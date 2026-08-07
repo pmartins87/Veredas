@@ -59,12 +59,12 @@ func _build_ui() -> void:
     header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     title_row.add_child(header)
-    var mark_icon := TextureRect.new()
-    mark_icon.texture = VectorAtlasRegistry.system_icon("trama")
-    mark_icon.custom_minimum_size = Vector2(42, 42)
-    mark_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-    mark_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-    title_row.add_child(mark_icon)
+    var trama_icon := TextureRect.new()
+    trama_icon.texture = VectorAtlasRegistry.system_icon("trama")
+    trama_icon.custom_minimum_size = Vector2(42, 42)
+    trama_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    trama_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    title_row.add_child(trama_icon)
     page.add_child(title_row)
 
     location_label = Label.new()
@@ -76,7 +76,6 @@ func _build_ui() -> void:
     stats.fit_content = true
     stats.custom_minimum_size = Vector2(0, 34)
     stats.scroll_active = false
-    stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     stats.add_theme_font_size_override("normal_font_size", 17)
     page.add_child(stats)
     page.add_child(HSeparator.new())
@@ -126,6 +125,7 @@ func _apply_visuals(domain_id: String) -> void:
 
 func _render_stats() -> void:
     stats.clear()
+    stats.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
     InlineIconRegistry.append_icon(stats, "health", 20)
     stats.add_text(" %s/%s    " % [GameState.run.get("health", 0), GameState.run.get("max_health", 0)])
     InlineIconRegistry.append_icon(stats, "vigor", 20)
@@ -134,6 +134,7 @@ func _render_stats() -> void:
     stats.add_text(" %s    " % GameState.run.get("resources", {}).get("fragments", 0))
     InlineIconRegistry.append_icon(stats, "mark", 20)
     stats.add_text(" %s" % GameState.run.get("marks", {}).size())
+    stats.pop()
 
 func _refresh() -> void:
     var world_id := str(GameState.run.get("world_id", "world.mata_fio_verde"))
@@ -148,7 +149,7 @@ func _refresh() -> void:
     _render_stats()
 
     var narrative := "[font_size=25][b]%s[/b][/font_size]\n\n%s" % [current_event.get("title", "A Vereda aguarda"), current_event.get("text", "Nenhum evento elegível.")]
-    story.text = InlineIconRegistry.render_bbcode_fallback(narrative) if InlineIconRegistry.has_method("render_bbcode_fallback") else narrative
+    story.text = narrative
 
     for child in choices.get_children():
         child.queue_free()
