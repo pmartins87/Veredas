@@ -315,9 +315,17 @@ func _add_action_button(text_value: String, callback: Callable, primary: bool) -
     button.custom_minimum_size = Vector2(0, 54)
     button.set_meta("base_font_size", 16)
     BookCardStyle.apply_button(button, current_domain_id, DomainThemeService, primary)
-    button.pressed.connect(callback)
+    button.pressed.connect(_press_action.bind(button, callback))
     choices.add_child(button)
     return button
+
+func _press_action(button: Button, callback: Callable) -> void:
+    var tween := BookVFX.choice_press(button, AccessibilityService.reduce_motion())
+    AccessibilityService.haptic(18, 0.28)
+    if tween != null:
+        await tween.finished
+    if callback.is_valid():
+        callback.call()
 
 func _open_accessibility() -> void:
     accessibility_panel.open_for(current_domain_id)
