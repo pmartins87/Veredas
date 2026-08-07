@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "shared": {
+    "paper": "#E6D7B6",
+    "paper_light": "#F3E9D2",
+    "paper_dark": "#B99D72",
+    "ink": "#28241D",
+    "ink_soft": "#5B5244",
+    "line": "#6B5B43",
+    "positive": "#4F742E",
+    "danger": "#8B2F27",
+    "information": "#245A73",
+    "rare": "#6D418C",
+    "gold": "#A96F18"
+  },
+  "domains": {
+    "mata_fio_verde": {
+      "primary": "#506B35",
+      "secondary": "#87915A",
+      "deep": "#263A24",
+      "wash": "#C8C59A",
+      "accent": "#8E702F",
+      "motif": "roots_knots_leaves"
+    },
+    "varzea_espelhos": {
+      "primary": "#4D6A65",
+      "secondary": "#78938A",
+      "deep": "#263F42",
+      "wash": "#B9C9BB",
+      "accent": "#557E8C",
+      "motif": "water_ripples_reflections"
+    },
+    "costa_sinos_afogados": {
+      "primary": "#397080",
+      "secondary": "#6C9BA3",
+      "deep": "#1F4651",
+      "wash": "#B7C9C7",
+      "accent": "#A46C32",
+      "motif": "waves_bells_coral"
+    },
+    "chapada_sol_oco": {
+      "primary": "#A26928",
+      "secondary": "#C58A3F",
+      "deep": "#62401E",
+      "wash": "#D8C497",
+      "accent": "#7D3723",
+      "motif": "sun_discs_shadows_obelisks"
+    },
+    "salinas_ossamar": {
+      "primary": "#B6A57D",
+      "secondary": "#D0C2A2",
+      "deep": "#6D6250",
+      "wash": "#E1D8BE",
+      "accent": "#8C5B2E",
+      "motif": "salt_ribs_absent_waves"
+    },
+    "vertice": {
+      "primary": "#635C77",
+      "secondary": "#85809A",
+      "deep": "#343442",
+      "wash": "#C0BCC7",
+      "accent": "#506C78",
+      "motif": "bridges_cables_wind"
+    },
+    "forja_rubra": {
+      "primary": "#93442D",
+      "secondary": "#BC633C",
+      "deep": "#48251D",
+      "wash": "#CDA98A",
+      "accent": "#D18A35",
+      "motif": "hammers_matrices_embers"
+    },
+    "mar_cinza": {
+      "primary": "#686763",
+      "secondary": "#8D8A80",
+      "deep": "#343534",
+      "wash": "#C6C2B6",
+      "accent": "#75535A",
+      "motif": "ash_erasure_names"
+    },
+    "noite_iscara": {
+      "primary": "#4D5E9A",
+      "secondary": "#687FB6",
+      "deep": "#252C50",
+      "wash": "#ABB7CA",
+      "accent": "#4A8A82",
+      "motif": "aurora_ice_future_memory"
+    },
+    "cidade_mil_portas": {
+      "primary": "#6E4D78",
+      "secondary": "#8B6C91",
+      "deep": "#3B2A47",
+      "wash": "#C7B8C8",
+      "accent": "#3E7069",
+      "motif": "doors_keys_thresholds"
+    },
+    "arquivo_ecos": {
+      "primary": "#3D6660",
+      "secondary": "#63867E",
+      "deep": "#233D3C",
+      "wash": "#B7C8BC",
+      "accent": "#587C88",
+      "motif": "pages_memory_rings"
+    },
+    "tear_desfeito": {
+      "primary": "#72525E",
+      "secondary": "#96707B",
+      "deep": "#3C2E38",
+      "wash": "#C9BEC0",
+      "accent": "#5A557E",
+      "motif": "broken_threads_paradox_knots"
+    }
+  }
+}
