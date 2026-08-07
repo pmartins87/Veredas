@@ -1,0 +1,25 @@
+[application]
+config/name="Veredas da Trama"
+run/main_scene="res://scenes/Main.tscn"
+
+[display]
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+window/handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[autoload]
+ContentRegistry="*res://core/autoload/ContentRegistry.gd"
+RNGService="*res://core/autoload/RNGService.gd"
+GameState="*res://core/autoload/GameState.gd"
+SaveService="*res://core/autoload/SaveService.gd"
+EventDirector="*res://core/systems/EventDirector.gd"
+CombatEngine="*res://core/systems/CombatEngine.gd"
+CharacterKitEngine="*res://core/systems/CharacterKitEngine.gd"
+DomainThemeService="*res://ui/DomainThemeService.gd"
