@@ -33,6 +33,7 @@ func apply_choice(event: Dictionary, choice_index: int) -> void:
     _apply_effect(choices[choice_index].get("effect", {}))
     GameState.run.turn = int(GameState.run.get("turn", 0)) + 1
     _age_debts()
+    PresentationBus.choice()
 
 func _apply_effect(effect: Dictionary) -> void:
     var op := str(effect.get("op", ""))
@@ -92,8 +93,9 @@ func _resolve_debt(debt_id: String) -> void:
 
 func _resolve_oldest_debt() -> void:
     var debts: Array = GameState.run.get("debts", [])
-    if debts.is_empty(): return
-    debts.sort_custom(func(a,b): return int(a.get("age",0)) > int(b.get("age",0)))
+    if debts.is_empty():
+        return
+    debts.sort_custom(func(a, b): return int(a.get("age", 0)) > int(b.get("age", 0)))
     debts.pop_front()
     GameState.run.debts = debts
 
@@ -103,7 +105,8 @@ func _times_seen(event_id: String) -> int:
 func _remember(event_id: String) -> void:
     var recent: Array = GameState.run.get("recent_events", [])
     recent.push_front(event_id)
-    if recent.size() > 12: recent.resize(12)
+    if recent.size() > 12:
+        recent.resize(12)
     GameState.run.recent_events = recent
     var counts: Dictionary = GameState.run.get("event_counts", {})
     counts[event_id] = int(counts.get(event_id, 0)) + 1
