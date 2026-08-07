@@ -1,0 +1,34 @@
+extends Node
+
+var profile: Dictionary = {}
+var run: Dictionary = {}
+
+func _ready() -> void:
+    reset_profile()
+
+func reset_profile() -> void:
+    profile = {"unlocked_characters":["character.mata_fio_verde.01"],"codex":[],"echo_marks":{},"endings":[],"settings":{}}
+
+func new_run(character_id: String, seed_value: int) -> void:
+    RNGService.start(seed_value)
+    var character := ContentRegistry.get_record(character_id)
+    var world_id := str(character.get("world_id", "world.mata_fio_verde"))
+    var world := ContentRegistry.get_record(world_id)
+    var locs: Array = world.get("locations", ["location.mata_fio_verde.01"])
+    run = {"active":true,"character_id":character_id,"world_id":world_id,"location_id":str(locs[0]),"health":16,"max_health":16,"vigor":8,"max_vigor":8,"resources":{"fragments":0,"essence":0,"provisions":3},"marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],"recent_events":[],"event_counts":{},"turn":0,"seed":seed_value,"rng":RNGService.snapshot()}
+
+func add_mark(mark_id: String, amount: int = 1) -> void:
+    var marks: Dictionary = run.get("marks", {})
+    marks[mark_id] = clampi(int(marks.get(mark_id, 0)) + amount, 0, 5)
+    run.marks = marks
+
+func serialize() -> Dictionary:
+    if not run.is_empty():
+        run.rng = RNGService.snapshot()
+    return {"profile":profile,"run":run}
+
+func deserialize(data: Dictionary) -> void:
+    profile = data.get("profile", {})
+    run = data.get("run", {})
+    if not run.is_empty() and run.has("rng"):
+        RNGService.restore(run.rng)
