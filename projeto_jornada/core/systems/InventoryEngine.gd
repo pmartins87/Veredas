@@ -89,11 +89,27 @@ func use_item(item_id: String) -> bool:
     return remove_item(item_id, 1)
 
 func equipment_bonuses() -> Dictionary:
-    var result := {"damage":0,"posture":0,"guard":0,"range":0,"status_power":0,"status_resist":0,"load":0}
+    var result := {
+        "damage":0,"posture":0,"guard":0,"range":0,"status_power":0,
+        "status_resist":0,"load":0,"vigor":0,"heal":0,"resource_gain":0,
+        "mark_synergy":0,"debt_pressure":0,
+    }
     for item_id in GameState.run.get("equipped", {}).values():
         var item := ContentRegistry.get_record(str(item_id))
-        var effect: Dictionary = item.get("effect", {})
-        var op := str(effect.get("op", ""))
-        if result.has(op):
-            result[op] = int(result[op]) + int(effect.get("value", 0))
+        var effects := AffixEngine.combined_effects(item)
+        for op in effects:
+            if result.has(op):
+                result[op] = int(result[op]) + int(effects[op])
     return result
+
+func weapon_range() -> Vector2i:
+    var weapon := equipped_item("weapon")
+    if weapon.is_empty():
+        return Vector2i(0, 0)
+    var visual := str(weapon.get("visual_archetype", ""))
+    match visual:
+        "dagger", "axe", "hammer": return Vector2i(0, 1)
+        "short_sword": return Vector2i(0, 1)
+        "spear": return Vector2i(1, 2)
+        "bow": return Vector2i(2, 2)
+        _: return Vector2i(0, 1)
