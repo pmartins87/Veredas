@@ -1,5 +1,4 @@
 extends Node
-class_name DomainThemeService
 
 const PALETTE_PATH := "res://ui/domain_palettes.json"
 
