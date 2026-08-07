@@ -4,14 +4,14 @@ class_name BookCardStyle
 # Shared original 'stitched page' visual grammar for events, combat,
 # inventory and character cards.
 
-static func panel_style(domain_id: String, theme_service: Node, emphasis: String = "normal") -> StyleBoxFlat:
-    var style := StyleBoxFlat.new()
-    var paper := theme_service.color("paper", domain_id)
-    var ink := theme_service.color("ink", domain_id)
-    var accent := theme_service.color("accent", domain_id)
-    var wash := theme_service.color("wash", domain_id)
+static func panel_style(domain_id: String, theme_service, emphasis: String = "normal") -> StyleBoxFlat:
+    var style: StyleBoxFlat = StyleBoxFlat.new()
+    var paper: Color = theme_service.color("paper", domain_id)
+    var ink: Color = theme_service.color("ink", domain_id)
+    var accent: Color = theme_service.color("accent", domain_id)
+    var wash: Color = theme_service.color("wash", domain_id)
 
-    var background := paper.lerp(wash, 0.055)
+    var background: Color = paper.lerp(wash, 0.055)
     if emphasis == "danger":
         background = background.lerp(theme_service.color("danger", domain_id), 0.10)
     elif emphasis == "selected":
@@ -35,11 +35,11 @@ static func panel_style(domain_id: String, theme_service: Node, emphasis: String
     style.shadow_offset = Vector2(1, 2)
     return style
 
-static func action_style(domain_id: String, theme_service: Node, primary: bool = false) -> StyleBoxFlat:
-    var style := StyleBoxFlat.new()
-    var ink := theme_service.color("ink", domain_id)
-    var accent := theme_service.color("accent", domain_id)
-    var paper := theme_service.color("paper", domain_id)
+static func action_style(domain_id: String, theme_service, primary: bool = false) -> StyleBoxFlat:
+    var style: StyleBoxFlat = StyleBoxFlat.new()
+    var ink: Color = theme_service.color("ink", domain_id)
+    var accent: Color = theme_service.color("accent", domain_id)
+    var paper: Color = theme_service.color("paper", domain_id)
     if primary:
         style.bg_color = accent.lerp(ink, 0.18)
         style.border_color = ink
@@ -60,16 +60,16 @@ static func action_style(domain_id: String, theme_service: Node, primary: bool =
     style.shadow_offset = Vector2(1, 2)
     return style
 
-static func apply_button(button: Button, domain_id: String, theme_service: Node, primary: bool = false) -> void:
+static func apply_button(button: Button, domain_id: String, theme_service, primary: bool = false) -> void:
     if button == null:
         return
-    var normal := action_style(domain_id, theme_service, primary)
-    var hover := normal.duplicate()
+    var normal: StyleBoxFlat = action_style(domain_id, theme_service, primary)
+    var hover: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
     hover.bg_color = normal.bg_color.lightened(0.045)
-    var pressed := normal.duplicate()
+    var pressed: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
     pressed.bg_color = normal.bg_color.darkened(0.07)
     pressed.shadow_size = 0
-    var disabled := normal.duplicate()
+    var disabled: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
     disabled.bg_color = normal.bg_color.lerp(Color(0.45, 0.43, 0.39), 0.38)
     disabled.border_color = normal.border_color.lerp(Color(0.5, 0.5, 0.5), 0.50)
 
@@ -77,22 +77,22 @@ static func apply_button(button: Button, domain_id: String, theme_service: Node,
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)
     button.add_theme_stylebox_override("disabled", disabled)
-    var button_text_token := "paper_light" if primary else "ink"
+    var button_text_token: String = "paper_light" if primary else "ink"
     button.add_theme_color_override("font_color", theme_service.color(button_text_token, domain_id))
     button.add_theme_color_override("font_hover_color", theme_service.color(button_text_token, domain_id))
 
-static func apply_panel(panel: PanelContainer, domain_id: String, theme_service: Node, emphasis: String = "normal") -> void:
+static func apply_panel(panel: PanelContainer, domain_id: String, theme_service, emphasis: String = "normal") -> void:
     if panel == null:
         return
     panel.add_theme_stylebox_override("panel", panel_style(domain_id, theme_service, emphasis))
 
-static func apply_heading(label: Label, domain_id: String, theme_service: Node, level: int = 1) -> void:
+static func apply_heading(label: Label, domain_id: String, theme_service, level: int = 1) -> void:
     if label == null:
         return
     label.add_theme_color_override("font_color", theme_service.color("deep" if level <= 2 else "ink", domain_id))
     label.add_theme_font_size_override("font_size", 34 if level == 1 else (26 if level == 2 else 21))
 
-static func apply_body(rich: RichTextLabel, domain_id: String, theme_service: Node) -> void:
+static func apply_body(rich: RichTextLabel, domain_id: String, theme_service) -> void:
     if rich == null:
         return
     rich.add_theme_color_override("default_color", theme_service.color("ink", domain_id))
