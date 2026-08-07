@@ -10,6 +10,7 @@ func _ready() -> void:
     _check_combat()
     _check_visual_assets()
     _check_theme()
+    _check_accessibility_and_vfx()
     _check_save_roundtrip()
     if failures.is_empty():
         print("RUNTIME_SMOKE PASS")
@@ -74,6 +75,24 @@ func _check_theme() -> void:
     var paper := DomainThemeService.color("paper", "mata_fio_verde")
     var accent := DomainThemeService.color("accent", "mata_fio_verde")
     expect(paper != accent, "theme paper/accent collision")
+
+func _check_accessibility_and_vfx() -> void:
+    var original := AccessibilityService.profile.serialize()
+    AccessibilityService.set_font_scale(1.25)
+    expect(AccessibilityService.font_size(20) == 25, "font scaling failed")
+    AccessibilityService.set_high_contrast(true)
+    expect(DomainThemeService.color("ink_soft", "mata_fio_verde") == DomainThemeService.color("ink", "mata_fio_verde"), "high contrast ink mapping failed")
+    AccessibilityService.set_reduce_motion(true)
+    var probe := Control.new()
+    add_child(probe)
+    var tween := BookVFX.page_settle(probe, AccessibilityService.reduce_motion())
+    expect(tween != null, "reduced-motion VFX did not return tween")
+    var intent_seen := [false]
+    PresentationBus.intent_revealed.connect(func(_intent: Dictionary): intent_seen[0] = true, CONNECT_ONE_SHOT)
+    CombatEngine.start("monster.mata_fio_verde.02", "character.mata_fio_verde.01")
+    expect(bool(intent_seen[0]), "combat intent was not emitted through PresentationBus")
+    probe.queue_free()
+    AccessibilityService.profile.deserialize(original)
 
 func _check_save_roundtrip() -> void:
     var marker := "smoke_%d" % Time.get_ticks_msec()
