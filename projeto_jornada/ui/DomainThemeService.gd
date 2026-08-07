@@ -29,13 +29,28 @@ func reload() -> void:
 func has_domain(domain_id: String) -> bool:
     return _domains.has(domain_id)
 
-func color(token: String, domain_id: String = "") -> Color:
+func _lookup_color(token: String, domain_id: String = "") -> Color:
     if domain_id != "" and _domains.has(domain_id):
         var domain: Dictionary = _domains[domain_id]
         if domain.has(token):
             return Color(domain[token])
     if _shared.has(token):
         return Color(_shared[token])
+    return Color.WHITE
+
+func _high_contrast_enabled() -> bool:
+    var service := get_node_or_null("/root/AccessibilityService")
+    return service != null and bool(service.high_contrast())
+
+func color(token: String, domain_id: String = "") -> Color:
+    if _high_contrast_enabled():
+        if token == "paper":
+            return _lookup_color("paper_light", domain_id)
+        if token == "ink_soft" or token == "line":
+            return _lookup_color("ink", domain_id)
+    var found_domain := domain_id != "" and _domains.has(domain_id) and (_domains[domain_id] as Dictionary).has(token)
+    if found_domain or _shared.has(token):
+        return _lookup_color(token, domain_id)
     push_warning("DomainThemeService: unknown color token %s for %s" % [token, domain_id])
     return Color.WHITE
 
@@ -44,6 +59,10 @@ func palette(domain_id: String) -> Dictionary:
     if _domains.has(domain_id):
         for key in _domains[domain_id]:
             result[key] = _domains[domain_id][key]
+    if _high_contrast_enabled():
+        result["paper"] = result.get("paper_light", result.get("paper", "#FFFFFF"))
+        result["ink_soft"] = result.get("ink", "#000000")
+        result["line"] = result.get("ink", "#000000")
     return result
 
 func motif(domain_id: String) -> String:
@@ -52,8 +71,6 @@ func motif(domain_id: String) -> String:
     return str(_domains[domain_id].get("motif", "thread_knot"))
 
 func apply_domain_accents(root: Node, domain_id: String) -> void:
-    # Nodes opt in using metadata instead of hard-coded scene paths.
-    # meta art_color_token="primary" / "accent" / "deep" etc.
     if root == null:
         return
     _apply_recursive(root, domain_id)
