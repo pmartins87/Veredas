@@ -9,9 +9,12 @@ var stats: RichTextLabel
 var page_panel: PanelContainer
 var ornament: TextureRect
 var background: ColorRect
+var accessibility_panel: AccessibilityPanel
+var current_domain_id := "mata_fio_verde"
 
 func _ready() -> void:
     _build_ui()
+    AccessibilityService.changed.connect(_on_accessibility_changed)
     if GameState.run.is_empty():
         GameState.new_run("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff)
     _refresh()
@@ -58,6 +61,7 @@ func _build_ui() -> void:
     header = Label.new()
     header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    header.set_meta("base_font_size", 34)
     title_row.add_child(header)
     var trama_icon := TextureRect.new()
     trama_icon.texture = VectorAtlasRegistry.system_icon("trama")
@@ -69,14 +73,14 @@ func _build_ui() -> void:
 
     location_label = Label.new()
     location_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    location_label.add_theme_font_size_override("font_size", 17)
+    location_label.set_meta("base_font_size", 17)
     page.add_child(location_label)
 
     stats = RichTextLabel.new()
     stats.fit_content = true
     stats.custom_minimum_size = Vector2(0, 34)
     stats.scroll_active = false
-    stats.add_theme_font_size_override("normal_font_size", 17)
+    stats.set_meta("base_font_size", 17)
     page.add_child(stats)
     page.add_child(HSeparator.new())
 
@@ -84,6 +88,7 @@ func _build_ui() -> void:
     story.bbcode_enabled = true
     story.size_flags_vertical = Control.SIZE_EXPAND_FILL
     story.scroll_active = true
+    story.set_meta("base_font_size", 19)
     page.add_child(story)
 
     choices = VBoxContainer.new()
@@ -96,14 +101,25 @@ func _build_ui() -> void:
     var save := Button.new()
     save.text = "Salvar"
     save.tooltip_text = "Salva a jornada atual"
+    save.set_meta("base_font_size", 16)
     save.pressed.connect(func(): SaveService.save_game())
     nav.add_child(save)
+    var access := Button.new()
+    access.text = "Acessibilidade"
+    access.tooltip_text = "Ajusta leitura, contraste, movimento e feedback"
+    access.set_meta("base_font_size", 16)
+    access.pressed.connect(_open_accessibility)
+    nav.add_child(access)
     var next := Button.new()
     next.text = "Nova situação"
     next.tooltip_text = "Avança sem escolher somente em builds de teste"
+    next.set_meta("base_font_size", 16)
     next.pressed.connect(_refresh)
     nav.add_child(next)
     page.add_child(nav)
+
+    accessibility_panel = AccessibilityPanel.new()
+    add_child(accessibility_panel)
 
 func _domain_id(world_id: String) -> String:
     return world_id.trim_prefix("world.")
@@ -121,15 +137,16 @@ func _apply_visuals(domain_id: String) -> void:
         material.set_shader_parameter("paper_light", DomainThemeService.color("paper_light", domain_id))
         material.set_shader_parameter("paper_dark", DomainThemeService.color("paper_dark", domain_id))
         material.set_shader_parameter("domain_wash", DomainThemeService.color("wash", domain_id))
-        material.set_shader_parameter("domain_strength", 0.065)
+        material.set_shader_parameter("domain_strength", 0.025 if AccessibilityService.high_contrast() else 0.065)
+    AccessibilityService.apply_font_scale(self)
 
 func _render_stats() -> void:
     stats.clear()
     stats.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
     InlineIconRegistry.append_icon(stats, "health", 20)
-    stats.add_text(" %s/%s    " % [GameState.run.get("health", 0), GameState.run.get("max_health", 0)])
+    stats.add_text(" Vida %s/%s    " % [GameState.run.get("health", 0), GameState.run.get("max_health", 0)])
     InlineIconRegistry.append_icon(stats, "vigor", 20)
-    stats.add_text(" %s/%s    " % [GameState.run.get("vigor", 0), GameState.run.get("max_vigor", 0)])
+    stats.add_text(" Vigor %s/%s    " % [GameState.run.get("vigor", 0), GameState.run.get("max_vigor", 0)])
     InlineIconRegistry.append_icon(stats, "coin", 20)
     stats.add_text(" %s    " % GameState.run.get("resources", {}).get("fragments", 0))
     InlineIconRegistry.append_icon(stats, "mark", 20)
@@ -138,17 +155,17 @@ func _render_stats() -> void:
 
 func _refresh() -> void:
     var world_id := str(GameState.run.get("world_id", "world.mata_fio_verde"))
-    var domain_id := _domain_id(world_id)
+    current_domain_id = _domain_id(world_id)
     var loc := str(GameState.run.get("location_id", ""))
     current_event = EventDirector.choose_event(world_id, loc)
     var world := ContentRegistry.get_record(world_id)
     var location := ContentRegistry.get_record(loc)
     header.text = str(world.get("name", "Veredas da Trama"))
     location_label.text = str(location.get("name", "Uma Vereda sem nome"))
-    _apply_visuals(domain_id)
+    _apply_visuals(current_domain_id)
     _render_stats()
 
-    var narrative := "[font_size=25][b]%s[/b][/font_size]\n\n%s" % [current_event.get("title", "A Vereda aguarda"), current_event.get("text", "Nenhum evento elegível.")]
+    var narrative := "[font_size=%d][b]%s[/b][/font_size]\n\n%s" % [AccessibilityService.font_size(25), current_event.get("title", "A Vereda aguarda"), current_event.get("text", "Nenhum evento elegível.")]
     story.text = narrative
 
     for child in choices.get_children():
@@ -159,7 +176,27 @@ func _refresh() -> void:
         button.text = str(options[i].get("text", "Escolher"))
         button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         button.custom_minimum_size = Vector2(0, 60)
-        BookCardStyle.apply_button(button, domain_id, DomainThemeService, i == 0)
+        button.set_meta("base_font_size", 17)
+        BookCardStyle.apply_button(button, current_domain_id, DomainThemeService, i == 0)
         var idx := i
-        button.pressed.connect(func(): EventDirector.apply_choice(current_event, idx); _refresh())
+        button.pressed.connect(_choose.bind(idx, button))
         choices.add_child(button)
+    AccessibilityService.apply_font_scale(self)
+    BookVFX.page_settle(page_panel, AccessibilityService.reduce_motion())
+
+func _choose(index: int, button: Button) -> void:
+    var tween := BookVFX.choice_press(button, AccessibilityService.reduce_motion())
+    AccessibilityService.haptic(18, 0.28)
+    if tween != null:
+        await tween.finished
+    EventDirector.apply_choice(current_event, index)
+    _refresh()
+
+func _open_accessibility() -> void:
+    accessibility_panel.open_for(current_domain_id)
+
+func _on_accessibility_changed() -> void:
+    if not is_node_ready():
+        return
+    _apply_visuals(current_domain_id)
+    _render_stats()
