@@ -19,8 +19,7 @@ func choose(event: Dictionary, option: int) -> bool:
     var choices: Array = event.get("choices", [])
     if option < 0 or option >= choices.size():
         return false
-    EventDirector.apply_choice(event, option)
-    return true
+    return EventDirector.apply_choice(event, option)
 
 func travel(location_id: String) -> bool:
     var ok := LocationEngine.travel_to(location_id)
@@ -34,6 +33,12 @@ func travel_world(world_id: String, location_id: String = "") -> bool:
         GameState.run.mode = "story"
     return ok
 
+func open_inventory() -> void:
+    GameState.run.mode = "inventory"
+
+func open_travel() -> void:
+    GameState.run.mode = "travel"
+
 func open_merchant(size: int = 8) -> Array:
     GameState.run.mode = "merchant"
     return MerchantEngine.stock(str(GameState.run.get("world_id", "")), size)
@@ -45,6 +50,30 @@ func buy(item_id: String) -> bool:
         purchases.append(item_id)
         GameState.run.purchases = purchases
     return ok
+
+func local_monsters() -> Array:
+    var result: Array = []
+    var location_id := str(GameState.run.get("location_id", ""))
+    for monster in ContentRegistry.all("monsters"):
+        if str(monster.get("location_id", "")) == location_id:
+            result.append(monster)
+    return result
+
+func local_bosses() -> Array:
+    var result: Array = []
+    var location_id := str(GameState.run.get("location_id", ""))
+    for boss in ContentRegistry.all("bosses"):
+        if str(boss.get("location_id", "")) == location_id:
+            result.append(boss)
+    return result
+
+func endings_for_current_world() -> Array:
+    var result: Array = []
+    var world_id := str(GameState.run.get("world_id", ""))
+    for ending in ContentRegistry.all("finals"):
+        if str(ending.get("world_id", "")) == world_id:
+            result.append(ending)
+    return result
 
 func start_combat(enemy_id: String) -> Dictionary:
     GameState.run.mode = "combat"
@@ -81,6 +110,10 @@ func fail(reason: String = "defeat") -> void:
     GameState.run.mode = "debrief"
     GameState.run.result = reason
 
+func resume_story() -> void:
+    if bool(GameState.run.get("active", false)):
+        GameState.run.mode = "story"
+
 func debrief() -> Dictionary:
     return {
         "result": GameState.run.get("result", "in_progress"),
@@ -100,6 +133,6 @@ func _close_combat(state: Dictionary) -> void:
         if enemy_id != "":
             defeated.append(enemy_id)
         GameState.run.defeated_enemies = defeated
-        GameState.run.mode = "story"
+        GameState.run.mode = "final_choice" if enemy_id.begins_with("boss.") else "story"
     elif result == "defeat":
         fail("defeat")
