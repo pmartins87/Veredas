@@ -1,11 +1,10 @@
 extends RefCounted
 class_name BookCardStyle
 
-# Creates the shared 'stitched page' visual grammar used by event, combat,
-# inventory and character cards. It deliberately derives appearance from
-# Veredas da Trama domain tokens rather than from fixed external layouts.
+# Shared original 'stitched page' visual grammar for events, combat,
+# inventory and character cards.
 
-static func panel_style(domain_id: String, theme_service: DomainThemeService, emphasis: String = "normal") -> StyleBoxFlat:
+static func panel_style(domain_id: String, theme_service: Node, emphasis: String = "normal") -> StyleBoxFlat:
     var style := StyleBoxFlat.new()
     var paper := theme_service.color("paper", domain_id)
     var ink := theme_service.color("ink", domain_id)
@@ -36,7 +35,7 @@ static func panel_style(domain_id: String, theme_service: DomainThemeService, em
     style.shadow_offset = Vector2(1, 2)
     return style
 
-static func action_style(domain_id: String, theme_service: DomainThemeService, primary: bool = false) -> StyleBoxFlat:
+static func action_style(domain_id: String, theme_service: Node, primary: bool = false) -> StyleBoxFlat:
     var style := StyleBoxFlat.new()
     var ink := theme_service.color("ink", domain_id)
     var accent := theme_service.color("accent", domain_id)
@@ -61,7 +60,7 @@ static func action_style(domain_id: String, theme_service: DomainThemeService, p
     style.shadow_offset = Vector2(1, 2)
     return style
 
-static func apply_button(button: Button, domain_id: String, theme_service: DomainThemeService, primary: bool = false) -> void:
+static func apply_button(button: Button, domain_id: String, theme_service: Node, primary: bool = false) -> void:
     if button == null:
         return
     var normal := action_style(domain_id, theme_service, primary)
@@ -82,18 +81,18 @@ static func apply_button(button: Button, domain_id: String, theme_service: Domai
     button.add_theme_color_override("font_color", theme_service.color(button_text_token, domain_id))
     button.add_theme_color_override("font_hover_color", theme_service.color(button_text_token, domain_id))
 
-static func apply_panel(panel: PanelContainer, domain_id: String, theme_service: DomainThemeService, emphasis: String = "normal") -> void:
+static func apply_panel(panel: PanelContainer, domain_id: String, theme_service: Node, emphasis: String = "normal") -> void:
     if panel == null:
         return
     panel.add_theme_stylebox_override("panel", panel_style(domain_id, theme_service, emphasis))
 
-static func apply_heading(label: Label, domain_id: String, theme_service: DomainThemeService, level: int = 1) -> void:
+static func apply_heading(label: Label, domain_id: String, theme_service: Node, level: int = 1) -> void:
     if label == null:
         return
     label.add_theme_color_override("font_color", theme_service.color("deep" if level <= 2 else "ink", domain_id))
     label.add_theme_font_size_override("font_size", 34 if level == 1 else (26 if level == 2 else 21))
 
-static func apply_body(rich: RichTextLabel, domain_id: String, theme_service: DomainThemeService) -> void:
+static func apply_body(rich: RichTextLabel, domain_id: String, theme_service: Node) -> void:
     if rich == null:
         return
     rich.add_theme_color_override("default_color", theme_service.color("ink", domain_id))
