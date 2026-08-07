@@ -1,5 +1,4 @@
 extends Node
-class_name PresentationBus
 
 signal page_changed
 signal choice_committed
