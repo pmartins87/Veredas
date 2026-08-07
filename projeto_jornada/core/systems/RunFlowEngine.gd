@@ -133,6 +133,9 @@ func _close_combat(state: Dictionary) -> void:
         if enemy_id != "":
             defeated.append(enemy_id)
         GameState.run.defeated_enemies = defeated
+        var resources: Dictionary = GameState.run.get("resources", {})
+        resources.fragments = int(resources.get("fragments", 0)) + (18 if enemy_id.begins_with("boss.") else 6)
+        GameState.run.resources = resources
         GameState.run.mode = "final_choice" if enemy_id.begins_with("boss.") else "story"
     elif result == "defeat":
         fail("defeat")
