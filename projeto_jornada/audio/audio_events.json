@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "buses": ["Master", "Music", "Ambience", "SFX", "UI"],
+  "ui": {
+    "ui.confirm": "res://assets/audio/ui/confirm.ogg",
+    "ui.cancel": "res://assets/audio/ui/cancel.ogg",
+    "ui.page_turn": "res://assets/audio/ui/page_turn.ogg",
+    "ui.ink_mark": "res://assets/audio/ui/ink_mark.ogg",
+    "ui.inventory_open": "res://assets/audio/ui/inventory_open.ogg",
+    "ui.mark_acquired": "res://assets/audio/ui/mark_acquired.ogg",
+    "ui.debt_callback": "res://assets/audio/ui/debt_callback.ogg"
+  },
+  "combat": {
+    "combat.attack_light": "res://assets/audio/combat/attack_light.ogg",
+    "combat.attack_heavy": "res://assets/audio/combat/attack_heavy.ogg",
+    "combat.guard": "res://assets/audio/combat/guard.ogg",
+    "combat.posture_break": "res://assets/audio/combat/posture_break.ogg",
+    "combat.dodge": "res://assets/audio/combat/dodge.ogg",
+    "combat.status_apply": "res://assets/audio/combat/status_apply.ogg",
+    "combat.boss_phase": "res://assets/audio/combat/boss_phase.ogg"
+  },
+  "domains": {
+    "mata_fio_verde": {"ambience": "res://assets/audio/domains/mata_fio_verde/ambience.ogg", "music": "res://assets/audio/domains/mata_fio_verde/theme.ogg", "signature": ["wood_creak", "leaves", "distant_threads"]},
+    "varzea_espelhos": {"ambience": "res://assets/audio/domains/varzea_espelhos/ambience.ogg", "music": "res://assets/audio/domains/varzea_espelhos/theme.ogg", "signature": ["water", "hollow_reeds", "reversed_drops"]},
+    "costa_sinos_afogados": {"ambience": "res://assets/audio/domains/costa_sinos_afogados/ambience.ogg", "music": "res://assets/audio/domains/costa_sinos_afogados/theme.ogg", "signature": ["surf", "bronze_bells", "wind"]},
+    "chapada_sol_oco": {"ambience": "res://assets/audio/domains/chapada_sol_oco/ambience.ogg", "music": "res://assets/audio/domains/chapada_sol_oco/theme.ogg", "signature": ["dry_wind", "stone", "low_drone"]},
+    "salinas_ossamar": {"ambience": "res://assets/audio/domains/salinas_ossamar/ambience.ogg", "music": "res://assets/audio/domains/salinas_ossamar/theme.ogg", "signature": ["salt_steps", "absent_waves", "bone_chimes"]},
+    "vertice": {"ambience": "res://assets/audio/domains/vertice/ambience.ogg", "music": "res://assets/audio/domains/vertice/theme.ogg", "signature": ["high_wind", "cables", "bridge_resonance"]},
+    "forja_rubra": {"ambience": "res://assets/audio/domains/forja_rubra/ambience.ogg", "music": "res://assets/audio/domains/forja_rubra/theme.ogg", "signature": ["hammers", "furnace", "metal_stress"]},
+    "mar_cinza": {"ambience": "res://assets/audio/domains/mar_cinza/ambience.ogg", "music": "res://assets/audio/domains/mar_cinza/theme.ogg", "signature": ["ash_wind", "muted_steps", "erased_whispers"]},
+    "noite_iscara": {"ambience": "res://assets/audio/domains/noite_iscara/ambience.ogg", "music": "res://assets/audio/domains/noite_iscara/theme.ogg", "signature": ["ice", "aurora_hum", "distant_fire"]},
+    "cidade_mil_portas": {"ambience": "res://assets/audio/domains/cidade_mil_portas/ambience.ogg", "music": "res://assets/audio/domains/cidade_mil_portas/theme.ogg", "signature": ["doors", "keys", "impossible_room_tone"]},
+    "arquivo_ecos": {"ambience": "res://assets/audio/domains/arquivo_ecos/ambience.ogg", "music": "res://assets/audio/domains/arquivo_ecos/theme.ogg", "signature": ["pages", "pen_scratches", "memory_echo"]},
+    "tear_desfeito": {"ambience": "res://assets/audio/domains/tear_desfeito/ambience.ogg", "music": "res://assets/audio/domains/tear_desfeito/theme.ogg", "signature": ["thread_tension", "broken_chord", "paradox_pulse"]}
+  }
+}
