@@ -15,8 +15,22 @@ func new_run(character_id: String, seed_value: int) -> void:
     var world_id := str(character.get("world_id", "world.mata_fio_verde"))
     var world := ContentRegistry.get_record(world_id)
     var locs: Array = world.get("locations", ["location.mata_fio_verde.01"])
-    run = {"active":true,"character_id":character_id,"world_id":world_id,"location_id":str(locs[0]),"health":16,"max_health":16,"vigor":8,"max_vigor":8,"resources":{"fragments":0,"essence":0,"provisions":3},"marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],"recent_events":[],"event_counts":{},"turn":0,"seed":seed_value,"rng":RNGService.snapshot()}
-    PresentationBus.location(str(run.location_id))
+    var first_location := str(locs[0])
+    run = {
+        "active":true,
+        "mode":"story",
+        "character_id":character_id,
+        "world_id":world_id,
+        "location_id":first_location,
+        "health":16,"max_health":16,
+        "vigor":8,"max_vigor":8,
+        "resources":{"fragments":12,"essence":0,"provisions":3},
+        "marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],
+        "recent_events":[],"event_counts":{},"turn":0,
+        "visited_locations":[first_location],"defeated_enemies":[],"purchases":[],"ending_id":"",
+        "seed":seed_value,"rng":RNGService.snapshot()
+    }
+    PresentationBus.location(first_location)
 
 func add_mark(mark_id: String, amount: int = 1) -> void:
     var marks: Dictionary = run.get("marks", {})
