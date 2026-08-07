@@ -50,11 +50,6 @@ if palette_path.exists():
     if len(palettes.get("domains", {})) != 12:
         errors.append("expected 12 domain palettes")
 
-def count_groups(path: str, prefix: str) -> int:
-    source = text(path)
-    return len(re.findall(rf'<g\s+id="{re.escape(prefix)}[^\"]*"', source))
-
-# Atlas QA uses known manifest structure rather than visual similarity.
 for path in [
     "ui/assets/vector/system_icons_atlas.svg",
     "ui/assets/vector/mark_glyphs_atlas.svg",
@@ -70,9 +65,13 @@ for signal_name in ["mark_added", "damage_applied", "intent_revealed", "boss_pha
         errors.append(f"presentation signal missing: {signal_name}")
 
 combat = text("core/systems/CombatEngine.gd")
-for hook in ["PresentationBus.intent", "PresentationBus.damage", "PresentationBus.boss_phase"]:
+for hook in ["PresentationBus.intent", "PresentationBus.damage", "BossPhaseEngine.transition_if_needed"]:
     if hook not in combat:
-        errors.append(f"combat presentation hook missing: {hook}")
+        errors.append(f"combat presentation/phase hook missing: {hook}")
+
+boss_phase = text("core/systems/BossPhaseEngine.gd")
+if "PresentationBus.boss_phase" not in boss_phase:
+    errors.append("boss phase engine does not emit presentation hook")
 
 if errors:
     print("PHASE7_INTEGRATION FAIL")
