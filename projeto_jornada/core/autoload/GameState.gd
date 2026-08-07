@@ -16,11 +16,15 @@ func new_run(character_id: String, seed_value: int) -> void:
     var world := ContentRegistry.get_record(world_id)
     var locs: Array = world.get("locations", ["location.mata_fio_verde.01"])
     run = {"active":true,"character_id":character_id,"world_id":world_id,"location_id":str(locs[0]),"health":16,"max_health":16,"vigor":8,"max_vigor":8,"resources":{"fragments":0,"essence":0,"provisions":3},"marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],"recent_events":[],"event_counts":{},"turn":0,"seed":seed_value,"rng":RNGService.snapshot()}
+    PresentationBus.location(str(run.location_id))
 
 func add_mark(mark_id: String, amount: int = 1) -> void:
     var marks: Dictionary = run.get("marks", {})
-    marks[mark_id] = clampi(int(marks.get(mark_id, 0)) + amount, 0, 5)
+    var before := int(marks.get(mark_id, 0))
+    marks[mark_id] = clampi(before + amount, 0, 5)
     run.marks = marks
+    if int(marks[mark_id]) > before:
+        PresentationBus.mark(mark_id)
 
 func serialize() -> Dictionary:
     if not run.is_empty():
