@@ -78,8 +78,9 @@ static func apply_button(button: Button, domain_id: String, theme_service: Domai
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)
     button.add_theme_stylebox_override("disabled", disabled)
-    button.add_theme_color_override("font_color", theme_service.color("button_text_primary" if primary else "ink", domain_id))
-    button.add_theme_color_override("font_hover_color", theme_service.color("button_text_primary" if primary else "ink", domain_id))
+    var button_text_token := "paper_light" if primary else "ink"
+    button.add_theme_color_override("font_color", theme_service.color(button_text_token, domain_id))
+    button.add_theme_color_override("font_hover_color", theme_service.color(button_text_token, domain_id))
 
 static func apply_panel(panel: PanelContainer, domain_id: String, theme_service: DomainThemeService, emphasis: String = "normal") -> void:
     if panel == null:
@@ -89,7 +90,7 @@ static func apply_panel(panel: PanelContainer, domain_id: String, theme_service:
 static func apply_heading(label: Label, domain_id: String, theme_service: DomainThemeService, level: int = 1) -> void:
     if label == null:
         return
-    label.add_theme_color_override("font_color", theme_service.color("heading" if level <= 2 else "ink", domain_id))
+    label.add_theme_color_override("font_color", theme_service.color("deep" if level <= 2 else "ink", domain_id))
     label.add_theme_font_size_override("font_size", 34 if level == 1 else (26 if level == 2 else 21))
 
 static func apply_body(rich: RichTextLabel, domain_id: String, theme_service: DomainThemeService) -> void:
