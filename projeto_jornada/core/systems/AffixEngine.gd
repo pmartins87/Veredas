@@ -16,31 +16,33 @@ const AFFIXES := [
 ]
 
 func affixes_for(item: Dictionary) -> Array:
-    var rarity := str(item.get("rarity", "common"))
-    var count := {"common":0,"uncommon":1,"rare":1,"singular":2,"relic":2,"echo":3}.get(rarity, 0)
+    var rarity: String = str(item.get("rarity", "common"))
+    var count: int = int({"common":0,"uncommon":1,"rare":1,"singular":2,"relic":2,"echo":3}.get(rarity, 0))
     if count <= 0:
         return []
-    var item_id := str(item.get("id", ""))
-    var hash_value := abs(item_id.hash())
+    var item_id: String = str(item.get("id", ""))
+    var hash_value: int = absi(int(item_id.hash()))
     var result: Array = []
-    for i in range(count):
-        var index := (hash_value + i * 7) % AFFIXES.size()
-        result.append(AFFIXES[index].duplicate(true))
+    for i: int in range(count):
+        var index: int = int((hash_value + i * 7) % AFFIXES.size())
+        result.append((AFFIXES[index] as Dictionary).duplicate(true))
     return result
 
 func combined_effects(item: Dictionary) -> Dictionary:
     var bonuses: Dictionary = {}
-    var base: Dictionary = item.get("effect", {})
-    var base_op := str(base.get("op", ""))
+    var base: Dictionary = item.get("effect", {}) as Dictionary
+    var base_op: String = str(base.get("op", ""))
     if base_op != "":
         bonuses[base_op] = int(base.get("value", 0))
-    for affix in affixes_for(item):
-        var op := str(affix.get("op", ""))
+    for affix_variant in affixes_for(item):
+        var affix: Dictionary = affix_variant as Dictionary
+        var op: String = str(affix.get("op", ""))
         bonuses[op] = int(bonuses.get(op, 0)) + int(affix.get("value", 0))
     return bonuses
 
 func display_name(item: Dictionary) -> String:
-    var affixes := affixes_for(item)
+    var affixes: Array = affixes_for(item)
     if affixes.is_empty():
         return str(item.get("name", "Item"))
-    return "%s — %s" % [item.get("name", "Item"), affixes[0].get("name", "")]
+    var first_affix: Dictionary = affixes[0] as Dictionary
+    return "%s — %s" % [item.get("name", "Item"), first_affix.get("name", "")]
