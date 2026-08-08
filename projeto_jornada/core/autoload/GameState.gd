@@ -10,6 +10,9 @@ func reset_profile() -> void:
     profile = {
         "unlocked_characters":["character.mata_fio_verde.01"],
         "codex":[],
+        "codex_records":{},
+        "discovery_history":[],
+        "achievements":{},
         "echo_marks":{},
         "consequences":{},
         "endings":[],
@@ -62,6 +65,7 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
     profile = data.get("profile", {})
     run = data.get("run", {})
+    CodexProgressEngine.new().ensure_state()
     if not run.is_empty():
         var setup_engine := JourneySetupEngine.new()
         run = setup_engine.normalize_run_state(run)
