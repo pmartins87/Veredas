@@ -320,7 +320,6 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
     var rounds := 0
     while bool(CombatEngine.combat.get("active", false)) and rounds < MAX_COMBAT_ROUNDS:
         rounds += 1
-        _use_recovery_item_if_needed(policy_id)
         var before_turn := int(CombatEngine.combat.get("turn", 0))
         var before_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))
         var before_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))
@@ -442,35 +441,55 @@ func _use_recovery_item_if_needed(policy_id: String) -> void:
                 return
 
 func _prepare_isolated_profile(world_id: String, character_id: String) -> void:
-    GameState.profile = ProfileMigrationEngine.new().fresh_profile()
-    GameState.run = {}
-    var unlocks: Dictionary = GameState.profile.get("unlocks", {}) as Dictionary
+    var profile := ProfileMigrationEngine.new().fresh_profile()
+    var unlocks: Dictionary = profile.get("unlocks", {}) as Dictionary
     var characters: Array = unlocks.get("characters", []) as Array
     if character_id not in characters:
         characters.append(character_id)
+    characters.sort()
     var routes: Array = unlocks.get("routes", []) as Array
     if world_id not in routes:
         routes.append(world_id)
+    routes.sort()
     unlocks.characters = characters
     unlocks.routes = routes
-    GameState.profile.unlocks = unlocks
-    GameState.profile.unlocked_characters = characters.duplicate()
+    profile.unlocks = unlocks
+    profile.unlocked_characters = characters.duplicate()
+    profile.hub = {
+        "stage":1,
+        "visit_count":0,
+        "routes":routes.duplicate(),
+        "residents":[],
+        "facilities":{},
+        "history":[],
+    }
+    profile["_simulation_ephemeral"] = true
 
-    var entitlement_engine := EntitlementEngine.new()
-    var entitlements := entitlement_engine.ensure_state()
-    var grants: Dictionary = entitlements.get("grants", {}) as Dictionary
-    var full_id := CommercialPolicyEngine.new().full_unlock_product_id()
-    if grants.has(full_id):
-        grants[full_id] = {
-            "owned":true,
+    var commercial := CommercialPolicyEngine.new()
+    var grants: Dictionary = {}
+    for product_variant in commercial.products():
+        var product: Dictionary = product_variant as Dictionary
+        var product_id := str(product.get("id", ""))
+        if product_id == "":
+            continue
+        grants[product_id] = {
+            "owned":product_id == commercial.full_unlock_product_id(),
             "verified_at":1,
             "source":"simulation",
-            "transaction_id":"simulation-only",
+            "transaction_id":"simulation-only" if product_id == commercial.full_unlock_product_id() else "",
             "revoked_at":0,
         }
-    entitlements.grants = grants
-    GameState.profile.entitlements = entitlements
-    ProfileMigrationEngine.new().normalize_live_profile()
+    profile.entitlements = {
+        "schema_version":EntitlementEngine.SCHEMA_VERSION,
+        "provider":"simulation",
+        "grants":grants,
+        "last_restore_at":1,
+        "last_store_contact_at":1,
+        "last_store_error":"",
+        "offline_cache_valid":true,
+    }
+    GameState.profile = profile
+    GameState.run = {}
 
 func _apply_build(world_id: String, build_id: String) -> Array[String]:
     if build_id == "baseline":
