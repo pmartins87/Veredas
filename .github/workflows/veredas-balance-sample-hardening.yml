@@ -1,0 +1,42 @@
+name: Veredas Balance Sample Hardening
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-balance-sample-hardening.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Increase Phase 10.2 sample size
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('projeto_jornada/tests/CharacterBalanceCertification.gd')
+          text = p.read_text(encoding='utf-8')
+          old = 'const SEEDS_PER_SKILL := 4\n'
+          new = 'const SEEDS_PER_SKILL := 12\n'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected one seed-count target, found {count}')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- projeto_jornada/tests/CharacterBalanceCertification.gd
+      - name: Commit sample hardening
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/tests/CharacterBalanceCertification.gd
+          git commit -m 'Raise Phase 10.2 matrix to 1296 journeys'
+          git push origin HEAD:projeto-jornada-snapshots
