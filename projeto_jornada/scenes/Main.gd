@@ -14,12 +14,16 @@ var nav_story: Button
 var nav_inventory: Button
 var nav_travel: Button
 var current_domain_id := "mata_fio_verde"
+var _last_back_msec := -10000
 
 func _ready() -> void:
     _build_ui()
     AccessibilityService.changed.connect(_on_accessibility_changed)
+    MobilePlatformService.back_requested.connect(_on_mobile_back_requested)
     if GameState.run.is_empty():
-        RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff)
+        var restored := SaveService.load_game()
+        if not restored or GameState.run.is_empty():
+            RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff)
     _refresh()
 
 func _build_ui() -> void:
@@ -33,16 +37,14 @@ func _build_ui() -> void:
         background.material = material
     add_child(background)
 
-    var outer := MarginContainer.new()
+    var outer := SafeAreaMargin.new()
     outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    outer.add_theme_constant_override("margin_left", 18)
-    outer.add_theme_constant_override("margin_right", 18)
-    outer.add_theme_constant_override("margin_top", 18)
-    outer.add_theme_constant_override("margin_bottom", 18)
     add_child(outer)
+    var reading_width := ReadingWidthMargin.new()
+    outer.add_child(reading_width)
 
     page_panel = PanelContainer.new()
-    outer.add_child(page_panel)
+    reading_width.add_child(page_panel)
     var margin := MarginContainer.new()
     margin.add_theme_constant_override("margin_left", 18)
     margin.add_theme_constant_override("margin_right", 18)
@@ -115,10 +117,12 @@ func _build_ui() -> void:
 
     accessibility_panel = AccessibilityPanel.new()
     add_child(accessibility_panel)
+    MobilePlatformService.apply_touch_targets(self)
 
 func _nav_button(text_value: String, callback: Callable) -> Button:
     var button := Button.new()
     button.text = text_value
+    button.custom_minimum_size.y = float(MobilePlatformService.MIN_TOUCH_TARGET)
     button.set_meta("base_font_size", 14)
     button.pressed.connect(callback)
     return button
@@ -181,6 +185,7 @@ func _refresh() -> void:
         "debrief": _render_debrief()
         _: _render_story()
     AccessibilityService.apply_font_scale(self)
+    MobilePlatformService.apply_touch_targets(self)
     BookVFX.page_settle(page_panel, AccessibilityService.reduce_motion())
 
 func _render_story() -> void:
@@ -312,7 +317,7 @@ func _add_action_button(text_value: String, callback: Callable, primary: bool) -
     var button := Button.new()
     button.text = text_value
     button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    button.custom_minimum_size = Vector2(0, 54)
+    button.custom_minimum_size = Vector2(0, maxf(54.0, float(MobilePlatformService.MIN_TOUCH_TARGET)))
     button.set_meta("base_font_size", 16)
     BookCardStyle.apply_button(button, current_domain_id, DomainThemeService, primary)
     button.pressed.connect(_press_action.bind(button, callback))
@@ -335,3 +340,27 @@ func _on_accessibility_changed() -> void:
         return
     _apply_visuals(current_domain_id)
     _render_stats()
+
+func _on_mobile_back_requested() -> void:
+    if accessibility_panel != null and accessibility_panel.visible:
+        accessibility_panel.close_panel()
+        return
+    var mode := str(GameState.run.get("mode", "story"))
+    if mode in ["inventory", "merchant", "travel"]:
+        RunFlowEngine.resume_story()
+        current_event = {}
+        _refresh()
+        return
+    if mode in ["combat", "final_choice"]:
+        var now := Time.get_ticks_msec()
+        SaveService.save_game()
+        if now - _last_back_msec <= 1500 and MobilePlatformService.is_mobile():
+            get_tree().quit()
+            return
+        _last_back_msec = now
+        story.append_text("\n\n[i]Jornada salva. Pressione Voltar novamente para sair.[/i]")
+        AccessibilityService.haptic(22, 0.22)
+        return
+    SaveService.save_game()
+    if MobilePlatformService.is_mobile():
+        get_tree().quit()
