@@ -12,6 +12,8 @@ const MECHANICS := [
     "intent_trick",
 ]
 
+# Every telegraphed intent exposes a semantic danger class from 0 (recovery) to
+# 4 (severe). Player policies consume this contract instead of hard-coding ids.
 func roll_intent(enemy_record: Dictionary, phase: Dictionary, roll: float) -> Dictionary:
     var mechanic := str(phase.get("mechanic", enemy_record.get("mechanic", "distance_pressure")))
     if mechanic not in MECHANICS:
