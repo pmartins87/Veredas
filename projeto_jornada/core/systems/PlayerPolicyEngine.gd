@@ -3,6 +3,27 @@ class_name PlayerPolicyEngine
 
 const POLICIES := ["balanced", "aggressive", "cautious", "explorer", "random"]
 
+var _decision_rng := RandomNumberGenerator.new()
+var _decision_rng_seeded := false
+
+func start_decision_rng(seed_value: int) -> void:
+    # Player-policy randomness is independent from world/combat RNG.
+    var mixed := absi(seed_value * 1664525 + 1013904223)
+    _decision_rng.seed = maxi(1, mixed)
+    _decision_rng_seeded = true
+
+func _ensure_decision_rng() -> void:
+    if not _decision_rng_seeded:
+        start_decision_rng(1)
+
+func _decision_range_int(minimum: int, maximum: int) -> int:
+    _ensure_decision_rng()
+    return _decision_rng.randi_range(minimum, maximum)
+
+func _decision_next_float() -> float:
+    _ensure_decision_rng()
+    return _decision_rng.randf()
+
 func policy_ids() -> Array[String]:
     var result: Array[String] = []
     for policy_id_variant in POLICIES:
@@ -16,7 +37,7 @@ func choose_event_choice(policy_id: String, _event: Dictionary, available: Array
     if available.is_empty():
         return -1
     if policy_id == "random":
-        var random_position: int = RNGService.range_int(0, available.size() - 1)
+        var random_position: int = _decision_range_int(0, available.size() - 1)
         return int((available[random_position] as Dictionary).get("index", -1))
     var best_index: int = int((available[0] as Dictionary).get("index", -1))
     var best_score: float = -1000000.0
@@ -73,7 +94,7 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         for ability_variant in payable:
             var ability: Dictionary = ability_variant as Dictionary
             options.append({"kind":"ability", "id":str(ability.get("id", ""))})
-        return options[RNGService.range_int(0, options.size() - 1)]
+        return options[_decision_range_int(0, options.size() - 1)]
 
     var healing_ability := _best_ability(payable, ["heal"])
     var defensive_ability := _best_ability(payable, ["counter", "guard"])
@@ -156,7 +177,7 @@ func should_fight_boss(policy_id: String, turn: int, health: int, max_health: in
         "explorer":
             return turn >= 9
         "random":
-            return turn >= 6 and RNGService.next_float() >= 0.45
+            return turn >= 6 and _decision_next_float() >= 0.45
         _:
             return turn >= 7 and ratio >= 0.40
 
@@ -175,7 +196,7 @@ func choose_travel(policy_id: String, locations: Array, current_location: String
     if candidates.is_empty():
         return ""
     if policy_id == "random":
-        return candidates[RNGService.range_int(0, candidates.size() - 1)]
+        return candidates[_decision_range_int(0, candidates.size() - 1)]
     if policy_id in ["explorer", "balanced"] and not unvisited.is_empty():
         return unvisited[0]
     if policy_id == "cautious" and current_location != "" and current_location in visited and not unvisited.is_empty():
@@ -192,7 +213,7 @@ func choose_purchase(policy_id: String, stock: Array) -> String:
     if affordable.is_empty():
         return ""
     if policy_id == "random":
-        return str(affordable[RNGService.range_int(0, affordable.size() - 1)].get("id", ""))
+        return str(affordable[_decision_range_int(0, affordable.size() - 1)].get("id", ""))
     var best_id: String = ""
     var best_score: float = -1000000.0
     for item in affordable:
@@ -216,7 +237,7 @@ func choose_ending(policy_id: String, endings: Array) -> String:
     if ordered.is_empty():
         return ""
     if policy_id == "random":
-        return ordered[RNGService.range_int(0, ordered.size() - 1)]
+        return ordered[_decision_range_int(0, ordered.size() - 1)]
     match policy_id:
         "aggressive":
             return ordered[ordered.size() - 1]

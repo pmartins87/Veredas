@@ -175,6 +175,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
     if ContentRegistry.get_record(world_id).is_empty():
         return _invalid_result(character_id, policy_id, build_id, seed_value, "invalid_world")
 
+    policy_engine.start_decision_rng(seed_value)
     _prepare_isolated_profile(world_id, character_id)
     if not RunFlowEngine.start_journey(character_id, seed_value):
         return _invalid_result(character_id, policy_id, build_id, seed_value, "start_failed")
