@@ -12,6 +12,10 @@ on:
       - '.github/workflows/veredas-android.yml'
   workflow_dispatch:
 
+concurrency:
+  group: veredas-android-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   android-debug-apk:
     runs-on: ubuntu-latest
@@ -166,11 +170,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Install emulator runtime library
+      - name: Prepare emulator runtime and KVM
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y libpulse0
           ldconfig -p | grep 'libpulse.so.0'
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            test -r /dev/kvm
+            test -w /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo '/dev/kvm is not exposed on this runner.'
+            exit 1
+          fi
 
       - name: Download exact APK built by this workflow
         uses: actions/download-artifact@v4
