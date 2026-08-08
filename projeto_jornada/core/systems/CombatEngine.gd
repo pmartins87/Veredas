@@ -12,15 +12,17 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
     var bonuses := InventoryEngine.equipment_bonuses()
     var player_hp := int(GameState.run.get("health", 16))
     var player_vigor := int(GameState.run.get("vigor", 8))
+    var base_posture := maxi(1, int(GameState.run.get("base_posture", 10)))
+    var base_guard := maxi(0, int(GameState.run.get("base_guard", 0)))
     combat = {
         "active": true,
         "turn": 1,
         "player": {
             "hp":player_hp,"max_hp":int(GameState.run.get("max_health",16)),
             "vigor":player_vigor,"max_vigor":int(GameState.run.get("max_vigor",8)),
-            "posture":10 + int(bonuses.get("posture",0)),
-            "max_posture":10 + int(bonuses.get("posture",0)),
-            "guard":int(bonuses.get("guard",0)),"distance":1,"states":[],
+            "posture":base_posture + int(bonuses.get("posture",0)),
+            "max_posture":base_posture + int(bonuses.get("posture",0)),
+            "guard":base_guard + int(bonuses.get("guard",0)),"distance":1,"states":[],
             "damage_bonus":int(bonuses.get("damage",0)),
             "posture_bonus":int(bonuses.get("posture",0)),
             "range_bonus":int(bonuses.get("range",0)),
