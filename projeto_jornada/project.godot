@@ -1,5 +1,6 @@
 [application]
 config/name="Veredas da Trama"
+config/quit_on_go_back=false
 run/main_scene="res://scenes/Main.tscn"
 
 [display]
@@ -8,6 +9,7 @@ window/size/viewport_height=960
 window/size/window_width_override=540
 window/size/window_height_override=960
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 window/handheld/orientation=1
 
 [rendering]
@@ -37,3 +39,4 @@ RunFlowEngine="*res://core/systems/RunFlowEngine.gd"
 DomainThemeService="*res://ui/DomainThemeService.gd"
 AccessibilityService="*res://ui/AccessibilityService.gd"
 PresentationVFXController="*res://ui/PresentationVFXController.gd"
+MobilePlatformService="*res://mobile/MobilePlatformService.gd"
