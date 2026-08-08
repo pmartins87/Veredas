@@ -11,6 +11,7 @@ func reset_profile() -> void:
         "unlocked_characters":["character.mata_fio_verde.01"],
         "codex":[],
         "echo_marks":{},
+        "consequences":{},
         "endings":[],
         "settings":{},
         "unlocks":{
@@ -40,6 +41,7 @@ func new_run(character_id: String, seed_value: int) -> void:
         "marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],
         "recent_events":[],"event_counts":{},"turn":0,
         "visited_locations":[first_location],"defeated_enemies":[],"purchases":[],"ending_id":"",
+        "echo_context":{},
         "seed":seed_value,"rng":RNGService.snapshot()
     }
     PresentationBus.location(first_location)
