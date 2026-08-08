@@ -29,6 +29,7 @@ jobs:
           python tools/rebuild_content.py
           python tools/refine_npc_authenticity.py
           python tools/refine_character_balance.py
+          python tools/enforce_character_horizontal_budget.py
 
       - name: Validate canonical content
         working-directory: projeto_jornada
