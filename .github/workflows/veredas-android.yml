@@ -5,7 +5,10 @@ on:
     branches:
       - projeto-jornada-snapshots
     paths:
-      - 'projeto_jornada/**'
+      - 'projeto_jornada/project.godot'
+      - 'projeto_jornada/export_presets.cfg'
+      - 'projeto_jornada/mobile/**'
+      - 'projeto_jornada/.android-build-trigger'
       - '.github/workflows/veredas-android.yml'
   workflow_dispatch:
 
