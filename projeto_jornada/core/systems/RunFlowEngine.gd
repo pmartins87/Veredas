@@ -10,16 +10,22 @@ func start_journey(character_id: String, seed_value: int) -> bool:
     var world_id := str(character.get("world_id", ""))
     if not EntitlementEngine.new().can_access_world(world_id):
         return false
+    var ephemeral_simulation := bool(GameState.profile.get("_simulation_ephemeral", false))
     GameState.new_run(character_id, seed_value)
     GameState.run.mode = "story"
     GameState.run.visited_locations = [str(GameState.run.get("location_id", ""))]
     GameState.run.defeated_enemies = []
     GameState.run.purchases = []
     GameState.run.ending_id = ""
-    MetaUnlockEngine.discover(character_id)
-    MetaUnlockEngine.discover(str(GameState.run.get("world_id", "")))
-    MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
-    EchoConsequenceEngine.apply_to_run()
+    if ephemeral_simulation:
+        var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
+        flags["simulation.no_persist"] = true
+        GameState.run.flags = flags
+    else:
+        MetaUnlockEngine.discover(character_id)
+        MetaUnlockEngine.discover(str(GameState.run.get("world_id", "")))
+        MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
+        EchoConsequenceEngine.apply_to_run()
     return true
 
 func story_event() -> Dictionary:
