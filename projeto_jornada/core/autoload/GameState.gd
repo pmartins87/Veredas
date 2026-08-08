@@ -17,6 +17,10 @@ func reset_profile() -> void:
         "consequences":{},
         "endings":[],
         "settings":{},
+        "meta_economy":{},
+        "saved_journey_presets":{},
+        "saved_seeds":[],
+        "codex_pins":[],
         "unlocks":{
             "characters":["character.mata_fio_verde.01"],
             "routes":["world.mata_fio_verde"],
@@ -66,6 +70,7 @@ func deserialize(data: Dictionary) -> void:
     profile = data.get("profile", {})
     run = data.get("run", {})
     CodexProgressEngine.new().ensure_state()
+    MetaEconomyEngine.new().ensure_state()
     if not run.is_empty():
         var setup_engine := JourneySetupEngine.new()
         run = setup_engine.normalize_run_state(run)
