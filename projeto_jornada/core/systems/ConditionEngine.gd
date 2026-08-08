@@ -25,6 +25,12 @@ func evaluate(condition: Dictionary, context: Dictionary = {}) -> bool:
             return int(GameState.run.get("marks", {}).get(str(condition.get("mark_id", "")), 0)) > 0
         "mark_intensity_gte":
             return int(GameState.run.get("marks", {}).get(str(condition.get("mark_id", "")), 0)) >= int(condition.get("value", 1))
+        "echo_mark_has":
+            return EchoConsequenceEngine.has_echo(str(condition.get("mark_id", "")), 1)
+        "echo_mark_intensity_gte":
+            return EchoConsequenceEngine.has_echo(str(condition.get("mark_id", "")), int(condition.get("value", 1)))
+        "ending_witnessed":
+            return EchoConsequenceEngine.ending_witnessed(str(condition.get("ending_id", "")))
         "flag_is":
             return GameState.run.get("flags", {}).get(str(condition.get("key", ""))) == condition.get("value", true)
         "item_has":
