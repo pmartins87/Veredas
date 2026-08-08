@@ -1,10 +1,55 @@
 extends Node
 
 func ensure_state() -> void:
-    if typeof(GameState.profile.get("echo_marks", {})) != TYPE_DICTIONARY:
-        GameState.profile.echo_marks = {}
-    if typeof(GameState.profile.get("consequences", {})) != TYPE_DICTIONARY:
-        GameState.profile.consequences = {}
+    var raw_echoes = GameState.profile.get("echo_marks", {})
+    var raw_consequences = GameState.profile.get("consequences", {})
+    var raw_endings = GameState.profile.get("endings", [])
+
+    var normalized_echoes: Dictionary = {}
+    if typeof(raw_echoes) == TYPE_DICTIONARY:
+        for mark_id_variant in (raw_echoes as Dictionary).keys():
+            var mark_id := str(mark_id_variant)
+            var raw_record = (raw_echoes as Dictionary).get(mark_id_variant, {})
+            if typeof(raw_record) != TYPE_DICTIONARY:
+                continue
+            var record: Dictionary = raw_record as Dictionary
+            normalized_echoes[mark_id] = {
+                "mark_id":str(record.get("mark_id", mark_id)),
+                "max_intensity":int(record.get("max_intensity", 0)),
+                "encounters":int(record.get("encounters", 0)),
+                "world_id":str(record.get("world_id", "")),
+                "last_result":str(record.get("last_result", "")),
+                "last_ending":str(record.get("last_ending", "")),
+                "last_seen":int(record.get("last_seen", 0)),
+            }
+
+    var normalized_consequences: Dictionary = {}
+    if typeof(raw_consequences) == TYPE_DICTIONARY:
+        for ending_id_variant in (raw_consequences as Dictionary).keys():
+            var ending_id := str(ending_id_variant)
+            var raw_record = (raw_consequences as Dictionary).get(ending_id_variant, {})
+            if typeof(raw_record) != TYPE_DICTIONARY:
+                continue
+            var record: Dictionary = raw_record as Dictionary
+            normalized_consequences[ending_id] = {
+                "ending_id":str(record.get("ending_id", ending_id)),
+                "world_id":str(record.get("world_id", "")),
+                "witnessed":bool(record.get("witnessed", false)),
+                "count":int(record.get("count", 0)),
+                "first_seen":int(record.get("first_seen", 0)),
+                "last_seen":int(record.get("last_seen", 0)),
+            }
+
+    var normalized_endings: Array = []
+    if typeof(raw_endings) == TYPE_ARRAY:
+        for ending_variant in raw_endings as Array:
+            var ending_id := str(ending_variant)
+            if ending_id != "" and ending_id not in normalized_endings:
+                normalized_endings.append(ending_id)
+
+    GameState.profile.echo_marks = normalized_echoes
+    GameState.profile.consequences = normalized_consequences
+    GameState.profile.endings = normalized_endings
 
 func record_outcome(ending_id: String = "", result: String = "victory") -> Dictionary:
     ensure_state()
