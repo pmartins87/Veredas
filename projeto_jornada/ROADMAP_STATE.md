@@ -9,8 +9,8 @@
 ## Progresso formal
 - Fases 0–6: **10/10 ✅ cada**.
 - Fase 7: **7.1, 7.2, 7.6, 7.7 e 7.9 ✅**; 7.3–7.5/7.8 em produção; 7.10 pendente.
-- Fase 8: **8.1–8.8 ✅**; 8.9–8.10 continuam abertos enquanto a matriz Android é estabilizada no runner.
-- Fase 9: **9.1–9.4 ✅**; 9.5 é o próximo passo.
+- Fase 8: **8.1–8.8 ✅**; 8.9–8.10 seguem em certificação Android real.
+- Fase 9: **9.1–9.5 ✅**; 9.6 em implementação.
 
 ## Certificação real da engine
 A branch canônica possui CI estrita em GitHub Actions com Godot 4.7.1 stable. A CI reconstrói o catálogo, valida conteúdo, importa o projeto sem tolerar erros de parser e executa testes runtime.
@@ -22,7 +22,8 @@ Baselines importantes:
 - run 31230627111: APK físico `veredas-debug-apk` exportado e publicado, certificando 8.8;
 - run 31231619568: `HUB_CERTIFICATION PASS: 9.1`;
 - run 31231957863: `META_UNLOCK_CERTIFICATION PASS: 9.2`;
-- run 31232936069: `ECHO_CONSEQUENCE_CERTIFICATION PASS: 9.3` e `JOURNEY_SETUP_CERTIFICATION PASS: 9.4`, junto com todos os gates anteriores.
+- run 31232936069: `ECHO_CONSEQUENCE_CERTIFICATION PASS: 9.3` + `JOURNEY_SETUP_CERTIFICATION PASS: 9.4`;
+- run 31233210258: `CODEX_PROGRESS_CERTIFICATION PASS: 9.5`, junto com todos os gates anteriores.
 
 ## Catálogo canônico
 - 5.160 registros; 12 mundos; 120 localidades; 96 famílias; 300 monstros; 60 chefes/subchefes; 1.116 itens; 300 NPCs; 204 Marcas; 120 Dívidas; 36 personagens; 72 habilidades; 2.544 eventos; 36 finais; 144 pools.
@@ -47,18 +48,18 @@ Baselines importantes:
 - 8.4 ✅ Layout tall/standard/wide e leitura responsiva.
 - 8.5 ✅ Orçamentos e instrumentação de performance mobile.
 - 8.6 ✅ Pipeline mobile de assets, budgets e cache LRU.
-- 8.7 ✅ Presets Android: debug APK + Play AAB arm64, validação de segurança e nenhum segredo de release no Git. Package ID atual é provisório.
+- 8.7 ✅ Presets Android: debug APK + Play AAB arm64, validação de segurança e nenhum segredo de release no Git.
 - 8.8 ✅ Build Android automatizada — APK físico exportado e publicado como artefato da CI.
-- 8.9 🔄 O APK ainda não foi reprovado: tentativas falharam antes da instalação por dependências do runner. Libpulse e KVM já foram resolvidos; o emulador agora precisa rodar explicitamente sem janela/Qt no runner headless.
-- 8.10 ⏳ Certificação install/launch/pause-save/force-stop/relaunch depende de uma matriz Android 10/14 que chegue efetivamente ao aplicativo.
+- 8.9 🔄 Emuladores Android 10/14 agora iniciam headless com libpulse + KVM; script de certificação foi corrigido para POSIX sh e jornada real de debug no sandbox.
+- 8.10 🔄 O mesmo APK precisa provar jornada ativa, pause/autosave, force-stop, relançamento e preservação da seed nos dois emuladores.
 
 ## Fase 9 — Metaprogressão
-- 9.1 ✅ Nó de Vigília funcional — hub persistente horizontal, tela de entrada entre jornadas, instalações, residentes, rotas e crescimento por marcos.
-- 9.2 ✅ Desbloqueios horizontais — personagens, rotas, modos e Códice persistentes; sem aumento de poder-base.
-- 9.3 ✅ Marcas de Eco e consequências persistentes — memórias atravessam jornadas, são consultáveis por condições declarativas e sobrevivem a save/load normalizado sem alterar Vida/Vigor-base.
-- 9.4 ✅ Preparação da jornada — rota, Andarilho, modo, quatro perfis de dificuldade, seed e modificadores; `Sem Trocas` e `Mochila Leve` funcionais; setup persistente e normalizado após save/load. A calibração numérica das dificuldades permanece corretamente em 10.6.
-- 9.5 ⏭ Códice, conquistas, coleção e histórico de descobertas.
-- 9.6 ⏳ Economia meta sem progressão vertical destrutiva.
+- 9.1 ✅ Nó de Vigília funcional.
+- 9.2 ✅ Desbloqueios horizontais de personagens, rotas, modos e Códice.
+- 9.3 ✅ Marcas de Eco e consequências persistentes entre jornadas.
+- 9.4 ✅ Preparação da jornada — rota, Andarilho, modo, dificuldade, seed e modificadores.
+- 9.5 ✅ Arquivo de Ecos/Códice — coleção por categoria, conquistas, histórico de descobertas, migração do Códice legado e persistência; repetição não duplica histórico e nenhuma conquista altera Vida/Vigor.
+- 9.6 🔄 Economia meta sem progressão vertical destrutiva.
 - 9.7 ⏳ Modelo comercial/monetização definitivo sem pay-to-win.
 - 9.8 ⏳ Entitlements, restauração de compras e comportamento offline.
 - 9.9 ⏳ Migrações/regressão/integridade de perfil.
@@ -69,7 +70,7 @@ Baselines importantes:
 - `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida das fases 8–12.
 
 ## Contagem formal
-- **87/130 passos concluídos/materializados segundo seus gates.**
+- **88/130 passos concluídos/materializados segundo seus gates.**
 
 ## Ponto final
 O roadmap só termina em 12.10 com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
