@@ -52,7 +52,7 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     var payable: Array = []
     for ability_variant in CharacterKitEngine.abilities_for(character_id):
         var ability: Dictionary = ability_variant as Dictionary
-        if CharacterKitEngine.can_pay(ability, resource_pool):
+        if _ability_is_tactically_available(ability, player, enemy, resource_pool):
             payable.append(ability)
 
     if policy_id == "random":
@@ -67,8 +67,8 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         return options[RNGService.range_int(0, options.size() - 1)]
 
     var healing_ability := _best_ability(payable, ["heal", "guard"])
-    var damage_ability := _best_ability(payable, ["damage", "posture", "status", "mark", "counter"])
-    var utility_ability := _best_ability(payable, ["resource", "echo", "range", "debt"])
+    var damage_ability := _best_ability(payable, ["damage", "posture", "range", "status", "mark", "counter", "debt"])
+    var utility_ability := _best_ability(payable, ["move", "resource", "echo", "range", "debt", "mark"])
 
     if policy_id == "cautious":
         if hp_ratio <= 0.70 and not healing_ability.is_empty():
@@ -280,6 +280,29 @@ func _item_score(policy_id: String, item: Dictionary) -> float:
         _:
             if kind == "equipment": score += 2.0
     return score
+
+func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, enemy: Dictionary, resource_pool: Dictionary) -> bool:
+    if not CharacterKitEngine.can_pay(ability, resource_pool):
+        return false
+    var mechanic := str(ability.get("mechanic", ""))
+    match mechanic:
+        "heal":
+            return int(player.get("hp", 0)) < int(player.get("max_hp", 1))
+        "guard", "counter":
+            return int(player.get("guard", 0)) < 8
+        "resource":
+            var resource := str(ability.get("resource", ""))
+            var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
+            var maximum := maxi(1, int(character.get("resource_max", 5)))
+            return int(resource_pool.get(resource, 0)) < maximum
+        "mark":
+            return StatusEngine.status_stacks(enemy, "marked") < 3
+        "move":
+            return int(player.get("guard", 0)) < 6 or int(player.get("distance", 1)) < 2
+        "debt":
+            return float(player.get("hp", 0)) / maxf(1.0, float(player.get("max_hp", 1))) > 0.35
+        _:
+            return true
 
 func _best_ability(payable: Array, mechanics: Array[String]) -> Dictionary:
     for mechanic in mechanics:
