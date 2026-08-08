@@ -33,24 +33,53 @@ func default_setup() -> Dictionary:
     var character_id := "character.mata_fio_verde.01"
     if not characters.is_empty():
         character_id = str((characters[0] as Dictionary).get("id", character_id))
-    return {
+    return normalize_setup({
         "world_id":world_id,
         "character_id":character_id,
         "journey_mode":"journey",
         "difficulty_id":DEFAULT_DIFFICULTY,
         "seed":0,
         "modifiers":[],
+    })
+
+func normalize_setup(setup: Dictionary) -> Dictionary:
+    var modifiers_raw = setup.get("modifiers", [])
+    var modifiers: Array = []
+    if typeof(modifiers_raw) == TYPE_ARRAY:
+        modifiers = _normalized_modifiers(modifiers_raw as Array)
+    return {
+        "world_id":str(setup.get("world_id", "")),
+        "character_id":str(setup.get("character_id", "")),
+        "journey_mode":str(setup.get("journey_mode", "journey")),
+        "difficulty_id":str(setup.get("difficulty_id", DEFAULT_DIFFICULTY)),
+        "seed":int(setup.get("seed", 0)),
+        "modifiers":modifiers,
     }
+
+func normalize_run_state(run_state: Dictionary) -> Dictionary:
+    if run_state.is_empty():
+        return run_state
+    var raw_setup = run_state.get("setup", {})
+    if typeof(raw_setup) != TYPE_DICTIONARY or (raw_setup as Dictionary).is_empty():
+        return run_state
+    var normalized := normalize_setup(raw_setup as Dictionary)
+    run_state.setup = normalized.duplicate(true)
+    run_state.seed = int(run_state.get("seed", normalized.seed))
+    run_state.journey_mode = str(run_state.get("journey_mode", normalized.journey_mode))
+    run_state.difficulty_id = str(run_state.get("difficulty_id", normalized.difficulty_id))
+    run_state.modifiers = _normalized_modifiers(run_state.get("modifiers", normalized.modifiers) as Array)
+    return run_state
 
 func validate(setup: Dictionary) -> Dictionary:
     MetaUnlockEngine.evaluate_progression()
+    var normalized := normalize_setup(setup)
     var errors: Array[String] = []
-    var world_id := str(setup.get("world_id", ""))
-    var character_id := str(setup.get("character_id", ""))
-    var journey_mode := str(setup.get("journey_mode", "journey"))
-    var difficulty_id := str(setup.get("difficulty_id", DEFAULT_DIFFICULTY))
-    var seed_value := int(setup.get("seed", 0))
-    var modifiers: Array = setup.get("modifiers", []) as Array
+    var world_id := str(normalized.world_id)
+    var character_id := str(normalized.character_id)
+    var journey_mode := str(normalized.journey_mode)
+    var difficulty_id := str(normalized.difficulty_id)
+    var seed_value := int(normalized.seed)
+    var modifiers: Array = normalized.modifiers as Array
 
     if not MetaUnlockEngine.is_route_unlocked(world_id):
         errors.append("route_locked")
@@ -66,50 +95,48 @@ func validate(setup: Dictionary) -> Dictionary:
     if journey_mode == "fixed_seed" and seed_value <= 0:
         errors.append("fixed_seed_required")
 
-    var seen := {}
     for modifier_variant in modifiers:
         var modifier_id := str(modifier_variant)
-        if seen.has(modifier_id):
-            errors.append("modifier_duplicate:%s" % modifier_id)
-            continue
-        seen[modifier_id] = true
         if not MODIFIERS.has(modifier_id):
             errors.append("modifier_unknown:%s" % modifier_id)
         elif not modifier_available(modifier_id):
             errors.append("modifier_locked:%s" % modifier_id)
 
+    var raw_modifiers = setup.get("modifiers", [])
+    if typeof(raw_modifiers) == TYPE_ARRAY:
+        var seen := {}
+        for modifier_variant in raw_modifiers as Array:
+            var modifier_id := str(modifier_variant)
+            if seen.has(modifier_id):
+                errors.append("modifier_duplicate:%s" % modifier_id)
+            seen[modifier_id] = true
+
     return {"ok":errors.is_empty(),"errors":errors}
 
 func start(setup: Dictionary) -> bool:
+    var normalized := normalize_setup(setup)
     var check := validate(setup)
     if not bool(check.get("ok", false)):
         return false
-    var seed_value := int(setup.get("seed", 0))
+    var seed_value := int(normalized.seed)
     if seed_value <= 0:
         seed_value = int(Time.get_unix_time_from_system()) & 0x7fffffff
         if seed_value <= 0:
             seed_value = 1
-    var character_id := str(setup.get("character_id", ""))
+    normalized.seed = seed_value
+    var character_id := str(normalized.character_id)
     if not RunFlowEngine.start_journey(character_id, seed_value):
         return false
 
-    var normalized := {
-        "world_id":str(setup.get("world_id", "")),
-        "character_id":character_id,
-        "journey_mode":str(setup.get("journey_mode", "journey")),
-        "difficulty_id":str(setup.get("difficulty_id", DEFAULT_DIFFICULTY)),
-        "seed":seed_value,
-        "modifiers":_normalized_modifiers(setup.get("modifiers", []) as Array),
-    }
     GameState.run.journey_mode = normalized.journey_mode
     GameState.run.difficulty_id = normalized.difficulty_id
-    GameState.run.modifiers = normalized.modifiers.duplicate()
+    GameState.run.modifiers = (normalized.modifiers as Array).duplicate()
     GameState.run.setup = normalized.duplicate(true)
 
     var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
-    if "sem_trocas" in normalized.modifiers:
+    if "sem_trocas" in (normalized.modifiers as Array):
         flags["modifier.no_trade"] = true
-    if "mochila_leve" in normalized.modifiers:
+    if "mochila_leve" in (normalized.modifiers as Array):
         var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary
         resources.provisions = mini(1, int(resources.get("provisions", 0)))
         GameState.run.resources = resources
