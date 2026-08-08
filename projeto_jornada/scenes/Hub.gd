@@ -1,6 +1,7 @@
 extends Control
 
 const ANDROID_CI_MARKER := "user://android_ci_autostart"
+const ANDROID_CI_READY := "user://android_ci_ready"
 const ANDROID_CI_SEED := 881001
 
 var page_panel: PanelContainer
@@ -14,6 +15,7 @@ func _ready() -> void:
         return
     loaded_active_run = SaveService.load_game() and not GameState.run.is_empty() and bool(GameState.run.get("active", false))
     if loaded_active_run and _android_ci_run_active():
+        _write_android_ci_ready("resumed")
         call_deferred("_continue_run")
         return
     HubEngine.ensure_state()
@@ -40,9 +42,22 @@ func _consume_android_ci_marker() -> bool:
     var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
     flags["ci.android_autostart"] = true
     GameState.run.flags = flags
-    SaveService.save_game()
+    if not SaveService.save_game():
+        push_error("Android CI autostart could not persist the canonical journey")
+        return false
+    _write_android_ci_ready("started")
     call_deferred("_continue_run")
     return true
+
+func _write_android_ci_ready(stage: String) -> void:
+    if not OS.is_debug_build() or not OS.has_feature("android"):
+        return
+    var file := FileAccess.open(ANDROID_CI_READY, FileAccess.WRITE)
+    if file == null:
+        push_error("Android CI readiness marker could not be written")
+        return
+    file.store_string("%s|seed=%d|schema=%d" % [stage, int(GameState.run.get("seed", 0)), int(GameState.profile.get("profile_schema_version", 0))])
+    file.close()
 
 func _android_ci_run_active() -> bool:
     if not OS.is_debug_build() or not OS.has_feature("android"):
