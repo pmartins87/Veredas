@@ -210,14 +210,15 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu swiftshader_indirect
           script: |
-            set -euo pipefail
+            set -eu
             PACKAGE='com.veredasdatrama.preview'
             APK='${{ steps.apk.outputs.path }}'
             adb install -r "$APK"
             adb shell pm path "$PACKAGE"
+            adb shell run-as "$PACKAGE" touch files/android_ci_autostart
             adb logcat -c
             adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
-            sleep 6
+            sleep 7
             PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
             test -n "$PID"
             adb shell input keyevent KEYCODE_HOME
@@ -229,20 +230,32 @@ jobs:
             data=json.load(open('/tmp/veredas-save-before.json',encoding='utf-8'))
             run=data['game']['run']
             assert run['active'] is True
-            assert int(run['seed']) > 0
-            print('SAVE_BEFORE seed=',run['seed'],'world=',run['world_id'])
+            assert int(run['seed']) == 881001
+            assert run['flags']['ci.android_autostart'] is True
+            assert run['mode'] == 'story'
+            print('SAVE_BEFORE seed=',run['seed'],'world=',run['world_id'],'mode=',run['mode'])
             PY
-            SEED_BEFORE=$(python -c "import json; print(json.load(open('/tmp/veredas-save-before.json'))['game']['run']['seed'])")
+            SEED_BEFORE=$(python -c "import json; print(int(json.load(open('/tmp/veredas-save-before.json'))['game']['run']['seed']))")
             adb shell am force-stop "$PACKAGE"
             sleep 2
             adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
-            sleep 6
+            sleep 7
             PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
             test -n "$PID"
             adb shell input keyevent KEYCODE_HOME
             sleep 3
             adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-after.json
-            SEED_AFTER=$(python -c "import json; print(json.load(open('/tmp/veredas-save-after.json'))['game']['run']['seed'])")
+            python - <<'PY'
+            import json
+            data=json.load(open('/tmp/veredas-save-after.json',encoding='utf-8'))
+            run=data['game']['run']
+            assert run['active'] is True
+            assert int(run['seed']) == 881001
+            assert run['flags']['ci.android_autostart'] is True
+            assert run['mode'] == 'story'
+            print('SAVE_AFTER seed=',run['seed'],'world=',run['world_id'],'mode=',run['mode'])
+            PY
+            SEED_AFTER=$(python -c "import json; print(int(json.load(open('/tmp/veredas-save-after.json'))['game']['run']['seed']))")
             test "$SEED_BEFORE" = "$SEED_AFTER"
             if adb logcat -d | grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview'; then
               echo 'Runtime error found in Android logcat'
@@ -259,6 +272,7 @@ jobs:
             'architecture=x86_64' \
             'install=pass' \
             'launch=pass' \
+            'active_journey=pass' \
             'pause_autosave=pass' \
             'force_stop_relaunch=pass' \
             'seed_persistence=pass' \
