@@ -25,7 +25,7 @@ func start_journey(character_id: String, seed_value: int) -> bool:
 func story_event() -> Dictionary:
     GameState.run.mode = "story"
     var event: Dictionary = EventDirector.choose_event(str(GameState.run.get("world_id", "")), str(GameState.run.get("location_id", "")))
-    if not event.is_empty():
+    if not event.is_empty() and not _simulation_no_persist():
         MetaUnlockEngine.discover(str(event.get("id", "")))
     return event
 
@@ -33,14 +33,16 @@ func choose(event: Dictionary, option: int) -> bool:
     var choices: Array = event.get("choices", [])
     if option < 0 or option >= choices.size():
         return false
-    MetaUnlockEngine.discover(str(event.get("id", "")))
+    if not _simulation_no_persist():
+        MetaUnlockEngine.discover(str(event.get("id", "")))
     return EventDirector.apply_choice(event, option)
 
 func travel(location_id: String) -> bool:
     var ok := LocationEngine.travel_to(location_id)
     if ok:
         GameState.run.mode = "story"
-        MetaUnlockEngine.discover(location_id)
+        if not _simulation_no_persist():
+            MetaUnlockEngine.discover(location_id)
     return ok
 
 func travel_world(world_id: String, location_id: String = "") -> bool:
@@ -51,8 +53,9 @@ func travel_world(world_id: String, location_id: String = "") -> bool:
     var ok := LocationEngine.travel_world(world_id, location_id)
     if ok:
         GameState.run.mode = "story"
-        MetaUnlockEngine.discover(world_id)
-        MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
+        if not _simulation_no_persist():
+            MetaUnlockEngine.discover(world_id)
+            MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
     return ok
 
 func open_inventory() -> void:
@@ -71,7 +74,8 @@ func buy(item_id: String) -> bool:
         var purchases: Array = GameState.run.get("purchases", [])
         purchases.append(item_id)
         GameState.run.purchases = purchases
-        MetaUnlockEngine.discover(item_id)
+        if not _simulation_no_persist():
+            MetaUnlockEngine.discover(item_id)
     return ok
 
 func local_monsters() -> Array:
@@ -100,7 +104,8 @@ func endings_for_current_world() -> Array:
 
 func start_combat(enemy_id: String) -> Dictionary:
     GameState.run.mode = "combat"
-    MetaUnlockEngine.discover(enemy_id)
+    if not _simulation_no_persist():
+        MetaUnlockEngine.discover(enemy_id)
     return CombatEngine.start(enemy_id, str(GameState.run.get("character_id", "")))
 
 func combat_action(action: String) -> Dictionary:
@@ -110,7 +115,8 @@ func combat_action(action: String) -> Dictionary:
     return state
 
 func combat_ability(ability_id: String) -> Dictionary:
-    MetaUnlockEngine.discover(ability_id)
+    if not _simulation_no_persist():
+        MetaUnlockEngine.discover(ability_id)
     var state := CombatEngine.use_character_ability(ability_id)
     if not bool(state.get("active", false)):
         _close_combat(state)
@@ -126,6 +132,8 @@ func finish(ending_id: String) -> bool:
     GameState.run.mode = "debrief"
     GameState.run.ending_id = ending_id
     GameState.run.result = "victory"
+    if _simulation_no_persist():
+        return true
     var endings: Array = GameState.profile.get("endings", [])
     if ending_id not in endings:
         endings.append(ending_id)
@@ -133,17 +141,17 @@ func finish(ending_id: String) -> bool:
     MetaUnlockEngine.discover(ending_id)
     MetaUnlockEngine.evaluate_progression()
     EchoConsequenceEngine.record_outcome(ending_id, "victory")
-    if not _simulation_no_persist():
-        SaveService.save_game()
+    SaveService.save_game()
     return true
 
 func fail(reason: String = "defeat") -> void:
     GameState.run.active = false
     GameState.run.mode = "debrief"
     GameState.run.result = reason
+    if _simulation_no_persist():
+        return
     EchoConsequenceEngine.record_outcome("", reason)
-    if not _simulation_no_persist():
-        SaveService.save_game()
+    SaveService.save_game()
 
 func resume_story() -> void:
     if bool(GameState.run.get("active", false)):
@@ -168,7 +176,8 @@ func _close_combat(state: Dictionary) -> void:
         var enemy_id := str(state.get("enemy", {}).get("id", ""))
         if enemy_id != "":
             defeated.append(enemy_id)
-            MetaUnlockEngine.discover(enemy_id)
+            if not _simulation_no_persist():
+                MetaUnlockEngine.discover(enemy_id)
         GameState.run.defeated_enemies = defeated
         var resources: Dictionary = GameState.run.get("resources", {})
         resources.fragments = int(resources.get("fragments", 0)) + (18 if enemy_id.begins_with("boss.") else 6)
