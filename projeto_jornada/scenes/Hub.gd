@@ -9,6 +9,7 @@ var loaded_active_run := false
 func _ready() -> void:
     loaded_active_run = SaveService.load_game() and not GameState.run.is_empty() and bool(GameState.run.get("active", false))
     HubEngine.ensure_state()
+    MetaUnlockEngine.evaluate_progression()
     if not loaded_active_run:
         HubEngine.enter()
     _build_ui()
@@ -74,21 +75,35 @@ func _build_ui() -> void:
 func _render() -> void:
     for child in actions.get_children():
         child.queue_free()
-    var hub := HubEngine.summary()
+    MetaUnlockEngine.evaluate_progression()
+    var hub: Dictionary = HubEngine.summary()
+    var unlocks: Dictionary = MetaUnlockEngine.summary()
     var lines: Array[String] = []
     lines.append("[font_size=%d][b]Um ponto estável entre Veredas instáveis.[/b][/font_size]" % AccessibilityService.font_size(23))
     lines.append("")
-    lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Rotas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.routes, hub.residents])
+    lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.residents])
+    lines.append("Andarilhos: [b]%s/36[/b]   •   Rotas: [b]%s/12[/b]   •   Modos: [b]%s/4[/b]   •   Códice: [b]%s[/b]" % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
     lines.append("")
     lines.append("[b]Instalações[/b]")
-    for facility in hub.facilities:
+    for facility_variant in hub.facilities:
+        var facility: Dictionary = facility_variant as Dictionary
         var marker := "✓" if bool(facility.unlocked) else "·"
         lines.append("%s [b]%s[/b] — %s" % [marker, facility.name, facility.description])
+
+    var modes: Array = MetaUnlockEngine.unlocked_modes()
+    if not modes.is_empty():
+        lines.append("")
+        lines.append("[b]Formas de jornada conhecidas[/b]")
+        for mode_variant in modes:
+            var mode: Dictionary = mode_variant as Dictionary
+            lines.append("• %s — %s" % [mode.name, mode.description])
+
     if not HubEngine.residents().is_empty():
         lines.append("")
         lines.append("[b]Pessoas que encontraram abrigo no Nó[/b]")
-        for npc_id in HubEngine.residents().slice(0, 6):
-            var npc := ContentRegistry.get_record(str(npc_id))
+        for npc_id_variant in HubEngine.residents().slice(0, 6):
+            var npc_id: String = str(npc_id_variant)
+            var npc: Dictionary = ContentRegistry.get_record(npc_id)
             lines.append("• %s" % npc.get("name", npc_id))
     summary.text = "\n".join(lines)
 
@@ -97,10 +112,11 @@ func _render() -> void:
         _button("Abandonar jornada e retornar ao Nó", _abandon_run, false)
     else:
         _button("Partir pela Mata do Fio Verde", _start_default, true)
-        for world_id in HubEngine.routes():
-            var world := ContentRegistry.get_record(str(world_id))
-            if str(world_id) != "world.mata_fio_verde":
-                _button("Ver rota — %s" % world.get("name", world_id), func(): _show_route(str(world_id)), false)
+        for world_id_variant in HubEngine.routes():
+            var world_id: String = str(world_id_variant)
+            var world: Dictionary = ContentRegistry.get_record(world_id)
+            if world_id != "world.mata_fio_verde":
+                _button("Ver rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
     _button("Acessibilidade", _open_accessibility, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
@@ -130,8 +146,9 @@ func _abandon_run() -> void:
     _render()
 
 func _show_route(world_id: String) -> void:
-    var world := ContentRegistry.get_record(world_id)
-    summary.append_text("\n\n[i]A Mesa das Veredas já conhece o caminho para %s. A preparação detalhada da próxima jornada será escolhida na etapa 9.4.[/i]" % world.get("name", world_id))
+    var world: Dictionary = ContentRegistry.get_record(world_id)
+    var characters: Array = MetaUnlockEngine.unlocked_characters(world_id)
+    summary.append_text("\n\n[i]A Mesa das Veredas conhece o caminho para %s. Andarilhos disponíveis nesta rota: %d. A escolha detalhada da próxima jornada será aberta em 9.4.[/i]" % [world.get("name", world_id), characters.size()])
 
 func _open_accessibility() -> void:
     var panel := AccessibilityPanel.new()
