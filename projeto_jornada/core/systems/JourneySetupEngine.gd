@@ -83,6 +83,8 @@ func validate(setup: Dictionary) -> Dictionary:
 
     if not MetaUnlockEngine.is_route_unlocked(world_id):
         errors.append("route_locked")
+    if not EntitlementEngine.new().can_access_world(world_id):
+        errors.append("entitlement_required")
     var character := ContentRegistry.get_record(character_id)
     if character.is_empty() or not MetaUnlockEngine.is_character_unlocked(character_id):
         errors.append("character_locked")
