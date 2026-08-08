@@ -25,6 +25,8 @@ func ensure_state() -> Dictionary:
 
 func enter() -> Dictionary:
     var hub: Dictionary = ensure_state()
+    MetaUnlockEngine.evaluate_progression()
+    hub = GameState.profile.get("hub", {}) as Dictionary
     hub.visit_count = int(hub.get("visit_count",0)) + 1
     var history: Array = hub.get("history", [])
     history.push_front({"kind":"visit","at":int(Time.get_unix_time_from_system()),"endings":GameState.profile.get("endings",[]).size()})
@@ -69,36 +71,35 @@ func add_resident(npc_id: String) -> bool:
         residents.append(npc_id)
         hub.residents = residents
         GameState.profile.hub = hub
+        MetaUnlockEngine.discover(npc_id)
         _recalculate_stage()
     return true
 
 func unlock_route(world_id: String) -> bool:
-    if ContentRegistry.get_record(world_id).is_empty() or not world_id.begins_with("world."):
+    if not MetaUnlockEngine.unlock_route(world_id):
         return false
-    var hub: Dictionary = ensure_state()
-    var routes_list: Array = hub.get("routes", [])
-    if world_id not in routes_list:
-        routes_list.append(world_id)
-        hub.routes = routes_list
-        GameState.profile.hub = hub
-        _recalculate_stage()
+    _recalculate_stage()
     return true
 
 func routes() -> Array:
-    return ensure_state().get("routes", []).duplicate()
+    MetaUnlockEngine.evaluate_progression()
+    return (MetaUnlockEngine.ensure_state().get("routes", []) as Array).duplicate()
 
 func residents() -> Array:
     return ensure_state().get("residents", []).duplicate()
 
 func summary() -> Dictionary:
     var hub: Dictionary = ensure_state()
+    var unlock_summary: Dictionary = MetaUnlockEngine.summary()
     return {
         "stage":int(hub.get("stage",1)),
         "visits":int(hub.get("visit_count",0)),
-        "routes":hub.get("routes",[]).size(),
+        "routes":int(unlock_summary.get("routes",0)),
         "residents":hub.get("residents",[]).size(),
         "endings":GameState.profile.get("endings",[]).size(),
-        "codex":GameState.profile.get("codex",[]).size(),
+        "codex":int(unlock_summary.get("codex",0)),
+        "characters":int(unlock_summary.get("characters",0)),
+        "modes":int(unlock_summary.get("modes",0)),
         "facilities":facility_state(),
     }
 
