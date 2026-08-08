@@ -62,5 +62,8 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
     profile = data.get("profile", {})
     run = data.get("run", {})
+    if not run.is_empty():
+        var setup_engine := JourneySetupEngine.new()
+        run = setup_engine.normalize_run_state(run)
     if not run.is_empty() and run.has("rng"):
         RNGService.restore(run.rng)
