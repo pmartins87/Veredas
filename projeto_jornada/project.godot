@@ -1,7 +1,7 @@
 [application]
 config/name="Veredas da Trama"
 config/quit_on_go_back=false
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/Hub.tscn"
 
 [display]
 window/size/viewport_width=540
