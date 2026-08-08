@@ -1,0 +1,98 @@
+name: Veredas Character Policy Patch
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-character-policy-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Patch tactical ability filtering
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd')
+          text = p.read_text(encoding='utf-8')
+          old = '''    var payable: Array = []
+          for ability_variant in CharacterKitEngine.abilities_for(character_id):
+              var ability: Dictionary = ability_variant as Dictionary
+              if CharacterKitEngine.can_pay(ability, resource_pool):
+                  payable.append(ability)
+          '''
+          new = '''    var payable: Array = []
+          for ability_variant in CharacterKitEngine.abilities_for(character_id):
+              var ability: Dictionary = ability_variant as Dictionary
+              if _ability_is_tactically_available(ability, player, enemy, resource_pool):
+                  payable.append(ability)
+          '''
+          if text.count(old) != 1:
+              raise SystemExit('payable block target mismatch')
+          text = text.replace(old, new, 1)
+          text = text.replace(
+              'var damage_ability := _best_ability(payable, ["damage", "posture", "status", "mark", "counter"])',
+              'var damage_ability := _best_ability(payable, ["damage", "posture", "range", "status", "mark", "counter", "debt"])',
+              1,
+          )
+          text = text.replace(
+              'var utility_ability := _best_ability(payable, ["resource", "echo", "range", "debt"])',
+              'var utility_ability := _best_ability(payable, ["move", "resource", "echo", "range", "debt", "mark"])',
+              1,
+          )
+          marker = 'func _best_ability(payable: Array, mechanics: Array[String]) -> Dictionary:\n'
+          helper = '''func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, enemy: Dictionary, resource_pool: Dictionary) -> bool:
+              if not CharacterKitEngine.can_pay(ability, resource_pool):
+                  return false
+              var mechanic := str(ability.get("mechanic", ""))
+              match mechanic:
+                  "heal":
+                      return int(player.get("hp", 0)) < int(player.get("max_hp", 1))
+                  "guard", "counter":
+                      return int(player.get("guard", 0)) < 8
+                  "resource":
+                      var resource := str(ability.get("resource", ""))
+                      var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
+                      var maximum := maxi(1, int(character.get("resource_max", 5)))
+                      return int(resource_pool.get(resource, 0)) < maximum
+                  "mark":
+                      return StatusEngine.status_stacks(enemy, "marked") < 3
+                  "move":
+                      return int(player.get("guard", 0)) < 6 or int(player.get("distance", 1)) < 2
+                  "debt":
+                      return float(player.get("hp", 0)) / maxf(1.0, float(player.get("max_hp", 1))) > 0.35
+                  _:
+                      return true
+
+          '''
+          if text.count(marker) != 1:
+              raise SystemExit('best ability marker mismatch')
+          text = text.replace(marker, helper + marker, 1)
+          p.write_text(text, encoding='utf-8')
+
+          q = Path('projeto_jornada/core/systems/CharacterKitEngine.gd')
+          qtext = q.read_text(encoding='utf-8')
+          qtext2 = qtext.replace('maxi(1, power / 2)', 'maxi(1, int(power / 2))')
+          if qtext2 == qtext:
+              raise SystemExit('CharacterKit integer-division target missing')
+          q.write_text(qtext2, encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/core/systems/CharacterKitEngine.gd
+      - name: Commit patch
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/core/systems/CharacterKitEngine.gd
+          git commit -m 'Filter signature abilities by tactical value'
+          git push origin HEAD:projeto-jornada-snapshots
