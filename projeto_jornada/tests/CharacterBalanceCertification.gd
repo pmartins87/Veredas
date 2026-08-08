@@ -193,7 +193,7 @@ func _learning_curve_gate() -> void:
         tier_row.learned = float(tier_row.learned) + learned
         tier_aggregate[tier] = tier_row
         var scores: Array = domain_scores.get(world_id, []) as Array
-        scores.append(learned)
+        scores.append(competent)
         domain_scores[world_id] = scores
 
     for tier in VALID_TIERS:
@@ -225,7 +225,7 @@ func _learning_curve_gate() -> void:
             continue
         var low := minf(float(scores[0]), minf(float(scores[1]), float(scores[2])))
         var high := maxf(float(scores[0]), maxf(float(scores[1]), float(scores[2])))
-        expect(high - low <= 0.65, "%s has excessive learned-score spread among its three Andarilhos" % world_id)
+        expect(high - low <= 0.65, "%s has excessive controlled balanced-score spread among its three Andarilhos" % world_id)
 
 func _journey_score(result: Dictionary, character: Dictionary) -> float:
     var score := 0.0
