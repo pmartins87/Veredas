@@ -30,8 +30,12 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
         "enemy": {
             "id":enemy_id,"name":enemy_record.get("name","Enemy"),
             "hp":enemy_hp,"max_hp":enemy_hp,"posture":enemy_posture,"max_posture":enemy_posture,
-            "guard":0,"distance":1,"states":[],"mechanic":enemy_record.get("mechanic","")
+            "guard":maxi(0, int(enemy_record.get("starting_guard",0))),"distance":1,"states":[],
+            "mechanic":enemy_record.get("mechanic",""),
+            "rank":enemy_record.get("rank", "boss" if is_boss else "normal"),
+            "elite_affix":enemy_record.get("elite_affix", ""),
         },
+        "enemy_record":enemy_record,
         "character_id": character_id,
         "signature_resource": CharacterKitEngine.initial_resource_pool(character_id),
         "intent": {},
@@ -46,26 +50,11 @@ func roll_intent() -> Dictionary:
     if combat.is_empty():
         return {}
     var enemy: Dictionary = combat.enemy
-    var hp_ratio := float(enemy.hp) / maxf(1.0, float(enemy.max_hp))
-    var roll := RNGService.next_float()
-    var intent: Dictionary = {}
-    var mechanic := str(enemy.get("mechanic", ""))
+    var enemy_record: Dictionary = combat.get("enemy_record", {}) as Dictionary
+    var phase: Dictionary = {}
     if bool(combat.get("is_boss", false)):
-        roll = clampf(roll - 0.05 * int(combat.get("boss_phase", 0)), 0.0, 1.0)
-    if hp_ratio < 0.30 and roll < 0.28:
-        intent = {"id":"recover","telegraph":"recua e recompõe a postura","damage":0,"posture":-4}
-    elif roll < 0.42:
-        intent = {"id":"heavy","telegraph":"prepara um golpe pesado","damage":5,"posture":2}
-    elif roll < 0.72:
-        intent = {"id":"pressure","telegraph":"avança para limitar seu espaço","damage":3,"move":-1}
-    else:
-        intent = {"id":"guard","telegraph":"fecha a guarda e observa","damage":1,"guard":3}
-    if mechanic == "status_combo" and intent.id == "pressure":
-        intent.status = "wet"
-    elif mechanic == "resource_drain" and intent.id == "heavy":
-        intent.vigor_damage = 1
-    elif mechanic == "intent_trick" and intent.id == "guard":
-        intent.telegraph = "desvia o olhar, mas mantém o peso pronto para reagir"
+        phase = BossPhaseEngine.phase(enemy_record, int(enemy.get("hp",0)), int(enemy.get("max_hp",1)))
+    var intent := EnemyBalanceEngine.new().roll_intent(enemy_record, phase, RNGService.next_float())
     combat.intent = intent
     PresentationBus.intent(intent)
     return intent
@@ -154,12 +143,20 @@ func _resolve_enemy() -> void:
     var intent: Dictionary = combat.intent
     var before_player_hp := int(player.hp)
     if intent.get("id", "") == "recover":
-        enemy.posture = mini(int(enemy.get("posture",0)) + 4, int(enemy.get("max_posture",12)))
+        var posture_gain := absi(int(intent.get("posture", -4)))
+        enemy.posture = mini(int(enemy.get("posture",0)) + posture_gain, int(enemy.get("max_posture",12)))
     else:
-        var damage := int(intent.get("damage",0))
-        var absorbed := mini(damage, int(player.get("guard",0)))
-        player.guard = maxi(0, int(player.get("guard",0)) - absorbed)
-        player.hp = maxi(0, int(player.hp) - (damage - absorbed))
+        var damage := maxi(0, int(intent.get("damage",0)))
+        var hits := maxi(1, int(intent.get("hits",1)))
+        for _hit in range(hits):
+            var absorbed := mini(damage, int(player.get("guard",0)))
+            player.guard = maxi(0, int(player.get("guard",0)) - absorbed)
+            player.hp = maxi(0, int(player.hp) - (damage - absorbed))
+            if int(player.hp) <= 0:
+                break
+        if intent.has("posture_damage"):
+            player.posture = maxi(0, int(player.get("posture",0)) - int(intent.get("posture_damage",0)))
+            player = _check_posture_break(player)
         if intent.has("move") and not StatusEngine.movement_locked(player):
             player.distance = clampi(int(player.distance) + int(intent.move), 0, 2)
         if intent.has("guard"):
