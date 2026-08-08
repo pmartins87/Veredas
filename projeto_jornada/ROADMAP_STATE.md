@@ -15,28 +15,22 @@
 - Fase 5 — Mundo e narrativa: **10/10 ✅**.
 - Fase 6 — Produção massiva: **10/10 ✅**; fonte canônica e QA determinísticos persistidos.
 - Fase 7 — Arte, UX e áudio: 7.1, 7.2, 7.6, 7.7 e 7.9 concluídos; 7.3–7.5 e 7.8 em produção; 7.10 pendente.
+- Fase 8 — Plataforma mobile e Android: **8.1–8.4 ✅ certificados na Godot real**; 8.5–8.10 em produção/pendentes.
 
 ## Certificação real da engine
-A partir de 2026-08-07, a branch canônica possui CI estrita em GitHub Actions usando **Godot 4.7.1 stable** headless.
+A branch canônica possui CI estrita em GitHub Actions usando **Godot 4.7.1 stable** headless.
 
-A CI executa, nesta ordem:
-1. reconstrução determinística do conteúdo;
-2. refinamento autoral determinístico dos NPCs;
-3. QA canônico de conteúdo;
-4. QA de integração audiovisual;
-5. importação do projeto pela Godot com falha obrigatória em `SCRIPT ERROR`, `Parse Error` ou script não carregado;
-6. `RuntimeSmoke`;
-7. `PhaseCertification` para 1.10–4.10.
+A CI executa reconstrução determinística, QA canônico, QA audiovisual, importação da engine sem tolerar erros de parser, RuntimeSmoke e certificações específicas por fase.
 
-Baseline certificado no run **31228878267**:
-- importação Godot sem erros de parser;
-- `RUNTIME_SMOKE PASS`;
-- `PHASE_CERTIFICATION PASS: 1.10 2.10 3.10 4.10`;
-- QA canônico e QA da Fase 7 em PASS.
+Baselines certificados:
+- run **31228878267**: `RUNTIME_SMOKE PASS` e `PHASE_CERTIFICATION PASS: 1.10 2.10 3.10 4.10`;
+- run **31229399274**: todos os gates anteriores + `MOBILE_CERTIFICATION PASS: 8.1 8.2 8.3 8.4`.
 
-Observação de QA: a execução headless ainda reporta objetos/um recurso em uso no encerramento do processo de teste. Isso não alterou resultados nem estado funcional e fica registrado como dívida de limpeza para 7.10/QA final; não é considerado resolvido.
+Observação de QA: execuções headless ainda podem reportar objetos/recursos em uso no encerramento dos testes. Isso não alterou resultados funcionais e permanece como dívida explícita para 7.10/11.x; não está resolvido.
 
 ## Fonte canônica reconstruível
+- `ROADMAP_MASTER.md`: roadmap finito 0.1–12.10 persistido.
+- `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida de 8–12.
 - `project.godot` e motores centrais estão persistidos na branch.
 - `tools/rebuild_content.py` recria deterministicamente todo o catálogo de dados.
 - `tools/refine_npc_authenticity.py` garante diversidade contextual das pressões privadas dos NPCs.
@@ -44,6 +38,7 @@ Observação de QA: a execução headless ainda reporta objetos/um recurso em us
 - `REBUILD_AND_VERIFY.md` documenta a sequência única de reconstrução.
 - `tests/runtime_smoke.tscn` testa conteúdo, RNG, eventos, combate, save, tema, acessibilidade e assets vetoriais.
 - `tests/phase_certification.tscn` certifica explicitamente os gates 1.10–4.10.
+- `tests/mobile_certification.tscn` certifica 8.1–8.4.
 
 Baseline atual do catálogo canônico:
 - 12 mundos
@@ -71,32 +66,26 @@ Baseline atual do catálogo canônico:
 - 7.3 🟡 Arte dos 12 Domínios e 120 localidades — paletas, 12 ornamentos finais, contratos e manifest materializados; 132 grandes ilustrações finais pendentes.
 - 7.4 🟡 Arte dos 36 personagens e NPCs — 108 contratos principais de personagem e estratégia modular de NPCs materializados; ilustrações finais pendentes.
 - 7.5 🟡 Arte dos 300 monstros e 60 chefes — 96 famílias-mãe + 60 contratos de chefes materializados; ilustrações finais pendentes.
-- 7.6 ✅ Ícones, equipamentos e Marcas — 32 ícones sistêmicos finais, 48 glifos-base de Marca, 24 arquétipos de item, 12 ornamentos de Domínio e composição visual determinística. Os 1.116 itens possuem arquétipo visual válido no catálogo canônico.
-- 7.7 ✅ Animações e VFX — vocabulário completo de papel/tinta integrado: assentamento de página, feedback de escolha, manchas de dano, costura de Marca, revelação de Intenção, ruptura de fase e transição de localidade; PresentationBus + PresentationVFXController desacoplam gameplay e UI; redução de movimento e bloqueio de flashes respeitados.
-- 7.8 🟡 Áudio e música — identidade sonora dos 12 Domínios, manifest e DomainAudioRouter implementados; arquivos sonoros/musicais finais pendentes.
-- 7.9 ✅ Acessibilidade audiovisual — painel in-game e serviço persistente para escala de fonte, alto contraste, redução de movimento, flashes, rótulos, haptics e detalhe de combate; integrado à UI e exercitado no RuntimeSmoke da Godot.
-- 7.10 ⏳ Integração e QA audiovisual final — depende das grandes artes e do áudio final; inclui limpeza dos leaks do encerramento headless.
+- 7.6 ✅ Ícones, equipamentos e Marcas — 32 ícones sistêmicos finais, 48 glifos-base de Marca, 24 arquétipos de item, 12 ornamentos de Domínio e composição visual determinística; 1.116 itens com arquétipo visual válido.
+- 7.7 ✅ Animações e VFX — página, escolha, dano, Marca, Intenção, fase de chefe e viagem integrados via PresentationBus/PresentationVFXController com redução de movimento e bloqueio de flashes.
+- 7.8 🟡 Áudio e música — identidade sonora dos 12 Domínios, manifest e roteador implementados; arquivos sonoros/musicais finais pendentes.
+- 7.9 ✅ Acessibilidade audiovisual — escala de fonte, alto contraste, redução de movimento, flashes, rótulos, haptics e detalhe de combate persistentes e testados.
+- 7.10 ⏳ Integração e QA audiovisual final — depende das grandes artes e áudio final; inclui limpeza de leaks headless.
 
-## Pipeline/integração visual persistidos
-- `ui/domain_palettes.json`: paletas canônicas dos 12 Domínios.
-- `ui/assets/vector/system_icons_atlas.svg`: 32 ícones desenhados em linha orgânica.
-- `ui/assets/vector/mark_glyphs_atlas.svg`: 48 glifos-base de Marcas.
-- `ui/assets/vector/item_archetypes_atlas.svg`: 24 arquétipos de itens/equipamentos.
-- `ui/assets/vector/domain_ornaments_atlas.svg`: 12 motivos próprios de Domínio.
-- `ui/VectorAtlasRegistry.gd`: recorte determinístico dos atlases.
-- `ui/ItemVisualComposer.gd`: composição de visual por item, raridade, Domínio e afixos.
-- `ui/InlineIconRegistry.gd`: ícones reais do atlas dentro de RichText.
-- `ui/BookCardStyle.gd`: gramática original de cartões/página costurada.
-- `ui/BookVFX.gd`: linguagem de movimento artesanal.
-- `ui/PresentationBus.gd` + `ui/PresentationVFXController.gd`: ligação desacoplada entre gameplay e VFX.
-- `ui/shaders/parchment_paper.gdshader`: fibras, envelhecimento e lavagem cromática procedural.
-- `ui/DomainThemeService.gd`: aplica paletas por Domínio no runtime e alto contraste.
-- `ui/AccessibilityProfile.gd`, `ui/AccessibilityService.gd` e `ui/AccessibilityPanel.gd`: acessibilidade persistente e configurável durante a jornada.
-- `audio/domain_audio_manifest.json` e `audio/DomainAudioRouter.gd`: roteamento de UI, combate, música e ambiência por Domínio.
-- `scenes/Main.gd`: interface multimodo de jornada, inventário, comércio, viagem, combate, finais e debrief no mesmo idioma visual de livro-jogo.
+## Fase 8 — Mobile/Android
+- 8.1 ✅ Safe areas e layout responsivo — `DisplayServer.get_display_safe_area()`, SafeAreaMargin, leitura vertical e `canvas_items + expand`, certificado.
+- 8.2 ✅ Ciclo de vida mobile — autosave em pause/Back/close, recuperação do save no boot e resume, certificado.
+- 8.3 ✅ Touch/Back — alvos mínimos de 48 px, `quit_on_go_back=false`, navegação contextual e Back certificado.
+- 8.4 ✅ Densidades/tamanhos — classes tall/standard/wide e limite de medida de leitura em telas largas, certificado.
+- 8.5 ⏭ Orçamento e instrumentação de performance mobile.
+- 8.6 ⏳ Pipeline de assets mobile.
+- 8.7 ⏳ Preset/exportação Android.
+- 8.8 ⏳ Build Android automatizada em CI.
+- 8.9 ⏳ Matriz de emuladores/dispositivos/versões Android.
+- 8.10 ⏳ Certificação de build Android instalável, jogável e retomável.
 
 ## Contagem formal
-- Passos materializados/concluídos no sentido estrito do roadmap: **75/130**.
+- Passos materializados/concluídos no sentido estrito do roadmap: **79/130**.
 
 ## Ponto final
 O roadmap só termina em 12.10 com build final completa, testada, empacotada e pronta para jogar, divulgar e publicar.
