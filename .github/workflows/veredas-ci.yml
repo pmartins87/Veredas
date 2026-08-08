@@ -106,3 +106,13 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$output" | grep -q 'ASSET_PIPELINE_CERTIFICATION PASS: 8.6'
+
+      - name: Phase 9 Knot of Vigil certification 9.1
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/hub_certification.tscn 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|HUB_CERTIFICATION FAIL'; then
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -q 'HUB_CERTIFICATION PASS: 9.1'
