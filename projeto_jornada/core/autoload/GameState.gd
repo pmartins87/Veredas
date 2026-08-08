@@ -7,13 +7,25 @@ func _ready() -> void:
     reset_profile()
 
 func reset_profile() -> void:
-    profile = {"unlocked_characters":["character.mata_fio_verde.01"],"codex":[],"echo_marks":{},"endings":[],"settings":{}}
+    profile = {
+        "unlocked_characters":["character.mata_fio_verde.01"],
+        "codex":[],
+        "echo_marks":{},
+        "endings":[],
+        "settings":{},
+        "unlocks":{
+            "characters":["character.mata_fio_verde.01"],
+            "routes":["world.mata_fio_verde"],
+            "modes":["journey"],
+            "codex":["character.mata_fio_verde.01","world.mata_fio_verde"]
+        }
+    }
 
 func new_run(character_id: String, seed_value: int) -> void:
     RNGService.start(seed_value)
-    var character := ContentRegistry.get_record(character_id)
+    var character: Dictionary = ContentRegistry.get_record(character_id)
     var world_id := str(character.get("world_id", "world.mata_fio_verde"))
-    var world := ContentRegistry.get_record(world_id)
+    var world: Dictionary = ContentRegistry.get_record(world_id)
     var locs: Array = world.get("locations", ["location.mata_fio_verde.01"])
     var first_location := str(locs[0])
     run = {
