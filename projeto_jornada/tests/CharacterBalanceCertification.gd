@@ -84,7 +84,7 @@ func _mechanic_gate() -> void:
         var result := CharacterKitEngine.execute(ability, actor, target, pool)
         expect(bool(result.get("ok", false)), "%s could not execute with funded synthetic state" % ability_id)
         if bool(result.get("ok", false)):
-            var changed := result.get("actor", {}) != actor or result.get("target", {}) != target or result.get("resources", {}) != pool
+            var changed: bool = result.get("actor", {}) != actor or result.get("target", {}) != target or result.get("resources", {}) != pool
             expect(changed, "%s mechanic %s is behaviorally inert" % [ability_id, mechanic])
     expect(mechanic_coverage.size() == VALID_MECHANICS.size(), "10.2 does not exercise all 12 signature mechanics")
     for mechanic in VALID_MECHANICS:
