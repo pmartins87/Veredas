@@ -1,5 +1,8 @@
 extends Control
 
+const ANDROID_CI_MARKER := "user://android_ci_autostart"
+const ANDROID_CI_SEED := 881001
+
 var page_panel: PanelContainer
 var title: Label
 var summary: RichTextLabel
@@ -7,7 +10,12 @@ var actions: VBoxContainer
 var loaded_active_run := false
 
 func _ready() -> void:
+    if _consume_android_ci_marker():
+        return
     loaded_active_run = SaveService.load_game() and not GameState.run.is_empty() and bool(GameState.run.get("active", false))
+    if loaded_active_run and _android_ci_run_active():
+        call_deferred("_continue_run")
+        return
     HubEngine.ensure_state()
     MetaUnlockEngine.evaluate_progression()
     CodexProgressEngine.new().ensure_state()
@@ -15,6 +23,30 @@ func _ready() -> void:
         HubEngine.enter()
     _build_ui()
     _render()
+
+func _consume_android_ci_marker() -> bool:
+    if not OS.is_debug_build() or not OS.has_feature("android"):
+        return false
+    if not FileAccess.file_exists(ANDROID_CI_MARKER):
+        return false
+    var absolute_marker := ProjectSettings.globalize_path(ANDROID_CI_MARKER)
+    DirAccess.remove_absolute(absolute_marker)
+    GameState.reset_profile()
+    MetaUnlockEngine.ensure_state()
+    if not RunFlowEngine.start_journey("character.mata_fio_verde.01", ANDROID_CI_SEED):
+        push_error("Android CI autostart could not create a canonical journey")
+        return false
+    var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
+    flags["ci.android_autostart"] = true
+    GameState.run.flags = flags
+    SaveService.save_game()
+    call_deferred("_continue_run")
+    return true
+
+func _android_ci_run_active() -> bool:
+    if not OS.is_debug_build() or not OS.has_feature("android"):
+        return false
+    return bool((GameState.run.get("flags", {}) as Dictionary).get("ci.android_autostart", false))
 
 func _build_ui() -> void:
     var background := ColorRect.new()
