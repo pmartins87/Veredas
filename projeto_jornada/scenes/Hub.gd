@@ -78,11 +78,13 @@ func _render() -> void:
     MetaUnlockEngine.evaluate_progression()
     var hub: Dictionary = HubEngine.summary()
     var unlocks: Dictionary = MetaUnlockEngine.summary()
+    var echoes: Dictionary = EchoConsequenceEngine.summary()
     var lines: Array[String] = []
     lines.append("[font_size=%d][b]Um ponto estável entre Veredas instáveis.[/b][/font_size]" % AccessibilityService.font_size(23))
     lines.append("")
     lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.residents])
     lines.append("Andarilhos: [b]%s/36[/b]   •   Rotas: [b]%s/12[/b]   •   Modos: [b]%s/4[/b]   •   Códice: [b]%s[/b]" % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
+    lines.append("Ecos persistentes: [b]%s[/b]   •   Consequências testemunhadas: [b]%s[/b]" % [echoes.echo_marks, echoes.consequences])
     lines.append("")
     lines.append("[b]Instalações[/b]")
     for facility_variant in hub.facilities:
@@ -111,12 +113,11 @@ func _render() -> void:
         _button("Continuar jornada", _continue_run, true)
         _button("Abandonar jornada e retornar ao Nó", _abandon_run, false)
     else:
-        _button("Partir pela Mata do Fio Verde", _start_default, true)
+        _button("Preparar jornada", _open_journey_setup, true)
         for world_id_variant in HubEngine.routes():
             var world_id: String = str(world_id_variant)
             var world: Dictionary = ContentRegistry.get_record(world_id)
-            if world_id != "world.mata_fio_verde":
-                _button("Ver rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
+            _button("Examinar rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
     _button("Acessibilidade", _open_accessibility, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
@@ -133,10 +134,8 @@ func _button(text_value: String, callback: Callable, primary: bool) -> Button:
 func _continue_run() -> void:
     get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
-func _start_default() -> void:
-    RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff)
-    SaveService.save_game()
-    get_tree().change_scene_to_file("res://scenes/Main.tscn")
+func _open_journey_setup() -> void:
+    get_tree().change_scene_to_file("res://scenes/JourneySetup.tscn")
 
 func _abandon_run() -> void:
     GameState.run.active = false
@@ -148,7 +147,7 @@ func _abandon_run() -> void:
 func _show_route(world_id: String) -> void:
     var world: Dictionary = ContentRegistry.get_record(world_id)
     var characters: Array = MetaUnlockEngine.unlocked_characters(world_id)
-    summary.append_text("\n\n[i]A Mesa das Veredas conhece o caminho para %s. Andarilhos disponíveis nesta rota: %d. A escolha detalhada da próxima jornada será aberta em 9.4.[/i]" % [world.get("name", world_id), characters.size()])
+    summary.append_text("\n\n[i]A Mesa das Veredas conhece o caminho para %s. Andarilhos disponíveis nesta rota: %d. Use Preparar jornada para selecionar rota, Andarilho, modo, dificuldade, seed e modificadores.[/i]" % [world.get("name", world_id), characters.size()])
 
 func _open_accessibility() -> void:
     var panel := AccessibilityPanel.new()
