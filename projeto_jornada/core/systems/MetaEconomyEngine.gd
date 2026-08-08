@@ -26,153 +26,113 @@ const CODEX_REWARDS := {
 
 func ensure_state() -> Dictionary:
     var raw = GameState.profile.get("meta_economy", {})
-    var state: Dictionary = raw as Dictionary if typeof(raw) == TYPE_DICTIONARY else {}
-    var capacities_raw = state.get("capacities", {})
-    var capacities: Dictionary = capacities_raw as Dictionary if typeof(capacities_raw) == TYPE_DICTIONARY else {}
-    capacities.journey_presets = maxi(1, int(capacities.get("journey_presets", 1)))
-    capacities.seed_notebook = maxi(1, int(capacities.get("seed_notebook", 1)))
-    capacities.codex_pins = maxi(5, int(capacities.get("codex_pins", 5)))
-
-    var claims := _string_array(state.get("claimed_rewards", []))
-    var purchases := _string_array(state.get("purchases", []))
-    var cosmetics := _string_array(state.get("cosmetics", ["plain"]))
-    if "plain" not in cosmetics:
-        cosmetics.append("plain")
-    cosmetics.sort()
-
-    state = {
-        "currency_id":CURRENCY_ID,
-        "balance":maxi(0, int(state.get("balance", 0))),
-        "lifetime_earned":maxi(0, int(state.get("lifetime_earned", state.get("balance", 0)))),
-        "lifetime_spent":maxi(0, int(state.get("lifetime_spent", 0))),
-        "claimed_rewards":claims,
-        "purchases":purchases,
-        "capacities":capacities,
-        "cosmetics":cosmetics,
-        "selected_ornament":str(state.get("selected_ornament", "plain")),
-    }
-    if state.selected_ornament not in cosmetics:
-        state.selected_ornament = "plain"
-    GameState.profile.meta_economy = state
-
-    if typeof(GameState.profile.get("saved_journey_presets", {})) != TYPE_DICTIONARY:
-        GameState.profile.saved_journey_presets = {}
-    if typeof(GameState.profile.get("saved_seeds", [])) != TYPE_ARRAY:
-        GameState.profile.saved_seeds = []
-    if typeof(GameState.profile.get("codex_pins", [])) != TYPE_ARRAY:
-        GameState.profile.codex_pins = []
-    _trim_convenience_state()
-    return state
+    var source: Dictionary = raw as Dictionary if typeof(raw) == TYPE_DICTIONARY else {}
+    var state := _normalize_state(source)
+    _store_state(state)
+    _normalize_convenience_state(state)
+    return state.duplicate(true)
 
 func sync_rewards() -> Dictionary:
+    CodexProgressEngine.new().evaluate_achievements()
     var state := ensure_state()
+    var claims: Array = _string_array(state.get("claimed_rewards", []))
     var new_keys: Array[String] = []
-    var awarded := 0
+    var balance_value := int(state.get("balance", 0))
+    var lifetime_earned := int(state.get("lifetime_earned", 0))
 
-    for ending_variant in (GameState.profile.get("endings", []) as Array):
-        var ending_id := str(ending_variant)
-        if ending_id != "" and not ContentRegistry.get_record(ending_id).is_empty():
-            awarded += _claim_reward(state, "ending:%s" % ending_id, 12, new_keys)
+    for candidate_variant in _reward_candidates():
+        var candidate: Dictionary = candidate_variant as Dictionary
+        var key := str(candidate.get("key", ""))
+        var amount := int(candidate.get("amount", 0))
+        if key == "" or amount <= 0 or key in claims:
+            continue
+        claims.append(key)
+        new_keys.append(key)
+        balance_value += amount
+        lifetime_earned += amount
 
-    var unlocks: Dictionary = GameState.profile.get("unlocks", {}) as Dictionary
-    for route_variant in (unlocks.get("routes", []) as Array):
-        var world_id := str(route_variant)
-        if world_id != "world.mata_fio_verde" and world_id != "":
-            awarded += _claim_reward(state, "route:%s" % world_id, 4, new_keys)
-
-    var achievements: Dictionary = GameState.profile.get("achievements", {}) as Dictionary
-    for achievement_id_variant in achievements.keys():
-        var achievement_id := str(achievement_id_variant)
-        var record: Dictionary = achievements.get(achievement_id_variant, {}) as Dictionary
-        if bool(record.get("unlocked", false)):
-            awarded += _claim_reward(state, "achievement:%s" % achievement_id, 6, new_keys)
-
-    var codex_count := (GameState.profile.get("codex_records", {}) as Dictionary).size()
-    for threshold_variant in CODEX_REWARDS.keys():
-        var threshold := int(threshold_variant)
-        if codex_count >= threshold:
-            awarded += _claim_reward(state, "codex:%d" % threshold, int(CODEX_REWARDS[threshold]), new_keys)
-
-    GameState.profile.meta_economy = state
-    return {"awarded":awarded,"new_rewards":new_keys,"balance":int(state.balance)}
+    claims.sort()
+    state.claimed_rewards = claims
+    state.balance = balance_value
+    state.lifetime_earned = lifetime_earned
+    _store_state(state)
+    return {"awarded":lifetime_earned - int(ensure_state().get("lifetime_earned", lifetime_earned)) + 0,"new_rewards":new_keys,"balance":balance_value} if false else {"awarded":_reward_amount_for_keys(new_keys),"new_rewards":new_keys,"balance":balance_value}
 
 func balance() -> int:
-    return int(ensure_state().get("balance", 0))
+    var state := ensure_state()
+    return int(state.get("balance", 0))
 
 func product_state(product_id: String) -> Dictionary:
     var state := ensure_state()
-    if not PRODUCTS.has(product_id):
-        return {}
-    var spec: Dictionary = (PRODUCTS[product_id] as Dictionary).duplicate(true)
-    var purchases: Array = state.purchases as Array
-    spec.id = product_id
-    spec.owned = product_id in purchases
-    spec.affordable = balance() >= int(spec.get("cost", 0))
-    var requirement := str(spec.get("requires", ""))
-    spec.requirement_met = requirement == "" or requirement in purchases
-    spec.real_money = false
-    spec.power_effect = false
-    return spec
+    return _product_state_from_state(product_id, state)
 
 func catalog() -> Array:
+    var state := ensure_state()
     var result: Array = []
     for product_id in PRODUCTS:
-        result.append(product_state(product_id))
+        result.append(_product_state_from_state(str(product_id), state))
     result.sort_custom(func(a,b): return int((a as Dictionary).get("cost",0)) < int((b as Dictionary).get("cost",0)))
     return result
 
 func purchase(product_id: String) -> bool:
-    var spec := product_state(product_id)
-    if spec.is_empty() or bool(spec.owned) or not bool(spec.requirement_met):
+    var state := ensure_state()
+    var spec := _product_state_from_state(product_id, state)
+    if spec.is_empty() or bool(spec.get("owned", false)) or not bool(spec.get("requirement_met", false)):
         return false
     var cost := int(spec.get("cost", 0))
-    var state := ensure_state()
-    if int(state.balance) < cost:
+    if int(state.get("balance", 0)) < cost:
         return false
-    state.balance = int(state.balance) - cost
-    state.lifetime_spent = int(state.lifetime_spent) + cost
-    var purchases: Array = state.purchases as Array
+
+    var purchases: Array = _string_array(state.get("purchases", []))
     purchases.append(product_id)
-    purchases.sort()
+    purchases = _string_array(purchases)
     state.purchases = purchases
+    state.balance = int(state.get("balance", 0)) - cost
+    state.lifetime_spent = int(state.get("lifetime_spent", 0)) + cost
 
     match str(spec.get("kind", "")):
         "capacity":
-            var capacities: Dictionary = state.capacities as Dictionary
+            var capacities: Dictionary = (state.get("capacities", {}) as Dictionary).duplicate(true)
             var target := str(spec.get("target", ""))
             capacities[target] = maxi(int(capacities.get(target, 0)), int(spec.get("value", 0)))
             state.capacities = capacities
         "cosmetic":
-            var cosmetics: Array = state.cosmetics as Array
+            var cosmetics: Array = _string_array(state.get("cosmetics", ["plain"]))
             var cosmetic_id := str(spec.get("value", ""))
-            if cosmetic_id != "" and cosmetic_id not in cosmetics:
+            if cosmetic_id != "":
                 cosmetics.append(cosmetic_id)
-                cosmetics.sort()
+                cosmetics = _string_array(cosmetics)
             state.cosmetics = cosmetics
         _:
             return false
 
-    GameState.profile.meta_economy = state
-    _trim_convenience_state()
+    _store_state(state)
+    _normalize_convenience_state(state)
     SaveService.save_game()
     return true
 
 func capacity(kind: String) -> int:
-    var capacities: Dictionary = ensure_state().get("capacities", {}) as Dictionary
+    var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
     return int(capacities.get(kind, 0))
 
 func save_journey_preset(slot: int, setup: Dictionary) -> bool:
-    if slot < 0 or slot >= capacity("journey_presets"):
+    var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
+    var limit := int(capacities.get("journey_presets", 1))
+    if slot < 0 or slot >= limit:
         return false
     var normalized := JourneySetupEngine.new().normalize_setup(setup)
-    var presets: Dictionary = GameState.profile.get("saved_journey_presets", {}) as Dictionary
-    presets[str(slot)] = normalized
-    GameState.profile.saved_journey_presets = presets
+    var presets := _normalize_presets(GameState.profile.get("saved_journey_presets", {}), limit)
+    presets[str(slot)] = normalized.duplicate(true)
+    GameState.profile.saved_journey_presets = presets.duplicate(true)
     return true
 
 func load_journey_preset(slot: int) -> Dictionary:
-    ensure_state()
-    var presets: Dictionary = GameState.profile.get("saved_journey_presets", {}) as Dictionary
+    var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
+    var presets := _normalize_presets(GameState.profile.get("saved_journey_presets", {}), int(capacities.get("journey_presets", 1)))
+    GameState.profile.saved_journey_presets = presets.duplicate(true)
     var raw = presets.get(str(slot), {})
     if typeof(raw) != TYPE_DICTIONARY:
         return {}
@@ -181,85 +141,208 @@ func load_journey_preset(slot: int) -> Dictionary:
 func remember_seed(seed_value: int, label: String = "") -> bool:
     if seed_value <= 0:
         return false
-    ensure_state()
-    var seeds: Array = GameState.profile.get("saved_seeds", []) as Array
-    for entry_variant in seeds:
-        var entry: Dictionary = entry_variant as Dictionary
+    var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
+    var limit := int(capacities.get("seed_notebook", 1))
+    var seeds := _normalize_seeds(GameState.profile.get("saved_seeds", []), limit)
+
+    for i in range(seeds.size()):
+        var entry: Dictionary = seeds[i] as Dictionary
         if int(entry.get("seed", 0)) == seed_value:
-            entry.label = label
+            seeds[i] = {"seed":seed_value,"label":label}
+            GameState.profile.saved_seeds = seeds.duplicate(true)
             return true
-    if seeds.size() >= capacity("seed_notebook"):
+
+    if seeds.size() >= limit:
+        GameState.profile.saved_seeds = seeds.duplicate(true)
         return false
     seeds.append({"seed":seed_value,"label":label})
-    GameState.profile.saved_seeds = seeds
+    GameState.profile.saved_seeds = seeds.duplicate(true)
     return true
 
 func pin_codex(content_id: String) -> bool:
     if ContentRegistry.get_record(content_id).is_empty():
         return false
-    ensure_state()
-    var pins: Array = GameState.profile.get("codex_pins", []) as Array
+    var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
+    var limit := int(capacities.get("codex_pins", 5))
+    var pins := _normalize_pins(GameState.profile.get("codex_pins", []), limit)
     if content_id in pins:
+        GameState.profile.codex_pins = pins.duplicate()
         return true
-    if pins.size() >= capacity("codex_pins"):
+    if pins.size() >= limit:
+        GameState.profile.codex_pins = pins.duplicate()
         return false
     pins.append(content_id)
-    GameState.profile.codex_pins = pins
+    GameState.profile.codex_pins = pins.duplicate()
     return true
 
 func select_ornament(ornament_id: String) -> bool:
     var state := ensure_state()
-    if ornament_id not in (state.cosmetics as Array):
+    var cosmetics: Array = _string_array(state.get("cosmetics", ["plain"]))
+    if ornament_id not in cosmetics:
         return false
     state.selected_ornament = ornament_id
-    GameState.profile.meta_economy = state
+    _store_state(state)
     return true
 
 func summary() -> Dictionary:
     var state := ensure_state()
+    var capacities: Dictionary = state.get("capacities", {}) as Dictionary
     return {
         "currency":CURRENCY_NAME,
-        "balance":int(state.balance),
-        "lifetime_earned":int(state.lifetime_earned),
-        "lifetime_spent":int(state.lifetime_spent),
-        "purchases":(state.purchases as Array).size(),
-        "journey_presets":capacity("journey_presets"),
-        "seed_notebook":capacity("seed_notebook"),
-        "codex_pins":capacity("codex_pins"),
-        "selected_ornament":str(state.selected_ornament),
+        "balance":int(state.get("balance", 0)),
+        "lifetime_earned":int(state.get("lifetime_earned", 0)),
+        "lifetime_spent":int(state.get("lifetime_spent", 0)),
+        "purchases":(state.get("purchases", []) as Array).size(),
+        "journey_presets":int(capacities.get("journey_presets", 1)),
+        "seed_notebook":int(capacities.get("seed_notebook", 1)),
+        "codex_pins":int(capacities.get("codex_pins", 5)),
+        "selected_ornament":str(state.get("selected_ornament", "plain")),
     }
 
-func _claim_reward(state: Dictionary, key: String, amount: int, new_keys: Array[String]) -> int:
-    var claims: Array = state.claimed_rewards as Array
-    if key in claims or amount <= 0:
+func _normalize_state(source: Dictionary) -> Dictionary:
+    var capacities_raw = source.get("capacities", {})
+    var capacities_source: Dictionary = capacities_raw as Dictionary if typeof(capacities_raw) == TYPE_DICTIONARY else {}
+    var capacities := {
+        "journey_presets":maxi(1, int(capacities_source.get("journey_presets", 1))),
+        "seed_notebook":maxi(1, int(capacities_source.get("seed_notebook", 1))),
+        "codex_pins":maxi(5, int(capacities_source.get("codex_pins", 5))),
+    }
+    var claims: Array = _string_array(source.get("claimed_rewards", []))
+    var purchases: Array = _string_array(source.get("purchases", []))
+    var cosmetics: Array = _string_array(source.get("cosmetics", ["plain"]))
+    if "plain" not in cosmetics:
+        cosmetics.append("plain")
+        cosmetics = _string_array(cosmetics)
+    var selected := str(source.get("selected_ornament", "plain"))
+    if selected not in cosmetics:
+        selected = "plain"
+    return {
+        "currency_id":CURRENCY_ID,
+        "balance":maxi(0, int(source.get("balance", 0))),
+        "lifetime_earned":maxi(0, int(source.get("lifetime_earned", source.get("balance", 0)))),
+        "lifetime_spent":maxi(0, int(source.get("lifetime_spent", 0))),
+        "claimed_rewards":claims.duplicate(),
+        "purchases":purchases.duplicate(),
+        "capacities":capacities.duplicate(true),
+        "cosmetics":cosmetics.duplicate(),
+        "selected_ornament":selected,
+    }
+
+func _store_state(state: Dictionary) -> void:
+    GameState.profile.meta_economy = _normalize_state(state).duplicate(true)
+
+func _product_state_from_state(product_id: String, state: Dictionary) -> Dictionary:
+    if not PRODUCTS.has(product_id):
+        return {}
+    var spec: Dictionary = (PRODUCTS[product_id] as Dictionary).duplicate(true)
+    var purchases: Array = _string_array(state.get("purchases", []))
+    spec.id = product_id
+    spec.owned = product_id in purchases
+    spec.affordable = int(state.get("balance", 0)) >= int(spec.get("cost", 0))
+    var requirement := str(spec.get("requires", ""))
+    spec.requirement_met = requirement == "" or requirement in purchases
+    spec.real_money = false
+    spec.power_effect = false
+    return spec
+
+func _reward_candidates() -> Array:
+    var result: Array = []
+    for ending_variant in (GameState.profile.get("endings", []) as Array):
+        var ending_id := str(ending_variant)
+        if ending_id != "" and not ContentRegistry.get_record(ending_id).is_empty():
+            result.append({"key":"ending:%s" % ending_id,"amount":12})
+
+    var unlocks: Dictionary = GameState.profile.get("unlocks", {}) as Dictionary
+    for route_variant in (unlocks.get("routes", []) as Array):
+        var world_id := str(route_variant)
+        if world_id != "world.mata_fio_verde" and world_id != "":
+            result.append({"key":"route:%s" % world_id,"amount":4})
+
+    var achievements: Dictionary = GameState.profile.get("achievements", {}) as Dictionary
+    for achievement_id_variant in achievements.keys():
+        var achievement_id := str(achievement_id_variant)
+        var record: Dictionary = achievements.get(achievement_id_variant, {}) as Dictionary
+        if bool(record.get("unlocked", false)):
+            result.append({"key":"achievement:%s" % achievement_id,"amount":6})
+
+    var codex_count := (GameState.profile.get("codex_records", {}) as Dictionary).size()
+    for threshold_variant in CODEX_REWARDS.keys():
+        var threshold := int(threshold_variant)
+        if codex_count >= threshold:
+            result.append({"key":"codex:%d" % threshold,"amount":int(CODEX_REWARDS[threshold])})
+    return result
+
+func _reward_amount_for_keys(keys: Array[String]) -> int:
+    if keys.is_empty():
         return 0
-    claims.append(key)
-    claims.sort()
-    state.claimed_rewards = claims
-    state.balance = int(state.balance) + amount
-    state.lifetime_earned = int(state.lifetime_earned) + amount
-    new_keys.append(key)
-    return amount
+    var wanted: Dictionary = {}
+    for key in keys:
+        wanted[key] = true
+    var total := 0
+    for candidate_variant in _reward_candidates():
+        var candidate: Dictionary = candidate_variant as Dictionary
+        if wanted.has(str(candidate.get("key", ""))):
+            total += int(candidate.get("amount", 0))
+    return total
 
-func _trim_convenience_state() -> void:
-    var state: Dictionary = GameState.profile.get("meta_economy", {}) as Dictionary
+func _normalize_convenience_state(state: Dictionary) -> void:
     var capacities: Dictionary = state.get("capacities", {}) as Dictionary
-    var presets: Dictionary = GameState.profile.get("saved_journey_presets", {}) as Dictionary
-    for key_variant in presets.keys():
+    var preset_limit := int(capacities.get("journey_presets", 1))
+    var seed_limit := int(capacities.get("seed_notebook", 1))
+    var pin_limit := int(capacities.get("codex_pins", 5))
+    GameState.profile.saved_journey_presets = _normalize_presets(GameState.profile.get("saved_journey_presets", {}), preset_limit).duplicate(true)
+    GameState.profile.saved_seeds = _normalize_seeds(GameState.profile.get("saved_seeds", []), seed_limit).duplicate(true)
+    GameState.profile.codex_pins = _normalize_pins(GameState.profile.get("codex_pins", []), pin_limit).duplicate()
+
+func _normalize_presets(raw, limit: int) -> Dictionary:
+    var result: Dictionary = {}
+    if typeof(raw) != TYPE_DICTIONARY:
+        return result
+    for key_variant in (raw as Dictionary).keys():
         var key := str(key_variant)
-        if not key.is_valid_int() or int(key) < 0 or int(key) >= int(capacities.get("journey_presets", 1)):
-            presets.erase(key_variant)
-    GameState.profile.saved_journey_presets = presets
+        if not key.is_valid_int():
+            continue
+        var slot := int(key)
+        if slot < 0 or slot >= limit:
+            continue
+        var value = (raw as Dictionary).get(key_variant, {})
+        if typeof(value) != TYPE_DICTIONARY:
+            continue
+        result[key] = JourneySetupEngine.new().normalize_setup(value as Dictionary)
+    return result
 
-    var seeds: Array = GameState.profile.get("saved_seeds", []) as Array
-    if seeds.size() > int(capacities.get("seed_notebook", 1)):
-        seeds.resize(int(capacities.get("seed_notebook", 1)))
-    GameState.profile.saved_seeds = seeds
+func _normalize_seeds(raw, limit: int) -> Array:
+    var result: Array = []
+    var seen: Dictionary = {}
+    if typeof(raw) != TYPE_ARRAY:
+        return result
+    for entry_variant in raw as Array:
+        if typeof(entry_variant) != TYPE_DICTIONARY:
+            continue
+        var entry: Dictionary = entry_variant as Dictionary
+        var seed_value := int(entry.get("seed", 0))
+        if seed_value <= 0 or seen.has(seed_value):
+            continue
+        seen[seed_value] = true
+        result.append({"seed":seed_value,"label":str(entry.get("label", ""))})
+        if result.size() >= limit:
+            break
+    return result
 
-    var pins: Array = GameState.profile.get("codex_pins", []) as Array
-    if pins.size() > int(capacities.get("codex_pins", 5)):
-        pins.resize(int(capacities.get("codex_pins", 5)))
-    GameState.profile.codex_pins = pins
+func _normalize_pins(raw, limit: int) -> Array:
+    var result: Array = []
+    if typeof(raw) != TYPE_ARRAY:
+        return result
+    for id_variant in raw as Array:
+        var content_id := str(id_variant)
+        if content_id == "" or content_id in result or ContentRegistry.get_record(content_id).is_empty():
+            continue
+        result.append(content_id)
+        if result.size() >= limit:
+            break
+    return result
 
 func _string_array(raw) -> Array:
     var result: Array = []
