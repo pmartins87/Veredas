@@ -9,8 +9,8 @@
 ## Progresso formal
 - Fases 0–6: **10/10 ✅ cada**.
 - Fase 7: **7.1, 7.2, 7.6, 7.7 e 7.9 ✅**; 7.3–7.5/7.8 em produção; 7.10 pendente.
-- Fase 8: **8.1–8.8 ✅**; 8.9–8.10 em nova certificação nos emuladores Android 10/14 após correção da dependência do runner.
-- Fase 9: **9.1 ✅**; 9.2 em implementação.
+- Fase 8: **8.1–8.8 ✅**; 8.9–8.10 continuam abertos enquanto a matriz Android é estabilizada no runner.
+- Fase 9: **9.1–9.2 ✅**; 9.3 em implementação/certificação.
 
 ## Certificação real da engine
 A branch canônica possui CI estrita em GitHub Actions com Godot 4.7.1 stable. A CI reconstrói o catálogo, valida conteúdo, importa o projeto sem tolerar erros de parser e executa testes runtime.
@@ -20,7 +20,8 @@ Baselines importantes:
 - run 31229399274: `MOBILE_CERTIFICATION PASS: 8.1 8.2 8.3 8.4`;
 - run 31229966822: `PERFORMANCE_BUDGET_CERTIFICATION PASS: 8.5`, `ASSET_PIPELINE_CERTIFICATION PASS: 8.6` e `ANDROID_EXPORT_CONFIG PASS` para 8.7;
 - run 31230627111: APK físico `veredas-debug-apk` exportado e publicado, certificando 8.8;
-- run 31231619568: `HUB_CERTIFICATION PASS: 9.1`, além de todos os gates anteriores da Godot.
+- run 31231619568: `HUB_CERTIFICATION PASS: 9.1`;
+- run 31231957863: `META_UNLOCK_CERTIFICATION PASS: 9.2`, junto com todos os gates anteriores da Godot.
 
 ## Catálogo canônico
 - 5.160 registros; 12 mundos; 120 localidades; 96 famílias; 300 monstros; 60 chefes/subchefes; 1.116 itens; 300 NPCs; 204 Marcas; 120 Dívidas; 36 personagens; 72 habilidades; 2.544 eventos; 36 finais; 144 pools.
@@ -47,13 +48,13 @@ Baselines importantes:
 - 8.6 ✅ Pipeline mobile de assets, budgets e cache LRU.
 - 8.7 ✅ Presets Android: debug APK + Play AAB arm64, validação de segurança e nenhum segredo de release no Git. Package ID atual é provisório.
 - 8.8 ✅ Build Android automatizada — APK físico exportado e publicado como artefato da CI.
-- 8.9 🔄 Primeira matriz falhou antes do boot por ausência de `libpulse.so.0` no runner Ubuntu; dependência foi adicionada e nova matriz está em execução. Não foi falha do APK.
-- 8.10 ⏳ Certificação install/launch/pause-save/force-stop/relaunch depende do resultado verde dos dois emuladores.
+- 8.9 🔄 O APK ainda não foi reprovado: as matrizes falharam antes da instalação. Primeiro faltava `libpulse.so.0`; depois o runner expôs `/dev/kvm` sem permissão e o emulador não registrou o dispositivo ADB. O workflow agora libera KVM e cancela runs Android obsoletos automaticamente.
+- 8.10 ⏳ Certificação install/launch/pause-save/force-stop/relaunch depende de uma matriz Android 10/14 que chegue efetivamente ao aplicativo.
 
 ## Fase 9 — Metaprogressão
 - 9.1 ✅ Nó de Vigília funcional — hub persistente horizontal, tela de entrada entre jornadas, instalações, residentes, rotas e crescimento por marcos; certificado na Godot real.
-- 9.2 🔄 Desbloqueios horizontais de personagens, rotas, modos e Códice.
-- 9.3 ⏳ Marcas de Eco, finais e consequências persistentes entre jornadas.
+- 9.2 ✅ Desbloqueios horizontais — personagens, rotas, modos e Códice persistentes; personagem bloqueado é recusado, finais/rotas liberam novas possibilidades, save/load é estável e nenhum desbloqueio altera Vida/Vigor-base.
+- 9.3 🔄 Marcas de Eco e consequências persistentes — `EchoConsequenceEngine`, condições declarativas de memória e contexto entre jornadas já materializados; gate runtime específico pendente.
 - 9.4 ⏳ Preparação da jornada: personagem, dificuldade, seed e modificadores.
 - 9.5 ⏳ Códice, conquistas, coleção e histórico de descobertas.
 - 9.6 ⏳ Economia meta sem progressão vertical destrutiva.
@@ -67,7 +68,7 @@ Baselines importantes:
 - `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida das fases 8–12.
 
 ## Contagem formal
-- **84/130 passos concluídos/materializados segundo seus gates.**
+- **85/130 passos concluídos/materializados segundo seus gates.**
 
 ## Ponto final
 O roadmap só termina em 12.10 com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
