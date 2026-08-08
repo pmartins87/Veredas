@@ -23,10 +23,13 @@ func remove_status(target: Dictionary, status_id: String) -> Dictionary:
     return result
 
 func has_status(target: Dictionary, status_id: String) -> bool:
+    return status_stacks(target, status_id) > 0
+
+func status_stacks(target: Dictionary, status_id: String) -> int:
     for state in target.get("states", []):
         if str(state.get("id", "")) == status_id:
-            return true
-    return false
+            return maxi(0, int(state.get("stacks", 1)))
+    return 0
 
 func tick(target: Dictionary) -> Dictionary:
     var result := target.duplicate(true)
@@ -48,6 +51,7 @@ func damage_multiplier(target: Dictionary) -> float:
         multiplier += 0.25
     if has_status(target, "fear"):
         multiplier += 0.08
+    multiplier += 0.08 * float(status_stacks(target, "marked"))
     return multiplier
 
 func movement_locked(target: Dictionary) -> bool:
