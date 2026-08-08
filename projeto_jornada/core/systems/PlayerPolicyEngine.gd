@@ -92,10 +92,9 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             return {"kind":"action", "id":"guard"}
         if hp_ratio <= 0.60 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-        if hp_ratio <= 0.35 and guard_value < 4:
-            if not defensive_ability.is_empty():
-                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-            return {"kind":"action", "id":"guard"}
+        # When healing is unavailable, progress the fight. Generic guard loops at
+        # critical HP can stabilize forever without regenerating enough net life.
+        # Normal attacks also generate signature resource, reopening healing.
         if not damage_ability.is_empty():
             return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 3:
