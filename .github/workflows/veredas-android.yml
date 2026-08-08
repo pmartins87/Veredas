@@ -92,7 +92,6 @@ jobs:
             'export/android/debug_keystore_pass = "android"' \
             > "$EDITOR_SETTINGS"
           test -s "$EDITOR_SETTINGS"
-          cat "$EDITOR_SETTINGS"
           test -x "$ANDROID_HOME/platform-tools/adb"
           java -version
           /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version
@@ -127,4 +126,107 @@ jobs:
             build/android/veredas-debug.apk
             build/android/veredas-debug.apk.sha256
           if-no-files-found: error
+          retention-days: 14
+
+  emulator-certification:
+    name: emulator-api-${{ matrix.api-level }}
+    needs: android-debug-apk
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 29
+            label: android10
+          - api-level: 34
+            label: android14
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Download exact APK built by this workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: veredas-debug-apk
+          path: android-artifact
+
+      - name: Resolve APK
+        id: apk
+        run: |
+          set -euo pipefail
+          APK=$(find android-artifact -type f -name '*.apk' -print -quit)
+          test -n "$APK"
+          echo "path=$APK" >> "$GITHUB_OUTPUT"
+          ls -lh "$APK"
+
+      - name: Android ${{ matrix.api-level }} install-launch-resume certification
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect
+          script: |
+            set -euo pipefail
+            PACKAGE='com.veredasdatrama.preview'
+            APK='${{ steps.apk.outputs.path }}'
+            adb install -r "$APK"
+            adb shell pm path "$PACKAGE"
+
+            adb logcat -c
+            adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
+            sleep 6
+            PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
+            test -n "$PID"
+
+            # HOME must trigger NOTIFICATION_APPLICATION_PAUSED and atomic autosave.
+            adb shell input keyevent KEYCODE_HOME
+            sleep 3
+            adb shell run-as "$PACKAGE" sh -c 'test -s files/veredas_save.json'
+            adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-before.json
+            python - <<'PY'
+            import json
+            data=json.load(open('/tmp/veredas-save-before.json',encoding='utf-8'))
+            run=data['game']['run']
+            assert run['active'] is True
+            assert int(run['seed']) > 0
+            print('SAVE_BEFORE seed=',run['seed'],'world=',run['world_id'])
+            PY
+            SEED_BEFORE=$(python -c "import json; print(json.load(open('/tmp/veredas-save-before.json'))['game']['run']['seed'])")
+
+            adb shell am force-stop "$PACKAGE"
+            sleep 2
+            adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
+            sleep 6
+            PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
+            test -n "$PID"
+            adb shell input keyevent KEYCODE_HOME
+            sleep 3
+            adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-after.json
+            SEED_AFTER=$(python -c "import json; print(json.load(open('/tmp/veredas-save-after.json'))['game']['run']['seed'])")
+            test "$SEED_BEFORE" = "$SEED_AFTER"
+
+            if adb logcat -d | grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview'; then
+              echo 'Runtime error found in Android logcat'
+              exit 1
+            fi
+            echo "ANDROID_EMULATOR_CERTIFICATION PASS: API ${{ matrix.api-level }} seed $SEED_AFTER"
+
+      - name: Upload compatibility evidence
+        run: |
+          mkdir -p compatibility
+          printf '%s\n' \
+            'api_level=${{ matrix.api-level }}' \
+            'label=${{ matrix.label }}' \
+            'architecture=x86_64' \
+            'install=pass' \
+            'launch=pass' \
+            'pause_autosave=pass' \
+            'force_stop_relaunch=pass' \
+            'seed_persistence=pass' \
+            > compatibility/${{ matrix.label }}.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: veredas-${{ matrix.label }}-compatibility
+          path: compatibility/${{ matrix.label }}.txt
           retention-days: 14
