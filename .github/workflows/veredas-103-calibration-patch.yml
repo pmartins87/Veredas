@@ -1,0 +1,82 @@
+name: Veredas 10.3 Calibration Patch
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-103-calibration-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Patch semantic danger response and boss raw budget
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          policy = Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd')
+          text = policy.read_text(encoding='utf-8')
+
+          replacements = [
+              (
+                  '    var incoming_heavy := str(intent.get("id", "")) == "heavy"\n    var guard_value := int(player.get("guard", 0))\n',
+                  '    var intent_danger := int(intent.get("danger", 4 if str(intent.get("id", "")) == "heavy" else 2))\n    var incoming_severe := intent_danger >= 4\n    var incoming_risky := intent_danger >= 3\n    var guard_value := int(player.get("guard", 0))\n'
+              ),
+              (
+                  '        if incoming_heavy and guard_value < 4:\n',
+                  '        if incoming_severe and guard_value < 4:\n'
+              ),
+              (
+                  '    if policy_id == "aggressive":\n        if not damage_ability.is_empty():\n',
+                  '    if policy_id == "aggressive":\n        if incoming_severe and hp_ratio <= 0.30 and guard_value < 3:\n            if not defensive_ability.is_empty():\n                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}\n            return {"kind":"action", "id":"guard"}\n        if not damage_ability.is_empty():\n'
+              ),
+              (
+                  '    if policy_id == "explorer":\n        if hp_ratio <= 0.45 and not healing_ability.is_empty():\n            return {"kind":"ability", "id":str(healing_ability.get("id", ""))}\n        if incoming_heavy and guard_value < 3 and not defensive_ability.is_empty():\n            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}\n',
+                  '    if policy_id == "explorer":\n        if incoming_severe and guard_value < 3:\n            if not defensive_ability.is_empty():\n                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}\n            if hp_ratio <= 0.40:\n                return {"kind":"action", "id":"guard"}\n        if hp_ratio <= 0.45 and not healing_ability.is_empty():\n            return {"kind":"ability", "id":str(healing_ability.get("id", ""))}\n'
+              ),
+              (
+                  '    if hp_ratio <= 0.45 and not healing_ability.is_empty():\n        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}\n    if incoming_heavy and guard_value < 3:\n        if not defensive_ability.is_empty():\n            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}\n        return {"kind":"action", "id":"guard"}\n',
+                  '    if incoming_severe and guard_value < 3 and hp_ratio < 0.75:\n        if not defensive_ability.is_empty():\n            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}\n        return {"kind":"action", "id":"guard"}\n    if incoming_risky and guard_value < 2 and hp_ratio <= 0.30:\n        return {"kind":"action", "id":"guard"}\n    if hp_ratio <= 0.45 and not healing_ability.is_empty():\n        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}\n'
+              ),
+          ]
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'PlayerPolicy patch target count {count} for: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          policy.write_text(text, encoding='utf-8')
+
+          refiner = Path('projeto_jornada/tools/refine_enemy_balance.py')
+          text = refiner.read_text(encoding='utf-8')
+          replacements = [
+              ('        boss["hp"] = 32 + tier * 4\n', '        boss["hp"] = 28 + tier * 2\n'),
+              ('        boss["posture"] = 14 + tier * 2\n', '        boss["posture"] = 14 + tier\n'),
+              ('        boss["starting_guard"] = 1 if tier >= 3 else 0\n', '        boss["starting_guard"] = 1 if tier >= 4 else 0\n'),
+              ('                "damage_bonus":1,\n                "guard_bonus":1 if tier >= 2 else 0,\n', '                "damage_bonus":0,\n                "guard_bonus":1 if tier >= 2 else 0,\n'),
+              ('                "damage_bonus":1 + (1 if tier >= 4 else 0),\n', '                "damage_bonus":1,\n'),
+          ]
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Enemy refiner patch target count {count} for: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          refiner.write_text(text, encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/tools/refine_enemy_balance.py
+      - name: Commit calibration
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/tools/refine_enemy_balance.py
+          git commit -m 'Calibrate danger-aware policies and boss raw budgets'
+          git push origin HEAD:projeto-jornada-snapshots
