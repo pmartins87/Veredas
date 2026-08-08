@@ -10,6 +10,7 @@ func _ready() -> void:
     loaded_active_run = SaveService.load_game() and not GameState.run.is_empty() and bool(GameState.run.get("active", false))
     HubEngine.ensure_state()
     MetaUnlockEngine.evaluate_progression()
+    CodexProgressEngine.new().ensure_state()
     if not loaded_active_run:
         HubEngine.enter()
     _build_ui()
@@ -76,6 +77,8 @@ func _render() -> void:
     for child in actions.get_children():
         child.queue_free()
     MetaUnlockEngine.evaluate_progression()
+    var codex := CodexProgressEngine.new()
+    codex.ensure_state()
     var hub: Dictionary = HubEngine.summary()
     var unlocks: Dictionary = MetaUnlockEngine.summary()
     var echoes: Dictionary = EchoConsequenceEngine.summary()
@@ -84,7 +87,7 @@ func _render() -> void:
     lines.append("")
     lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.residents])
     lines.append("Andarilhos: [b]%s/36[/b]   •   Rotas: [b]%s/12[/b]   •   Modos: [b]%s/4[/b]   •   Códice: [b]%s[/b]" % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
-    lines.append("Ecos persistentes: [b]%s[/b]   •   Consequências testemunhadas: [b]%s[/b]" % [echoes.echo_marks, echoes.consequences])
+    lines.append("Conquistas: [b]%s/%s[/b]   •   Ecos persistentes: [b]%s[/b]   •   Consequências: [b]%s[/b]" % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size(), echoes.echo_marks, echoes.consequences])
     lines.append("")
     lines.append("[b]Instalações[/b]")
     for facility_variant in hub.facilities:
@@ -118,6 +121,7 @@ func _render() -> void:
             var world_id: String = str(world_id_variant)
             var world: Dictionary = ContentRegistry.get_record(world_id)
             _button("Examinar rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
+    _button("Arquivo de Ecos", _open_codex, false)
     _button("Acessibilidade", _open_accessibility, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
@@ -136,6 +140,9 @@ func _continue_run() -> void:
 
 func _open_journey_setup() -> void:
     get_tree().change_scene_to_file("res://scenes/JourneySetup.tscn")
+
+func _open_codex() -> void:
+    get_tree().change_scene_to_file("res://scenes/Codex.tscn")
 
 func _abandon_run() -> void:
     GameState.run.active = false
