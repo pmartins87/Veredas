@@ -133,20 +133,16 @@ jobs:
 
       - name: Phase 9 Echo consequence certification 9.3
         run: |
-          set -o pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/echo_consequence_certification.tscn 2>&1)
-          printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|ECHO_CONSEQUENCE_CERTIFICATION FAIL'; then
-            exit 1
-          fi
-          printf '%s\n' "$output" | grep -q 'ECHO_CONSEQUENCE_CERTIFICATION PASS: 9.3'
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/echo_consequence_certification.tscn \
+            'ECHO_CONSEQUENCE_CERTIFICATION FAIL' \
+            'ECHO_CONSEQUENCE_CERTIFICATION PASS: 9.3'
 
       - name: Phase 9 journey setup certification 9.4
         run: |
-          set -o pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/journey_setup_certification.tscn 2>&1)
-          printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|JOURNEY_SETUP_CERTIFICATION FAIL'; then
-            exit 1
-          fi
-          printf '%s\n' "$output" | grep -q 'JOURNEY_SETUP_CERTIFICATION PASS: 9.4'
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/journey_setup_certification.tscn \
+            'JOURNEY_SETUP_CERTIFICATION FAIL' \
+            'JOURNEY_SETUP_CERTIFICATION PASS: 9.4'
