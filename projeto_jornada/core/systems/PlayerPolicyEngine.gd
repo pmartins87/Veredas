@@ -83,15 +83,15 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     var guard_value := int(player.get("guard", 0))
 
     if policy_id == "cautious":
-        # Caution means mitigating real danger, not turtling forever. Guard and
-        # counter are deliberately separated from healing so low HP cannot lock
-        # the policy into a non-damaging loop.
-        if hp_ratio <= 0.60 and not healing_ability.is_empty():
-            return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
+        # A telegraphed heavy attack is mitigated before healing. Healing first
+        # can create a stable loop where the incoming heavy immediately removes
+        # the recovered HP and the policy repeats the same non-progressing turn.
         if incoming_heavy and guard_value < 4:
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
+        if hp_ratio <= 0.60 and not healing_ability.is_empty():
+            return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
         if hp_ratio <= 0.35 and guard_value < 4:
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
