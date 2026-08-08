@@ -178,3 +178,11 @@ jobs:
             res://tests/entitlement_certification.tscn \
             'ENTITLEMENT_CERTIFICATION FAIL' \
             'ENTITLEMENT_CERTIFICATION PASS: 9.8'
+
+      - name: Phase 9 profile migration certification 9.9
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/profile_migration_certification.tscn \
+            'PROFILE_MIGRATION_CERTIFICATION FAIL' \
+            'PROFILE_MIGRATION_CERTIFICATION PASS: 9.9'
