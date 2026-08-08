@@ -44,16 +44,25 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     if InventoryEngine.equipped_item("weapon").is_empty():
         weapon_range = Vector2i(0, 0)
 
-    if distance < weapon_range.x:
-        return {"kind":"action", "id":"retreat"}
-    if distance > weapon_range.y:
-        return {"kind":"action", "id":"advance"}
-
     var payable: Array = []
     for ability_variant in CharacterKitEngine.abilities_for(character_id):
         var ability: Dictionary = ability_variant as Dictionary
         if _ability_is_tactically_available(ability, player, enemy, resource_pool):
             payable.append(ability)
+
+    # Signature mobility/range tools are allowed to solve distance before the
+    # generic weapon-range fallback. Otherwise a ranged or movement Andarilho
+    # would be forced to walk instead of using the very tool that defines them.
+    if distance < weapon_range.x:
+        return {"kind":"action", "id":"retreat"}
+    if distance > weapon_range.y:
+        var ranged_ability := _best_ability(payable, ["range"])
+        if not ranged_ability.is_empty():
+            return {"kind":"ability", "id":str(ranged_ability.get("id", ""))}
+        var mobility_ability := _best_ability(payable, ["move"])
+        if not mobility_ability.is_empty():
+            return {"kind":"ability", "id":str(mobility_ability.get("id", ""))}
+        return {"kind":"action", "id":"advance"}
 
     if policy_id == "random":
         var options: Array[Dictionary] = [
@@ -66,20 +75,30 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             options.append({"kind":"ability", "id":str(ability.get("id", ""))})
         return options[RNGService.range_int(0, options.size() - 1)]
 
-    var healing_ability := _best_ability(payable, ["heal", "guard"])
-    var damage_ability := _best_ability(payable, ["damage", "posture", "range", "status", "mark", "counter", "debt"])
-    var utility_ability := _best_ability(payable, ["move", "resource", "echo", "range", "debt", "mark"])
+    var healing_ability := _best_ability(payable, ["heal"])
+    var defensive_ability := _best_ability(payable, ["counter", "guard"])
+    var damage_ability := _best_ability(payable, ["damage", "posture", "range", "echo", "status", "mark", "debt"])
+    var utility_ability := _best_ability(payable, ["resource", "mark", "move"])
+    var incoming_heavy := str(intent.get("id", "")) == "heavy"
+    var guard_value := int(player.get("guard", 0))
 
     if policy_id == "cautious":
-        if hp_ratio <= 0.70 and not healing_ability.is_empty():
+        # Caution means mitigating real danger, not turtling forever. Guard and
+        # counter are deliberately separated from healing so low HP cannot lock
+        # the policy into a non-damaging loop.
+        if hp_ratio <= 0.60 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-        if str(intent.get("id", "")) == "heavy" and int(player.get("guard", 0)) < 4:
+        if incoming_heavy and guard_value < 4:
+            if not defensive_ability.is_empty():
+                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
-        if hp_ratio <= 0.45:
+        if hp_ratio <= 0.35 and guard_value < 4:
+            if not defensive_ability.is_empty():
+                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
-        if not damage_ability.is_empty() and int(enemy.get("hp", 0)) <= 8:
+        if not damage_ability.is_empty():
             return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
-        if int(player.get("vigor", 0)) >= 4:
+        if int(player.get("vigor", 0)) >= 3:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
 
@@ -91,8 +110,10 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         return {"kind":"action", "id":"strike"}
 
     if policy_id == "explorer":
-        if hp_ratio <= 0.50 and not healing_ability.is_empty():
+        if hp_ratio <= 0.45 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
+        if incoming_heavy and guard_value < 3 and not defensive_ability.is_empty():
+            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         if not utility_ability.is_empty():
             return {"kind":"ability", "id":str(utility_ability.get("id", ""))}
         if not damage_ability.is_empty():
@@ -101,9 +122,11 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
 
-    if hp_ratio <= 0.55 and not healing_ability.is_empty():
+    if hp_ratio <= 0.45 and not healing_ability.is_empty():
         return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-    if str(intent.get("id", "")) == "heavy" and hp_ratio < 0.75:
+    if incoming_heavy and guard_value < 3:
+        if not defensive_ability.is_empty():
+            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         return {"kind":"action", "id":"guard"}
     if not damage_ability.is_empty():
         return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
@@ -289,7 +312,7 @@ func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, e
         "heal":
             return int(player.get("hp", 0)) < int(player.get("max_hp", 1))
         "guard", "counter":
-            return int(player.get("guard", 0)) < 8
+            return int(player.get("guard", 0)) < 6
         "resource":
             var resource := str(ability.get("resource", ""))
             var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
@@ -297,8 +320,11 @@ func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, e
             return int(resource_pool.get(resource, 0)) < maximum
         "mark":
             return StatusEngine.status_stacks(enemy, "marked") < 3
+        "status":
+            var status_id := str(ability.get("status_id", ""))
+            return status_id == "" or StatusEngine.status_stacks(enemy, status_id) < 3
         "move":
-            return int(player.get("guard", 0)) < 6 or int(player.get("distance", 1)) < 2
+            return int(player.get("distance", 1)) > 0
         "debt":
             return float(player.get("hp", 0)) / maxf(1.0, float(player.get("max_hp", 1))) > 0.35
         _:
