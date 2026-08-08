@@ -6,6 +6,10 @@ func start_journey(character_id: String, seed_value: int) -> bool:
     MetaUnlockEngine.evaluate_progression()
     if not MetaUnlockEngine.is_character_unlocked(character_id):
         return false
+    var character: Dictionary = ContentRegistry.get_record(character_id)
+    var world_id := str(character.get("world_id", ""))
+    if not EntitlementEngine.new().can_access_world(world_id):
+        return false
     GameState.new_run(character_id, seed_value)
     GameState.run.mode = "story"
     GameState.run.visited_locations = [str(GameState.run.get("location_id", ""))]
@@ -41,6 +45,8 @@ func travel(location_id: String) -> bool:
 
 func travel_world(world_id: String, location_id: String = "") -> bool:
     if not MetaUnlockEngine.is_route_unlocked(world_id):
+        return false
+    if not EntitlementEngine.new().can_access_world(world_id):
         return false
     var ok := LocationEngine.travel_world(world_id, location_id)
     if ok:
