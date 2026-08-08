@@ -17,14 +17,20 @@ func new_run(character_id: String, seed_value: int) -> void:
     var world: Dictionary = ContentRegistry.get_record(world_id)
     var locs: Array = world.get("locations", ["location.mata_fio_verde.01"])
     var first_location := str(locs[0])
+    var base_health := maxi(1, int(character.get("base_health", 16)))
+    var base_vigor := maxi(1, int(character.get("base_vigor", 8)))
+    var base_posture := maxi(1, int(character.get("base_posture", 10)))
+    var base_guard := maxi(0, int(character.get("base_guard", 0)))
     run = {
         "active":true,
         "mode":"story",
         "character_id":character_id,
         "world_id":world_id,
         "location_id":first_location,
-        "health":16,"max_health":16,
-        "vigor":8,"max_vigor":8,
+        "health":base_health,"max_health":base_health,
+        "vigor":base_vigor,"max_vigor":base_vigor,
+        "base_posture":base_posture,"base_guard":base_guard,
+        "learning_curve":(character.get("learning_curve", {}) as Dictionary).duplicate(true),
         "resources":{"fragments":12,"essence":0,"provisions":3},
         "marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],
         "recent_events":[],"event_counts":{},"turn":0,
