@@ -9,6 +9,7 @@ on:
       - 'projeto_jornada/export_presets.cfg'
       - 'projeto_jornada/mobile/**'
       - 'projeto_jornada/.android-build-trigger'
+      - 'projeto_jornada/tools/android_emulator_certify.sh'
       - '.github/workflows/veredas-android.yml'
   workflow_dispatch:
 
@@ -170,6 +171,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
+      - name: Checkout exact workflow commit
+        uses: actions/checkout@v4
+
       - name: Prepare emulator runtime and KVM
         run: |
           set -euo pipefail
@@ -209,49 +213,14 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu swiftshader_indirect
-          script: |
-            mkdir -p /tmp/veredas-emulator-diag
-            adb install -r '${{ steps.apk.outputs.path }}'
-            adb shell pm path com.veredasdatrama.preview > /tmp/veredas-emulator-diag/package-path.txt
-            adb shell run-as com.veredasdatrama.preview mkdir -p files
-            adb shell run-as com.veredasdatrama.preview touch files/android_ci_autostart
-            adb logcat -c
-            adb shell monkey -p com.veredasdatrama.preview -c android.intent.category.LAUNCHER 1
-            sleep 7
-            test -n "$(adb shell pidof com.veredasdatrama.preview | tr -d '\r')"
-            adb shell input keyevent KEYCODE_HOME
-            sleep 3
-            adb shell run-as com.veredasdatrama.preview ls -l files/veredas_save.json
-            adb exec-out run-as com.veredasdatrama.preview cat files/veredas_save.json > /tmp/veredas-save-before.json
-            cp /tmp/veredas-save-before.json /tmp/veredas-emulator-diag/save-before.json
-            python -c 'import json; d=json.load(open("/tmp/veredas-save-before.json",encoding="utf-8")); r=d["game"]["run"]; assert r["active"] is True; assert int(r["seed"])==881001; assert r["flags"]["ci.android_autostart"] is True; assert r["mode"]=="story"; assert int(d["game"]["profile"]["profile_schema_version"])==3; print("SAVE_BEFORE seed=",r["seed"],"world=",r["world_id"],"mode=",r["mode"])'
-            adb shell am force-stop com.veredasdatrama.preview
-            sleep 2
-            adb shell monkey -p com.veredasdatrama.preview -c android.intent.category.LAUNCHER 1
-            sleep 7
-            test -n "$(adb shell pidof com.veredasdatrama.preview | tr -d '\r')"
-            adb shell input keyevent KEYCODE_HOME
-            sleep 3
-            adb exec-out run-as com.veredasdatrama.preview cat files/veredas_save.json > /tmp/veredas-save-after.json
-            cp /tmp/veredas-save-after.json /tmp/veredas-emulator-diag/save-after.json
-            python -c 'import json; b=json.load(open("/tmp/veredas-save-before.json",encoding="utf-8"))["game"]; a=json.load(open("/tmp/veredas-save-after.json",encoding="utf-8"))["game"]; assert a["run"]["active"] is True; assert int(a["run"]["seed"])==881001; assert a["run"]["flags"]["ci.android_autostart"] is True; assert a["run"]["mode"]=="story"; assert int(b["run"]["seed"])==int(a["run"]["seed"]); assert int(a["profile"]["profile_schema_version"])==3; print("SAVE_AFTER seed=",a["run"]["seed"],"world=",a["run"]["world_id"],"mode=",a["run"]["mode"])'
-            adb shell pidof com.veredasdatrama.preview > /tmp/veredas-emulator-diag/pid.txt
-            adb logcat -d > /tmp/veredas-emulator-diag/logcat.txt
-            ! grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview' /tmp/veredas-emulator-diag/logcat.txt
-            echo 'ANDROID_EMULATOR_CERTIFICATION PASS: API ${{ matrix.api-level }} seed 881001 schema 3' | tee /tmp/veredas-emulator-diag/result.txt
-
-      - name: Collect emulator diagnostics
-        if: always()
-        run: |
-          mkdir -p compatibility/diagnostics
-          cp -a /tmp/veredas-emulator-diag/. compatibility/diagnostics/ 2>/dev/null || true
+          script: sh projeto_jornada/tools/android_emulator_certify.sh com.veredasdatrama.preview '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}'
 
       - name: Upload emulator diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: veredas-${{ matrix.label }}-emulator-diagnostics
-          path: compatibility/diagnostics/
+          path: android-emulator-diagnostics/api-${{ matrix.api-level }}/
           if-no-files-found: warn
           retention-days: 14
 
@@ -265,9 +234,11 @@ jobs:
             'architecture=x86_64' \
             'install=pass' \
             'launch=pass' \
+            'application_readiness=pass' \
             'active_journey=pass' \
-            'pause_autosave=pass' \
+            'pause_autosave_recreated_save=pass' \
             'force_stop_relaunch=pass' \
+            'resumed_application_readiness=pass' \
             'seed_persistence=pass' \
             'profile_schema_version=3' \
             > compatibility/${{ matrix.label }}.txt
