@@ -28,6 +28,7 @@ jobs:
         run: |
           python tools/rebuild_content.py
           python tools/refine_npc_authenticity.py
+          python tools/refine_character_balance.py
 
       - name: Validate canonical content
         working-directory: projeto_jornada
@@ -202,3 +203,11 @@ jobs:
             res://tests/journey_simulation_certification.tscn \
             'JOURNEY_SIMULATION_CERTIFICATION FAIL' \
             'JOURNEY_SIMULATION_CERTIFICATION PASS: 10.1'
+
+      - name: Phase 10 character balance certification 10.2
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/character_balance_certification.tscn \
+            'CHARACTER_BALANCE_CERTIFICATION FAIL' \
+            'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
