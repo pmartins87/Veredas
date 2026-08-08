@@ -7,27 +7,8 @@ func _ready() -> void:
     reset_profile()
 
 func reset_profile() -> void:
-    profile = {
-        "unlocked_characters":["character.mata_fio_verde.01"],
-        "codex":[],
-        "codex_records":{},
-        "discovery_history":[],
-        "achievements":{},
-        "echo_marks":{},
-        "consequences":{},
-        "endings":[],
-        "settings":{},
-        "meta_economy":{},
-        "saved_journey_presets":{},
-        "saved_seeds":[],
-        "codex_pins":[],
-        "unlocks":{
-            "characters":["character.mata_fio_verde.01"],
-            "routes":["world.mata_fio_verde"],
-            "modes":["journey"],
-            "codex":["character.mata_fio_verde.01","world.mata_fio_verde"]
-        }
-    }
+    profile = ProfileMigrationEngine.new().fresh_profile()
+    run = {}
 
 func new_run(character_id: String, seed_value: int) -> void:
     RNGService.start(seed_value)
@@ -62,17 +43,44 @@ func add_mark(mark_id: String, amount: int = 1) -> void:
         PresentationBus.mark(mark_id)
 
 func serialize() -> Dictionary:
+    var migration := ProfileMigrationEngine.new()
+    var report := migration.normalize_live_profile()
+    if not bool(report.get("ok", false)):
+        push_error("Profile integrity failed before save: %s" % str(report.get("errors", [])))
     if not run.is_empty():
         run.rng = RNGService.snapshot()
-    return {"profile":profile,"run":run}
+    return {"profile":profile.duplicate(true),"run":run.duplicate(true)}
 
-func deserialize(data: Dictionary) -> void:
-    profile = data.get("profile", {})
-    run = data.get("run", {})
-    CodexProgressEngine.new().ensure_state()
-    MetaEconomyEngine.new().ensure_state()
+func deserialize(data: Dictionary) -> bool:
+    if not data.has("profile") or typeof(data.get("profile")) != TYPE_DICTIONARY:
+        push_error("Save profile is missing or invalid")
+        return false
+    var run_raw = data.get("run", {})
+    if typeof(run_raw) != TYPE_DICTIONARY:
+        push_error("Save run state is invalid")
+        return false
+
+    var raw_profile: Dictionary = data.get("profile", {}) as Dictionary
+    var migration := ProfileMigrationEngine.new()
+    if not migration.can_migrate(raw_profile):
+        push_error("Profile schema is newer than this build")
+        return false
+
+    var previous_profile := profile.duplicate(true)
+    var previous_run := run.duplicate(true)
+    profile = migration.migrate_raw(raw_profile)
+    run = (run_raw as Dictionary).duplicate(true)
+
+    var report := migration.normalize_live_profile()
+    if not bool(report.get("ok", false)):
+        push_error("Profile migration integrity failure: %s" % str(report.get("errors", [])))
+        profile = previous_profile
+        run = previous_run
+        return false
+
     if not run.is_empty():
         var setup_engine := JourneySetupEngine.new()
         run = setup_engine.normalize_run_state(run)
     if not run.is_empty() and run.has("rng"):
         RNGService.restore(run.rng)
+    return true
