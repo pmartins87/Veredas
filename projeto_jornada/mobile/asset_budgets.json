@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "package": {
+    "soft_mb": 300,
+    "hard_mb": 450,
+    "art_soft_mb": 180,
+    "audio_soft_mb": 100
+  },
+  "runtime_cache": {
+    "max_textures": 24,
+    "preload_current_domain": 4,
+    "release_on_world_change": true
+  },
+  "profiles": {
+    "domain_key_art": {"max_width": 1440, "max_height": 2560, "quality": 88, "max_file_kb": 1100},
+    "location": {"max_width": 1440, "max_height": 1440, "quality": 86, "max_file_kb": 800},
+    "character": {"max_width": 1200, "max_height": 1600, "quality": 88, "max_file_kb": 700},
+    "monster_family": {"max_width": 1200, "max_height": 1200, "quality": 86, "max_file_kb": 600},
+    "boss": {"max_width": 1600, "max_height": 1600, "quality": 88, "max_file_kb": 950},
+    "npc": {"max_width": 800, "max_height": 1000, "quality": 84, "max_file_kb": 400},
+    "ui": {"max_width": 1024, "max_height": 1024, "quality": 90, "max_file_kb": 300}
+  },
+  "allowed_exported_raster_extensions": [".webp", ".png"],
+  "forbidden_exported_extensions": [".psd", ".tif", ".tiff", ".bmp", ".xcf"],
+  "notes": "Source art stays in art/final_source and is not part of the Android export. Generated mobile derivatives live in assets/art/mobile. WebP is preferred for opaque/painterly illustrations; PNG remains allowed for transparency-critical UI."
+}
