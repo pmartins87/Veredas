@@ -71,24 +71,28 @@ jobs:
 
       - name: Configure Godot Android editor settings
         run: |
-          mkdir -p "$HOME/.config/godot" "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+          set -euo pipefail
+          mkdir -p "${HOME}/.config/godot" "${HOME}/.android"
+          if [ ! -f "${HOME}/.android/debug.keystore" ]; then
             keytool -keyalg RSA -genkeypair -v \
-              -keystore "$HOME/.android/debug.keystore" \
+              -keystore "${HOME}/.android/debug.keystore" \
               -storepass android -alias androiddebugkey -keypass android \
               -dname 'CN=Android Debug,O=Veredas da Trama,C=BR' \
               -validity 10000
           fi
-          cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<EOF
-          [gd_resource type="EditorSettings" format=3]
-
-          [resource]
-          export/android/android_sdk_path = "$ANDROID_HOME"
-          export/android/java_sdk_path = "$JAVA_HOME"
-          export/android/debug_keystore = "$HOME/.android/debug.keystore"
-          export/android/debug_keystore_user = "androiddebugkey"
-          export/android/debug_keystore_pass = "android"
-          EOF
+          EDITOR_SETTINGS="${HOME}/.config/godot/editor_settings-4.7.tres"
+          printf '%s\n' \
+            '[gd_resource type="EditorSettings" format=3]' \
+            '' \
+            '[resource]' \
+            "export/android/android_sdk_path = \"${ANDROID_HOME}\"" \
+            "export/android/java_sdk_path = \"${JAVA_HOME}\"" \
+            "export/android/debug_keystore = \"${HOME}/.android/debug.keystore\"" \
+            'export/android/debug_keystore_user = "androiddebugkey"' \
+            'export/android/debug_keystore_pass = "android"' \
+            > "$EDITOR_SETTINGS"
+          test -s "$EDITOR_SETTINGS"
+          cat "$EDITOR_SETTINGS"
           test -x "$ANDROID_HOME/platform-tools/adb"
           java -version
           /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version
