@@ -144,11 +144,20 @@ func _simulation_gate() -> void:
             expect(int(aggregate.combats) > 0, "%s %s never entered combat" % [character_id, skill])
             expect(int(aggregate.combat_timeouts) <= 1, "%s %s is dominated by combat timeouts" % [character_id, skill])
         metrics[character_id] = character_metrics
+        var novice: Dictionary = character_metrics["novice"] as Dictionary
+        var competent: Dictionary = character_metrics["competent"] as Dictionary
         var learned: Dictionary = character_metrics["learned"] as Dictionary
         expect(int(learned.boss_reached) > 0, "%s learned policy never reached its boss" % character_id)
-        var novice_score := float((character_metrics["novice"] as Dictionary).get("score", 0.0))
+        var novice_score := float(novice.get("score", 0.0))
         var learned_score := float(learned.get("score", 0.0))
         expect(learned_score + 0.30 >= novice_score, "%s learned policy is materially worse than novice play" % character_id)
+        print("10.2 character %s | %s | %s | tier=%s policy=%s | novice=%.3f competent=%.3f learned=%.3f | learned[v=%d boss=%d bw=%d combat=%d/%d]" % [
+            str(character.get("name", character_id)), character_id, str(character.get("world_id", "")),
+            str(curve.get("tier", "")), recommended,
+            novice_score, float(competent.get("score", 0.0)), learned_score,
+            int(learned.get("victories", 0)), int(learned.get("boss_reached", 0)), int(learned.get("boss_wins", 0)),
+            int(learned.get("combat_wins", 0)), int(learned.get("combats", 0)),
+        ])
 
     var elapsed_ms := Time.get_ticks_msec() - started_at
     print("10.2 simulation matrix: characters=%d runs=%d seeds_per_skill=%d elapsed_ms=%d" % [characters.size(), global_runs, SEEDS_PER_SKILL, elapsed_ms])
