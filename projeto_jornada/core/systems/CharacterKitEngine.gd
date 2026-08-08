@@ -52,16 +52,20 @@ func execute(ability: Dictionary, actor: Dictionary, target: Dictionary, resourc
         "heal":
             actor_result.hp = mini(int(actor_result.get("max_hp",16)), int(actor_result.get("hp",0)) + power)
         "move":
-            actor_result.distance = mini(2, int(actor_result.get("distance",1)) + 1)
+            # Signature mobility is a protected gap-close. It must advance the
+            # fight rather than creating a retreat/advance loop in baseline play.
+            actor_result.distance = maxi(0, int(actor_result.get("distance",1)) - 1)
             actor_result.guard = int(actor_result.get("guard",0)) + power
         "status":
             var status_id := str(ability.get("status_id", "marked"))
             target_result = StatusEngine.apply_status(target_result, status_id, power, duration)
         "counter":
-            # Immediate counter stance: protect now and punish enemy posture. This
-            # keeps the mechanic effective without hidden deferred state.
+            # A successful counter must progress the fight: protection plus a
+            # small riposte and posture punishment, not an endless turtle state.
             actor_result.guard = int(actor_result.get("guard",0)) + power
-            target_result.posture = maxi(0, int(target_result.get("posture",0)) - maxi(1, int(power / 2)))
+            var riposte := maxi(1, int(power / 2))
+            target_result.hp = maxi(0, int(target_result.get("hp",0)) - riposte)
+            target_result.posture = maxi(0, int(target_result.get("posture",0)) - riposte)
         "resource":
             var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
             var maximum := maxi(1, int(character.get("resource_max", 5)))
