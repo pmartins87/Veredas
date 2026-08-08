@@ -15,6 +15,7 @@ func start_journey(character_id: String, seed_value: int) -> bool:
     MetaUnlockEngine.discover(character_id)
     MetaUnlockEngine.discover(str(GameState.run.get("world_id", "")))
     MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
+    EchoConsequenceEngine.apply_to_run()
     return true
 
 func story_event() -> Dictionary:
@@ -123,6 +124,7 @@ func finish(ending_id: String) -> bool:
     GameState.profile.endings = endings
     MetaUnlockEngine.discover(ending_id)
     MetaUnlockEngine.evaluate_progression()
+    EchoConsequenceEngine.record_outcome(ending_id, "victory")
     SaveService.save_game()
     return true
 
@@ -130,6 +132,7 @@ func fail(reason: String = "defeat") -> void:
     GameState.run.active = false
     GameState.run.mode = "debrief"
     GameState.run.result = reason
+    EchoConsequenceEngine.record_outcome("", reason)
     SaveService.save_game()
 
 func resume_story() -> void:
@@ -145,6 +148,7 @@ func debrief() -> Dictionary:
         "defeated_enemies": GameState.run.get("defeated_enemies", []).duplicate(),
         "purchases": GameState.run.get("purchases", []).duplicate(),
         "marks": GameState.run.get("marks", {}).duplicate(true),
+        "echoes": EchoConsequenceEngine.summary(),
     }
 
 func _close_combat(state: Dictionary) -> void:
