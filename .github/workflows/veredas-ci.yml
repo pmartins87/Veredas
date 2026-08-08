@@ -116,3 +116,13 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$output" | grep -q 'HUB_CERTIFICATION PASS: 9.1'
+
+      - name: Phase 9 horizontal unlock certification 9.2
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/meta_unlock_certification.tscn 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|META_UNLOCK_CERTIFICATION FAIL'; then
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -q 'META_UNLOCK_CERTIFICATION PASS: 9.2'
