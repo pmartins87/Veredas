@@ -16,7 +16,7 @@ def text(path: str) -> str:
     return p.read_text(encoding="utf-8") if p.exists() else ""
 
 project = text("project.godot")
-for singleton in ["DomainThemeService", "AccessibilityService", "PresentationBus"]:
+for singleton in ["DomainThemeService", "AccessibilityService", "PresentationBus", "PresentationVFXController"]:
     if f'{singleton}="*res://' not in project:
         errors.append(f"autoload missing: {singleton}")
 
@@ -24,6 +24,7 @@ for path, autoload_name in [
     ("ui/DomainThemeService.gd", "DomainThemeService"),
     ("ui/AccessibilityService.gd", "AccessibilityService"),
     ("ui/PresentationBus.gd", "PresentationBus"),
+    ("ui/PresentationVFXController.gd", "PresentationVFXController"),
 ]:
     source = text(path)
     if re.search(rf"^class_name\s+{re.escape(autoload_name)}\s*$", source, re.M):
@@ -38,6 +39,20 @@ vfx = text("ui/BookVFX.gd")
 for fn in ["page_settle", "choice_press", "ink_stain", "stitch_mark", "intent_reveal", "thread_rupture", "location_transition"]:
     if f"func {fn}(" not in vfx:
         errors.append(f"VFX function missing: {fn}")
+
+controller = text("ui/PresentationVFXController.gd")
+for signal_hook in [
+    "PresentationBus.damage_applied.connect",
+    "PresentationBus.intent_revealed.connect",
+    "PresentationBus.boss_phase_changed.connect",
+    "PresentationBus.location_changed.connect",
+    "PresentationBus.mark_added.connect",
+]:
+    if signal_hook not in controller:
+        errors.append(f"presentation controller hook missing: {signal_hook}")
+for effect_call in ["BookVFX.ink_stain", "BookVFX.intent_reveal", "BookVFX.thread_rupture", "BookVFX.location_transition", "BookVFX.stitch_mark"]:
+    if effect_call not in controller:
+        errors.append(f"presentation controller effect missing: {effect_call}")
 
 access = text("ui/AccessibilityService.gd")
 for token in ["font_size", "high_contrast", "reduce_motion", "flashes_disabled", "icon_labels_enabled", "haptic", "SETTINGS_PATH"]:
@@ -80,4 +95,4 @@ if errors:
     sys.exit(1)
 
 print("PHASE7_INTEGRATION PASS")
-print("12 domain palettes; VFX, accessibility and presentation hooks present")
+print("12 domain palettes; VFX controller, accessibility and presentation hooks present")
