@@ -210,60 +210,53 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu swiftshader_indirect
           script: |
-            set -eu
-            PACKAGE='com.veredasdatrama.preview'
-            APK='${{ steps.apk.outputs.path }}'
-            adb install -r "$APK"
-            adb shell pm path "$PACKAGE"
-            adb shell run-as "$PACKAGE" touch files/android_ci_autostart
+            adb install -r '${{ steps.apk.outputs.path }}'
+            adb shell pm path com.veredasdatrama.preview
+            adb shell run-as com.veredasdatrama.preview mkdir -p files
+            adb shell run-as com.veredasdatrama.preview touch files/android_ci_autostart
             adb logcat -c
-            adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
+            adb shell monkey -p com.veredasdatrama.preview -c android.intent.category.LAUNCHER 1
             sleep 7
-            PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
-            test -n "$PID"
+            test -n "$(adb shell pidof com.veredasdatrama.preview | tr -d '\r')"
             adb shell input keyevent KEYCODE_HOME
             sleep 3
-            adb shell run-as "$PACKAGE" sh -c 'test -s files/veredas_save.json'
-            adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-before.json
-            python - <<'PY'
-            import json
-            data=json.load(open('/tmp/veredas-save-before.json',encoding='utf-8'))
-            run=data['game']['run']
-            assert run['active'] is True
-            assert int(run['seed']) == 881001
-            assert run['flags']['ci.android_autostart'] is True
-            assert run['mode'] == 'story'
-            print('SAVE_BEFORE seed=',run['seed'],'world=',run['world_id'],'mode=',run['mode'])
-            PY
-            SEED_BEFORE=$(python -c "import json; print(int(json.load(open('/tmp/veredas-save-before.json'))['game']['run']['seed']))")
-            adb shell am force-stop "$PACKAGE"
+            adb shell run-as com.veredasdatrama.preview ls -l files/veredas_save.json
+            adb exec-out run-as com.veredasdatrama.preview cat files/veredas_save.json > /tmp/veredas-save-before.json
+            python -c 'import json; d=json.load(open("/tmp/veredas-save-before.json",encoding="utf-8")); r=d["game"]["run"]; assert r["active"] is True; assert int(r["seed"])==881001; assert r["flags"]["ci.android_autostart"] is True; assert r["mode"]=="story"; print("SAVE_BEFORE seed=",r["seed"],"world=",r["world_id"],"mode=",r["mode"])'
+            adb shell am force-stop com.veredasdatrama.preview
             sleep 2
-            adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
+            adb shell monkey -p com.veredasdatrama.preview -c android.intent.category.LAUNCHER 1
             sleep 7
-            PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
-            test -n "$PID"
+            test -n "$(adb shell pidof com.veredasdatrama.preview | tr -d '\r')"
             adb shell input keyevent KEYCODE_HOME
             sleep 3
-            adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-after.json
-            python - <<'PY'
-            import json
-            data=json.load(open('/tmp/veredas-save-after.json',encoding='utf-8'))
-            run=data['game']['run']
-            assert run['active'] is True
-            assert int(run['seed']) == 881001
-            assert run['flags']['ci.android_autostart'] is True
-            assert run['mode'] == 'story'
-            print('SAVE_AFTER seed=',run['seed'],'world=',run['world_id'],'mode=',run['mode'])
-            PY
-            SEED_AFTER=$(python -c "import json; print(int(json.load(open('/tmp/veredas-save-after.json'))['game']['run']['seed']))")
-            test "$SEED_BEFORE" = "$SEED_AFTER"
-            if adb logcat -d | grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview'; then
-              echo 'Runtime error found in Android logcat'
-              exit 1
-            fi
-            echo "ANDROID_EMULATOR_CERTIFICATION PASS: API ${{ matrix.api-level }} seed $SEED_AFTER"
+            adb exec-out run-as com.veredasdatrama.preview cat files/veredas_save.json > /tmp/veredas-save-after.json
+            python -c 'import json; b=json.load(open("/tmp/veredas-save-before.json",encoding="utf-8"))["game"]["run"]; a=json.load(open("/tmp/veredas-save-after.json",encoding="utf-8"))["game"]["run"]; assert a["active"] is True; assert int(a["seed"])==881001; assert a["flags"]["ci.android_autostart"] is True; assert a["mode"]=="story"; assert int(b["seed"])==int(a["seed"]); print("SAVE_AFTER seed=",a["seed"],"world=",a["world_id"],"mode=",a["mode"])'
+            adb logcat -d > /tmp/veredas-logcat.txt
+            ! grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview' /tmp/veredas-logcat.txt
+            echo 'ANDROID_EMULATOR_CERTIFICATION PASS: API ${{ matrix.api-level }} seed 881001'
 
-      - name: Upload compatibility evidence
+      - name: Collect emulator diagnostics
+        if: always()
+        run: |
+          mkdir -p compatibility/diagnostics
+          adb shell pm path com.veredasdatrama.preview > compatibility/diagnostics/package-path.txt 2>&1 || true
+          adb shell pidof com.veredasdatrama.preview > compatibility/diagnostics/pid.txt 2>&1 || true
+          adb logcat -d > compatibility/diagnostics/logcat.txt 2>&1 || true
+          cp /tmp/veredas-save-before.json compatibility/diagnostics/save-before.json 2>/dev/null || true
+          cp /tmp/veredas-save-after.json compatibility/diagnostics/save-after.json 2>/dev/null || true
+
+      - name: Upload emulator diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-${{ matrix.label }}-emulator-diagnostics
+          path: compatibility/diagnostics/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Write compatibility evidence
+        if: success()
         run: |
           mkdir -p compatibility
           printf '%s\n' \
@@ -278,7 +271,9 @@ jobs:
             'seed_persistence=pass' \
             > compatibility/${{ matrix.label }}.txt
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload compatibility evidence
+        if: success()
+        uses: actions/upload-artifact@v4
         with:
           name: veredas-${{ matrix.label }}-compatibility
           path: compatibility/${{ matrix.label }}.txt
