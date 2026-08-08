@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "target_profile": "midrange_android_portrait",
+  "targets": {
+    "fps_target": 60.0,
+    "fps_floor_sustained": 50.0,
+    "process_ms_p95": 10.0,
+    "physics_ms_p95": 4.0,
+    "frame_ms_target": 16.67,
+    "static_memory_mb_soft": 280.0,
+    "static_memory_mb_hard": 420.0,
+    "video_memory_mb_soft": 220.0,
+    "draw_calls_soft": 180,
+    "nodes_soft": 3000,
+    "warm_start_seconds": 3.0,
+    "resume_seconds": 1.0,
+    "interactive_response_ms": 120.0,
+    "thermal_soak_minutes": 30,
+    "battery_soak_minutes": 30
+  },
+  "policy": {
+    "synthetic_gate_in_ci": true,
+    "real_device_measurement_required_for": ["8.9", "11.3"],
+    "do_not_fail_headless_on_fps": true,
+    "sample_window": 600,
+    "notes": "This game is a mostly-static illustrated gamebook. Budgets deliberately leave large headroom for final art and Android device variability."
+  }
+}
