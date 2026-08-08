@@ -180,7 +180,8 @@ def main() -> None:
             },
         ]
         boss["phases"] = phases
-        boss["combat_signature"] = f"t{tier}:{'>'+'.join(phase_mechanics)}:{boss['domain_status']}"
+        phase_signature = ">".join(phase_mechanics)
+        boss["combat_signature"] = f"t{tier}:{phase_signature}:{boss['domain_status']}"
         boss["threat_rating"] = round(
             boss["hp"] * 0.08 + boss["posture"] * 0.08 + tier * 0.65,
             3,
