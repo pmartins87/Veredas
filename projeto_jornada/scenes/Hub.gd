@@ -19,6 +19,7 @@ func _ready() -> void:
     HubEngine.ensure_state()
     MetaUnlockEngine.evaluate_progression()
     CodexProgressEngine.new().ensure_state()
+    MetaEconomyEngine.new().sync_rewards()
     if not loaded_active_run:
         HubEngine.enter()
     _build_ui()
@@ -78,7 +79,11 @@ func _build_ui() -> void:
     var top := HBoxContainer.new()
     top.alignment = BoxContainer.ALIGNMENT_CENTER
     var ornament := TextureRect.new()
-    ornament.texture = VectorAtlasRegistry.system_icon("trama")
+    var ornament_id := str(MetaEconomyEngine.new().summary().get("selected_ornament", "plain"))
+    match ornament_id:
+        "ink": ornament.texture = VectorAtlasRegistry.domain_ornament("mata_fio_verde")
+        "echo": ornament.texture = VectorAtlasRegistry.system_icon("echo")
+        _: ornament.texture = VectorAtlasRegistry.system_icon("trama")
     ornament.custom_minimum_size = Vector2(52,52)
     ornament.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     ornament.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -111,6 +116,8 @@ func _render() -> void:
     MetaUnlockEngine.evaluate_progression()
     var codex := CodexProgressEngine.new()
     codex.ensure_state()
+    var economy := MetaEconomyEngine.new()
+    var economy_summary: Dictionary = economy.summary()
     var hub: Dictionary = HubEngine.summary()
     var unlocks: Dictionary = MetaUnlockEngine.summary()
     var echoes: Dictionary = EchoConsequenceEngine.summary()
@@ -120,6 +127,7 @@ func _render() -> void:
     lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.residents])
     lines.append("Andarilhos: [b]%s/36[/b]   •   Rotas: [b]%s/12[/b]   •   Modos: [b]%s/4[/b]   •   Códice: [b]%s[/b]" % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
     lines.append("Conquistas: [b]%s/%s[/b]   •   Ecos persistentes: [b]%s[/b]   •   Consequências: [b]%s[/b]" % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size(), echoes.echo_marks, echoes.consequences])
+    lines.append("Fios de Vigília: [b]%s[/b]   •   Gastos: %s   •   Aquisições: %s" % [economy_summary.balance, economy_summary.lifetime_spent, economy_summary.purchases])
     lines.append("")
     lines.append("[b]Instalações[/b]")
     for facility_variant in hub.facilities:
@@ -154,6 +162,7 @@ func _render() -> void:
             var world: Dictionary = ContentRegistry.get_record(world_id)
             _button("Examinar rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
     _button("Arquivo de Ecos", _open_codex, false)
+    _button("Mesa dos Fios", _open_meta_economy, false)
     _button("Acessibilidade", _open_accessibility, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
@@ -176,11 +185,15 @@ func _open_journey_setup() -> void:
 func _open_codex() -> void:
     get_tree().change_scene_to_file("res://scenes/Codex.tscn")
 
+func _open_meta_economy() -> void:
+    get_tree().change_scene_to_file("res://scenes/VigilThreads.tscn")
+
 func _abandon_run() -> void:
     GameState.run.active = false
     GameState.run.mode = "hub"
     loaded_active_run = false
     HubEngine.enter()
+    MetaEconomyEngine.new().sync_rewards()
     _render()
 
 func _show_route(world_id: String) -> void:
