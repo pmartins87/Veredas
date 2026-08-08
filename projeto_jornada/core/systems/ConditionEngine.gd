@@ -26,10 +26,16 @@ func evaluate(condition: Dictionary, context: Dictionary = {}) -> bool:
         "mark_intensity_gte":
             return int(GameState.run.get("marks", {}).get(str(condition.get("mark_id", "")), 0)) >= int(condition.get("value", 1))
         "echo_mark_has":
+            if _ephemeral_simulation():
+                return false
             return EchoConsequenceEngine.has_echo(str(condition.get("mark_id", "")), 1)
         "echo_mark_intensity_gte":
+            if _ephemeral_simulation():
+                return false
             return EchoConsequenceEngine.has_echo(str(condition.get("mark_id", "")), int(condition.get("value", 1)))
         "ending_witnessed":
+            if _ephemeral_simulation():
+                return false
             return EchoConsequenceEngine.ending_witnessed(str(condition.get("ending_id", "")))
         "flag_is":
             return GameState.run.get("flags", {}).get(str(condition.get("key", ""))) == condition.get("value", true)
@@ -52,3 +58,6 @@ func _resource(key: String) -> int:
     if key == "vigor":
         return int(GameState.run.get("vigor", 0))
     return int(GameState.run.get("resources", {}).get(key, 0))
+
+func _ephemeral_simulation() -> bool:
+    return bool(GameState.profile.get("_simulation_ephemeral", false))
