@@ -1,0 +1,93 @@
+name: Veredas Policy RNG Isolation Patch
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-policy-rng-isolation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Separate policy RNG from world RNG
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          policy = Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd')
+          text = policy.read_text(encoding='utf-8')
+          marker = 'const POLICIES := ["balanced", "aggressive", "cautious", "explorer", "random"]\n\n'
+          insert = '''const POLICIES := ["balanced", "aggressive", "cautious", "explorer", "random"]
+
+var _decision_rng := RandomNumberGenerator.new()
+var _decision_rng_seeded := false
+
+func start_decision_rng(seed_value: int) -> void:
+    # Player-policy randomness is intentionally independent from world/combat RNG.
+    # Human decisions do not consume the game's random stream, and simulations
+    # must preserve that same causal boundary.
+    var mixed := absi(seed_value * 1664525 + 1013904223)
+    _decision_rng.seed = maxi(1, mixed)
+    _decision_rng_seeded = true
+
+func _ensure_decision_rng() -> void:
+    if not _decision_rng_seeded:
+        start_decision_rng(1)
+
+func _decision_range_int(minimum: int, maximum: int) -> int:
+    _ensure_decision_rng()
+    return _decision_rng.randi_range(minimum, maximum)
+
+func _decision_next_float() -> float:
+    _ensure_decision_rng()
+    return _decision_rng.randf()
+
+'''
+          count = text.count(marker)
+          if count != 1:
+              raise SystemExit(f'Policy RNG insertion marker count={count}')
+          text = text.replace(marker, insert, 1)
+          range_count = text.count('RNGService.range_int(')
+          float_count = text.count('RNGService.next_float()')
+          if range_count != 5 or float_count != 1:
+              raise SystemExit(f'Unexpected policy RNG call counts range={range_count} float={float_count}')
+          text = text.replace('RNGService.range_int(', '_decision_range_int(')
+          text = text.replace('RNGService.next_float()', '_decision_next_float()')
+          policy.write_text(text, encoding='utf-8')
+
+          simulator = Path('projeto_jornada/core/systems/JourneySimulationEngine.gd')
+          text = simulator.read_text(encoding='utf-8')
+          old = '''    if ContentRegistry.get_record(world_id).is_empty():
+        return _invalid_result(character_id, policy_id, build_id, seed_value, "invalid_world")
+
+    _prepare_isolated_profile(world_id, character_id)
+'''
+          new = '''    if ContentRegistry.get_record(world_id).is_empty():
+        return _invalid_result(character_id, policy_id, build_id, seed_value, "invalid_world")
+
+    policy_engine.start_decision_rng(seed_value)
+    _prepare_isolated_profile(world_id, character_id)
+'''
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Simulator policy seed target count={count}')
+          simulator.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/core/systems/JourneySimulationEngine.gd
+      - name: Commit RNG isolation
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/PlayerPolicyEngine.gd projeto_jornada/core/systems/JourneySimulationEngine.gd
+          git commit -m 'Isolate simulated player decisions from world RNG'
+          git push origin HEAD:projeto-jornada-snapshots
