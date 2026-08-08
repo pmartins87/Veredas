@@ -133,7 +133,8 @@ func finish(ending_id: String) -> bool:
     MetaUnlockEngine.discover(ending_id)
     MetaUnlockEngine.evaluate_progression()
     EchoConsequenceEngine.record_outcome(ending_id, "victory")
-    SaveService.save_game()
+    if not _simulation_no_persist():
+        SaveService.save_game()
     return true
 
 func fail(reason: String = "defeat") -> void:
@@ -141,7 +142,8 @@ func fail(reason: String = "defeat") -> void:
     GameState.run.mode = "debrief"
     GameState.run.result = reason
     EchoConsequenceEngine.record_outcome("", reason)
-    SaveService.save_game()
+    if not _simulation_no_persist():
+        SaveService.save_game()
 
 func resume_story() -> void:
     if bool(GameState.run.get("active", false)):
@@ -174,3 +176,6 @@ func _close_combat(state: Dictionary) -> void:
         GameState.run.mode = "final_choice" if enemy_id.begins_with("boss.") else "story"
     elif result == "defeat":
         fail("defeat")
+
+func _simulation_no_persist() -> bool:
+    return bool((GameState.run.get("flags", {}) as Dictionary).get("simulation.no_persist", false))
