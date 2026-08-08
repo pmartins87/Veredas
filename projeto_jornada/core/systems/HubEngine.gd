@@ -24,7 +24,7 @@ func ensure_state() -> Dictionary:
     return GameState.profile.hub
 
 func enter() -> Dictionary:
-    var hub := ensure_state()
+    var hub: Dictionary = ensure_state()
     hub.visit_count = int(hub.get("visit_count",0)) + 1
     var history: Array = hub.get("history", [])
     history.push_front({"kind":"visit","at":int(Time.get_unix_time_from_system()),"endings":GameState.profile.get("endings",[]).size()})
@@ -44,7 +44,7 @@ func stage() -> int:
     return int(ensure_state().get("stage",1))
 
 func facility_state() -> Array:
-    var hub := ensure_state()
+    var hub: Dictionary = ensure_state()
     var result: Array = []
     var facilities: Dictionary = hub.get("facilities", {}) as Dictionary
     for facility_id in FACILITIES:
@@ -60,10 +60,10 @@ func facility_state() -> Array:
     return result
 
 func add_resident(npc_id: String) -> bool:
-    var npc := ContentRegistry.get_record(npc_id)
+    var npc: Dictionary = ContentRegistry.get_record(npc_id)
     if npc.is_empty() or not npc_id.begins_with("npc."):
         return false
-    var hub := ensure_state()
+    var hub: Dictionary = ensure_state()
     var residents: Array = hub.get("residents", [])
     if npc_id not in residents:
         residents.append(npc_id)
@@ -75,11 +75,11 @@ func add_resident(npc_id: String) -> bool:
 func unlock_route(world_id: String) -> bool:
     if ContentRegistry.get_record(world_id).is_empty() or not world_id.begins_with("world."):
         return false
-    var hub := ensure_state()
-    var routes: Array = hub.get("routes", [])
-    if world_id not in routes:
-        routes.append(world_id)
-        hub.routes = routes
+    var hub: Dictionary = ensure_state()
+    var routes_list: Array = hub.get("routes", [])
+    if world_id not in routes_list:
+        routes_list.append(world_id)
+        hub.routes = routes_list
         GameState.profile.hub = hub
         _recalculate_stage()
     return true
@@ -91,7 +91,7 @@ func residents() -> Array:
     return ensure_state().get("residents", []).duplicate()
 
 func summary() -> Dictionary:
-    var hub := ensure_state()
+    var hub: Dictionary = ensure_state()
     return {
         "stage":int(hub.get("stage",1)),
         "visits":int(hub.get("visit_count",0)),
@@ -106,10 +106,10 @@ func _recalculate_stage() -> void:
     var hub: Dictionary = GameState.profile.get("hub", {}) as Dictionary
     if hub.is_empty():
         return
-    var milestones := GameState.profile.get("endings",[]).size() * 2
-    milestones += hub.get("routes",[]).size() - 1
-    milestones += mini(4, hub.get("residents",[]).size())
-    var new_stage := clampi(1 + milestones / 3, 1, 5)
+    var milestones: int = int(GameState.profile.get("endings",[]).size()) * 2
+    milestones += int(hub.get("routes",[]).size()) - 1
+    milestones += mini(4, int(hub.get("residents",[]).size()))
+    var new_stage: int = clampi(1 + int(floor(float(milestones) / 3.0)), 1, 5)
     hub.stage = maxi(int(hub.get("stage",1)), new_stage)
     var facilities: Dictionary = hub.get("facilities", {}) as Dictionary
     for facility_id in FACILITIES:
