@@ -21,7 +21,7 @@ capture_on_exit() {
   adb logcat -d > "$DIAG_ROOT/logcat.txt" 2>&1 || true
   adb shell dumpsys activity top > "$DIAG_ROOT/activity-top.txt" 2>&1 || true
   adb shell dumpsys package "$PACKAGE" > "$DIAG_ROOT/package.txt" 2>&1 || true
-  adb shell run-as "$PACKAGE" find files -maxdepth 2 -type f -ls > "$DIAG_ROOT/app-files.txt" 2>&1 || true
+  adb shell run-as "$PACKAGE" ls -la files > "$DIAG_ROOT/app-files.txt" 2>&1 || true
   adb shell run-as "$PACKAGE" cat files/android_ci_ready > "$DIAG_ROOT/ready-final.txt" 2>&1 || true
   exit "$status"
 }
@@ -42,12 +42,17 @@ wait_for_pid() {
   return 1
 }
 
+file_exists() {
+  relative_path="$1"
+  adb shell run-as "$PACKAGE" ls -l "$relative_path" >/dev/null 2>&1
+}
+
 wait_for_file() {
   relative_path="$1"
   limit="$2"
   i=0
   while [ "$i" -lt "$limit" ]; do
-    if adb shell run-as "$PACKAGE" sh -c "test -s '$relative_path'" >/dev/null 2>&1; then
+    if file_exists "$relative_path"; then
       return 0
     fi
     i=$((i + 1))
@@ -108,17 +113,19 @@ adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 | tee "$DIA
 wait_for_pid 60 | tee "$DIAG_ROOT/pid-1.txt"
 wait_for_ready started 90 | tee "$DIAG_ROOT/ready-started.txt"
 wait_for_file files/veredas_save.json 30
+adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-initial-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-initial.json"
 validate_save "$DIAG_ROOT/save-initial.json" 'SAVE_INITIAL'
 
 step '04 prove pause autosave by deleting disk save and requiring recreation'
 adb shell run-as "$PACKAGE" rm -f files/veredas_save.json
-if adb shell run-as "$PACKAGE" sh -c 'test -e files/veredas_save.json'; then
+if file_exists files/veredas_save.json; then
   echo 'Could not remove pre-pause save'
   exit 1
 fi
 adb shell input keyevent KEYCODE_HOME
 wait_for_file files/veredas_save.json 45
+adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-pause-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-before.json"
 validate_save "$DIAG_ROOT/save-before.json" 'SAVE_AFTER_PAUSE'
 
@@ -132,12 +139,13 @@ wait_for_ready resumed 90 | tee "$DIAG_ROOT/ready-resumed.txt"
 
 step '06 prove resumed in-memory journey can autosave again'
 adb shell run-as "$PACKAGE" rm -f files/veredas_save.json
-if adb shell run-as "$PACKAGE" sh -c 'test -e files/veredas_save.json'; then
+if file_exists files/veredas_save.json; then
   echo 'Could not remove post-resume save'
   exit 1
 fi
 adb shell input keyevent KEYCODE_HOME
 wait_for_file files/veredas_save.json 45
+adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-resume-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-after.json"
 validate_save "$DIAG_ROOT/save-after.json" 'SAVE_AFTER_RELAUNCH_PAUSE'
 python - "$DIAG_ROOT/save-before.json" "$DIAG_ROOT/save-after.json" <<'PY'
