@@ -1,6 +1,6 @@
 extends Node
 
-const SEEDS_PER_SKILL := 4
+const SEEDS_PER_SKILL := 12
 const MAX_STEPS := 24
 const VALID_TIERS := ["approachable", "intermediate", "expert"]
 const VALID_MECHANICS := ["damage", "posture", "guard", "heal", "move", "status", "counter", "resource", "echo", "mark", "debt", "range"]
