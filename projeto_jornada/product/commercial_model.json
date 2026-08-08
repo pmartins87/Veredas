@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "model_id": "free_trial_one_time_unlock",
+  "principles": {
+    "no_ads": true,
+    "no_subscriptions": true,
+    "no_paid_consumables": true,
+    "no_loot_boxes": true,
+    "no_paid_random_rewards": true,
+    "no_real_money_meta_currency": true,
+    "no_pay_to_win": true,
+    "no_paid_combat_stats": true,
+    "no_paid_drop_rate": true,
+    "no_paid_difficulty_relief": true,
+    "purchases_survive_reinstall_when_store_restoration_is_available": true
+  },
+  "free_trial": {
+    "price": 0,
+    "worlds": ["world.mata_fio_verde"],
+    "description": "A demonstração permite jogar o primeiro Domínio com progressão normal, saves e sem anúncios. O bloqueio comercial limita conteúdo, não poder dentro da jornada."
+  },
+  "products": [
+    {
+      "id": "full_game_unlock",
+      "store_type": "one_time_non_consumable",
+      "billing_channel": "platform_billing",
+      "effect_kind": "content_license",
+      "description": "Desbloqueia o acesso comercial ao restante do jogo completo, sem conceder atributos, moeda, loot ou vantagem de combate.",
+      "content_scope": "all_game_content",
+      "consumable": false,
+      "repeatable": false,
+      "grants_power": false,
+      "grants_currency": false,
+      "grants_stats": false,
+      "grants_drop_rate": false
+    },
+    {
+      "id": "supporter_cosmetic_pack",
+      "store_type": "one_time_non_consumable",
+      "billing_channel": "platform_billing",
+      "effect_kind": "cosmetic_only",
+      "description": "Pacote opcional de apoiador com ornamentos puramente visuais do Nó de Vigília.",
+      "content_scope": "cosmetics_only",
+      "consumable": false,
+      "repeatable": false,
+      "grants_power": false,
+      "grants_currency": false,
+      "grants_stats": false,
+      "grants_drop_rate": false
+    }
+  ],
+  "forbidden_real_money_products": [
+    "vigil_threads",
+    "health",
+    "vigor",
+    "damage",
+    "loot_chance",
+    "revives",
+    "consumables",
+    "random_rewards",
+    "difficulty_reduction"
+  ],
+  "notes": "Prices and localized store metadata are release configuration, not gameplay data. Store integration, purchase acknowledgement, restoration and offline entitlement caching belong to Phase 9.8."
+}
