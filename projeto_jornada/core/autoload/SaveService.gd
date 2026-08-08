@@ -22,10 +22,14 @@ func load_game() -> bool:
     if f == null:
         return false
     var parsed = JSON.parse_string(f.get_as_text())
+    f.close()
     if typeof(parsed) != TYPE_DICTIONARY:
         return false
     if int(parsed.get("save_schema_version",0)) > SAVE_VERSION:
         push_error("Save is newer than this build")
         return false
-    GameState.deserialize(parsed.get("game",{}))
-    return true
+    var game_raw = parsed.get("game", {})
+    if typeof(game_raw) != TYPE_DICTIONARY:
+        push_error("Save game payload is invalid")
+        return false
+    return GameState.deserialize(game_raw as Dictionary)
