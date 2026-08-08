@@ -149,7 +149,7 @@ func result_signature(results: Array) -> String:
             int(result.get("locations_visited", 0)),
             int(result.get("final_health", 0)),
             str(result.get("ending_id", "")),
-        ]))
+        ])
     return "\n".join(rows).sha256_text()
 
 func build_ids() -> Array[String]:
