@@ -72,7 +72,7 @@ jobs:
       - name: Configure Godot Android editor settings
         run: |
           set -euo pipefail
-          mkdir -p "${HOME}/.config/godot" "${HOME}/.android"
+          mkdir -p "${HOME}/.config/godot" "${HOME}/.android" build/android-diagnostics
           if [ ! -f "${HOME}/.android/debug.keystore" ]; then
             keytool -keyalg RSA -genkeypair -v \
               -keystore "${HOME}/.android/debug.keystore" \
@@ -91,34 +91,55 @@ jobs:
             'export/android/debug_keystore_user = "androiddebugkey"' \
             'export/android/debug_keystore_pass = "android"' \
             > "$EDITOR_SETTINGS"
-          test -s "$EDITOR_SETTINGS"
-          test -x "$ANDROID_HOME/platform-tools/adb"
-          java -version
-          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version
+          cp "$EDITOR_SETTINGS" build/android-diagnostics/editor_settings-4.7.tres
+          env | sort | grep -E '^(ANDROID|JAVA_HOME|HOME)=' > build/android-diagnostics/environment.txt || true
+          find "$HOME/.local/share/godot/export_templates/4.7.1.stable" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > build/android-diagnostics/export-templates.txt
+          "$ANDROID_HOME/platform-tools/adb" version > build/android-diagnostics/adb-version.txt 2>&1
+          java -version 2> build/android-diagnostics/java-version.txt
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version > build/android-diagnostics/godot-version.txt
 
       - name: Import project
         run: |
           set -o pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
-          printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1 | tee build/android-diagnostics/import.log
+          if grep -E 'SCRIPT ERROR|Parse Error|Failed to load script' build/android-diagnostics/import.log; then
             exit 1
           fi
 
       - name: Export debug APK
+        id: export_apk
+        shell: bash
         run: |
-          mkdir -p build/android
-          set -o pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --export-debug 'Android Debug APK' "$GITHUB_WORKSPACE/build/android/veredas-debug.apk" 2>&1)
-          printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'ERROR:|SCRIPT ERROR|Parse Error|Export failed'; then
+          mkdir -p build/android build/android-diagnostics
+          set +e
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            --headless --verbose --path projeto_jornada \
+            --export-debug 'Android Debug APK' "$GITHUB_WORKSPACE/build/android/veredas-debug.apk" \
+            > build/android-diagnostics/export.log 2>&1
+          STATUS=$?
+          set -e
+          cat build/android-diagnostics/export.log
+          printf '%s\n' "$STATUS" > build/android-diagnostics/export-exit-code.txt
+          find build/android -maxdepth 2 -type f -printf '%p %s bytes\n' | sort > build/android-diagnostics/output-files.txt || true
+          test "$STATUS" -eq 0 || exit "$STATUS"
+          test -s build/android/veredas-debug.apk
+          if grep -E 'SCRIPT ERROR|Parse Error|Export failed' build/android-diagnostics/export.log; then
             exit 1
           fi
-          test -s build/android/veredas-debug.apk
           sha256sum build/android/veredas-debug.apk | tee build/android/veredas-debug.apk.sha256
           du -h build/android/veredas-debug.apk
 
+      - name: Upload Android diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-android-export-diagnostics
+          path: build/android-diagnostics/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: veredas-debug-apk
@@ -171,14 +192,11 @@ jobs:
             APK='${{ steps.apk.outputs.path }}'
             adb install -r "$APK"
             adb shell pm path "$PACKAGE"
-
             adb logcat -c
             adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
             sleep 6
             PID=$(adb shell pidof "$PACKAGE" | tr -d '\r')
             test -n "$PID"
-
-            # HOME must trigger NOTIFICATION_APPLICATION_PAUSED and atomic autosave.
             adb shell input keyevent KEYCODE_HOME
             sleep 3
             adb shell run-as "$PACKAGE" sh -c 'test -s files/veredas_save.json'
@@ -192,7 +210,6 @@ jobs:
             print('SAVE_BEFORE seed=',run['seed'],'world=',run['world_id'])
             PY
             SEED_BEFORE=$(python -c "import json; print(json.load(open('/tmp/veredas-save-before.json'))['game']['run']['seed'])")
-
             adb shell am force-stop "$PACKAGE"
             sleep 2
             adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
@@ -204,7 +221,6 @@ jobs:
             adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > /tmp/veredas-save-after.json
             SEED_AFTER=$(python -c "import json; print(json.load(open('/tmp/veredas-save-after.json'))['game']['run']['seed'])")
             test "$SEED_BEFORE" = "$SEED_AFTER"
-
             if adb logcat -d | grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview'; then
               echo 'Runtime error found in Android logcat'
               exit 1
