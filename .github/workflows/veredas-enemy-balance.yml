@@ -9,6 +9,8 @@ on:
       - 'projeto_jornada/core/systems/EnemyBalanceEngine.gd'
       - 'projeto_jornada/core/systems/CombatEngine.gd'
       - 'projeto_jornada/core/systems/BossPhaseEngine.gd'
+      - 'projeto_jornada/core/systems/PlayerPolicyEngine.gd'
+      - 'projeto_jornada/core/systems/JourneySimulationEngine.gd'
       - 'projeto_jornada/tests/EnemyBalanceCertification.gd'
       - 'projeto_jornada/tests/enemy_balance_certification.tscn'
       - '.github/workflows/veredas-enemy-balance.yml'
