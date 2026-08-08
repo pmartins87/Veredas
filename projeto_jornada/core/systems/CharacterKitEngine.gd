@@ -61,7 +61,7 @@ func execute(ability: Dictionary, actor: Dictionary, target: Dictionary, resourc
             # Immediate counter stance: protect now and punish enemy posture. This
             # keeps the mechanic effective without hidden deferred state.
             actor_result.guard = int(actor_result.get("guard",0)) + power
-            target_result.posture = maxi(0, int(target_result.get("posture",0)) - maxi(1, power / 2))
+            target_result.posture = maxi(0, int(target_result.get("posture",0)) - maxi(1, int(power / 2)))
         "resource":
             var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
             var maximum := maxi(1, int(character.get("resource_max", 5)))
@@ -71,7 +71,7 @@ func execute(ability: Dictionary, actor: Dictionary, target: Dictionary, resourc
             # An Echo repeats part of the attack immediately; its strength is
             # explicit in data so it can be balanced statistically.
             target_result.hp = maxi(0, int(target_result.get("hp",0)) - power)
-            actor_result.guard = int(actor_result.get("guard",0)) + maxi(1, power / 2)
+            actor_result.guard = int(actor_result.get("guard",0)) + maxi(1, int(power / 2))
         "mark":
             target_result = StatusEngine.apply_status(target_result, "marked", power, duration)
         "debt":
