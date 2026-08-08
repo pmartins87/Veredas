@@ -142,9 +142,9 @@ def main() -> None:
         tier = bi + 1
         boss["boss_tier"] = tier
         boss["rank"] = "subboss" if tier <= 3 else "boss"
-        boss["hp"] = 32 + tier * 4
-        boss["posture"] = 14 + tier * 2
-        boss["starting_guard"] = 1 if tier >= 3 else 0
+        boss["hp"] = 28 + tier * 2
+        boss["posture"] = 14 + tier
+        boss["starting_guard"] = 1 if tier >= 4 else 0
         boss["domain_status"] = DOMAIN_STATUS.get(domain_id, "fear")
         boss["mechanic"] = MECHANICS[(wi + bi * 2) % len(MECHANICS)]
         boss["damage_bonus"] = 0
@@ -166,7 +166,7 @@ def main() -> None:
                 "threshold":0.60,
                 "name":"Ruptura",
                 "mechanic":phase_mechanics[1],
-                "damage_bonus":1,
+                "damage_bonus":0,
                 "guard_bonus":1 if tier >= 2 else 0,
                 "status":boss["domain_status"],
             },
@@ -174,7 +174,7 @@ def main() -> None:
                 "threshold":0.25,
                 "name":"Consequência",
                 "mechanic":phase_mechanics[2],
-                "damage_bonus":1 + (1 if tier >= 4 else 0),
+                "damage_bonus":1,
                 "guard_bonus":1,
                 "status":boss["domain_status"],
             },

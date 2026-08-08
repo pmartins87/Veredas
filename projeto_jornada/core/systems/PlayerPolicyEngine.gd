@@ -79,14 +79,16 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     var defensive_ability := _best_ability(payable, ["counter", "guard"])
     var damage_ability := _best_ability(payable, ["damage", "posture", "range", "echo", "status", "mark", "debt"])
     var utility_ability := _best_ability(payable, ["resource", "mark", "move"])
-    var incoming_heavy := str(intent.get("id", "")) == "heavy"
+    var intent_danger := int(intent.get("danger", 4 if str(intent.get("id", "")) == "heavy" else 2))
+    var incoming_severe := intent_danger >= 4
+    var incoming_risky := intent_danger >= 3
     var guard_value := int(player.get("guard", 0))
 
     if policy_id == "cautious":
         # A telegraphed heavy attack is mitigated before healing. Healing first
         # can create a stable loop where the incoming heavy immediately removes
         # the recovered HP and the policy repeats the same non-progressing turn.
-        if incoming_heavy and guard_value < 4:
+        if incoming_severe and guard_value < 4:
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
@@ -102,6 +104,10 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         return {"kind":"action", "id":"strike"}
 
     if policy_id == "aggressive":
+        if incoming_severe and hp_ratio <= 0.30 and guard_value < 3:
+            if not defensive_ability.is_empty():
+                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
+            return {"kind":"action", "id":"guard"}
         if not damage_ability.is_empty():
             return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 2:
@@ -109,10 +115,13 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         return {"kind":"action", "id":"strike"}
 
     if policy_id == "explorer":
+        if incoming_severe and guard_value < 3:
+            if not defensive_ability.is_empty():
+                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
+            if hp_ratio <= 0.40:
+                return {"kind":"action", "id":"guard"}
         if hp_ratio <= 0.45 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-        if incoming_heavy and guard_value < 3 and not defensive_ability.is_empty():
-            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         if not utility_ability.is_empty():
             return {"kind":"ability", "id":str(utility_ability.get("id", ""))}
         if not damage_ability.is_empty():
@@ -121,12 +130,14 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
 
-    if hp_ratio <= 0.45 and not healing_ability.is_empty():
-        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-    if incoming_heavy and guard_value < 3:
+    if incoming_severe and guard_value < 3 and hp_ratio < 0.75:
         if not defensive_ability.is_empty():
             return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         return {"kind":"action", "id":"guard"}
+    if incoming_risky and guard_value < 2 and hp_ratio <= 0.30:
+        return {"kind":"action", "id":"guard"}
+    if hp_ratio <= 0.45 and not healing_ability.is_empty():
+        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
     if not damage_ability.is_empty():
         return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
     if int(player.get("vigor", 0)) >= 3:
