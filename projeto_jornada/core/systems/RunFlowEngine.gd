@@ -120,6 +120,8 @@ func finish(ending_id: String) -> bool:
     var ending := ContentRegistry.get_record(ending_id)
     if ending.is_empty() or not ending_id.begins_with("ending."):
         return false
+    if str(ending.get("world_id", "")) != str(GameState.run.get("world_id", "")):
+        return false
     GameState.run.active = false
     GameState.run.mode = "debrief"
     GameState.run.ending_id = ending_id
