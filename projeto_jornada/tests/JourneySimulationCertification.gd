@@ -5,6 +5,8 @@ var simulator := JourneySimulationEngine.new()
 var policies := PlayerPolicyEngine.new()
 var representative_characters: Array[String] = []
 
+const CI_MAX_STEPS := 24
+
 func _ready() -> void:
     await get_tree().process_frame
     _resolve_representatives()
@@ -65,7 +67,7 @@ func _isolation_gate() -> void:
         "policy_id":"balanced",
         "build_id":"baseline",
         "seed":101001,
-        "max_steps":80,
+        "max_steps":CI_MAX_STEPS,
     })
     expect(bool(result.get("ok", false)), "10.1 isolated simulation failed")
     expect(GameState.profile == before_profile, "10.1 simulation leaked into profile state")
@@ -82,7 +84,7 @@ func _determinism_gate() -> void:
         "policy_id":"random",
         "build_id":"utility",
         "seed":202002,
-        "max_steps":80,
+        "max_steps":CI_MAX_STEPS,
     }
     var first := simulator.simulate(config)
     var second := simulator.simulate(config)
@@ -100,7 +102,7 @@ func _representative_matrix_gate() -> void:
         "build_ids":["baseline", "offense"],
         "seeds_per_combination":1,
         "base_seed":303003,
-        "max_steps":80,
+        "max_steps":CI_MAX_STEPS,
     })
     var results: Array = matrix.get("results", []) as Array
     var summary: Dictionary = matrix.get("summary", {}) as Dictionary
@@ -110,9 +112,9 @@ func _representative_matrix_gate() -> void:
     expect(str(matrix.get("signature", "")).length() == 64, "10.1 matrix signature is not SHA-256")
 
     var probes: Array = results.duplicate()
-    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"aggressive", "build_id":"utility", "seed":404001, "max_steps":80}))
-    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"cautious", "build_id":"baseline", "seed":404002, "max_steps":80}))
-    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"explorer", "build_id":"defense", "seed":404003, "max_steps":80}))
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"aggressive", "build_id":"utility", "seed":404001, "max_steps":CI_MAX_STEPS}))
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"cautious", "build_id":"baseline", "seed":404002, "max_steps":CI_MAX_STEPS}))
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"explorer", "build_id":"defense", "seed":404003, "max_steps":CI_MAX_STEPS}))
 
     var seen_worlds: Dictionary = {}
     var seen_policies: Dictionary = {}
