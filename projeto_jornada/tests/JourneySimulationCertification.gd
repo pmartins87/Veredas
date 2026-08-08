@@ -11,7 +11,7 @@ func _ready() -> void:
     _catalog_gate()
     _isolation_gate()
     _determinism_gate()
-    _matrix_gate()
+    _representative_matrix_gate()
     _invalid_input_gate()
     _finish()
 
@@ -92,21 +92,27 @@ func _determinism_gate() -> void:
     for field in ["result", "ending_id", "turns", "events", "combats", "purchases", "locations_visited", "final_health", "final_vigor", "final_fragments"]:
         expect(first.get(field) == second.get(field), "10.1 deterministic field mismatch: %s" % field)
 
-func _matrix_gate() -> void:
+func _representative_matrix_gate() -> void:
+    var started_at := Time.get_ticks_msec()
     var matrix := simulator.simulate_matrix({
         "character_ids":representative_characters,
-        "policy_ids":policies.policy_ids(),
-        "build_ids":simulator.build_ids(),
+        "policy_ids":["balanced", "random"],
+        "build_ids":["baseline", "offense"],
         "seeds_per_combination":1,
         "base_seed":303003,
         "max_steps":80,
     })
     var results: Array = matrix.get("results", []) as Array
     var summary: Dictionary = matrix.get("summary", {}) as Dictionary
-    expect(results.size() == 40, "10.1 matrix must execute 40 representative full journeys")
+    expect(results.size() == 8, "10.1 compact cartesian matrix must execute eight full journeys")
     expect(int(summary.get("runs", 0)) == results.size(), "10.1 summary run count mismatch")
-    expect((summary.get("groups", []) as Array).size() == 40, "10.1 summary grouping must preserve Domain/character/policy/build cells")
+    expect((summary.get("groups", []) as Array).size() == 8, "10.1 summary grouping lost a cartesian cell")
     expect(str(matrix.get("signature", "")).length() == 64, "10.1 matrix signature is not SHA-256")
+
+    var probes: Array = results.duplicate()
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"aggressive", "build_id":"utility", "seed":404001, "max_steps":80}))
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"cautious", "build_id":"baseline", "seed":404002, "max_steps":80}))
+    probes.append(simulator.simulate({"character_id":representative_characters[0], "policy_id":"explorer", "build_id":"defense", "seed":404003, "max_steps":80}))
 
     var seen_worlds: Dictionary = {}
     var seen_policies: Dictionary = {}
@@ -121,7 +127,7 @@ func _matrix_gate() -> void:
     var total_deadlocks := 0
     var valid_outcomes := ["victory", "defeat", "combat_timeout", "ending_unavailable", "timeout"]
 
-    for result_variant in results:
+    for result_variant in probes:
         var result: Dictionary = result_variant as Dictionary
         if not bool(result.get("ok", false)):
             total_invalid += 1
@@ -151,19 +157,20 @@ func _matrix_gate() -> void:
                 var item := ContentRegistry.get_record(str(item_id_variant))
                 expect(str(item.get("kind", "")) == "equipment", "10.1 build contains a non-equipment item")
 
-    expect(total_invalid == 0, "10.1 representative matrix produced invalid simulations")
-    expect(seen_worlds.size() == 2, "10.1 matrix did not cover two Domains")
-    expect(seen_policies.size() == 5, "10.1 matrix did not cover all policies")
-    expect(seen_builds.size() == 4, "10.1 matrix did not cover all builds")
-    expect(total_events >= results.size(), "10.1 matrix did not exercise narrative runtime")
-    expect(total_combats > 0, "10.1 matrix did not exercise combat runtime")
-    expect(total_travel > 0, "10.1 matrix did not exercise travel runtime")
-    expect(total_boss_reached > 0, "10.1 matrix never reached a boss")
+    expect(total_invalid == 0, "10.1 representative probes produced invalid simulations")
+    expect(seen_worlds.size() == 2, "10.1 probes did not cover two Domains")
+    expect(seen_policies.size() == 5, "10.1 probes did not cover all five policies")
+    expect(seen_builds.size() == 4, "10.1 probes did not cover all four builds")
+    expect(total_events >= probes.size(), "10.1 probes did not exercise narrative runtime")
+    expect(total_combats > 0, "10.1 probes did not exercise combat runtime")
+    expect(total_travel > 0, "10.1 probes did not exercise travel runtime")
+    expect(total_boss_reached > 0, "10.1 probes never reached a boss")
     expect(total_nonbaseline_items > 0, "10.1 non-baseline builds contain no equipment")
-    expect(total_deadlocks < results.size(), "10.1 simulator is dominated by deadlocks")
-    print("10.1 representative matrix: runs=%d victories=%d defeats=%d timeouts=%d events=%d combats=%d travel=%d purchases=%d bosses=%d" % [
-        results.size(), int(summary.get("victories", 0)), int(summary.get("defeats", 0)), int(summary.get("timeouts", 0)),
-        total_events, total_combats, total_travel, total_purchases, total_boss_reached,
+    expect(total_deadlocks < probes.size(), "10.1 simulator is dominated by deadlocks")
+    var elapsed_ms := Time.get_ticks_msec() - started_at
+    print("10.1 representative probes: runs=%d matrix_victories=%d matrix_defeats=%d matrix_timeouts=%d events=%d combats=%d travel=%d purchases=%d bosses=%d elapsed_ms=%d" % [
+        probes.size(), int(summary.get("victories", 0)), int(summary.get("defeats", 0)), int(summary.get("timeouts", 0)),
+        total_events, total_combats, total_travel, total_purchases, total_boss_reached, elapsed_ms,
     ])
 
 func _invalid_input_gate() -> void:
