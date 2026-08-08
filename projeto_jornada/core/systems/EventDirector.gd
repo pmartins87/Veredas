@@ -1,15 +1,13 @@
 extends Node
 
+var _candidate_cache: Dictionary = {}
+
 func choose_event(world_id: String, location_id: String = "") -> Dictionary:
     var candidates: Array = []
     var weights: Array = []
     var recent: Array = GameState.run.get("recent_events", [])
-    for event in ContentRegistry.all("events"):
-        if str(event.get("world_id", "")) != world_id:
-            continue
-        var ev_loc := str(event.get("location_id", ""))
-        if location_id != "" and ev_loc != "" and ev_loc != location_id:
-            continue
+    for event_variant in _static_candidates(world_id, location_id):
+        var event: Dictionary = event_variant as Dictionary
         if int(event.get("max_per_run", 99)) <= _times_seen(str(event.get("id", ""))):
             continue
         if event.has("condition") and not ConditionEngine.evaluate(event.get("condition", {})):
@@ -55,6 +53,28 @@ func apply_choice(event: Dictionary, choice_index: int) -> bool:
 
 func create_debt(debt_id: String) -> bool:
     return NarrativeDebtEngine.create(debt_id)
+
+func clear_candidate_cache() -> void:
+    _candidate_cache.clear()
+
+func cached_candidate_sets() -> int:
+    return _candidate_cache.size()
+
+func _static_candidates(world_id: String, location_id: String) -> Array:
+    var key := "%s|%s" % [world_id, location_id]
+    if _candidate_cache.has(key):
+        return _candidate_cache[key] as Array
+    var result: Array = []
+    for event_variant in ContentRegistry.all("events"):
+        var event: Dictionary = event_variant as Dictionary
+        if str(event.get("world_id", "")) != world_id:
+            continue
+        var ev_loc := str(event.get("location_id", ""))
+        if location_id != "" and ev_loc != "" and ev_loc != location_id:
+            continue
+        result.append(event)
+    _candidate_cache[key] = result
+    return result
 
 func _times_seen(event_id: String) -> int:
     return int(GameState.run.get("event_counts", {}).get(event_id, 0))
