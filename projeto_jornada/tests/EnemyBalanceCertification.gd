@@ -107,8 +107,8 @@ func _structure_gate() -> void:
         var rank := str(boss.get("rank", ""))
         expect(tier >= 1 and tier <= 5, "%s boss tier outside 1..5" % boss_id)
         expect(rank in ["subboss", "boss"], "%s has invalid boss rank" % boss_id)
-        expect(int(boss.get("hp", 0)) >= 36 and int(boss.get("hp", 0)) <= 52, "%s boss HP outside anti-sponge envelope" % boss_id)
-        expect(int(boss.get("posture", 0)) >= 16 and int(boss.get("posture", 0)) <= 24, "%s boss posture outside anti-sponge envelope" % boss_id)
+        expect(int(boss.get("hp", 0)) >= 30 and int(boss.get("hp", 0)) <= 38, "%s boss HP outside anti-sponge envelope" % boss_id)
+        expect(int(boss.get("posture", 0)) >= 15 and int(boss.get("posture", 0)) <= 19, "%s boss posture outside anti-sponge envelope" % boss_id)
         expect(str(boss.get("mechanic", "")) in VALID_MECHANICS, "%s has invalid base boss mechanic" % boss_id)
         var phases: Array = boss.get("phases", []) as Array
         expect(phases.size() == 3, "%s must contain exactly three combat phases" % boss_id)
@@ -151,7 +151,7 @@ func _intent_gate() -> void:
             bare.elite_affix_data = {}
             bare.starting_guard = 0
             bare.damage_bonus = 0
-            var changed := int(monster.get("starting_guard",0)) != 0 or int(monster.get("posture",0)) != int(bare.get("posture",0))
+            var changed: bool = int(monster.get("starting_guard",0)) != 0 or int(monster.get("posture",0)) != int(bare.get("posture",0))
             for roll in [0.10, 0.50, 0.76, 0.93]:
                 var with_affix := enemy_engine.roll_intent(monster, {}, float(roll))
                 var without_affix := enemy_engine.roll_intent(bare, {}, float(roll))
