@@ -1,7 +1,7 @@
 extends Node
 
 const DEFAULT_MAX_TEXTURES := 24
-var max_textures := DEFAULT_MAX_TEXTURES
+var max_textures: int = DEFAULT_MAX_TEXTURES
 var _cache: Dictionary = {}
 var _usage: Array[String] = []
 
@@ -26,7 +26,7 @@ func texture(path: String) -> Texture2D:
         return _cache[path] as Texture2D
     if not ResourceLoader.exists(path):
         return null
-    var loaded = ResourceLoader.load(path)
+    var loaded: Resource = ResourceLoader.load(path)
     if not (loaded is Texture2D):
         return null
     _cache[path] = loaded
@@ -35,11 +35,11 @@ func texture(path: String) -> Texture2D:
     return loaded as Texture2D
 
 func preload_paths(paths: Array) -> int:
-    var loaded := 0
+    var loaded_count: int = 0
     for path_variant in paths:
         if texture(str(path_variant)) != null:
-            loaded += 1
-    return loaded
+            loaded_count += 1
+    return loaded_count
 
 func release(path: String) -> void:
     _cache.erase(path)
@@ -50,12 +50,13 @@ func release_all() -> void:
     _usage.clear()
 
 func release_except(paths: Array) -> void:
-    var keep := {}
+    var keep: Dictionary = {}
     for path_variant in paths:
         keep[str(path_variant)] = true
-    for path in _cache.keys():
-        if not keep.has(str(path)):
-            release(str(path))
+    for path_variant in _cache.keys():
+        var path: String = str(path_variant)
+        if not keep.has(path):
+            release(path)
 
 func cached_count() -> int:
     return _cache.size()
@@ -69,5 +70,5 @@ func _touch(path: String) -> void:
 
 func _evict_if_needed() -> void:
     while _usage.size() > max_textures:
-        var oldest := _usage.pop_front()
+        var oldest: String = str(_usage.pop_front())
         _cache.erase(oldest)
