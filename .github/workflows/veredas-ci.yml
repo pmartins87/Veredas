@@ -69,3 +69,13 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$output" | grep -q 'PHASE_CERTIFICATION PASS: 1.10 2.10 3.10 4.10'
+
+      - name: Phase 8 mobile certification 8.1-8.4
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/mobile_certification.tscn 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|MOBILE_CERTIFICATION FAIL'; then
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -q 'MOBILE_CERTIFICATION PASS: 8.1 8.2 8.3 8.4'
