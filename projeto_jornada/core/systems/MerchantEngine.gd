@@ -2,6 +2,9 @@ extends Node
 
 const RARITY_PRICE := {"common":8,"uncommon":13,"rare":22,"singular":36,"relic":58,"echo":90}
 
+func trading_disabled() -> bool:
+    return bool((GameState.run.get("flags", {}) as Dictionary).get("modifier.no_trade", false))
+
 func price(item_id: String) -> int:
     var item: Dictionary = ContentRegistry.get_record(item_id)
     if item.is_empty():
@@ -12,6 +15,8 @@ func price(item_id: String) -> int:
     return base_price + maxi(0, int(effect.get("value", 0)) - 1) * 2
 
 func stock(world_id: String, size: int = 8) -> Array:
+    if trading_disabled():
+        return []
     var items: Array = []
     for item_variant in ContentRegistry.all("items"):
         var item: Dictionary = item_variant as Dictionary
@@ -30,10 +35,14 @@ func stock(world_id: String, size: int = 8) -> Array:
     return result
 
 func can_buy(item_id: String) -> bool:
+    if trading_disabled():
+        return false
     var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary
     return int(resources.get("fragments", 0)) >= price(item_id)
 
 func buy(item_id: String) -> bool:
+    if trading_disabled():
+        return false
     var cost: int = price(item_id)
     if cost <= 0 or not can_buy(item_id):
         return false
@@ -43,6 +52,8 @@ func buy(item_id: String) -> bool:
     return InventoryEngine.add_item(item_id)
 
 func sell(item_id: String) -> bool:
+    if trading_disabled():
+        return false
     if not InventoryEngine.has_item(item_id):
         return false
     if not InventoryEngine.remove_item(item_id):
