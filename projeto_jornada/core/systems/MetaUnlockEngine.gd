@@ -102,6 +102,8 @@ func unlock_route(world_id: String) -> bool:
         _append_unique(hub_routes, world_id)
         hub.routes = hub_routes
         GameState.profile.hub = hub
+    _sync_legacy_fields()
+    CodexProgressEngine.new().discover(world_id, "route_unlock")
     evaluate_progression()
     return true
 
@@ -113,6 +115,7 @@ func unlock_character(character_id: String) -> bool:
     _append_unique(unlocks.codex, character_id)
     GameState.profile.unlocks = unlocks
     _sync_legacy_fields()
+    CodexProgressEngine.new().discover(character_id, "character_unlock")
     return true
 
 func unlock_mode(mode_id: String) -> bool:
@@ -130,7 +133,7 @@ func discover(content_id: String) -> bool:
     _append_unique(unlocks.codex, content_id)
     GameState.profile.unlocks = unlocks
     _sync_legacy_fields()
-    return true
+    return CodexProgressEngine.new().discover(content_id, "journey")
 
 func is_character_unlocked(character_id: String) -> bool:
     return character_id in (ensure_state().get("characters", []) as Array)
