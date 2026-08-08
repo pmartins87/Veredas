@@ -28,5 +28,8 @@ jobs:
         run: |
           set -o pipefail
           timeout 60s /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/simulation_parser_probe.tscn 2>&1 | tee /tmp/simulation-parser.log
-          ! grep -E 'SCRIPT ERROR|Parse Error|Compile Error|SIMULATION_PARSER_PROBE .* failed' /tmp/simulation-parser.log
+          if grep -E 'SCRIPT ERROR|Parse Error|Compile Error|SIMULATION_PARSER_PROBE .* failed' /tmp/simulation-parser.log; then
+            echo 'Simulation parser probe emitted a script/parser/compile error.'
+            exit 1
+          fi
           grep -Fq 'SIMULATION_PARSER_PROBE PASS' /tmp/simulation-parser.log
