@@ -9,8 +9,9 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
     if enemy_record.is_empty():
         return {}
     var is_boss := enemy_id.begins_with("boss.")
-    var enemy_hp := int(enemy_record.get("hp", 30 if is_boss else 12))
-    var enemy_posture := int(enemy_record.get("posture", 18 if is_boss else 8))
+    var difficulty_id := DifficultyEngine.current_id()
+    var enemy_hp := DifficultyEngine.scale_enemy_health(int(enemy_record.get("hp", 30 if is_boss else 12)), difficulty_id)
+    var enemy_posture := DifficultyEngine.scale_enemy_posture(int(enemy_record.get("posture", 18 if is_boss else 8)), difficulty_id)
     var bonuses := InventoryEngine.equipment_bonuses()
     var base_max_vigor := int(GameState.run.get("max_vigor", 8))
     var effective_load := maxi(0, int(bonuses.get("load", 0)))
@@ -23,6 +24,7 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
     combat = {
         "active": true,
         "turn": 1,
+        "difficulty_id":difficulty_id,
         "player": {
             "hp":player_hp,"max_hp":int(GameState.run.get("max_health",16)),
             "vigor":player_vigor,"max_vigor":effective_max_vigor,
@@ -164,7 +166,7 @@ func _resolve_enemy() -> void:
         var posture_gain := absi(int(intent.get("posture", -4)))
         enemy.posture = mini(int(enemy.get("posture",0)) + posture_gain, int(enemy.get("max_posture",12)))
     else:
-        var damage := maxi(0, int(intent.get("damage",0)))
+        var damage := DifficultyEngine.scale_enemy_damage(maxi(0, int(intent.get("damage",0))), str(combat.get("difficulty_id", DifficultyEngine.DEFAULT_ID)))
         var hits := maxi(1, int(intent.get("hits",1)))
         for _hit in range(hits):
             var absorbed := mini(damage, int(player.get("guard",0)))
