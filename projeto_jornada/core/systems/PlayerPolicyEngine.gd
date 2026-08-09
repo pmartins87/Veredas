@@ -165,8 +165,6 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
         if not explorer_progress_ability.is_empty():
             return {"kind":"ability", "id":str(explorer_progress_ability.get("id", ""))}
-        if not utility_ability.is_empty() and not movement_locked:
-            return {"kind":"ability", "id":str(utility_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 3:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
