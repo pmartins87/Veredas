@@ -7,6 +7,10 @@ EXPECTED={'worlds':12,'locations':120,'families':96,'monsters':300,'bosses':60,'
 def load(n): return json.loads((DATA/f'{n}.json').read_text(encoding='utf-8'))
 def norm(s):
  s=unicodedata.normalize('NFKD',s).encode('ascii','ignore').decode().lower(); s=re.sub(r'\d+','N',s); return re.sub(r'\s+',' ',s).strip()
+def effect_rows(value):
+ if isinstance(value,list): return [e for e in value if isinstance(e,dict)]
+ if isinstance(value,dict): return [value]
+ return []
 rows={}; ids={}; errors=[]
 for k,count in EXPECTED.items():
  a=load(k); rows[k]=a
@@ -37,10 +41,14 @@ for r in rows['characters']:
 for r in rows['events']:
  ref(r,'world_id','world.')
  if r.get('location_id'): ref(r,'location_id','location.')
+ if r.get('character_id'): ref(r,'character_id','character.')
+ if r.get('debt_id'): ref(r,'debt_id','debt.')
+ for mark_key in ['memory_mark_id','callback_mark_id']:
+  if r.get(mark_key): ref(r,mark_key,'mark.')
  for c in r.get('choices',[]):
-  e=c.get('effect',{})
-  for key in ['mark_id','debt_id']:
-   if e.get(key) and e[key] not in ids: errors.append(f"{r['id']}: broken effect ref {e[key]}")
+  for e in effect_rows(c.get('effect',{})):
+   for key in ['mark_id','debt_id']:
+    if e.get(key) and e[key] not in ids: errors.append(f"{r['id']}: broken effect ref {e[key]}")
 unique_text=len({norm(e.get('text','')) for e in rows['events']})/len(rows['events'])
 choice_sigs=len({tuple(norm(c.get('text','')) for c in e.get('choices',[])) for e in rows['events']})
 if unique_text<.80: errors.append(f'event uniqueness too low {unique_text:.3f}')
