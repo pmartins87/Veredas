@@ -28,18 +28,24 @@ jobs:
           python tools/enforce_character_horizontal_budget.py
           python tools/refine_enemy_balance.py
           python tools/refine_item_economy.py
-      - name: Patch cautious prolonged-combat cadence locally
+      - name: Patch simulator-only stall recovery locally
         working-directory: projeto_jornada
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path('core/systems/PlayerPolicyEngine.gd')
+          p = Path('core/systems/JourneySimulationEngine.gd')
           s = p.read_text(encoding='utf-8')
-          old = '''    if policy_id == "cautious":\n        # A telegraphed heavy attack is mitigated before healing. Healing first\n'''
-          new = '''    if policy_id == "cautious":\n        # A cautious policy must still convert survival into progress. In very\n        # long fights, force one progress turn every four rounds so a repeating\n        # severe intent cannot create a guard/heal loop with no win condition.\n        var prolonged_progress_turn := int(combat.get("turn", 1)) >= 12 and int(combat.get("turn", 1)) % 4 == 0\n        if prolonged_progress_turn:\n            if not progress_ability.is_empty():\n                return {"kind":"ability", "id":str(progress_ability.get("id", ""))}\n            if int(player.get("vigor", 0)) >= 2:\n                return {"kind":"action", "id":"precise"}\n            return {"kind":"action", "id":"strike"}\n        # A telegraphed heavy attack is mitigated before healing. Healing first\n'''
+          old = '''    var rounds := 0\n    while bool(CombatEngine.combat.get("active", false)) and rounds < MAX_COMBAT_ROUNDS:\n        rounds += 1\n        var before_turn := int(CombatEngine.combat.get("turn", 0))\n        var before_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))\n        var before_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))\n        var decision := policy_engine.choose_combat_decision(policy_id, CombatEngine.combat)\n        _apply_combat_decision(decision)\n        if bool(CombatEngine.combat.get("active", false)):\n            var after_turn := int(CombatEngine.combat.get("turn", 0))\n            var after_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))\n            var after_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))\n            if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:\n                _combat_fallback()\n'''
+          new = '''    var rounds := 0\n    var stalled_rounds := 0\n    while bool(CombatEngine.combat.get("active", false)) and rounds < MAX_COMBAT_ROUNDS:\n        rounds += 1\n        var before_turn := int(CombatEngine.combat.get("turn", 0))\n        var before_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))\n        var before_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))\n        var decision := _combat_progress_decision() if stalled_rounds >= 6 else policy_engine.choose_combat_decision(policy_id, CombatEngine.combat)\n        _apply_combat_decision(decision)\n        if bool(CombatEngine.combat.get("active", false)):\n            var after_turn := int(CombatEngine.combat.get("turn", 0))\n            var after_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))\n            var after_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))\n            if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:\n                _combat_fallback()\n                after_enemy_hp = int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))\n            if after_enemy_hp < before_enemy_hp:\n                stalled_rounds = 0\n            else:\n                stalled_rounds += 1\n'''
           if s.count(old) != 1:
-              raise SystemExit('cautious anchor mismatch')
-          p.write_text(s.replace(old, new), encoding='utf-8')
+              raise SystemExit('combat loop anchor mismatch')
+          s = s.replace(old, new)
+          anchor = '''func _combat_fallback() -> void:\n'''
+          helper = '''func _combat_progress_decision() -> Dictionary:\n    var player: Dictionary = CombatEngine.combat.get("player", {}) as Dictionary\n    var distance := int(player.get("distance", 1))\n    var movement_locked := StatusEngine.movement_locked(player)\n    var weapon_range := InventoryEngine.weapon_range()\n    if InventoryEngine.equipped_item("weapon").is_empty():\n        weapon_range = Vector2i(0, 0)\n    if distance < weapon_range.x:\n        return {"kind":"action", "id":"guard" if movement_locked else "retreat"}\n    if distance > weapon_range.y:\n        return {"kind":"action", "id":"guard" if movement_locked else "advance"}\n    if int(player.get("vigor", 0)) >= 2:\n        return {"kind":"action", "id":"precise"}\n    return {"kind":"action", "id":"strike"}\n\n'''
+          if s.count(anchor) != 1:
+              raise SystemExit('fallback helper anchor mismatch')
+          s = s.replace(anchor, helper + anchor)
+          p.write_text(s, encoding='utf-8')
           PY
       - name: Download Godot
         run: |
