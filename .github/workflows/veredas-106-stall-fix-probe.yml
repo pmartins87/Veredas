@@ -49,11 +49,26 @@ jobs:
       - name: Import
         run: /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit
       - name: Re-certify 10.2
-        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/character_balance_certification.tscn 'CHARACTER_BALANCE_CERTIFICATION FAIL' 'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/character_balance_certification.tscn \
+            'CHARACTER_BALANCE_CERTIFICATION FAIL' \
+            'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
       - name: Re-certify 10.3
-        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/enemy_balance_certification.tscn 'ENEMY_BALANCE_CERTIFICATION FAIL' 'ENEMY_BALANCE_CERTIFICATION PASS: 10.3'
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/enemy_balance_certification.tscn \
+            'ENEMY_BALANCE_CERTIFICATION FAIL' \
+            'ENEMY_BALANCE_CERTIFICATION PASS: 10.3'
       - name: Add integrated narrative fixture
         working-directory: projeto_jornada
         run: python tools/refine_narrative_balance.py
       - name: Certify 10.6 candidate
-        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/difficulty_balance_certification.tscn 'DIFFICULTY_BALANCE_CERTIFICATION FAIL' 'DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6'
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/difficulty_balance_certification.tscn \
+            'DIFFICULTY_BALANCE_CERTIFICATION FAIL' \
+            'DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6'
