@@ -50,12 +50,12 @@ jobs:
             exit 1
           fi
 
-      - name: Run paired difficulty matrix
+      - name: Run permanent 10.6 certification
         run: |
           set -o pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/difficulty_balance_probe.tscn 2>&1)
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/difficulty_balance_certification.tscn 2>&1)
           printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|DIFFICULTY_BALANCE_PROBE FAIL'; then
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|DIFFICULTY_BALANCE_CERTIFICATION FAIL'; then
             exit 1
           fi
-          printf '%s\n' "$output" | grep -q 'DIFFICULTY_BALANCE_PROBE PASS: 10.6 instrumentation'
+          printf '%s\n' "$output" | grep -q 'DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6'
