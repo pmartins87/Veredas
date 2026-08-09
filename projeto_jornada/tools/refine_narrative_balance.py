@@ -122,6 +122,12 @@ def main() -> None:
             transit_callbacks.append(event)
         elif pool == "arc":
             arcs_by_world[str(event.get("world_id", ""))].append(event)
+        elif pool == "personal_story":
+            # A personal chapter is a unique narrative beat, not ambient filler.
+            # Make its single-use semantics explicit. With max_per_run=1 a
+            # cooldown would be redundant, so zero is intentional and valid.
+            event["max_per_run"] = 1
+            event["cooldown_turns"] = 0
 
     if set(debt_events) != set(debt_by_location) or set(callback_events) != set(debt_by_location):
         raise SystemExit("Debt/callback event locations do not match the 120 debt origins")
@@ -173,10 +179,13 @@ def main() -> None:
         raise SystemExit(f"Expected 120 distinct debt memory marks, got {len(linked_marks)}")
 
     # Transit consequences are a pressure-release valve for any unresolved debt,
-    # not ambient events that appear when nothing is owed.
+    # not ambient events that appear when nothing is owed. Unlike one-shot arc
+    # and personal-story beats these events can recur, so they require a real
+    # cooldown to prevent debt pressure from spamming the same transit beat.
     for event in transit_callbacks:
         event["narrative_role"] = "debt_transit_pressure"
         event["condition"] = {"op": "debt_any"}
+        event["cooldown_turns"] = 4
 
     # Convert the 17 loose arc events per Domain into three finite causal threads.
     # Existing prose/choice effects are untouched; every response advances the
@@ -202,6 +211,8 @@ def main() -> None:
                 event["arc_length"] = length
                 event["narrative_role"] = "arc_stage"
                 event["weight"] = round(1.8 + min(stage - 1, 4) * 0.30, 2)
+                event["max_per_run"] = 1
+                event["cooldown_turns"] = 0
                 if previous_flag:
                     event["condition"] = combine_condition(
                         event.get("condition", {}),
