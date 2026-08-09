@@ -18,16 +18,15 @@ jobs:
         with:
           ref: projeto-jornada-snapshots
           fetch-depth: 0
-      - name: Apply targeted final character tuning without changing gates
+      - name: Remove redundant in-range explorer mobility without changing gates
         run: |
-          python -c "from pathlib import Path; p=Path('projeto_jornada/tools/refine_character_balance.py'); s=p.read_text(encoding='utf-8'); reps=[('(\"status\", \"resource\", \"explorer\", \"expert\", \"controller\", \"rooted\")','(\"status\", \"resource\", \"balanced\", \"expert\", \"controller\", \"rooted\")'),('(\"move\", \"debt\", \"explorer\", \"intermediate\", \"raider\", \"fear\")','(\"move\", \"debt\", \"balanced\", \"intermediate\", \"raider\", \"fear\")'),('(\"mark\", \"resource\", \"explorer\", \"intermediate\", \"scholar\", \"fear\")','(\"mark\", \"resource\", \"balanced\", \"intermediate\", \"scholar\", \"fear\")')]; [(s.count(a)==1) or (_ for _ in ()).throw(SystemExit('policy target mismatch '+a)) for a,b in reps]; [None for a,b in reps if not (s:=s.replace(a,b,1))]; p.write_text(s,encoding='utf-8')"
-          python -c "from pathlib import Path; p=Path('projeto_jornada/tools/enforce_character_horizontal_budget.py'); s=p.read_text(encoding='utf-8'); nl=chr(10); anchor='    \"Peregrina da Sede\": {'+nl+'        \"heal\": {\"power\": 4, \"cost\": 3},'+nl+'        \"resource\": {\"power\": 2, \"cost\": 0},'+nl+'    },'+nl+'}'; insert='    \"Peregrina da Sede\": {'+nl+'        \"heal\": {\"power\": 4, \"cost\": 3},'+nl+'        \"resource\": {\"power\": 2, \"cost\": 0},'+nl+'    },'+nl+'    \"Barqueiro do Reflexo\": {'+nl+'        \"counter\": {\"power\": 4, \"cost\": 3},'+nl+'    },'+nl+'    \"Magistrada do Limiar\": {'+nl+'        \"guard\": {\"power\": 4, \"cost\": 2},'+nl+'    },'+nl+'    \"Portador da Brasa\": {'+nl+'        \"damage\": {\"power\": 4, \"cost\": 1},'+nl+'    },'+nl+'}'; (s.count(anchor)==1) or (_ for _ in ()).throw(SystemExit('tuning insertion mismatch')); s=s.replace(anchor,insert,1); old='    print(\"CHARACTER_TARGETED_TUNING PASS: Vigia de Maré and Peregrina da Sede\")'; new='    print(\"CHARACTER_TARGETED_TUNING PASS: %s\" % \", \".join(sorted(tuned)))'; (s.count(old)==1) or (_ for _ in ()).throw(SystemExit('print target mismatch')); p.write_text(s.replace(old,new,1),encoding='utf-8')"
+          python -c "from pathlib import Path; p=Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd'); s=p.read_text(encoding='utf-8'); old='        if not utility_ability.is_empty() and not movement_locked:\n            return {\"kind\":\"ability\", \"id\":str(utility_ability.get(\"id\", \"\"))}\n        if int(player.get(\"vigor\", 0)) >= 3:\n'; new='        if int(player.get(\"vigor\", 0)) >= 3:\n'; (s.count(old)==1) or (_ for _ in ()).throw(SystemExit('explorer mobility target mismatch')); p.write_text(s.replace(old,new,1),encoding='utf-8')"
           git diff --check
-          git diff -- projeto_jornada/tools/refine_character_balance.py projeto_jornada/tools/enforce_character_horizontal_budget.py
-      - name: Commit targeted final tuning
+          git diff -- projeto_jornada/core/systems/PlayerPolicyEngine.gd
+      - name: Commit final policy cleanup
         run: |
           git config user.name 'Veredas CI'
           git config user.email 'actions@users.noreply.github.com'
-          git add projeto_jornada/tools/refine_character_balance.py projeto_jornada/tools/enforce_character_horizontal_budget.py
-          git commit -m 'Tune final 10.2 character outliers'
+          git add projeto_jornada/core/systems/PlayerPolicyEngine.gd
+          git commit -m 'Avoid redundant explorer mobility in range'
           git push origin HEAD:projeto-jornada-snapshots
