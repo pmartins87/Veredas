@@ -46,6 +46,13 @@ var simulation_override := ""
 func normalize_id(difficulty_id: String) -> String:
     return difficulty_id if PROFILES.has(difficulty_id) else DEFAULT_ID
 
+func requested_id(explicit_id: String = "") -> String:
+    if explicit_id != "":
+        return normalize_id(explicit_id)
+    if simulation_override != "":
+        return normalize_id(simulation_override)
+    return DEFAULT_ID
+
 func profile(difficulty_id: String = "") -> Dictionary:
     var resolved := current_id() if difficulty_id == "" else normalize_id(difficulty_id)
     return (PROFILES[resolved] as Dictionary).duplicate(true)
