@@ -1,0 +1,95 @@
+name: Veredas 10.7 Provision Attrition Probe
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-107-provision-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild mechanical fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py
+          python tools/refine_npc_authenticity.py
+          python tools/refine_character_balance.py
+          python tools/enforce_character_horizontal_budget.py
+          python tools/refine_enemy_balance.py
+          python tools/refine_item_economy.py
+      - name: Patch candidate travel attrition locally
+        working-directory: projeto_jornada
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('core/systems/LocationEngine.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    GameState.run.location_id = location_id\n'''
+          new = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    if location_id != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.location_id = location_id\n'''
+          if s.count(old) != 1:
+              raise SystemExit('travel_to anchor mismatch')
+          s = s.replace(old, new)
+          old = '''    if target not in locations:\n        return false\n    GameState.run.world_id = world_id\n'''
+          new = '''    if target not in locations:\n        return false\n    if world_id != str(GameState.run.get("world_id", "")) or target != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.world_id = world_id\n'''
+          if s.count(old) != 1:
+              raise SystemExit('travel_world anchor mismatch')
+          s = s.replace(old, new)
+          anchor = '''func _remember(location_id: String) -> void:\n'''
+          helper = '''func _apply_travel_attrition() -> void:\n    var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary\n    var provisions := maxi(0, int(resources.get("provisions", 0)))\n    if provisions > 0:\n        resources.provisions = provisions - 1\n        GameState.run.resources = resources\n        return\n    var vigor := maxi(0, int(GameState.run.get("vigor", 0)))\n    if vigor > 0:\n        GameState.run.vigor = vigor - 1\n        return\n    var health := maxi(1, int(GameState.run.get("health", 1)))\n    GameState.run.health = maxi(1, health - 1)\n\n'''
+          if s.count(anchor) != 1:
+              raise SystemExit('attrition helper anchor mismatch')
+          s = s.replace(anchor, helper + anchor)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Download Godot
+        run: |
+          curl -fL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import
+        run: /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit
+      - name: Re-certify 10.2 mechanical baseline
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/character_balance_certification.tscn \
+            'CHARACTER_BALANCE_CERTIFICATION FAIL' \
+            'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
+      - name: Add integrated narrative fixture
+        working-directory: projeto_jornada
+        run: python tools/refine_narrative_balance.py
+      - name: Re-certify integrated journey 10.1
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/journey_simulation_certification.tscn \
+            'JOURNEY_SIMULATION_CERTIFICATION FAIL' \
+            'JOURNEY_SIMULATION_CERTIFICATION PASS: 10.1'
+      - name: Re-certify narrative 10.5
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/narrative_balance_certification.tscn \
+            'NARRATIVE_BALANCE_CERTIFICATION FAIL' \
+            'NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5'
+      - name: Re-certify difficulty 10.6
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/difficulty_balance_certification.tscn \
+            'DIFFICULTY_BALANCE_CERTIFICATION FAIL' \
+            'DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6'
+      - name: Measure 10.7 candidate
+        run: |
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/journey_pacing_probe.tscn
