@@ -63,6 +63,7 @@ jobs:
             'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
 
       - name: Certify Phase 10.3 enemy balance
+        if: ${{ always() }}
         run: |
           bash projeto_jornada/tools/run_godot_gate.sh \
             /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
