@@ -30,7 +30,7 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
             "vigor":player_vigor,"max_vigor":effective_max_vigor,
             "posture":base_posture + int(bonuses.get("posture",0)),
             "max_posture":base_posture + int(bonuses.get("posture",0)),
-            "guard":base_guard + int(bonuses.get("guard",0)),"distance":1,"states":[],
+            "guard":mini(BASIC_GUARD_CAP, base_guard + int(bonuses.get("guard",0))),"distance":1,"states":[],
             "damage_bonus":int(bonuses.get("damage",0)),
             "posture_bonus":int(bonuses.get("posture",0)),
             "range_bonus":int(bonuses.get("range",0)),
