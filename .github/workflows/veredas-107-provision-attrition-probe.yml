@@ -36,10 +36,10 @@ jobs:
 
           p = Path('core/systems/JourneySimulationEngine.gd')
           s = p.read_text(encoding='utf-8')
-          old = '''    if not RunFlowEngine.start_journey(character_id, seed_value):\n        return _invalid_result("journey_start_failed", seed_value, character_id, policy_id, build_id)\n\n    var world_id := str(GameState.run.get("world_id", ""))\n'''
-          new = '''    if not RunFlowEngine.start_journey(character_id, seed_value):\n        return _invalid_result("journey_start_failed", seed_value, character_id, policy_id, build_id)\n    var simulation_flags: Dictionary = GameState.run.get("flags", {}) as Dictionary\n    simulation_flags["simulation.no_attrition"] = not bool(config.get("attrition_enabled", true))\n    GameState.run.flags = simulation_flags\n\n    var world_id := str(GameState.run.get("world_id", ""))\n'''
+          old = '''    flags["simulation.build"] = build_id\n    flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))\n    GameState.run.flags = flags\n'''
+          new = '''    flags["simulation.build"] = build_id\n    flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))\n    flags["simulation.no_attrition"] = not bool(config.get("attrition_enabled", true))\n    GameState.run.flags = flags\n'''
           if s.count(old) != 1:
-              raise SystemExit('simulation attrition anchor mismatch')
+              raise SystemExit(f'simulation attrition anchor mismatch: {s.count(old)}')
           p.write_text(s.replace(old, new), encoding='utf-8')
 
           p = Path('core/systems/LocationEngine.gd')
@@ -47,17 +47,17 @@ jobs:
           old = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    GameState.run.location_id = location_id\n'''
           new = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    if location_id != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.location_id = location_id\n'''
           if s.count(old) != 1:
-              raise SystemExit('travel_to anchor mismatch')
+              raise SystemExit(f'travel_to anchor mismatch: {s.count(old)}')
           s = s.replace(old, new)
           old = '''    if target not in locations:\n        return false\n    GameState.run.world_id = world_id\n'''
           new = '''    if target not in locations:\n        return false\n    if world_id != str(GameState.run.get("world_id", "")) or target != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.world_id = world_id\n'''
           if s.count(old) != 1:
-              raise SystemExit('travel_world anchor mismatch')
+              raise SystemExit(f'travel_world anchor mismatch: {s.count(old)}')
           s = s.replace(old, new)
           anchor = '''func _remember(location_id: String) -> void:\n'''
           helper = '''func _apply_travel_attrition() -> void:\n    var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary\n    if bool(flags.get("simulation.no_attrition", false)):\n        return\n    var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary\n    var provisions := maxi(0, int(resources.get("provisions", 0)))\n    if provisions > 0:\n        resources.provisions = provisions - 1\n        GameState.run.resources = resources\n        return\n    var vigor := maxi(0, int(GameState.run.get("vigor", 0)))\n    if vigor > 0:\n        GameState.run.vigor = vigor - 1\n        return\n    var health := maxi(1, int(GameState.run.get("health", 1)))\n    GameState.run.health = maxi(1, health - 1)\n\n'''
           if s.count(anchor) != 1:
-              raise SystemExit('attrition helper anchor mismatch')
+              raise SystemExit(f'attrition helper anchor mismatch: {s.count(anchor)}')
           p.write_text(s.replace(anchor, helper + anchor), encoding='utf-8')
 
           p = Path('tests/CharacterBalanceCertification.gd')
@@ -65,7 +65,7 @@ jobs:
           old = '''                    "build_id":"baseline",\n                    "economy_enabled":false,\n                    "seed":seed_value,\n'''
           new = '''                    "build_id":"baseline",\n                    "economy_enabled":false,\n                    "attrition_enabled":false,\n                    "seed":seed_value,\n'''
           if s.count(old) != 1:
-              raise SystemExit('10.2 attrition isolation anchor mismatch')
+              raise SystemExit(f'10.2 attrition isolation anchor mismatch: {s.count(old)}')
           p.write_text(s.replace(old, new), encoding='utf-8')
           PY
       - name: Download Godot
