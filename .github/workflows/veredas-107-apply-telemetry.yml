@@ -1,0 +1,105 @@
+name: Veredas 10.7 Apply Pacing Telemetry
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-107-telemetry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Add observational journey telemetry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('projeto_jornada/core/systems/JourneySimulationEngine.gd')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''    var build_items := _apply_build(world_id, build_id)\n\n    var stats := {\n        "events":0,\n        "choices":0,\n        "combats":0,\n        "combat_wins":0,\n        "combat_losses":0,\n        "combat_timeouts":0,\n        "boss_reached":false,\n        "boss_win":false,\n        "purchases":0,\n        "travel_actions":0,\n        "deadlocks":0,\n    }\n'''
+          new = '''    var build_items := _apply_build(world_id, build_id)\n\n    var start_resources: Dictionary = GameState.run.get("resources", {}) as Dictionary\n    var stats := {\n        "events":0,\n        "choices":0,\n        "combats":0,\n        "combat_wins":0,\n        "combat_losses":0,\n        "combat_timeouts":0,\n        "combat_rounds":0,\n        "boss_reached":false,\n        "boss_win":false,\n        "boss_step":0,\n        "first_combat_step":0,\n        "first_purchase_step":0,\n        "first_loot_step":0,\n        "purchases":0,\n        "travel_actions":0,\n        "deadlocks":0,\n        "current_step":0,\n        "start_health":int(GameState.run.get("health", 0)),\n        "start_vigor":int(GameState.run.get("vigor", 0)),\n        "start_fragments":int(start_resources.get("fragments", 0)),\n        "start_provisions":int(start_resources.get("provisions", 0)),\n        "min_health":int(GameState.run.get("health", 0)),\n        "min_vigor":int(GameState.run.get("vigor", 0)),\n        "min_fragments":int(start_resources.get("fragments", 0)),\n        "max_fragments":int(start_resources.get("fragments", 0)),\n        "min_provisions":int(start_resources.get("provisions", 0)),\n        "max_provisions":int(start_resources.get("provisions", 0)),\n        "damage_taken":0,\n        "healing_received":0,\n        "vigor_spent":0,\n        "vigor_recovered":0,\n        "fragments_spent":0,\n        "fragments_gained":0,\n        "provisions_spent":0,\n        "provisions_gained":0,\n        "last_health":int(GameState.run.get("health", 0)),\n        "last_vigor":int(GameState.run.get("vigor", 0)),\n        "last_fragments":int(start_resources.get("fragments", 0)),\n        "last_provisions":int(start_resources.get("provisions", 0)),\n    }\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'stats anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''    while bool(GameState.run.get("active", false)) and steps < max_steps:\n        steps += 1\n        var mode := str(GameState.run.get("mode", "story"))\n'''
+          new = '''    while bool(GameState.run.get("active", false)) and steps < max_steps:\n        steps += 1\n        stats.current_step = steps\n        _observe_run(stats)\n        var mode := str(GameState.run.get("mode", "story"))\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'outer loop anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''            _:\n                stats.deadlocks = int(stats.deadlocks) + 1\n                RunFlowEngine.resume_story()\n\n    if bool(GameState.run.get("active", false)):\n'''
+          new = '''            _:\n                stats.deadlocks = int(stats.deadlocks) + 1\n                RunFlowEngine.resume_story()\n        _observe_run(stats)\n\n    if bool(GameState.run.get("active", false)):\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'outer observe anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''        "combat_losses":int(stats.combat_losses),\n        "combat_timeouts":int(stats.combat_timeouts),\n        "boss_reached":bool(stats.boss_reached),\n'''
+          new = '''        "combat_losses":int(stats.combat_losses),\n        "combat_timeouts":int(stats.combat_timeouts),\n        "combat_rounds":int(stats.combat_rounds),\n        "boss_reached":bool(stats.boss_reached),\n        "boss_step":int(stats.boss_step),\n        "first_combat_step":int(stats.first_combat_step),\n        "first_purchase_step":int(stats.first_purchase_step),\n        "first_loot_step":int(stats.first_loot_step),\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'result combat anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''        "final_health":int(GameState.run.get("health", 0)),\n        "final_vigor":int(GameState.run.get("vigor", 0)),\n        "final_fragments":int((GameState.run.get("resources", {}) as Dictionary).get("fragments", 0)),\n        "final_inventory_value":ItemEconomyEngine.inventory_value(GameState.run.get("inventory", []) as Array),\n'''
+          new = '''        "final_health":int(GameState.run.get("health", 0)),\n        "final_vigor":int(GameState.run.get("vigor", 0)),\n        "final_fragments":int((GameState.run.get("resources", {}) as Dictionary).get("fragments", 0)),\n        "final_provisions":int((GameState.run.get("resources", {}) as Dictionary).get("provisions", 0)),\n        "start_health":int(stats.start_health),\n        "start_vigor":int(stats.start_vigor),\n        "start_fragments":int(stats.start_fragments),\n        "start_provisions":int(stats.start_provisions),\n        "min_health":int(stats.min_health),\n        "min_vigor":int(stats.min_vigor),\n        "min_fragments":int(stats.min_fragments),\n        "max_fragments":int(stats.max_fragments),\n        "min_provisions":int(stats.min_provisions),\n        "max_provisions":int(stats.max_provisions),\n        "damage_taken":int(stats.damage_taken),\n        "healing_received":int(stats.healing_received),\n        "vigor_spent":int(stats.vigor_spent),\n        "vigor_recovered":int(stats.vigor_recovered),\n        "fragments_spent":int(stats.fragments_spent),\n        "fragments_gained":int(stats.fragments_gained),\n        "provisions_spent":int(stats.provisions_spent),\n        "provisions_gained":int(stats.provisions_gained),\n        "final_inventory_value":ItemEconomyEngine.inventory_value(GameState.run.get("inventory", []) as Array),\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'result attrition anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''    stats.combats = int(stats.combats) + 1\n    var was_boss := bool(CombatEngine.combat.get("is_boss", false))\n    if was_boss:\n        stats.boss_reached = true\n    var rounds := 0\n'''
+          new = '''    stats.combats = int(stats.combats) + 1\n    if int(stats.first_combat_step) == 0:\n        stats.first_combat_step = int(stats.current_step)\n    var was_boss := bool(CombatEngine.combat.get("is_boss", false))\n    if was_boss:\n        stats.boss_reached = true\n        if int(stats.boss_step) == 0:\n            stats.boss_step = int(stats.current_step)\n    var loot_before := (GameState.run.get("loot_found", []) as Array).size()\n    var rounds := 0\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'combat start anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''        var decision := policy_engine.choose_combat_decision(policy_id, CombatEngine.combat)\n        _apply_combat_decision(decision)\n        if bool(CombatEngine.combat.get("active", false)):\n'''
+          new = '''        var decision := policy_engine.choose_combat_decision(policy_id, CombatEngine.combat)\n        _apply_combat_decision(decision)\n        _observe_run(stats)\n        if bool(CombatEngine.combat.get("active", false)):\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'combat observe anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''            if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:\n                _combat_fallback()\n    if bool(CombatEngine.combat.get("active", false)):\n'''
+          new = '''            if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:\n                _combat_fallback()\n                _observe_run(stats)\n    stats.combat_rounds = int(stats.combat_rounds) + rounds\n    if bool(CombatEngine.combat.get("active", false)):\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'combat round anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''        if was_boss:\n            stats.boss_win = true\n        _equip_loot_upgrades(policy_id)\n'''
+          new = '''        if was_boss:\n            stats.boss_win = true\n        if int(stats.first_loot_step) == 0 and (GameState.run.get("loot_found", []) as Array).size() > loot_before:\n            stats.first_loot_step = int(stats.current_step)\n        _equip_loot_upgrades(policy_id)\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'loot step anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          old = '''        stats.purchases = int(stats.purchases) + 1\n        var item := ContentRegistry.get_record(item_id)\n'''
+          new = '''        stats.purchases = int(stats.purchases) + 1\n        if int(stats.first_purchase_step) == 0:\n            stats.first_purchase_step = int(stats.current_step)\n        _observe_run(stats)\n        var item := ContentRegistry.get_record(item_id)\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'purchase step anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+
+          anchor = '''func _prepare_isolated_profile(world_id: String, character_id: String) -> void:\n'''
+          helper = '''func _observe_run(stats: Dictionary) -> void:\n    if GameState.run.is_empty():\n        return\n    var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary\n    var health := int(GameState.run.get("health", 0))\n    var vigor := int(GameState.run.get("vigor", 0))\n    var fragments := int(resources.get("fragments", 0))\n    var provisions := int(resources.get("provisions", 0))\n\n    var last_health := int(stats.get("last_health", health))\n    var last_vigor := int(stats.get("last_vigor", vigor))\n    var last_fragments := int(stats.get("last_fragments", fragments))\n    var last_provisions := int(stats.get("last_provisions", provisions))\n\n    if health < last_health:\n        stats.damage_taken = int(stats.damage_taken) + (last_health - health)\n    elif health > last_health:\n        stats.healing_received = int(stats.healing_received) + (health - last_health)\n    if vigor < last_vigor:\n        stats.vigor_spent = int(stats.vigor_spent) + (last_vigor - vigor)\n    elif vigor > last_vigor:\n        stats.vigor_recovered = int(stats.vigor_recovered) + (vigor - last_vigor)\n    if fragments < last_fragments:\n        stats.fragments_spent = int(stats.fragments_spent) + (last_fragments - fragments)\n    elif fragments > last_fragments:\n        stats.fragments_gained = int(stats.fragments_gained) + (fragments - last_fragments)\n    if provisions < last_provisions:\n        stats.provisions_spent = int(stats.provisions_spent) + (last_provisions - provisions)\n    elif provisions > last_provisions:\n        stats.provisions_gained = int(stats.provisions_gained) + (provisions - last_provisions)\n\n    stats.min_health = mini(int(stats.min_health), health)\n    stats.min_vigor = mini(int(stats.min_vigor), vigor)\n    stats.min_fragments = mini(int(stats.min_fragments), fragments)\n    stats.max_fragments = maxi(int(stats.max_fragments), fragments)\n    stats.min_provisions = mini(int(stats.min_provisions), provisions)\n    stats.max_provisions = maxi(int(stats.max_provisions), provisions)\n    stats.last_health = health\n    stats.last_vigor = vigor\n    stats.last_fragments = fragments\n    stats.last_provisions = provisions\n\n'''
+          if s.count(anchor) != 1:
+              raise SystemExit(f'observer anchor mismatch: {s.count(anchor)}')
+          s = s.replace(anchor, helper + anchor)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+          rm -f .github/workflows/veredas-107-apply-telemetry.yml
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/JourneySimulationEngine.gd .github/workflows/veredas-107-apply-telemetry.yml
+          git diff --cached --check
+          git commit -m 'feat: instrument journey pacing and attrition'
+          git push origin HEAD:projeto-jornada-snapshots
