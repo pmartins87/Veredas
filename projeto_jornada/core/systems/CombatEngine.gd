@@ -1,5 +1,7 @@
 extends Node
 
+const BASIC_GUARD_CAP := 6
+
 var combat: Dictionary = {}
 
 func start(enemy_id: String, character_id: String) -> Dictionary:
@@ -84,7 +86,10 @@ func player_action(action: String) -> Dictionary:
                 enemy.hp = maxi(0, int(enemy.hp) - damage)
                 enemy.posture = maxi(0, int(enemy.posture) - (4 + int(player.get("posture_bonus",0))))
         "guard":
-            player.guard = int(player.get("guard",0)) + 4
+            # Basic guard is a temporary defensive stance, not an unbounded
+            # bank of future damage absorption. Signature guard/counter tools
+            # may still exceed this through their explicit power budget.
+            player.guard = mini(BASIC_GUARD_CAP, int(player.get("guard",0)) + 4)
         "advance":
             if StatusEngine.movement_locked(player):
                 did_act = false
