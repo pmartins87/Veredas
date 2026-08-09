@@ -1,5 +1,6 @@
 name: Veredas Enemy Balance 10.3
 # Definitive Phase 10.3 gate: always re-certify 10.2 before accepting enemy balance.
+# Explicit user-triggered commit keeps CI attached to the latest calibration HEAD.
 
 on:
   push:
