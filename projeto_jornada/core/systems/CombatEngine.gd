@@ -12,8 +12,12 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
     var enemy_hp := int(enemy_record.get("hp", 30 if is_boss else 12))
     var enemy_posture := int(enemy_record.get("posture", 18 if is_boss else 8))
     var bonuses := InventoryEngine.equipment_bonuses()
+    var base_max_vigor := int(GameState.run.get("max_vigor", 8))
+    var effective_load := maxi(0, int(bonuses.get("load", 0)))
+    var vigor_bonus := maxi(0, int(bonuses.get("vigor", 0)))
+    var effective_max_vigor := maxi(1, base_max_vigor + vigor_bonus - effective_load)
     var player_hp := int(GameState.run.get("health", 16))
-    var player_vigor := int(GameState.run.get("vigor", 8))
+    var player_vigor := mini(effective_max_vigor, int(GameState.run.get("vigor", 8)) + vigor_bonus)
     var base_posture := maxi(1, int(GameState.run.get("base_posture", 10)))
     var base_guard := maxi(0, int(GameState.run.get("base_guard", 0)))
     combat = {
@@ -21,13 +25,20 @@ func start(enemy_id: String, character_id: String) -> Dictionary:
         "turn": 1,
         "player": {
             "hp":player_hp,"max_hp":int(GameState.run.get("max_health",16)),
-            "vigor":player_vigor,"max_vigor":int(GameState.run.get("max_vigor",8)),
+            "vigor":player_vigor,"max_vigor":effective_max_vigor,
             "posture":base_posture + int(bonuses.get("posture",0)),
             "max_posture":base_posture + int(bonuses.get("posture",0)),
             "guard":base_guard + int(bonuses.get("guard",0)),"distance":1,"states":[],
             "damage_bonus":int(bonuses.get("damage",0)),
             "posture_bonus":int(bonuses.get("posture",0)),
             "range_bonus":int(bonuses.get("range",0)),
+            "status_power_bonus":int(bonuses.get("status_power",0)),
+            "status_resist":int(bonuses.get("status_resist",0)),
+            "heal_bonus":int(bonuses.get("heal",0)),
+            "resource_gain_bonus":int(bonuses.get("resource_gain",0)),
+            "mark_synergy_bonus":int(bonuses.get("mark_synergy",0)),
+            "debt_pressure_bonus":int(bonuses.get("debt_pressure",0)),
+            "equipment_load":effective_load,
         },
         "enemy": {
             "id":enemy_id,"name":enemy_record.get("name","Enemy"),
@@ -68,10 +79,11 @@ func player_action(action: String) -> Dictionary:
     var enemy: Dictionary = combat.enemy
     var before_enemy_hp := int(enemy.hp)
     var did_act := true
+    var marked_bonus := _marked_damage_bonus(player, enemy)
     match action:
         "strike":
             if _in_weapon_range(player):
-                var raw := 4 + int(player.get("damage_bonus",0))
+                var raw := 4 + int(player.get("damage_bonus",0)) + marked_bonus
                 var dealt := maxi(0, roundi(float(raw) * StatusEngine.damage_multiplier(enemy)) - int(enemy.get("guard",0)))
                 enemy.hp = maxi(0, int(enemy.hp) - dealt)
                 enemy.guard = 0
@@ -82,7 +94,7 @@ func player_action(action: String) -> Dictionary:
                 did_act = false
             else:
                 player.vigor = int(player.vigor) - 2
-                var damage := roundi(float(3 + int(player.get("damage_bonus",0))) * StatusEngine.damage_multiplier(enemy))
+                var damage := roundi(float(3 + int(player.get("damage_bonus",0)) + marked_bonus) * StatusEngine.damage_multiplier(enemy))
                 enemy.hp = maxi(0, int(enemy.hp) - damage)
                 enemy.posture = maxi(0, int(enemy.posture) - (4 + int(player.get("posture_bonus",0))))
         "guard":
@@ -108,7 +120,8 @@ func player_action(action: String) -> Dictionary:
         combat.last_error = "action_unavailable"
         return combat
     combat.erase("last_error")
-    combat.signature_resource = CharacterKitEngine.gain_resource(str(combat.character_id), combat.signature_resource, 1)
+    var resource_gain_amount := 1 + mini(1, maxi(0, int(player.get("resource_gain_bonus", 0))))
+    combat.signature_resource = CharacterKitEngine.gain_resource(str(combat.character_id), combat.signature_resource, resource_gain_amount)
     combat.player = player
     combat.enemy = _check_posture_break(enemy)
     PresentationBus.damage("enemy", before_enemy_hp - int(combat.enemy.hp))
@@ -167,7 +180,9 @@ func _resolve_enemy() -> void:
         if intent.has("guard"):
             enemy.guard = int(enemy.get("guard",0)) + int(intent.guard)
         if intent.has("status"):
-            player = StatusEngine.apply_status(player, str(intent.status), 1, 2)
+            var resistance := maxi(0, int(player.get("status_resist", 0)))
+            var duration := 1 if resistance >= 2 else 2
+            player = StatusEngine.apply_status(player, str(intent.status), 1, duration)
         if intent.has("vigor_damage"):
             player.vigor = maxi(0, int(player.get("vigor",0)) - int(intent.vigor_damage))
     combat.player = player
@@ -206,6 +221,11 @@ func _in_weapon_range(player: Dictionary) -> bool:
     var bonus := int(player.get("range_bonus",0))
     return distance >= limits.x and distance <= mini(2, limits.y + bonus)
 
+func _marked_damage_bonus(player: Dictionary, enemy: Dictionary) -> int:
+    if not StatusEngine.has_status(enemy, "marked"):
+        return 0
+    return maxi(0, int(player.get("mark_synergy_bonus", 0)))
+
 func _update_boss_phase() -> void:
     if not bool(combat.get("is_boss",false)):
         return
@@ -221,4 +241,5 @@ func _sync_run_resources() -> void:
     if combat.is_empty():
         return
     GameState.run.health = int(combat.player.get("hp",GameState.run.get("health",0)))
-    GameState.run.vigor = int(combat.player.get("vigor",GameState.run.get("vigor",0)))
+    var base_max_vigor := maxi(1, int(GameState.run.get("max_vigor", 8)))
+    GameState.run.vigor = mini(base_max_vigor, int(combat.player.get("vigor",GameState.run.get("vigor",0))))
