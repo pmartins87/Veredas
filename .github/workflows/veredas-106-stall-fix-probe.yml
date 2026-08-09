@@ -1,0 +1,59 @@
+name: Veredas 10.6 Stall Fix Probe
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-106-stall-fix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild mechanical baseline
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py
+          python tools/refine_npc_authenticity.py
+          python tools/refine_character_balance.py
+          python tools/enforce_character_horizontal_budget.py
+          python tools/refine_enemy_balance.py
+          python tools/refine_item_economy.py
+      - name: Patch cautious prolonged-combat cadence locally
+        working-directory: projeto_jornada
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('core/systems/PlayerPolicyEngine.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''    if policy_id == "cautious":\n        # A telegraphed heavy attack is mitigated before healing. Healing first\n'''
+          new = '''    if policy_id == "cautious":\n        # A cautious policy must still convert survival into progress. In very\n        # long fights, force one progress turn every four rounds so a repeating\n        # severe intent cannot create a guard/heal loop with no win condition.\n        var prolonged_progress_turn := int(combat.get("turn", 1)) >= 12 and int(combat.get("turn", 1)) % 4 == 0\n        if prolonged_progress_turn:\n            if not progress_ability.is_empty():\n                return {"kind":"ability", "id":str(progress_ability.get("id", ""))}\n            if int(player.get("vigor", 0)) >= 2:\n                return {"kind":"action", "id":"precise"}\n            return {"kind":"action", "id":"strike"}\n        # A telegraphed heavy attack is mitigated before healing. Healing first\n'''
+          if s.count(old) != 1:
+              raise SystemExit('cautious anchor mismatch')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
+      - name: Download Godot
+        run: |
+          curl -fL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import
+        run: /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit
+      - name: Re-certify 10.2
+        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/character_balance_certification.tscn 'CHARACTER_BALANCE_CERTIFICATION FAIL' 'CHARACTER_BALANCE_CERTIFICATION PASS: 10.2'
+      - name: Re-certify 10.3
+        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/enemy_balance_certification.tscn 'ENEMY_BALANCE_CERTIFICATION FAIL' 'ENEMY_BALANCE_CERTIFICATION PASS: 10.3'
+      - name: Add integrated narrative fixture
+        working-directory: projeto_jornada
+        run: python tools/refine_narrative_balance.py
+      - name: Certify 10.6 candidate
+        run: bash projeto_jornada/tools/run_godot_gate.sh /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 res://tests/difficulty_balance_certification.tscn 'DIFFICULTY_BALANCE_CERTIFICATION FAIL' 'DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6'
