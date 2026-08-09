@@ -25,12 +25,26 @@ var simulator := DifficultySimulationEngine.new()
 
 func _ready() -> void:
     await get_tree().process_frame
+    _print_forja_loadouts()
     _verify_regrets()
     _locate_cautious_stalemates()
     _stress_forja_ruptura()
     print("MASS_OUTLIER_DIAGNOSTIC PASS: 10.8 targeted")
     DifficultyEngine.clear_simulation_override()
     get_tree().quit(0)
+
+func _print_forja_loadouts() -> void:
+    var engine := JourneySimulationEngine.new()
+    for build_id in ["offense", "defense", "utility"]:
+        engine._prepare_isolated_profile("world.forja_rubra", "character.forja_rubra.01")
+        if not RunFlowEngine.start_journey("character.forja_rubra.01", 108811, "andarilho"):
+            print("10.8 Forja loadout %s START_FAILED" % build_id)
+            continue
+        var selected: Array[String] = engine._apply_build("world.forja_rubra", build_id)
+        print("10.8 Forja loadout %s total=%s" % [build_id, str(InventoryEngine.equipment_bonuses())])
+        for item_id in selected:
+            var item := ContentRegistry.get_record(item_id)
+            print("10.8 Forja item %s slot=%s rarity=%s item=%s bonuses=%s affixes=%s" % [build_id, InventoryEngine.slot_for(item), str(item.get("rarity","")), str(item.get("name","")), str(AffixEngine.combined_effects(item)), str(AffixEngine.affixes_for(item))])
 
 func _verify_regrets() -> void:
     var by_name: Dictionary = {}
