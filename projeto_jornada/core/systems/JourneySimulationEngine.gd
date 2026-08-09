@@ -248,12 +248,14 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "boss_reached":bool(stats.boss_reached),
         "boss_win":bool(stats.boss_win),
         "purchases":int(stats.purchases),
+        "loot_drops":(GameState.run.get("loot_found", []) as Array).size(),
         "travel_actions":int(stats.travel_actions),
         "deadlocks":int(stats.deadlocks),
         "locations_visited":visited.size(),
         "final_health":int(GameState.run.get("health", 0)),
         "final_vigor":int(GameState.run.get("vigor", 0)),
         "final_fragments":int((GameState.run.get("resources", {}) as Dictionary).get("fragments", 0)),
+        "final_inventory_value":ItemEconomyEngine.inventory_value(GameState.run.get("inventory", []) as Array),
         "marks":(GameState.run.get("marks", {}) as Dictionary).size(),
         "debts":(GameState.run.get("debts", []) as Array).size(),
     }
@@ -341,8 +343,19 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
         stats.combat_wins = int(stats.combat_wins) + 1
         if was_boss:
             stats.boss_win = true
+        _equip_loot_upgrades(policy_id)
     else:
         stats.combat_losses = int(stats.combat_losses) + 1
+
+func _equip_loot_upgrades(policy_id: String) -> void:
+    var seen: Dictionary = {}
+    for item_variant in GameState.run.get("loot_found", []) as Array:
+        var item_id := str(item_variant)
+        if item_id == "" or seen.has(item_id):
+            continue
+        seen[item_id] = true
+        if policy_engine.should_equip(policy_id, item_id):
+            InventoryEngine.equip(item_id)
 
 func _simulate_merchant_step(policy_id: String, stats: Dictionary) -> void:
     var stock := MerchantEngine.stock(str(GameState.run.get("world_id", "")), 8)
@@ -353,7 +366,7 @@ func _simulate_merchant_step(policy_id: String, stats: Dictionary) -> void:
             break
         stats.purchases = int(stats.purchases) + 1
         var item := ContentRegistry.get_record(item_id)
-        if str(item.get("kind", "")) == "equipment":
+        if str(item.get("kind", "")) == "equipment" and policy_engine.should_equip(policy_id, item_id):
             InventoryEngine.equip(item_id)
         stock = MerchantEngine.stock(str(GameState.run.get("world_id", "")), 8)
     _use_recovery_item_if_needed(policy_id)

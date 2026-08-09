@@ -352,21 +352,27 @@ func _item_score(policy_id: String, item: Dictionary) -> float:
     var price: float = float(maxi(1, MerchantEngine.price(item_id)))
     var kind: String = str(item.get("kind", ""))
     var effect: Dictionary = item.get("effect", {}) as Dictionary
-    var effect_value: float = float(effect.get("value", effect.get("count", 1)))
-    var score: float = effect_value + 10.0 / price
+    var score: float = ItemEconomyEngine.power_score(item) + 8.0 / price
+    if kind == "equipment":
+        score = ItemEconomyEngine.equipment_score(policy_id, item) + 8.0 / price
+    elif kind == "component":
+        score -= 8.0
     match policy_id:
         "aggressive":
-            if kind == "equipment": score += 5.0
-            if str(item.get("visual_archetype", "")) in InventoryEngine.WEAPONS: score += 5.0
+            if kind == "equipment": score += 3.0
+            if str(item.get("visual_archetype", "")) in InventoryEngine.WEAPONS: score += 4.0
         "cautious":
-            if kind in ["consumable", "tool"]: score += 5.0
-            if str(effect.get("op", "")) in ["heal", "vigor"]: score += 6.0
+            if kind in ["consumable", "tool"]: score += 4.0
+            if str(effect.get("op", "")) in ["heal", "vigor"]: score += 5.0
         "explorer":
-            if not InventoryEngine.has_item(item_id): score += 5.0
+            if not InventoryEngine.has_item(item_id): score += 3.0
             score += 2.0 / price
         _:
-            if kind == "equipment": score += 2.0
+            if kind == "equipment": score += 1.5
     return score
+
+func should_equip(policy_id: String, item_id: String) -> bool:
+    return ItemEconomyEngine.should_equip(policy_id, item_id)
 
 func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, enemy: Dictionary, resource_pool: Dictionary) -> bool:
     if not CharacterKitEngine.can_pay(ability, resource_pool):
