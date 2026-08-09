@@ -187,6 +187,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
     GameState.run.flags = flags
     var build_items := _apply_build(world_id, build_id)
 
+    var start_resources: Dictionary = GameState.run.get("resources", {}) as Dictionary
     var stats := {
         "events":0,
         "choices":0,
@@ -194,15 +195,45 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "combat_wins":0,
         "combat_losses":0,
         "combat_timeouts":0,
+        "combat_rounds":0,
         "boss_reached":false,
         "boss_win":false,
+        "boss_step":0,
+        "first_combat_step":0,
+        "first_purchase_step":0,
+        "first_loot_step":0,
         "purchases":0,
         "travel_actions":0,
         "deadlocks":0,
+        "current_step":0,
+        "start_health":int(GameState.run.get("health", 0)),
+        "start_vigor":int(GameState.run.get("vigor", 0)),
+        "start_fragments":int(start_resources.get("fragments", 0)),
+        "start_provisions":int(start_resources.get("provisions", 0)),
+        "min_health":int(GameState.run.get("health", 0)),
+        "min_vigor":int(GameState.run.get("vigor", 0)),
+        "min_fragments":int(start_resources.get("fragments", 0)),
+        "max_fragments":int(start_resources.get("fragments", 0)),
+        "min_provisions":int(start_resources.get("provisions", 0)),
+        "max_provisions":int(start_resources.get("provisions", 0)),
+        "damage_taken":0,
+        "healing_received":0,
+        "vigor_spent":0,
+        "vigor_recovered":0,
+        "fragments_spent":0,
+        "fragments_gained":0,
+        "provisions_spent":0,
+        "provisions_gained":0,
+        "last_health":int(GameState.run.get("health", 0)),
+        "last_vigor":int(GameState.run.get("vigor", 0)),
+        "last_fragments":int(start_resources.get("fragments", 0)),
+        "last_provisions":int(start_resources.get("provisions", 0)),
     }
     var steps := 0
     while bool(GameState.run.get("active", false)) and steps < max_steps:
         steps += 1
+        stats.current_step = steps
+        _observe_run(stats)
         var mode := str(GameState.run.get("mode", "story"))
         match mode:
             "story":
@@ -223,6 +254,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
             _:
                 stats.deadlocks = int(stats.deadlocks) + 1
                 RunFlowEngine.resume_story()
+        _observe_run(stats)
 
     if bool(GameState.run.get("active", false)):
         GameState.run.active = false
@@ -248,7 +280,12 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "combat_wins":int(stats.combat_wins),
         "combat_losses":int(stats.combat_losses),
         "combat_timeouts":int(stats.combat_timeouts),
+        "combat_rounds":int(stats.combat_rounds),
         "boss_reached":bool(stats.boss_reached),
+        "boss_step":int(stats.boss_step),
+        "first_combat_step":int(stats.first_combat_step),
+        "first_purchase_step":int(stats.first_purchase_step),
+        "first_loot_step":int(stats.first_loot_step),
         "boss_win":bool(stats.boss_win),
         "purchases":int(stats.purchases),
         "loot_drops":(GameState.run.get("loot_found", []) as Array).size(),
@@ -258,6 +295,25 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "final_health":int(GameState.run.get("health", 0)),
         "final_vigor":int(GameState.run.get("vigor", 0)),
         "final_fragments":int((GameState.run.get("resources", {}) as Dictionary).get("fragments", 0)),
+        "final_provisions":int((GameState.run.get("resources", {}) as Dictionary).get("provisions", 0)),
+        "start_health":int(stats.start_health),
+        "start_vigor":int(stats.start_vigor),
+        "start_fragments":int(stats.start_fragments),
+        "start_provisions":int(stats.start_provisions),
+        "min_health":int(stats.min_health),
+        "min_vigor":int(stats.min_vigor),
+        "min_fragments":int(stats.min_fragments),
+        "max_fragments":int(stats.max_fragments),
+        "min_provisions":int(stats.min_provisions),
+        "max_provisions":int(stats.max_provisions),
+        "damage_taken":int(stats.damage_taken),
+        "healing_received":int(stats.healing_received),
+        "vigor_spent":int(stats.vigor_spent),
+        "vigor_recovered":int(stats.vigor_recovered),
+        "fragments_spent":int(stats.fragments_spent),
+        "fragments_gained":int(stats.fragments_gained),
+        "provisions_spent":int(stats.provisions_spent),
+        "provisions_gained":int(stats.provisions_gained),
         "final_inventory_value":ItemEconomyEngine.inventory_value(GameState.run.get("inventory", []) as Array),
         "marks":(GameState.run.get("marks", {}) as Dictionary).size(),
         "debts":(GameState.run.get("debts", []) as Array).size(),
@@ -320,9 +376,14 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
         RunFlowEngine.resume_story()
         return
     stats.combats = int(stats.combats) + 1
+    if int(stats.first_combat_step) == 0:
+        stats.first_combat_step = int(stats.current_step)
     var was_boss := bool(CombatEngine.combat.get("is_boss", false))
     if was_boss:
         stats.boss_reached = true
+        if int(stats.boss_step) == 0:
+            stats.boss_step = int(stats.current_step)
+    var loot_before := (GameState.run.get("loot_found", []) as Array).size()
     var rounds := 0
     while bool(CombatEngine.combat.get("active", false)) and rounds < MAX_COMBAT_ROUNDS:
         rounds += 1
@@ -331,12 +392,15 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
         var before_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))
         var decision := policy_engine.choose_combat_decision(policy_id, CombatEngine.combat)
         _apply_combat_decision(decision)
+        _observe_run(stats)
         if bool(CombatEngine.combat.get("active", false)):
             var after_turn := int(CombatEngine.combat.get("turn", 0))
             var after_enemy_hp := int((CombatEngine.combat.get("enemy", {}) as Dictionary).get("hp", 0))
             var after_player_hp := int((CombatEngine.combat.get("player", {}) as Dictionary).get("hp", 0))
             if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:
                 _combat_fallback()
+                _observe_run(stats)
+    stats.combat_rounds = int(stats.combat_rounds) + rounds
     if bool(CombatEngine.combat.get("active", false)):
         # A combat that advances turns for the full simulation horizon is a
         # policy stalemate, not an engine deadlock. Keep it as a penalized loss
@@ -350,6 +414,8 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
         stats.combat_wins = int(stats.combat_wins) + 1
         if was_boss:
             stats.boss_win = true
+        if int(stats.first_loot_step) == 0 and (GameState.run.get("loot_found", []) as Array).size() > loot_before:
+            stats.first_loot_step = int(stats.current_step)
         _equip_loot_upgrades(policy_id)
     else:
         stats.combat_losses = int(stats.combat_losses) + 1
@@ -374,6 +440,9 @@ func _simulate_merchant_step(policy_id: String, stats: Dictionary) -> void:
         if item_id == "" or not RunFlowEngine.buy(item_id):
             break
         stats.purchases = int(stats.purchases) + 1
+        if int(stats.first_purchase_step) == 0:
+            stats.first_purchase_step = int(stats.current_step)
+        _observe_run(stats)
         var item := ContentRegistry.get_record(item_id)
         if str(item.get("kind", "")) == "equipment" and policy_engine.should_equip(policy_id, item_id):
             InventoryEngine.equip(item_id)
@@ -462,6 +531,48 @@ func _use_recovery_item_if_needed(policy_id: String) -> void:
         if (op == "heal" and health < max_health) or (op == "vigor" and vigor < max_vigor):
             if InventoryEngine.use_item(item_id):
                 return
+
+func _observe_run(stats: Dictionary) -> void:
+    if GameState.run.is_empty():
+        return
+    var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary
+    var health := int(GameState.run.get("health", 0))
+    var vigor := int(GameState.run.get("vigor", 0))
+    var fragments := int(resources.get("fragments", 0))
+    var provisions := int(resources.get("provisions", 0))
+
+    var last_health := int(stats.get("last_health", health))
+    var last_vigor := int(stats.get("last_vigor", vigor))
+    var last_fragments := int(stats.get("last_fragments", fragments))
+    var last_provisions := int(stats.get("last_provisions", provisions))
+
+    if health < last_health:
+        stats.damage_taken = int(stats.damage_taken) + (last_health - health)
+    elif health > last_health:
+        stats.healing_received = int(stats.healing_received) + (health - last_health)
+    if vigor < last_vigor:
+        stats.vigor_spent = int(stats.vigor_spent) + (last_vigor - vigor)
+    elif vigor > last_vigor:
+        stats.vigor_recovered = int(stats.vigor_recovered) + (vigor - last_vigor)
+    if fragments < last_fragments:
+        stats.fragments_spent = int(stats.fragments_spent) + (last_fragments - fragments)
+    elif fragments > last_fragments:
+        stats.fragments_gained = int(stats.fragments_gained) + (fragments - last_fragments)
+    if provisions < last_provisions:
+        stats.provisions_spent = int(stats.provisions_spent) + (last_provisions - provisions)
+    elif provisions > last_provisions:
+        stats.provisions_gained = int(stats.provisions_gained) + (provisions - last_provisions)
+
+    stats.min_health = mini(int(stats.min_health), health)
+    stats.min_vigor = mini(int(stats.min_vigor), vigor)
+    stats.min_fragments = mini(int(stats.min_fragments), fragments)
+    stats.max_fragments = maxi(int(stats.max_fragments), fragments)
+    stats.min_provisions = mini(int(stats.min_provisions), provisions)
+    stats.max_provisions = maxi(int(stats.max_provisions), provisions)
+    stats.last_health = health
+    stats.last_vigor = vigor
+    stats.last_fragments = fragments
+    stats.last_provisions = provisions
 
 func _prepare_isolated_profile(world_id: String, character_id: String) -> void:
     var profile := ProfileMigrationEngine.new().fresh_profile()
