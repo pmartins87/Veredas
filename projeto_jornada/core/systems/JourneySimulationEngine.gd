@@ -184,6 +184,9 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
     flags["simulation.policy"] = policy_id
     flags["simulation.build"] = build_id
     flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))
+    # Character-kit certification may explicitly disable journey attrition so
+    # 10.2 remains a mechanical experiment. Real/integrated journeys default on.
+    flags["simulation.no_attrition"] = not bool(config.get("attrition_enabled", true))
     GameState.run.flags = flags
     var build_items := _apply_build(world_id, build_id)
 

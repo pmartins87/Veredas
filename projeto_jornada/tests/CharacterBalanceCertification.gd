@@ -118,6 +118,9 @@ func _simulation_gate() -> void:
                     "policy_id":policy_id,
                     "build_id":"baseline",
                     "economy_enabled":false,
+                    # 10.2 isolates the Andarilho kit from journey-economy and
+                    # travel-attrition layers; those are certified in 10.4/10.7.
+                    "attrition_enabled":false,
                     "seed":seed_value,
                     "max_steps":MAX_STEPS,
                 })
