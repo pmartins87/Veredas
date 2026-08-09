@@ -1,25 +1,25 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 100,
+  "completed_steps": 101,
   "current_phase": 10,
-  "completed_through": "10.5",
-  "current_step": "10.6",
-  "current_step_title": "Calibração dos quatro modos de dificuldade",
+  "completed_through": "10.6",
+  "current_step": "10.7",
+  "current_step_title": "Ritmo de progressão, duração, recursos e attrition das jornadas",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
     "10.3": "certified",
     "10.4": "certified",
     "10.5": "certified",
-    "10.6": "in_progress",
-    "10.7": "pending",
+    "10.6": "certified",
+    "10.7": "in_progress",
     "10.8": "pending",
     "10.9": "pending",
     "10.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31337983973,
-    "commit": "4a4e714885a7f702f7c69f05b63918992c226947",
+    "run_id": 31339193258,
+    "commit": "c5b40d5383d757e3e3ca3bbe6817d8d016f7eaf7",
     "character_balance_runs": 1296,
     "character_balance_result": "PASS",
     "enemy_balance_combats": 2340,
@@ -39,7 +39,20 @@
     "narrative_arc_unique": 85,
     "narrative_max_arc_stage": 4,
     "narrative_balance_result": "PASS",
-    "integrated_journey_regression_result": "PASS"
+    "integrated_journey_regression_result": "PASS",
+    "difficulty_balance_runs": 1728,
+    "difficulty_balance_result": "PASS",
+    "difficulty_modes": {
+      "contemplativa": {"victory": 0.470, "boss_reach": 0.868, "score": 0.993, "combat_win": 0.639},
+      "andarilho": {"victory": 0.197, "boss_reach": 0.817, "score": 0.589, "combat_win": 0.418},
+      "severa": {"victory": 0.109, "boss_reach": 0.764, "score": 0.443, "combat_win": 0.325},
+      "ruptura": {"victory": 0.037, "boss_reach": 0.692, "score": 0.308, "combat_win": 0.185}
+    },
+    "difficulty_paired_not_worse": {
+      "contemplativa_over_andarilho": 0.940,
+      "andarilho_over_severa": 0.972,
+      "severa_over_ruptura": 0.981
+    }
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
