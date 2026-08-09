@@ -8,12 +8,15 @@ func choose_event(world_id: String, location_id: String = "") -> Dictionary:
     var recent: Array = GameState.run.get("recent_events", [])
     for event_variant in _static_candidates(world_id, location_id):
         var event: Dictionary = event_variant as Dictionary
-        if int(event.get("max_per_run", 99)) <= _times_seen(str(event.get("id", ""))):
+        var event_id := str(event.get("id", ""))
+        if int(event.get("max_per_run", 99)) <= _times_seen(event_id):
+            continue
+        if not _cooldown_ready(event):
             continue
         if event.has("condition") and not ConditionEngine.evaluate(event.get("condition", {})):
             continue
         var weight := float(event.get("weight", 1.0))
-        if str(event.get("id", "")) in recent:
+        if event_id in recent:
             weight *= 0.12
         weight *= NarrativeDebtEngine.event_multiplier(event)
         if weight > 0.0:
@@ -79,6 +82,16 @@ func _static_candidates(world_id: String, location_id: String) -> Array:
 func _times_seen(event_id: String) -> int:
     return int(GameState.run.get("event_counts", {}).get(event_id, 0))
 
+func _cooldown_ready(event: Dictionary) -> bool:
+    var cooldown := maxi(0, int(event.get("cooldown_turns", 0)))
+    if cooldown <= 0:
+        return true
+    var event_id := str(event.get("id", ""))
+    var last_turns: Dictionary = GameState.run.get("event_last_turn", {}) as Dictionary
+    if not last_turns.has(event_id):
+        return true
+    return int(GameState.run.get("turn", 0)) - int(last_turns[event_id]) >= cooldown
+
 func _remember(event_id: String) -> void:
     var recent: Array = GameState.run.get("recent_events", [])
     recent.push_front(event_id)
@@ -88,3 +101,6 @@ func _remember(event_id: String) -> void:
     var counts: Dictionary = GameState.run.get("event_counts", {})
     counts[event_id] = int(counts.get(event_id, 0)) + 1
     GameState.run.event_counts = counts
+    var last_turns: Dictionary = GameState.run.get("event_last_turn", {}) as Dictionary
+    last_turns[event_id] = int(GameState.run.get("turn", 0))
+    GameState.run.event_last_turn = last_turns
