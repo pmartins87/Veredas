@@ -26,20 +26,10 @@ jobs:
           chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
       - name: Import project once
         run: timeout 30s /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit
-      - name: Probe setup fallback and Guardian counter
+      - name: Probe minimal Forja corrections
         working-directory: projeto_jornada
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('core/systems/PlayerPolicyEngine.gd')
-          s=p.read_text()
-          old='''    if not balanced_progress_ability.is_empty():\n        return {"kind":"ability", "id":str(balanced_progress_ability.get("id", ""))}\n    if not echo_ability.is_empty() and guard_value <= 0 and enemy_hp_ratio >= 0.50:\n'''
-          new='''    if not balanced_progress_ability.is_empty():\n        return {"kind":"ability", "id":str(balanced_progress_ability.get("id", ""))}\n    if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):\n        return {"kind":"ability", "id":str(setup_ability.get("id", ""))}\n    if not echo_ability.is_empty() and guard_value <= 0 and enemy_hp_ratio >= 0.50:\n'''
-          if s.count(old)!=1: raise SystemExit('balanced fallback anchor mismatch')
-          p.write_text(s.replace(old,new))
-          PY
-
           rebuild() {
             python tools/rebuild_content.py >/dev/null
             python tools/refine_npc_authenticity.py >/dev/null
@@ -49,35 +39,42 @@ jobs:
             python tools/refine_item_economy.py >/dev/null
           }
           scenario() {
-            local label="$1" power="$2" cost="$3" policy="$4"
+            local label="$1" desertor_cost="$2" tecela_posture="$3"
             echo "=== $label ==="
             rebuild
-            POWER="$power" COST="$cost" POLICY="$policy" python - <<'PY'
+            DESERTOR_COST="$desertor_cost" TECELA_POSTURE="$tecela_posture" python - <<'PY'
           import json, os
           from pathlib import Path
           cp=Path('data/characters.json'); ap=Path('data/abilities.json')
           chars=json.loads(cp.read_text()); abilities=json.loads(ap.read_text()); byid={a['id']:a for a in abilities}
           for r in chars:
-              if r.get('name')=='Sonhador de Gelo':
+              name=r.get('name')
+              if name=='Sonhador de Gelo':
                   r['learning_curve']['recommended_policy']='balanced'
-              if r.get('name')=='Guardião de Casca':
-                  r['learning_curve']['recommended_policy']=os.environ['POLICY']
+              elif name=='Guardião de Casca':
                   for aid in r.get('abilities',[]):
                       a=byid[aid]
                       if a.get('mechanic')=='counter':
-                          a['power']=int(os.environ['POWER']); a['cost']=int(os.environ['COST'])
+                          a['power']=4; a['cost']=3
+              elif name=='Desertor da Forja' and int(os.environ['DESERTOR_COST'])>0:
+                  for aid in r.get('abilities',[]):
+                      a=byid[aid]
+                      if a.get('mechanic')=='counter':
+                          a['power']=4; a['cost']=int(os.environ['DESERTOR_COST'])
+              elif name=='Tecelã de Metal' and int(os.environ['TECELA_POSTURE'])>=0:
+                  r['base_posture']=int(os.environ['TECELA_POSTURE'])
           cp.write_text(json.dumps(chars, ensure_ascii=False, indent=2)); ap.write_text(json.dumps(abilities, ensure_ascii=False, indent=2))
           PY
             set +e
             output=$(timeout 20s /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path . res://tests/character_balance_certification.tscn 2>&1)
             code=$?
             set -e
-            printf '%s\n' "$output" | grep -E '10\.2 character (Guardião de Casca|Ferreiro de Guerra|Desertor da Forja|Tecelã de Metal|Sonhador de Gelo|Cantora de Cipós)|world\.forja_rubra|recommended play fails|CHARACTER_BALANCE_CERTIFICATION (PASS|FAIL)' || true
+            printf '%s\n' "$output" | grep -E '10\.2 character (Guardião de Casca|Ferreiro de Guerra|Desertor da Forja|Tecelã de Metal|Sonhador de Gelo)|world\.forja_rubra|recommended play fails|CHARACTER_BALANCE_CERTIFICATION (PASS|FAIL)' || true
             echo "exit=$code"
           }
 
-          scenario 'BASE_SETUP + Guardian cautious p3c3' 3 3 cautious
-          scenario 'Guardian cautious p4c3' 4 3 cautious
-          scenario 'Guardian cautious p3c2' 3 2 cautious
-          scenario 'Guardian cautious p4c2' 4 2 cautious
-          scenario 'Guardian explorer p4c2' 4 2 explorer
+          scenario 'baseline selected corrections' 0 -1
+          scenario 'Desertor counter p4c3' 3 -1
+          scenario 'Tecela posture 1' 0 1
+          scenario 'Tecela posture 2' 0 2
+          scenario 'Desertor p4c3 + Tecela posture 1' 3 1
