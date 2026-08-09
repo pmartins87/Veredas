@@ -1,0 +1,73 @@
+name: Veredas 10.4 Phase Isolation Patch
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-104-isolation-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Isolate Phase 10.2 from Phase 10.4 economy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('projeto_jornada/core/systems/JourneySimulationEngine.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''    flags["simulation.policy"] = policy_id
+              flags["simulation.build"] = build_id
+              GameState.run.flags = flags
+          '''.replace('          ', '')
+          new = '''    flags["simulation.policy"] = policy_id
+              flags["simulation.build"] = build_id
+              flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))
+              GameState.run.flags = flags
+          '''.replace('          ', '')
+          if s.count(old) != 1:
+              raise SystemExit(f'JourneySimulation flag target mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          old = '''func _equip_loot_upgrades(policy_id: String) -> void:
+              var seen: Dictionary = {}
+          '''.replace('          ', '')
+          new = '''func _equip_loot_upgrades(policy_id: String) -> void:
+              if bool((GameState.run.get("flags", {}) as Dictionary).get("simulation.disable_item_economy", false)):
+                  return
+              var seen: Dictionary = {}
+          '''.replace('          ', '')
+          if s.count(old) != 1:
+              raise SystemExit(f'JourneySimulation loot target mismatch: {s.count(old)}')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+          p = Path('projeto_jornada/tests/CharacterBalanceCertification.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''                    "build_id":"baseline",
+                          "seed":seed_value,
+          '''.replace('          ', '')
+          new = '''                    "build_id":"baseline",
+                          "economy_enabled":false,
+                          "seed":seed_value,
+          '''.replace('          ', '')
+          if s.count(old) != 1:
+              raise SystemExit(f'CharacterBalance config target mismatch: {s.count(old)}')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- projeto_jornada/core/systems/JourneySimulationEngine.gd projeto_jornada/tests/CharacterBalanceCertification.gd
+      - name: Commit phase isolation
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/JourneySimulationEngine.gd projeto_jornada/tests/CharacterBalanceCertification.gd
+          git commit -m 'Isolate character certification from item economy'
+          git push origin HEAD:projeto-jornada-snapshots
