@@ -16,6 +16,11 @@ const AFFIXES := [
 ]
 
 func affixes_for(item: Dictionary) -> Array:
+    # Afixos são propriedades permanentes de equipamento. Consumíveis,
+    # ferramentas e componentes têm valor econômico/efeito próprio e não
+    # recebem bônus passivos que nunca poderiam ser usados enquanto equipados.
+    if str(item.get("kind", "")) != "equipment":
+        return []
     var rarity: String = str(item.get("rarity", "common"))
     var count: int = int({"common":0,"uncommon":1,"rare":1,"singular":2,"relic":2,"echo":3}.get(rarity, 0))
     if count <= 0:
@@ -30,10 +35,15 @@ func affixes_for(item: Dictionary) -> Array:
 
 func combined_effects(item: Dictionary) -> Dictionary:
     var bonuses: Dictionary = {}
+    if str(item.get("kind", "")) != "equipment":
+        return bonuses
     var base: Dictionary = item.get("effect", {}) as Dictionary
     var base_op: String = str(base.get("op", ""))
     if base_op != "":
         bonuses[base_op] = int(base.get("value", 0))
+    var base_load := int(item.get("load", 0))
+    if base_load != 0:
+        bonuses["load"] = base_load
     for affix_variant in affixes_for(item):
         var affix: Dictionary = affix_variant as Dictionary
         var op: String = str(affix.get("op", ""))
