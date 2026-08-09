@@ -22,62 +22,50 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           policy = Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd')
           text = policy.read_text(encoding='utf-8')
-
           old = '    var progress_ability := _best_ability(payable, ["damage", "range", "debt", "posture", "echo"])\n    var resource_ability := _best_ability(payable, ["resource"])\n'
           new = '    var progress_ability := _best_ability(payable, ["damage", "range", "debt", "posture", "echo"])\n    var explorer_progress_ability := _best_ability(payable, ["damage", "echo", "range", "debt", "posture", "counter"])\n    var balanced_progress_ability := _best_ability(payable, ["damage", "range", "debt", "posture"])\n    var echo_ability := _best_ability(payable, ["echo"])\n    var resource_ability := _best_ability(payable, ["resource"])\n'
           if text.count(old) != 1:
               raise SystemExit('ability-priority declaration target mismatch')
           text = text.replace(old, new, 1)
-
-          old = '''        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
-            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
-        if not progress_ability.is_empty():
-            return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
-        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
-'''
-          new = '''        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
-            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
-        if not explorer_progress_ability.is_empty():
-            return {"kind":"ability", "id":str(explorer_progress_ability.get("id", ""))}
-        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
-'''
+          old = '        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):\n            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}\n        if not progress_ability.is_empty():\n            return {"kind":"ability", "id":str(progress_ability.get("id", ""))}\n        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):\n'
+          new = '        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):\n            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}\n        if not explorer_progress_ability.is_empty():\n            return {"kind":"ability", "id":str(explorer_progress_ability.get("id", ""))}\n        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):\n'
           if text.count(old) != 1:
               raise SystemExit('explorer progress target mismatch')
           text = text.replace(old, new, 1)
-
           start = text.index('    # Balanced play prioritizes survival only when the telegraph warrants it,')
           end = text.index('\nfunc should_fight_boss', start)
-          balanced = '''    # Balanced play reacts to danger without banking signature defense forever.
-    # Signature guard is reserved for genuine emergencies; counter remains a
-    # tactical response. Echo is used intermittently instead of every turn.
-    if incoming_severe and guard_value < 3 and hp_ratio < 0.75:
-        if not defensive_ability.is_empty():
-            var defensive_mechanic := str(defensive_ability.get("mechanic", ""))
-            if defensive_mechanic == "counter" and hp_ratio <= 0.65:
-                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-            if defensive_mechanic == "guard" and hp_ratio <= 0.45:
-                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-        return {"kind":"action", "id":"guard"}
-    if incoming_risky and guard_value < 2 and hp_ratio <= 0.45:
-        if not defensive_ability.is_empty() and str(defensive_ability.get("mechanic", "")) == "counter":
-            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-        return {"kind":"action", "id":"guard"}
-    # Healing is an emergency recovery for the generic policy. Character-specific
-    # cautious play still exploits healing at a materially higher threshold.
-    if hp_ratio <= 0.15 and not healing_ability.is_empty():
-        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-    if not balanced_progress_ability.is_empty():
-        return {"kind":"ability", "id":str(balanced_progress_ability.get("id", ""))}
-    if not echo_ability.is_empty() and guard_value <= 0 and enemy_hp_ratio >= 0.50:
-        return {"kind":"ability", "id":str(echo_ability.get("id", ""))}
-    if int(player.get("vigor", 0)) >= 3:
-        return {"kind":"action", "id":"precise"}
-    return {"kind":"action", "id":"strike"}
-'''
-          text = text[:start] + balanced + text[end:]
+          lines = [
+              '    # Balanced play reacts to danger without banking signature defense forever.',
+              '    # Signature guard is reserved for genuine emergencies; counter remains a',
+              '    # tactical response. Echo is used intermittently instead of every turn.',
+              '    if incoming_severe and guard_value < 3 and hp_ratio < 0.75:',
+              '        if not defensive_ability.is_empty():',
+              '            var defensive_mechanic := str(defensive_ability.get("mechanic", ""))',
+              '            if defensive_mechanic == "counter" and hp_ratio <= 0.65:',
+              '                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}',
+              '            if defensive_mechanic == "guard" and hp_ratio <= 0.45:',
+              '                return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}',
+              '        return {"kind":"action", "id":"guard"}',
+              '    if incoming_risky and guard_value < 2 and hp_ratio <= 0.45:',
+              '        if not defensive_ability.is_empty() and str(defensive_ability.get("mechanic", "")) == "counter":',
+              '            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}',
+              '        return {"kind":"action", "id":"guard"}',
+              '    # Healing is an emergency recovery for the generic policy. Character-specific',
+              '    # cautious play still exploits healing at a materially higher threshold.',
+              '    if hp_ratio <= 0.15 and not healing_ability.is_empty():',
+              '        return {"kind":"ability", "id":str(healing_ability.get("id", ""))}',
+              '    if not balanced_progress_ability.is_empty():',
+              '        return {"kind":"ability", "id":str(balanced_progress_ability.get("id", ""))}',
+              '    if not echo_ability.is_empty() and guard_value <= 0 and enemy_hp_ratio >= 0.50:',
+              '        return {"kind":"ability", "id":str(echo_ability.get("id", ""))}',
+              '    if int(player.get("vigor", 0)) >= 3:',
+              '        return {"kind":"action", "id":"precise"}',
+              '    return {"kind":"action", "id":"strike"}',
+              '',
+          ]
+          text = text[:start] + '\n'.join(lines) + text[end:]
           policy.write_text(text, encoding='utf-8')
           PY
           git diff --check
