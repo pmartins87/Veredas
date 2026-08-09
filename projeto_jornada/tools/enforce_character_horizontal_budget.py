@@ -20,6 +20,15 @@ ABILITY_TUNING = {
         "heal": {"power": 4, "cost": 3},
         "resource": {"power": 2, "cost": 0},
     },
+    "Barqueiro do Reflexo": {
+        "counter": {"power": 4, "cost": 3},
+    },
+    "Magistrada do Limiar": {
+        "guard": {"power": 4, "cost": 2},
+    },
+    "Portador da Brasa": {
+        "damage": {"power": 4, "cost": 1},
+    },
 }
 
 
@@ -80,7 +89,7 @@ def main() -> None:
     _write(CHARACTERS_PATH, characters)
     _write(ABILITIES_PATH, abilities)
     print("CHARACTER_HORIZONTAL_BUDGET PASS: all 36 use 16 health / 8 vigor")
-    print("CHARACTER_TARGETED_TUNING PASS: Vigia de Maré and Peregrina da Sede")
+    print("CHARACTER_TARGETED_TUNING PASS: %s" % ", ".join(sorted(tuned)))
 
 
 if __name__ == "__main__":
