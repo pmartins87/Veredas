@@ -22,7 +22,7 @@ KIT = {
     "Vigia de Maré": ("guard", "range", "cautious", "expert", "sentinel", "wet"),
     "Lanceiro Solar": ("damage", "range", "aggressive", "approachable", "duelist", "burning"),
     "Caminhante de Sombra": ("counter", "move", "balanced", "intermediate", "skirmisher", "fear"),
-    "Oráculo do Meio-Dia": ("mark", "echo", "explorer", "expert", "seer", "burning"),
+    "Oráculo do Meio-Dia": ("mark", "echo", "balanced", "expert", "seer", "burning"),
     "Catador de Ossos": ("guard", "posture", "cautious", "approachable", "bulwark", "bleeding"),
     "Peregrina da Sede": ("heal", "resource", "cautious", "intermediate", "survivor", "poison"),
     "Paleocaçador": ("range", "status", "aggressive", "expert", "hunter", "bleeding"),
