@@ -61,6 +61,7 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     var max_hp: int = maxi(1, int(player.get("max_hp", 16)))
     var hp_ratio: float = float(hp) / float(max_hp)
     var distance: int = int(player.get("distance", 1))
+    var movement_locked := StatusEngine.movement_locked(player)
     var weapon_range: Vector2i = InventoryEngine.weapon_range()
     if InventoryEngine.equipped_item("weapon").is_empty():
         weapon_range = Vector2i(0, 0)
@@ -72,17 +73,22 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             payable.append(ability)
 
     # Signature mobility/range tools are allowed to solve distance before the
-    # generic weapon-range fallback. Otherwise a ranged or movement Andarilho
-    # would be forced to walk instead of using the very tool that defines them.
+    # generic weapon-range fallback. If a temporary status locks movement, use
+    # a legal defensive turn instead of retrying an impossible move forever;
+    # this lets status duration tick and prevents deterministic AI deadlocks.
     if distance < weapon_range.x:
+        if movement_locked:
+            return {"kind":"action", "id":"guard"}
         return {"kind":"action", "id":"retreat"}
     if distance > weapon_range.y:
         var ranged_ability := _best_ability(payable, ["range"])
         if not ranged_ability.is_empty():
             return {"kind":"ability", "id":str(ranged_ability.get("id", ""))}
         var mobility_ability := _best_ability(payable, ["move"])
-        if not mobility_ability.is_empty():
+        if not mobility_ability.is_empty() and not movement_locked:
             return {"kind":"ability", "id":str(mobility_ability.get("id", ""))}
+        if movement_locked:
+            return {"kind":"action", "id":"guard"}
         return {"kind":"action", "id":"advance"}
 
     if policy_id == "random":
