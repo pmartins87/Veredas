@@ -6,9 +6,13 @@ func choose_event(world_id: String, location_id: String = "") -> Dictionary:
     var candidates: Array = []
     var weights: Array = []
     var recent: Array = GameState.run.get("recent_events", [])
+    var current_character := str(GameState.run.get("character_id", ""))
     for event_variant in _static_candidates(world_id, location_id):
         var event: Dictionary = event_variant as Dictionary
         var event_id := str(event.get("id", ""))
+        var event_character := str(event.get("character_id", ""))
+        if event_character != "" and event_character != current_character:
+            continue
         if int(event.get("max_per_run", 99)) <= _times_seen(event_id):
             continue
         if not _cooldown_ready(event):
