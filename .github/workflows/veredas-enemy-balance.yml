@@ -8,11 +8,13 @@ on:
       - projeto-jornada-snapshots
     paths:
       - 'projeto_jornada/tools/refine_enemy_balance.py'
+      - 'projeto_jornada/tools/refine_item_economy.py'
       - 'projeto_jornada/core/systems/EnemyBalanceEngine.gd'
       - 'projeto_jornada/core/systems/CombatEngine.gd'
       - 'projeto_jornada/core/systems/BossPhaseEngine.gd'
       - 'projeto_jornada/core/systems/PlayerPolicyEngine.gd'
       - 'projeto_jornada/core/systems/JourneySimulationEngine.gd'
+      - 'projeto_jornada/core/systems/ItemEconomyEngine.gd'
       - 'projeto_jornada/tests/EnemyBalanceCertification.gd'
       - 'projeto_jornada/tests/enemy_balance_certification.tscn'
       - '.github/workflows/veredas-enemy-balance.yml'
@@ -39,6 +41,7 @@ jobs:
           python tools/refine_character_balance.py
           python tools/enforce_character_horizontal_budget.py
           python tools/refine_enemy_balance.py
+          python tools/refine_item_economy.py
           python tools/validate_canonical.py
 
       - name: Download Godot 4.7.1 stable
