@@ -1,0 +1,70 @@
+name: Veredas 10.7 Apply Attrition
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-107-apply-attrition-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Apply validated attrition semantics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('projeto_jornada/core/systems/JourneySimulationEngine.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''    flags["simulation.build"] = build_id\n    flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))\n    GameState.run.flags = flags\n'''
+          new = '''    flags["simulation.build"] = build_id\n    flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))\n    # Character-kit certification may explicitly disable journey attrition so\n    # 10.2 remains a mechanical experiment. Real/integrated journeys default on.\n    flags["simulation.no_attrition"] = not bool(config.get("attrition_enabled", true))\n    GameState.run.flags = flags\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'simulation attrition anchor mismatch: {s.count(old)}')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+
+          p = Path('projeto_jornada/core/systems/LocationEngine.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    GameState.run.location_id = location_id\n'''
+          new = '''    if world_id != str(GameState.run.get("world_id", "")):\n        return false\n    if location_id != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.location_id = location_id\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'travel_to anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+          old = '''    if target not in locations:\n        return false\n    GameState.run.world_id = world_id\n'''
+          new = '''    if target not in locations:\n        return false\n    if world_id != str(GameState.run.get("world_id", "")) or target != str(GameState.run.get("location_id", "")):\n        _apply_travel_attrition()\n    GameState.run.world_id = world_id\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'travel_world anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new)
+          anchor = '''func _remember(location_id: String) -> void:\n'''
+          helper = '''func _apply_travel_attrition() -> void:\n    var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary\n    if bool(flags.get("simulation.no_attrition", false)):\n        return\n    var resources: Dictionary = GameState.run.get("resources", {}) as Dictionary\n    var provisions := maxi(0, int(resources.get("provisions", 0)))\n    if provisions > 0:\n        resources.provisions = provisions - 1\n        GameState.run.resources = resources\n        return\n    # Travelling without supplies is possible, but it converts route choice into\n    # real attrition instead of a free loop: first Vigor, then nonlethal Health.\n    var vigor := maxi(0, int(GameState.run.get("vigor", 0)))\n    if vigor > 0:\n        GameState.run.vigor = vigor - 1\n        return\n    GameState.run.health = maxi(1, int(GameState.run.get("health", 1)) - 1)\n\n'''
+          if s.count(anchor) != 1:
+              raise SystemExit(f'attrition helper anchor mismatch: {s.count(anchor)}')
+          p.write_text(s.replace(anchor, helper + anchor), encoding='utf-8')
+
+          p = Path('projeto_jornada/tests/CharacterBalanceCertification.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '''                    "build_id":"baseline",\n                    "economy_enabled":false,\n                    "seed":seed_value,\n'''
+          new = '''                    "build_id":"baseline",\n                    "economy_enabled":false,\n                    # 10.2 isolates the Andarilho kit from journey-economy and\n                    # travel-attrition layers; those are certified in 10.4/10.7.\n                    "attrition_enabled":false,\n                    "seed":seed_value,\n'''
+          if s.count(old) != 1:
+              raise SystemExit(f'10.2 isolation anchor mismatch: {s.count(old)}')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
+
+          rm -f .github/workflows/veredas-107-apply-attrition.yml
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/JourneySimulationEngine.gd projeto_jornada/core/systems/LocationEngine.gd projeto_jornada/tests/CharacterBalanceCertification.gd .github/workflows/veredas-107-apply-attrition.yml
+          git diff --cached --check
+          git commit -m 'feat: make travel provisions a real attrition resource'
+          git push origin HEAD:projeto-jornada-snapshots
