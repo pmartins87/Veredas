@@ -29,8 +29,16 @@ ABILITY_TUNING = {
     "Portador da Brasa": {
         "damage": {"power": 4, "cost": 1},
     },
+}
+
+# Tecelã de Metal is a setup-only expert controller (status + mark). Under the
+# controlled balanced policy used to compare raw kit resilience, neither setup
+# tool is intentionally spammed. A one-point posture correction therefore
+# addresses the measured Forja Rubra resilience outlier without inventing power
+# in an inert status stack or weakening the statistical gate.
+CHARACTER_TUNING = {
     "Tecelã de Metal": {
-        "status": {"power": 3, "cost": 2},
+        "base_posture": 10,
     },
 }
 
@@ -61,33 +69,39 @@ def main() -> None:
         character["base_vigor"] = 8
 
         name = str(character.get("name", ""))
-        overrides = ABILITY_TUNING.get(name)
-        if not overrides:
-            continue
-        seen_mechanics = set()
-        for ability_id in character.get("abilities", []):
-            ability = abilities_by_id.get(str(ability_id))
-            if not ability:
-                raise SystemExit(f"Missing ability {ability_id} for {name}")
-            mechanic = str(ability.get("mechanic", ""))
-            if mechanic not in overrides:
-                continue
-            for key, value in overrides[mechanic].items():
-                ability[key] = value
-            ability["signature"] = (
-                f"{mechanic}:p{ability['power']}:c{ability['cost']}:"
-                f"{ability.get('status_id', '')}:{ability.get('combat_role', '')}:"
-                f"{ability.get('resource', '')}"
-            )
-            seen_mechanics.add(mechanic)
-        if seen_mechanics != set(overrides):
-            raise SystemExit(
-                f"Tuning map mismatch for {name}: expected {sorted(overrides)}, got {sorted(seen_mechanics)}"
-            )
-        tuned.append(name)
+        character_overrides = CHARACTER_TUNING.get(name, {})
+        for key, value in character_overrides.items():
+            character[key] = value
 
-    if sorted(tuned) != sorted(ABILITY_TUNING):
-        raise SystemExit(f"Expected to tune {sorted(ABILITY_TUNING)}, tuned {sorted(tuned)}")
+        ability_overrides = ABILITY_TUNING.get(name, {})
+        seen_mechanics = set()
+        if ability_overrides:
+            for ability_id in character.get("abilities", []):
+                ability = abilities_by_id.get(str(ability_id))
+                if not ability:
+                    raise SystemExit(f"Missing ability {ability_id} for {name}")
+                mechanic = str(ability.get("mechanic", ""))
+                if mechanic not in ability_overrides:
+                    continue
+                for key, value in ability_overrides[mechanic].items():
+                    ability[key] = value
+                ability["signature"] = (
+                    f"{mechanic}:p{ability['power']}:c{ability['cost']}:"
+                    f"{ability.get('status_id', '')}:{ability.get('combat_role', '')}:"
+                    f"{ability.get('resource', '')}"
+                )
+                seen_mechanics.add(mechanic)
+            if seen_mechanics != set(ability_overrides):
+                raise SystemExit(
+                    f"Tuning map mismatch for {name}: expected {sorted(ability_overrides)}, got {sorted(seen_mechanics)}"
+                )
+
+        if ability_overrides or character_overrides:
+            tuned.append(name)
+
+    expected_tuned = set(ABILITY_TUNING) | set(CHARACTER_TUNING)
+    if set(tuned) != expected_tuned:
+        raise SystemExit(f"Expected to tune {sorted(expected_tuned)}, tuned {sorted(tuned)}")
 
     _write(CHARACTERS_PATH, characters)
     _write(ABILITIES_PATH, abilities)
