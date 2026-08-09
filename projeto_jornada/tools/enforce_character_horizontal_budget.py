@@ -31,14 +31,13 @@ ABILITY_TUNING = {
     },
 }
 
-# Tecelã de Metal is a setup-only expert controller (status + mark). Under the
-# controlled balanced policy used to compare raw kit resilience, neither setup
-# tool is intentionally spammed. A one-point posture correction therefore
-# addresses the measured Forja Rubra resilience outlier without inventing power
-# in an inert status stack or weakening the statistical gate.
+# Tecelã de Metal is a setup-only expert controller (status + mark). The
+# controlled matrix showed that adding status power or one posture point did
+# not change any outcome. One point of starting guard instead cushions the
+# actual setup-turn cost while keeping health/vigor and damage unchanged.
 CHARACTER_TUNING = {
     "Tecelã de Metal": {
-        "base_posture": 10,
+        "base_guard": 1,
     },
 }
 
