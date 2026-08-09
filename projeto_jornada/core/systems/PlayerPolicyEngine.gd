@@ -108,7 +108,7 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     # mark/status as generic damage made deterministic policies spend several
     # consecutive turns preparing an enemy while novice play kept attacking.
     var setup_ability := _best_ability(payable, ["mark", "status"])
-    var progress_ability := _best_ability(payable, ["damage", "echo", "range", "debt", "counter", "posture"])
+    var progress_ability := _best_ability(payable, ["damage", "range", "debt", "posture", "echo"])
     var resource_ability := _best_ability(payable, ["resource"])
     var utility_ability := _best_ability(payable, ["move"])
     var intent_danger := int(intent.get("danger", 4 if str(intent.get("id", "")) == "heavy" else 2))
@@ -127,14 +127,12 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             return {"kind":"action", "id":"guard"}
         if incoming_risky and hp_ratio <= 0.55 and guard_value < 2 and not defensive_ability.is_empty():
             return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-        if hp_ratio <= 0.52 and not healing_ability.is_empty():
+        if hp_ratio <= 0.45 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
         if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
             return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
         if not progress_ability.is_empty():
             return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
-        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
-            return {"kind":"ability", "id":str(resource_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 3:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
@@ -186,12 +184,8 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
     # preserving healing as an emergency tool. Cautious retains the higher band.
     if hp_ratio <= 0.32 and not healing_ability.is_empty():
         return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-    if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
-        return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
     if not progress_ability.is_empty():
         return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
-    if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
-        return {"kind":"ability", "id":str(resource_ability.get("id", ""))}
     if int(player.get("vigor", 0)) >= 3:
         return {"kind":"action", "id":"precise"}
     return {"kind":"action", "id":"strike"}
