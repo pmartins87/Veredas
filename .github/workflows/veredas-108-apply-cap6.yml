@@ -1,0 +1,38 @@
+name: Veredas 10.8 Apply Guard Cap
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - name: Apply validated cap
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('projeto_jornada/core/systems/CombatEngine.gd')
+          s=p.read_text(encoding='utf-8')
+          old='"guard":base_guard + int(bonuses.get("guard",0)),"distance":1,"states":[],'
+          new='"guard":mini(BASIC_GUARD_CAP, base_guard + int(bonuses.get("guard",0))),"distance":1,"states":[],'
+          if s.count(old)!=1:
+              raise SystemExit(f'guard anchor mismatch: {s.count(old)}')
+          p.write_text(s.replace(old,new), encoding='utf-8')
+          PY
+          rm -f .github/workflows/veredas-108-apply-cap6.yml
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/core/systems/CombatEngine.gd .github/workflows/veredas-108-apply-cap6.yml
+          git diff --cached --check
+          git commit -m 'fix: cap starting equipment guard at combat guard limit'
+          git push origin HEAD:projeto-jornada-snapshots
