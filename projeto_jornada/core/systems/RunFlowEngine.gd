@@ -16,6 +16,7 @@ func start_journey(character_id: String, seed_value: int) -> bool:
     GameState.run.visited_locations = [str(GameState.run.get("location_id", ""))]
     GameState.run.defeated_enemies = []
     GameState.run.purchases = []
+    GameState.run.loot_found = []
     GameState.run.ending_id = ""
     if ephemeral_simulation:
         var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
@@ -171,6 +172,7 @@ func debrief() -> Dictionary:
         "visited_locations": GameState.run.get("visited_locations", []).duplicate(),
         "defeated_enemies": GameState.run.get("defeated_enemies", []).duplicate(),
         "purchases": GameState.run.get("purchases", []).duplicate(),
+        "loot_found": GameState.run.get("loot_found", []).duplicate(),
         "marks": GameState.run.get("marks", {}).duplicate(true),
         "echoes": EchoConsequenceEngine.summary(),
     }
@@ -185,9 +187,19 @@ func _close_combat(state: Dictionary) -> void:
             if not _simulation_no_persist():
                 MetaUnlockEngine.discover(enemy_id)
         GameState.run.defeated_enemies = defeated
+
+        var enemy_record: Dictionary = state.get("enemy_record", {}) as Dictionary
         var resources: Dictionary = GameState.run.get("resources", {})
-        resources.fragments = int(resources.get("fragments", 0)) + (18 if enemy_id.begins_with("boss.") else 6)
+        resources.fragments = int(resources.get("fragments", 0)) + ItemEconomyEngine.fragment_reward(enemy_record)
         GameState.run.resources = resources
+
+        var loot_found: Array = GameState.run.get("loot_found", [])
+        for item_id in ItemEconomyEngine.loot_for_victory(enemy_record, defeated.size()):
+            if InventoryEngine.add_item(str(item_id)):
+                loot_found.append(str(item_id))
+                if not _simulation_no_persist():
+                    MetaUnlockEngine.discover(str(item_id))
+        GameState.run.loot_found = loot_found
         GameState.run.mode = "final_choice" if enemy_id.begins_with("boss.") else "story"
     elif result == "defeat":
         fail("defeat")
