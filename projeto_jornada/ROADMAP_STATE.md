@@ -11,7 +11,7 @@
 - Fase 7: **7.1, 7.2, 7.6, 7.7 e 7.9 ✅**; 7.3–7.5/7.8 em produção; 7.10 pendente.
 - Fase 8: **8.1–8.10 ✅ — FASE CONCLUÍDA**.
 - Fase 9: **9.1–9.10 ✅ — FASE CONCLUÍDA**.
-- Fase 10: **10.1–10.5 ✅ certificados; 10.6 está em andamento**.
+- Fase 10: **10.1–10.6 ✅ certificados; 10.7 está em andamento**.
 
 ## Certificação real da engine
 A branch canônica possui CI estrita em GitHub Actions com Godot 4.7.1 stable. A CI reconstrói o catálogo, valida conteúdo, importa o projeto sem tolerar erros de parser e executa testes runtime.
@@ -33,7 +33,8 @@ Baselines importantes:
 - run 31237251316: matriz final Android real — API 29/Android 10 e API 34/Android 14 verdes no mesmo APK, com prontidão do app, seed 881001, schema 3, pause/autosave por recriação física do save, force-stop, relaunch, retomada e segundo autosave certificados;
 - run 31299621611: `CHARACTER_BALANCE_CERTIFICATION PASS: 10.2` + `ENEMY_BALANCE_CERTIFICATION PASS: 10.3` no mesmo HEAD, após 1.296 jornadas de balanceamento de personagens e 2.340 combates da matriz inimiga;
 - run 31304747936 / commit `0f0ebd1`: `JOURNEY_SIMULATION_CERTIFICATION PASS: 10.1`, `CHARACTER_BALANCE_CERTIFICATION PASS: 10.2`, `ENEMY_BALANCE_CERTIFICATION PASS: 10.3` e `ITEM_ECONOMY_CERTIFICATION PASS: 10.4` no mesmo HEAD. O gate 10.4 certificou os 1.116 itens, 12 tipos funcionais de bônus/afixos, preços e raridades, 7.680 ofertas amostradas de mercador, loot determinístico e taxas observadas de 40,3% para inimigos normais e 90,0% para elites;
-- run 31337983973 / commit `4a4e714`: CI canônica limpa com `10.1`, `10.2`, `10.3`, `10.4`, `NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5` e regressão integrada 10.1 pós-narrativa no mesmo HEAD. A matriz 10.5 executou 216 jornadas / 12.960 seleções, cobertura narrativa de 92,7%, 693 origens de Dívida, 352 callbacks exatos, 569 consequências de trânsito, participação de arco de 2,7%, 85 estágios distintos de arco alcançados e progressão até estágio 4. Os três workflows temporários de diagnóstico 10.2/10.5 foram removidos antes do gate final.
+- run 31337983973 / commit `4a4e714`: CI canônica limpa com `10.1`, `10.2`, `10.3`, `10.4`, `NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5` e regressão integrada 10.1 pós-narrativa no mesmo HEAD. A matriz 10.5 executou 216 jornadas / 12.960 seleções, cobertura narrativa de 92,7%, 693 origens de Dívida, 352 callbacks exatos, 569 consequências de trânsito, participação de arco de 2,7%, 85 estágios distintos de arco alcançados e progressão até estágio 4. Os três workflows temporários de diagnóstico 10.2/10.5 foram removidos antes do gate final;
+- run 31339193258 / commit `c5b40d5`: CI canônica limpa com todos os gates anteriores e `DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6` no mesmo HEAD. A matriz 10.6 executou 1.728 jornadas pareadas (36 personagens × 12 seeds × 4 modos), preservou Andarilho como baseline exato e certificou uma curva monotônica: Contemplativa 47,0% de vitórias / score 0,993; Andarilho 19,7% / 0,589; Severa 10,9% / 0,443; Ruptura 3,7% / 0,308. As taxas pareadas de o modo mais fácil não ser pior foram 94,0%, 97,2% e 98,1%. Combates que atingem o horizonte máximo enquanto continuam avançando são contabilizados separadamente como `combat_timeouts`; deadlocks estruturais continuam exigidos em zero. Todos os probes e diagnósticos temporários foram removidos antes do gate final.
 
 ## Catálogo canônico
 - 5.160 registros; 12 mundos; 120 localidades; 96 famílias; 300 monstros; 60 chefes/subchefes; 1.116 itens; 300 NPCs; 204 Marcas; 120 Dívidas; 36 personagens; 72 habilidades; 2.544 eventos; 36 finais; 144 pools.
@@ -82,15 +83,16 @@ Baselines importantes:
 - 10.3 ✅ Balanceamento dos 300 monstros, elites e 60 chefes/subchefes — certificado com 2.340 combates, fases funcionais e timeouts dentro do gate.
 - 10.4 ✅ Balanceamento dos 1.116 itens, afixos, loot e economia de jornada — raridades, preços, mercadores, drops, upgrades e efeitos de equipamento integrados e certificados.
 - 10.5 ✅ Frequências de eventos, Marcas, Dívidas, callbacks e arcos narrativos — 216 jornadas / 12.960 escolhas, cobertura 92,7%, loops de Dívida finitos e 36 arcos causais certificados.
-- 10.6 🟡 Calibração dos quatro modos de dificuldade — em andamento.
-- 10.7–10.10 ⏳ Pendentes após certificação de 10.6.
+- 10.6 ✅ Calibração dos quatro modos de dificuldade — 1.728 jornadas pareadas, quatro curvas distintas e monotônicas, Andarilho preservado como baseline, zero deadlocks estruturais.
+- 10.7 🟡 Ritmo de progressão, duração, recursos e attrition das jornadas — em andamento.
+- 10.8–10.10 ⏳ Pendentes após certificação de 10.7.
 
 ## Integridade do roadmap
 - `ROADMAP_MASTER.md`: roadmap 0.1–12.10.
 - `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida das fases 8–12.
 
 ## Contagem formal
-- **100/130 passos concluídos segundo seus gates.**
+- **101/130 passos concluídos segundo seus gates.**
 
 ## Ponto final
 O roadmap só termina em 12.10 com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
