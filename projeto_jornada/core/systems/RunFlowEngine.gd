@@ -1,6 +1,6 @@
 extends Node
 
-func start_journey(character_id: String, seed_value: int) -> bool:
+func start_journey(character_id: String, seed_value: int, difficulty_id: String = "") -> bool:
     if ContentRegistry.get_record(character_id).is_empty():
         return false
     MetaUnlockEngine.evaluate_progression()
@@ -11,7 +11,9 @@ func start_journey(character_id: String, seed_value: int) -> bool:
     if not EntitlementEngine.new().can_access_world(world_id):
         return false
     var ephemeral_simulation := bool(GameState.profile.get("_simulation_ephemeral", false))
+    var resolved_difficulty := DifficultyEngine.requested_id(difficulty_id)
     GameState.new_run(character_id, seed_value)
+    DifficultyEngine.apply_to_run(resolved_difficulty)
     GameState.run.mode = "story"
     GameState.run.visited_locations = [str(GameState.run.get("location_id", ""))]
     GameState.run.defeated_enemies = []
