@@ -1,6 +1,6 @@
 name: Veredas Enemy Balance 10.3
 # Definitive Phase 10.3 gate: always re-certify 10.2 before accepting enemy balance.
-# Final certification trigger after removing redundant in-range explorer mobility.
+# Certification trigger after correcting the Oraculo recommended mastery policy.
 
 on:
   push:
