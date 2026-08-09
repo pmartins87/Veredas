@@ -42,15 +42,20 @@ func execute(ability: Dictionary, actor: Dictionary, target: Dictionary, resourc
     var mechanic := str(ability.get("mechanic", ""))
     var power := maxi(1, int(ability.get("power", _default_power(mechanic))))
     var duration := maxi(1, int(ability.get("duration", 2)))
+    var marked_bonus := _marked_damage_bonus(actor_result, target_result)
+    var status_bonus := maxi(0, int(actor_result.get("status_power_bonus", 0)))
+    var heal_bonus := maxi(0, int(actor_result.get("heal_bonus", 0)))
+    var resource_bonus := maxi(0, int(actor_result.get("resource_gain_bonus", 0)))
+    var debt_bonus := maxi(0, int(actor_result.get("debt_pressure_bonus", 0)))
     match mechanic:
         "damage":
-            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power)
+            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power - marked_bonus)
         "posture":
             target_result.posture = maxi(0, int(target_result.get("posture",0)) - power)
         "guard":
             actor_result.guard = int(actor_result.get("guard",0)) + power
         "heal":
-            actor_result.hp = mini(int(actor_result.get("max_hp",16)), int(actor_result.get("hp",0)) + power)
+            actor_result.hp = mini(int(actor_result.get("max_hp",16)), int(actor_result.get("hp",0)) + power + heal_bonus)
         "move":
             # Signature mobility is a protected gap-close. It must advance the
             # fight rather than creating a retreat/advance loop in baseline play.
@@ -58,38 +63,44 @@ func execute(ability: Dictionary, actor: Dictionary, target: Dictionary, resourc
             actor_result.guard = int(actor_result.get("guard",0)) + power
         "status":
             var status_id := str(ability.get("status_id", "marked"))
-            target_result = StatusEngine.apply_status(target_result, status_id, power, duration)
+            target_result = StatusEngine.apply_status(target_result, status_id, power + status_bonus, duration)
         "counter":
             # A successful counter must progress the fight: protection plus a
             # small riposte and posture punishment, not an endless turtle state.
             actor_result.guard = int(actor_result.get("guard",0)) + power
-            var riposte := maxi(1, int(power / 2))
+            var riposte := maxi(1, int(power / 2)) + marked_bonus
             target_result.hp = maxi(0, int(target_result.get("hp",0)) - riposte)
-            target_result.posture = maxi(0, int(target_result.get("posture",0)) - riposte)
+            target_result.posture = maxi(0, int(target_result.get("posture",0)) - maxi(1, int(power / 2)))
         "resource":
             var character := ContentRegistry.get_record(str(ability.get("character_id", "")))
             var maximum := maxi(1, int(character.get("resource_max", 5)))
-            resources[resource] = clampi(int(resources.get(resource,0)) + power, 0, maximum)
+            resources[resource] = clampi(int(resources.get(resource,0)) + power + resource_bonus, 0, maximum)
             actor_result.guard = int(actor_result.get("guard",0)) + 1
         "echo":
             # An Echo repeats part of the attack immediately; its strength is
             # explicit in data so it can be balanced statistically.
-            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power)
+            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power - marked_bonus)
             actor_result.guard = int(actor_result.get("guard",0)) + maxi(1, int(power / 2))
         "mark":
-            target_result = StatusEngine.apply_status(target_result, "marked", power, duration)
+            target_result = StatusEngine.apply_status(target_result, "marked", power + status_bonus, duration)
         "debt":
-            # Debt buys immediate power at a visible personal cost.
-            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power)
+            # Debt buys immediate power at a visible personal cost. Equipment
+            # tuned to Debt increases its payoff without erasing that cost.
+            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power - debt_bonus - marked_bonus)
             var self_cost := maxi(1, int((power + 3) / 4))
             actor_result.hp = maxi(1, int(actor_result.get("hp",1)) - self_cost)
         "range":
             # Ranged signature attacks deal damage and create space.
-            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power)
+            target_result.hp = maxi(0, int(target_result.get("hp",0)) - power - marked_bonus)
             actor_result.distance = mini(2, int(actor_result.get("distance",1)) + 1)
         _:
             return {"ok":false,"reason":"unknown_mechanic"}
     return {"ok":true,"actor":actor_result,"target":target_result,"resources":resources}
+
+func _marked_damage_bonus(actor: Dictionary, target: Dictionary) -> int:
+    if not StatusEngine.has_status(target, "marked"):
+        return 0
+    return maxi(0, int(actor.get("mark_synergy_bonus", 0)))
 
 func _default_power(mechanic: String) -> int:
     return int({
