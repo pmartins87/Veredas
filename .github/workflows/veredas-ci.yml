@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Rebuild canonical content
+      - name: Rebuild mechanical balance baseline
         working-directory: projeto_jornada
         run: |
           python tools/rebuild_content.py
@@ -32,9 +32,8 @@ jobs:
           python tools/enforce_character_horizontal_budget.py
           python tools/refine_enemy_balance.py
           python tools/refine_item_economy.py
-          python tools/refine_narrative_balance.py
 
-      - name: Validate canonical content
+      - name: Validate mechanical baseline content
         working-directory: projeto_jornada
         run: python tools/validate_canonical.py
 
@@ -200,7 +199,7 @@ jobs:
             'MULTI_JOURNEY_LOOP_CERTIFICATION FAIL' \
             'MULTI_JOURNEY_LOOP_CERTIFICATION PASS: 9.10'
 
-      - name: Phase 10 complete journey simulator certification 10.1
+      - name: Phase 10 complete journey simulator certification 10.1 baseline
         run: |
           bash projeto_jornada/tools/run_godot_gate.sh \
             /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
@@ -232,6 +231,12 @@ jobs:
             'ITEM_ECONOMY_CERTIFICATION FAIL' \
             'ITEM_ECONOMY_CERTIFICATION PASS: 10.4'
 
+      - name: Prepare Phase 10 narrative balance 10.5
+        working-directory: projeto_jornada
+        run: |
+          python tools/refine_narrative_balance.py
+          python tools/validate_canonical.py
+
       - name: Phase 10 narrative balance certification 10.5
         run: |
           bash projeto_jornada/tools/run_godot_gate.sh \
@@ -239,3 +244,11 @@ jobs:
             res://tests/narrative_balance_certification.tscn \
             'NARRATIVE_BALANCE_CERTIFICATION FAIL' \
             'NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5'
+
+      - name: Phase 10 integrated journey regression after 10.5
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/journey_simulation_certification.tscn \
+            'JOURNEY_SIMULATION_CERTIFICATION FAIL' \
+            'JOURNEY_SIMULATION_CERTIFICATION PASS: 10.1'
