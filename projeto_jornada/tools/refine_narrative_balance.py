@@ -181,9 +181,10 @@ def main() -> None:
     # Convert the 17 loose arc events per Domain into three finite causal threads.
     # Existing prose/choice effects are untouched; every response advances the
     # thread, while later stages remain unavailable until the previous stage ran.
-    # Stage one competes at a normal event weight; once a thread starts, later
-    # stages gain moderate continuity pressure so the game prefers finishing an
-    # established story over endlessly starting unrelated arcs.
+    # Stage one has deliberate discovery pressure and, once a thread starts,
+    # later stages gain progressively more continuity pressure. Only one next
+    # stage per thread can be eligible, so this favors finishing stories without
+    # allowing the arc pool to flood the event director.
     for world in worlds:
         world_id = str(world.get("id", ""))
         rows = sorted(arcs_by_world.get(world_id, []), key=lambda row: str(row.get("id", "")))
@@ -200,7 +201,7 @@ def main() -> None:
                 event["stage"] = stage
                 event["arc_length"] = length
                 event["narrative_role"] = "arc_stage"
-                event["weight"] = round(1.0 + min(stage - 1, 4) * 0.25, 2)
+                event["weight"] = round(1.8 + min(stage - 1, 4) * 0.30, 2)
                 if previous_flag:
                     event["condition"] = combine_condition(
                         event.get("condition", {}),
