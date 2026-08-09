@@ -1,4 +1,5 @@
 name: Veredas 10.5 Narrative Audit
+# Explicit rerun after allocating 120 unique debt memory Marks.
 
 on:
   push:
