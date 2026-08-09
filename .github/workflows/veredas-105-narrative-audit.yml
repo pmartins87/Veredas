@@ -7,6 +7,10 @@ on:
     paths:
       - '.github/workflows/veredas-105-narrative-audit.yml'
       - 'projeto_jornada/tools/audit_narrative_balance.py'
+      - 'projeto_jornada/tools/refine_narrative_balance.py'
+      - 'projeto_jornada/core/systems/EventDirector.gd'
+      - 'projeto_jornada/core/systems/NarrativeDebtEngine.gd'
+      - 'projeto_jornada/core/systems/ConditionEngine.gd'
   workflow_dispatch:
 
 jobs:
@@ -29,6 +33,7 @@ jobs:
           python tools/enforce_character_horizontal_budget.py
           python tools/refine_enemy_balance.py
           python tools/refine_item_economy.py
+          python tools/refine_narrative_balance.py
       - name: Audit Phase 10.5 narrative balance schema
         working-directory: projeto_jornada
         run: python tools/audit_narrative_balance.py
