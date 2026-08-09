@@ -1,5 +1,5 @@
 name: Veredas 10.5 Narrative Audit
-# Runtime frequency probe over the refined causal narrative graph.
+# Final diagnostic harness before folding 10.5 into the permanent CI.
 
 on:
   push:
@@ -14,12 +14,14 @@ on:
       - 'projeto_jornada/core/systems/ConditionEngine.gd'
       - 'projeto_jornada/tests/NarrativeBalanceProbe.gd'
       - 'projeto_jornada/tests/narrative_balance_probe.tscn'
+      - 'projeto_jornada/tests/NarrativeBalanceCertification.gd'
+      - 'projeto_jornada/tests/narrative_balance_certification.tscn'
   workflow_dispatch:
 
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,3 +62,10 @@ jobs:
             res://tests/narrative_balance_probe.tscn \
             'NARRATIVE_BALANCE_PROBE FAIL' \
             'NARRATIVE_BALANCE_PROBE PASS'
+      - name: Certify Phase 10.5 narrative balance
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/narrative_balance_certification.tscn \
+            'NARRATIVE_BALANCE_CERTIFICATION FAIL' \
+            'NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5'
