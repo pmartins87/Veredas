@@ -25,6 +25,13 @@ func evaluate(condition: Dictionary, context: Dictionary = {}) -> bool:
             return int(GameState.run.get("marks", {}).get(str(condition.get("mark_id", "")), 0)) > 0
         "mark_intensity_gte":
             return int(GameState.run.get("marks", {}).get(str(condition.get("mark_id", "")), 0)) >= int(condition.get("value", 1))
+        "debt_active":
+            return NarrativeDebtEngine.is_active(str(condition.get("debt_id", "")))
+        "debt_any":
+            return NarrativeDebtEngine.has_active()
+        "debt_overdue":
+            var debt := NarrativeDebtEngine.active_debt(str(condition.get("debt_id", "")))
+            return not debt.is_empty() and int(debt.get("age", 0)) >= int(debt.get("hard_deadline", 10))
         "echo_mark_has":
             if _ephemeral_simulation():
                 return false
