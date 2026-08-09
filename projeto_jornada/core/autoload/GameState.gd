@@ -33,7 +33,7 @@ func new_run(character_id: String, seed_value: int) -> void:
         "learning_curve":(character.get("learning_curve", {}) as Dictionary).duplicate(true),
         "resources":{"fragments":12,"essence":0,"provisions":3},
         "marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],
-        "recent_events":[],"event_counts":{},"turn":0,
+        "recent_events":[],"event_counts":{},"event_last_turn":{},"turn":0,
         "visited_locations":[first_location],"defeated_enemies":[],"purchases":[],"loot_found":[],"ending_id":"",
         "echo_context":{},
         "seed":seed_value,"rng":RNGService.snapshot()
@@ -87,6 +87,8 @@ func deserialize(data: Dictionary) -> bool:
     if not run.is_empty():
         var setup_engine := JourneySetupEngine.new()
         run = setup_engine.normalize_run_state(run)
+        if not run.has("event_last_turn"):
+            run.event_last_turn = {}
     if not run.is_empty() and run.has("rng"):
         RNGService.restore(run.rng)
     return true
