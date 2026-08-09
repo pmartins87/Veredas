@@ -1,15 +1,15 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 97,
+  "completed_steps": 98,
   "current_phase": 10,
-  "completed_through": "10.2",
-  "current_step": "10.3",
-  "current_step_title": "Balanceamento dos 300 monstros, elites e 60 chefes/subchefes",
+  "completed_through": "10.3",
+  "current_step": "10.4",
+  "current_step_title": "Balanceamento dos 1.116 itens, afixos, loot e economia de jornada",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
-    "10.3": "in_progress",
-    "10.4": "pending",
+    "10.3": "certified",
+    "10.4": "in_progress",
     "10.5": "pending",
     "10.6": "pending",
     "10.7": "pending",
@@ -18,10 +18,12 @@
     "10.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31243230601,
-    "commit": "c6d6b64e037c190c2248f935ecad17e5a40f7f57",
+    "run_id": 31299621611,
+    "commit": "278798b6102a8c6c3f3b783cd9a8d1682c1e08e1",
     "character_balance_runs": 1296,
-    "character_balance_result": "PASS"
+    "character_balance_result": "PASS",
+    "enemy_balance_combats": 2340,
+    "enemy_balance_result": "PASS"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
