@@ -4,10 +4,10 @@ class_name JourneySetupEngine
 const DEFAULT_DIFFICULTY := "andarilho"
 
 const DIFFICULTIES := {
-    "contemplativa": {"name":"Contemplativa","description":"Maior margem para leitura, descoberta e aprendizado. Calibração numérica final em 10.6."},
-    "andarilho": {"name":"Andarilho","description":"Experiência-base pretendida para a primeira jornada completa. Calibração numérica final em 10.6."},
-    "severa": {"name":"Severa","description":"Menor margem para erro e recursos. Calibração numérica final em 10.6."},
-    "ruptura": {"name":"Ruptura","description":"A configuração de maior exigência. Calibração numérica final em 10.6."},
+    "contemplativa": {"name":"Contemplativa","description":"Maior margem para leitura, descoberta e aprendizado."},
+    "andarilho": {"name":"Andarilho","description":"Experiência-base pretendida para a primeira jornada completa."},
+    "severa": {"name":"Severa","description":"Menor margem para erro e recursos."},
+    "ruptura": {"name":"Ruptura","description":"A configuração de maior exigência."},
 }
 
 const MODIFIERS := {
@@ -66,7 +66,7 @@ func normalize_run_state(run_state: Dictionary) -> Dictionary:
     run_state.setup = normalized.duplicate(true)
     run_state.seed = int(run_state.get("seed", normalized.seed))
     run_state.journey_mode = str(run_state.get("journey_mode", normalized.journey_mode))
-    run_state.difficulty_id = str(run_state.get("difficulty_id", normalized.difficulty_id))
+    run_state.difficulty_id = DifficultyEngine.normalize_id(str(run_state.get("difficulty_id", normalized.difficulty_id)))
     run_state.modifiers = _normalized_modifiers(run_state.get("modifiers", normalized.modifiers) as Array)
     return run_state
 
@@ -92,7 +92,7 @@ func validate(setup: Dictionary) -> Dictionary:
         errors.append("character_wrong_route")
     if not MetaUnlockEngine.is_mode_unlocked(journey_mode):
         errors.append("mode_locked")
-    if not DIFFICULTIES.has(difficulty_id):
+    if not DIFFICULTIES.has(difficulty_id) or not DifficultyEngine.PROFILES.has(difficulty_id):
         errors.append("difficulty_unknown")
     if journey_mode == "fixed_seed" and seed_value <= 0:
         errors.append("fixed_seed_required")
@@ -127,11 +127,11 @@ func start(setup: Dictionary) -> bool:
             seed_value = 1
     normalized.seed = seed_value
     var character_id := str(normalized.character_id)
-    if not RunFlowEngine.start_journey(character_id, seed_value):
+    if not RunFlowEngine.start_journey(character_id, seed_value, str(normalized.difficulty_id)):
         return false
 
     GameState.run.journey_mode = normalized.journey_mode
-    GameState.run.difficulty_id = normalized.difficulty_id
+    GameState.run.difficulty_id = DifficultyEngine.normalize_id(str(normalized.difficulty_id))
     GameState.run.modifiers = (normalized.modifiers as Array).duplicate()
     GameState.run.setup = normalized.duplicate(true)
 
