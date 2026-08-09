@@ -218,3 +218,7 @@ def main() -> None:
     write("characters", characters)
     write("abilities", abilities)
     print("CHARACTER_BALANCE_REFINEMENT PASS: 36 curated kits; one learning tier of each kind per Domain")
+
+
+if __name__ == "__main__":
+    main()
