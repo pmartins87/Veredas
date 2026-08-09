@@ -37,7 +37,7 @@ KIT = {
     "Sem-Nome": ("move", "mark", "balanced", "expert", "skirmisher", "fear"),
     "Caçadora de Aurora": ("range", "status", "aggressive", "approachable", "hunter", "shock"),
     "Portador da Brasa": ("damage", "resource", "aggressive", "intermediate", "bruiser", "burning"),
-    "Sonhador de Gelo": ("echo", "status", "explorer", "expert", "seer", "frozen"),
+    "Sonhador de Gelo": ("echo", "status", "balanced", "expert", "seer", "frozen"),
     "Chaveiro": ("range", "move", "balanced", "approachable", "skirmisher", "rooted"),
     "Contrabandista de Portas": ("move", "debt", "balanced", "intermediate", "raider", "fear"),
     "Magistrada do Limiar": ("mark", "guard", "cautious", "expert", "sentinel", "rooted"),
@@ -218,7 +218,3 @@ def main() -> None:
     write("characters", characters)
     write("abilities", abilities)
     print("CHARACTER_BALANCE_REFINEMENT PASS: 36 curated kits; one learning tier of each kind per Domain")
-
-
-if __name__ == "__main__":
-    main()
