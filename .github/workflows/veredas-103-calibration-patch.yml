@@ -20,56 +20,8 @@ jobs:
           fetch-depth: 0
       - name: Apply targeted final character tuning without changing gates
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          balance = Path('projeto_jornada/tools/refine_character_balance.py')
-          text = balance.read_text(encoding='utf-8')
-          policy_replacements = [
-              ('"Cantora de Cipós": ("status", "resource", "explorer", "expert", "controller", "rooted"),',
-               '"Cantora de Cipós": ("status", "resource", "balanced", "expert", "controller", "rooted"),'),
-              ('"Contrabandista de Portas": ("move", "debt", "explorer", "intermediate", "raider", "fear"),',
-               '"Contrabandista de Portas": ("move", "debt", "balanced", "intermediate", "raider", "fear"),'),
-              ('"Arquivista": ("mark", "resource", "explorer", "intermediate", "scholar", "fear"),',
-               '"Arquivista": ("mark", "resource", "balanced", "intermediate", "scholar", "fear"),'),
-          ]
-          for old, new in policy_replacements:
-              if text.count(old) != 1:
-                  raise SystemExit(f'learning-policy target mismatch: {old}')
-              text = text.replace(old, new, 1)
-          balance.write_text(text, encoding='utf-8')
-
-          budget = Path('projeto_jornada/tools/enforce_character_horizontal_budget.py')
-          text = budget.read_text(encoding='utf-8')
-          old = '''    "Peregrina da Sede": {
-        "heal": {"power": 4, "cost": 3},
-        "resource": {"power": 2, "cost": 0},
-    },
-}'''
-          new = '''    "Peregrina da Sede": {
-        "heal": {"power": 4, "cost": 3},
-        "resource": {"power": 2, "cost": 0},
-    },
-    "Barqueiro do Reflexo": {
-        "counter": {"power": 4, "cost": 3},
-    },
-    "Magistrada do Limiar": {
-        "guard": {"power": 4, "cost": 2},
-    },
-    "Portador da Brasa": {
-        "damage": {"power": 4, "cost": 1},
-    },
-}'''
-          if text.count(old) != 1:
-              raise SystemExit('targeted tuning insertion mismatch')
-          text = text.replace(old, new, 1)
-          old = '    print("CHARACTER_TARGETED_TUNING PASS: Vigia de Maré and Peregrina da Sede")\n'
-          new = '    print("CHARACTER_TARGETED_TUNING PASS: %s" % ", ".join(sorted(tuned)))\n'
-          if text.count(old) != 1:
-              raise SystemExit('targeted tuning print mismatch')
-          text = text.replace(old, new, 1)
-          budget.write_text(text, encoding='utf-8')
-          PY
+          python -c "from pathlib import Path; p=Path('projeto_jornada/tools/refine_character_balance.py'); s=p.read_text(encoding='utf-8'); reps=[('(\"status\", \"resource\", \"explorer\", \"expert\", \"controller\", \"rooted\")','(\"status\", \"resource\", \"balanced\", \"expert\", \"controller\", \"rooted\")'),('(\"move\", \"debt\", \"explorer\", \"intermediate\", \"raider\", \"fear\")','(\"move\", \"debt\", \"balanced\", \"intermediate\", \"raider\", \"fear\")'),('(\"mark\", \"resource\", \"explorer\", \"intermediate\", \"scholar\", \"fear\")','(\"mark\", \"resource\", \"balanced\", \"intermediate\", \"scholar\", \"fear\")')]; [(s.count(a)==1) or (_ for _ in ()).throw(SystemExit('policy target mismatch '+a)) for a,b in reps]; [None for a,b in reps if not (s:=s.replace(a,b,1))]; p.write_text(s,encoding='utf-8')"
+          python -c "from pathlib import Path; p=Path('projeto_jornada/tools/enforce_character_horizontal_budget.py'); s=p.read_text(encoding='utf-8'); nl=chr(10); anchor='    \"Peregrina da Sede\": {'+nl+'        \"heal\": {\"power\": 4, \"cost\": 3},'+nl+'        \"resource\": {\"power\": 2, \"cost\": 0},'+nl+'    },'+nl+'}'; insert='    \"Peregrina da Sede\": {'+nl+'        \"heal\": {\"power\": 4, \"cost\": 3},'+nl+'        \"resource\": {\"power\": 2, \"cost\": 0},'+nl+'    },'+nl+'    \"Barqueiro do Reflexo\": {'+nl+'        \"counter\": {\"power\": 4, \"cost\": 3},'+nl+'    },'+nl+'    \"Magistrada do Limiar\": {'+nl+'        \"guard\": {\"power\": 4, \"cost\": 2},'+nl+'    },'+nl+'    \"Portador da Brasa\": {'+nl+'        \"damage\": {\"power\": 4, \"cost\": 1},'+nl+'    },'+nl+'}'; (s.count(anchor)==1) or (_ for _ in ()).throw(SystemExit('tuning insertion mismatch')); s=s.replace(anchor,insert,1); old='    print(\"CHARACTER_TARGETED_TUNING PASS: Vigia de Maré and Peregrina da Sede\")'; new='    print(\"CHARACTER_TARGETED_TUNING PASS: %s\" % \", \".join(sorted(tuned)))'; (s.count(old)==1) or (_ for _ in ()).throw(SystemExit('print target mismatch')); p.write_text(s.replace(old,new,1),encoding='utf-8')"
           git diff --check
           git diff -- projeto_jornada/tools/refine_character_balance.py projeto_jornada/tools/enforce_character_horizontal_budget.py
       - name: Commit targeted final tuning
