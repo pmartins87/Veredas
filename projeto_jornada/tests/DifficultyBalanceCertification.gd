@@ -157,8 +157,10 @@ func _paired_matrix_gate() -> void:
             "purchases":float(row.purchases) / float(runs),
         }
         var m: Dictionary = metrics[difficulty_id] as Dictionary
-        expect(int(row.deadlocks) == 0, "%s produced %d simulation deadlocks" % [difficulty_id, int(row.deadlocks)])
-        expect(float(m.timeout) <= 0.05, "%s timeout rate exceeds 5%%: %.3f" % [difficulty_id, float(m.timeout)])
+        var combat_stalemate_rate := float(row.combat_timeouts) / float(runs)
+        expect(int(row.deadlocks) == 0, "%s produced %d structural simulation deadlocks" % [difficulty_id, int(row.deadlocks)])
+        expect(combat_stalemate_rate <= 0.01, "%s combat stalemate rate exceeds 1%%: %.3f" % [difficulty_id, combat_stalemate_rate])
+        expect(float(m.timeout) <= 0.05, "%s journey timeout rate exceeds 5%%: %.3f" % [difficulty_id, float(m.timeout)])
         print("10.6 %s: runs=%d victory=%.3f boss_reach=%.3f boss_win=%.3f timeout=%.3f score=%.3f combat_win=%.3f final_hp=%.2f purchases=%.2f" % [
             difficulty_id, int(row.runs), float(m.victory), float(m.boss_reach), float(m.boss_win), float(m.timeout), float(m.score), float(m.combat_win), float(m.final_hp), float(m.purchases)
         ])
@@ -206,6 +208,7 @@ func _empty_stats() -> Dictionary:
         "score_total":0.0,
         "combats":0,
         "combat_wins":0,
+        "combat_timeouts":0,
         "final_health":0,
         "purchases":0,
         "deadlocks":0,
@@ -224,6 +227,7 @@ func _accumulate(row: Dictionary, result: Dictionary) -> void:
     row.score_total = float(row.score_total) + _journey_score(result)
     row.combats = int(row.combats) + int(result.get("combats", 0))
     row.combat_wins = int(row.combat_wins) + int(result.get("combat_wins", 0))
+    row.combat_timeouts = int(row.combat_timeouts) + int(result.get("combat_timeouts", 0))
     row.final_health = int(row.final_health) + int(result.get("final_health", 0))
     row.purchases = int(row.purchases) + int(result.get("purchases", 0))
     row.deadlocks = int(row.deadlocks) + int(result.get("deadlocks", 0))

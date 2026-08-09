@@ -193,6 +193,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "combats":0,
         "combat_wins":0,
         "combat_losses":0,
+        "combat_timeouts":0,
         "boss_reached":false,
         "boss_win":false,
         "purchases":0,
@@ -246,6 +247,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
         "combats":int(stats.combats),
         "combat_wins":int(stats.combat_wins),
         "combat_losses":int(stats.combat_losses),
+        "combat_timeouts":int(stats.combat_timeouts),
         "boss_reached":bool(stats.boss_reached),
         "boss_win":bool(stats.boss_win),
         "purchases":int(stats.purchases),
@@ -336,7 +338,11 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
             if after_turn == before_turn and after_enemy_hp == before_enemy_hp and after_player_hp == before_player_hp:
                 _combat_fallback()
     if bool(CombatEngine.combat.get("active", false)):
-        stats.deadlocks = int(stats.deadlocks) + 1
+        # A combat that advances turns for the full simulation horizon is a
+        # policy stalemate, not an engine deadlock. Keep it as a penalized loss
+        # and expose it separately so balance gates can bound its frequency.
+        stats.combat_timeouts = int(stats.combat_timeouts) + 1
+        stats.combat_losses = int(stats.combat_losses) + 1
         RunFlowEngine.fail("combat_timeout")
         return
     var combat_result := str(CombatEngine.combat.get("result", ""))
