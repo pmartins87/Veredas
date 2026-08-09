@@ -104,12 +104,18 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
 
     var healing_ability := _best_ability(payable, ["heal"])
     var defensive_ability := _best_ability(payable, ["counter", "guard"])
-    var damage_ability := _best_ability(payable, ["damage", "posture", "range", "echo", "status", "mark", "debt"])
-    var utility_ability := _best_ability(payable, ["resource", "mark", "move"])
+    # Setup effects are intentionally separated from progress effects. Treating
+    # mark/status as generic damage made deterministic policies spend several
+    # consecutive turns preparing an enemy while novice play kept attacking.
+    var setup_ability := _best_ability(payable, ["mark", "status"])
+    var progress_ability := _best_ability(payable, ["damage", "echo", "range", "debt", "counter", "posture"])
+    var resource_ability := _best_ability(payable, ["resource"])
+    var utility_ability := _best_ability(payable, ["move"])
     var intent_danger := int(intent.get("danger", 4 if str(intent.get("id", "")) == "heavy" else 2))
     var incoming_severe := intent_danger >= 4
     var incoming_risky := intent_danger >= 3
     var guard_value := int(player.get("guard", 0))
+    var enemy_hp_ratio := float(enemy.get("hp", 0)) / maxf(1.0, float(enemy.get("max_hp", 1)))
 
     if policy_id == "cautious":
         # A telegraphed heavy attack is mitigated before healing. Healing first
@@ -119,13 +125,16 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
-        if hp_ratio <= 0.60 and not healing_ability.is_empty():
+        if incoming_risky and hp_ratio <= 0.55 and guard_value < 2 and not defensive_ability.is_empty():
+            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
+        if hp_ratio <= 0.52 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-        # When healing is unavailable, progress the fight. Generic guard loops at
-        # critical HP can stabilize forever without regenerating enough net life.
-        # Normal attacks also generate signature resource, reopening healing.
-        if not damage_ability.is_empty():
-            return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
+        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
+            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
+        if not progress_ability.is_empty():
+            return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
+        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
+            return {"kind":"ability", "id":str(resource_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 3:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
@@ -135,8 +144,10 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
             return {"kind":"action", "id":"guard"}
-        if not damage_ability.is_empty():
-            return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
+        if not progress_ability.is_empty():
+            return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
+        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio) and enemy_hp_ratio >= 0.75:
+            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 2:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
@@ -145,28 +156,42 @@ func choose_combat_decision(policy_id: String, combat: Dictionary) -> Dictionary
         if incoming_severe and guard_value < 3:
             if not defensive_ability.is_empty():
                 return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
-            if hp_ratio <= 0.40:
+            if hp_ratio <= 0.45:
                 return {"kind":"action", "id":"guard"}
-        if hp_ratio <= 0.45 and not healing_ability.is_empty():
+        if hp_ratio <= 0.40 and not healing_ability.is_empty():
             return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-        if not utility_ability.is_empty():
+        if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
+            return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
+        if not progress_ability.is_empty():
+            return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
+        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
+            return {"kind":"ability", "id":str(resource_ability.get("id", ""))}
+        if not utility_ability.is_empty() and not movement_locked:
             return {"kind":"ability", "id":str(utility_ability.get("id", ""))}
-        if not damage_ability.is_empty():
-            return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
         if int(player.get("vigor", 0)) >= 3:
             return {"kind":"action", "id":"precise"}
         return {"kind":"action", "id":"strike"}
 
-    if incoming_severe and guard_value < 3 and hp_ratio < 0.75:
+    # Balanced play prioritizes survival only when the telegraph warrants it,
+    # then spends signature resources on actions that actually progress combat.
+    if incoming_severe and guard_value < 3 and hp_ratio < 0.80:
         if not defensive_ability.is_empty():
             return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         return {"kind":"action", "id":"guard"}
-    if incoming_risky and guard_value < 2 and hp_ratio <= 0.30:
+    if incoming_risky and guard_value < 2 and hp_ratio <= 0.60:
+        if not defensive_ability.is_empty():
+            return {"kind":"ability", "id":str(defensive_ability.get("id", ""))}
         return {"kind":"action", "id":"guard"}
-    if hp_ratio <= 0.45 and not healing_ability.is_empty():
+    # A lower generic heal threshold prevents stable heal/damage loops while
+    # preserving healing as an emergency tool. Cautious retains the higher band.
+    if hp_ratio <= 0.32 and not healing_ability.is_empty():
         return {"kind":"ability", "id":str(healing_ability.get("id", ""))}
-    if not damage_ability.is_empty():
-        return {"kind":"ability", "id":str(damage_ability.get("id", ""))}
+    if _setup_is_worthwhile(setup_ability, enemy, enemy_hp_ratio):
+        return {"kind":"ability", "id":str(setup_ability.get("id", ""))}
+    if not progress_ability.is_empty():
+        return {"kind":"ability", "id":str(progress_ability.get("id", ""))}
+    if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):
+        return {"kind":"ability", "id":str(resource_ability.get("id", ""))}
     if int(player.get("vigor", 0)) >= 3:
         return {"kind":"action", "id":"precise"}
     return {"kind":"action", "id":"strike"}
@@ -179,9 +204,11 @@ func should_fight_boss(policy_id: String, turn: int, health: int, max_health: in
         "aggressive":
             return true
         "cautious":
-            return turn >= 10 or (turn >= 8 and ratio >= 0.70)
+            # Do not force a supposedly cautious player into a boss at critical
+            # health merely because a turn counter expired.
+            return (turn >= 8 and ratio >= 0.70) or (turn >= 11 and ratio >= 0.50)
         "explorer":
-            return turn >= 9
+            return (turn >= 8 and ratio >= 0.65) or (turn >= 10 and ratio >= 0.45)
         "random":
             return turn >= 6 and _decision_next_float() >= 0.45
         _:
@@ -360,12 +387,34 @@ func _ability_is_tactically_available(ability: Dictionary, player: Dictionary, e
         "status":
             var status_id := str(ability.get("status_id", ""))
             return status_id == "" or StatusEngine.status_stacks(enemy, status_id) < 3
+        "posture":
+            return not StatusEngine.has_status(enemy, "exposed") and int(enemy.get("posture", 0)) > 0
         "move":
             return int(player.get("distance", 1)) > 0
         "debt":
             return float(player.get("hp", 0)) / maxf(1.0, float(player.get("max_hp", 1))) > 0.35
         _:
             return true
+
+func _setup_is_worthwhile(ability: Dictionary, enemy: Dictionary, enemy_hp_ratio: float) -> bool:
+    if ability.is_empty() or enemy_hp_ratio < 0.55:
+        return false
+    var mechanic := str(ability.get("mechanic", ""))
+    if mechanic == "mark":
+        return StatusEngine.status_stacks(enemy, "marked") == 0
+    if mechanic == "status":
+        var status_id := str(ability.get("status_id", ""))
+        return status_id != "" and StatusEngine.status_stacks(enemy, status_id) == 0
+    return false
+
+func _resource_is_worthwhile(ability: Dictionary, character_id: String, resource_pool: Dictionary, incoming_risky: bool) -> bool:
+    if ability.is_empty() or incoming_risky:
+        return false
+    var character := ContentRegistry.get_record(character_id)
+    var resource := str(character.get("resource", ""))
+    var current := int(resource_pool.get(resource, 0))
+    var maximum := maxi(1, int(character.get("resource_max", 5)))
+    return current <= maxi(1, int(maximum / 3))
 
 func _best_ability(payable: Array, mechanics: Array[String]) -> Dictionary:
     for mechanic in mechanics:
