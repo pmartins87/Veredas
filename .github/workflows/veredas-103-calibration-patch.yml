@@ -18,35 +18,64 @@ jobs:
         with:
           ref: projeto-jornada-snapshots
           fetch-depth: 0
-      - name: Refine final policy behavior without changing gates
+      - name: Apply targeted final character tuning without changing gates
         run: |
           python - <<'PY'
           from pathlib import Path
-          policy = Path('projeto_jornada/core/systems/PlayerPolicyEngine.gd')
-          text = policy.read_text(encoding='utf-8')
-          replacements = [
-              ('    var balanced_progress_ability := _best_ability(payable, ["damage", "range", "debt", "posture"])\n',
-               '    var balanced_progress_ability := _best_ability(payable, ["damage", "debt", "posture", "range"])\n'),
-              ('        if _resource_is_worthwhile(resource_ability, character_id, resource_pool, incoming_risky):\n            return {"kind":"ability", "id":str(resource_ability.get("id", ""))}\n        if not utility_ability.is_empty() and not movement_locked:\n',
-               '        if not utility_ability.is_empty() and not movement_locked:\n'),
-              ('    if incoming_risky and guard_value < 2 and hp_ratio <= 0.45:\n',
-               '    if incoming_risky and guard_value < 2 and hp_ratio <= 0.50:\n'),
-              ('    if hp_ratio <= 0.15 and not healing_ability.is_empty():\n',
-               '    if hp_ratio <= 0.15 and enemy_hp_ratio <= 0.45 and not healing_ability.is_empty():\n'),
+
+          balance = Path('projeto_jornada/tools/refine_character_balance.py')
+          text = balance.read_text(encoding='utf-8')
+          policy_replacements = [
+              ('"Cantora de Cipós": ("status", "resource", "explorer", "expert", "controller", "rooted"),',
+               '"Cantora de Cipós": ("status", "resource", "balanced", "expert", "controller", "rooted"),'),
+              ('"Contrabandista de Portas": ("move", "debt", "explorer", "intermediate", "raider", "fear"),',
+               '"Contrabandista de Portas": ("move", "debt", "balanced", "intermediate", "raider", "fear"),'),
+              ('"Arquivista": ("mark", "resource", "explorer", "intermediate", "scholar", "fear"),',
+               '"Arquivista": ("mark", "resource", "balanced", "intermediate", "scholar", "fear"),'),
           ]
-          for old, new in replacements:
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f'policy target count={count}: {old[:90]!r}')
+          for old, new in policy_replacements:
+              if text.count(old) != 1:
+                  raise SystemExit(f'learning-policy target mismatch: {old}')
               text = text.replace(old, new, 1)
-          policy.write_text(text, encoding='utf-8')
+          balance.write_text(text, encoding='utf-8')
+
+          budget = Path('projeto_jornada/tools/enforce_character_horizontal_budget.py')
+          text = budget.read_text(encoding='utf-8')
+          old = '''    "Peregrina da Sede": {
+        "heal": {"power": 4, "cost": 3},
+        "resource": {"power": 2, "cost": 0},
+    },
+}'''
+          new = '''    "Peregrina da Sede": {
+        "heal": {"power": 4, "cost": 3},
+        "resource": {"power": 2, "cost": 0},
+    },
+    "Barqueiro do Reflexo": {
+        "counter": {"power": 4, "cost": 3},
+    },
+    "Magistrada do Limiar": {
+        "guard": {"power": 4, "cost": 2},
+    },
+    "Portador da Brasa": {
+        "damage": {"power": 4, "cost": 1},
+    },
+}'''
+          if text.count(old) != 1:
+              raise SystemExit('targeted tuning insertion mismatch')
+          text = text.replace(old, new, 1)
+          old = '    print("CHARACTER_TARGETED_TUNING PASS: Vigia de Maré and Peregrina da Sede")\n'
+          new = '    print("CHARACTER_TARGETED_TUNING PASS: %s" % ", ".join(sorted(tuned)))\n'
+          if text.count(old) != 1:
+              raise SystemExit('targeted tuning print mismatch')
+          text = text.replace(old, new, 1)
+          budget.write_text(text, encoding='utf-8')
           PY
           git diff --check
-          git diff -- projeto_jornada/core/systems/PlayerPolicyEngine.gd
-      - name: Commit final policy refinement
+          git diff -- projeto_jornada/tools/refine_character_balance.py projeto_jornada/tools/enforce_character_horizontal_budget.py
+      - name: Commit targeted final tuning
         run: |
           git config user.name 'Veredas CI'
           git config user.email 'actions@users.noreply.github.com'
-          git add projeto_jornada/core/systems/PlayerPolicyEngine.gd
-          git commit -m 'Refine final 10.2 policy behavior'
+          git add projeto_jornada/tools/refine_character_balance.py projeto_jornada/tools/enforce_character_horizontal_budget.py
+          git commit -m 'Tune final 10.2 character outliers'
           git push origin HEAD:projeto-jornada-snapshots
