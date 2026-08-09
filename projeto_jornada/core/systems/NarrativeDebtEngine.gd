@@ -34,6 +34,22 @@ func resolve_oldest() -> bool:
     GameState.run.debts = debts
     return true
 
+func is_active(debt_id: String) -> bool:
+    return not active_debt(debt_id).is_empty()
+
+func has_active() -> bool:
+    return not (GameState.run.get("debts", []) as Array).is_empty()
+
+func active_count() -> int:
+    return (GameState.run.get("debts", []) as Array).size()
+
+func active_debt(debt_id: String) -> Dictionary:
+    for debt_variant in GameState.run.get("debts", []) as Array:
+        var debt: Dictionary = debt_variant as Dictionary
+        if str(debt.get("id", "")) == debt_id:
+            return debt
+    return {}
+
 func age_all(turns: int = 1) -> void:
     var debts: Array = GameState.run.get("debts", [])
     for debt in debts:
@@ -43,14 +59,31 @@ func age_all(turns: int = 1) -> void:
     GameState.run.debts = debts
 
 func event_multiplier(event: Dictionary) -> float:
-    if str(event.get("pool", "")) not in ["callback", "transit_callback", "debt"]:
-        return 1.0
-    var multiplier := 1.0
-    for debt in GameState.run.get("debts", []):
-        multiplier += float(debt.get("pressure", 1.0))
+    var pool := str(event.get("pool", ""))
+    if pool == "callback":
+        # A callback is pressured only by the obligation it actually closes.
+        # Unrelated debts must never make an arbitrary callback dominate the pool.
+        var debt_id := str(event.get("debt_id", ""))
+        var debt := active_debt(debt_id)
+        if debt.is_empty():
+            return 1.0
+        var multiplier := 1.0 + float(debt.get("pressure", 1.0))
         if int(debt.get("age", 0)) >= int(debt.get("hard_deadline", 10)):
             multiplier += 50.0
-    return multiplier
+        return multiplier
+    if pool == "transit_callback":
+        # Transit pressure reflects the most urgent unresolved obligation rather
+        # than summing every debt and creating runaway multiplicative weight.
+        var strongest := 0.0
+        var overdue := false
+        for debt_variant in GameState.run.get("debts", []) as Array:
+            var debt: Dictionary = debt_variant as Dictionary
+            strongest = maxf(strongest, float(debt.get("pressure", 1.0)))
+            overdue = overdue or int(debt.get("age", 0)) >= int(debt.get("hard_deadline", 10))
+        if strongest <= 0.0:
+            return 1.0
+        return 1.0 + strongest + (25.0 if overdue else 0.0)
+    return 1.0
 
 func overdue_count() -> int:
     var count := 0
