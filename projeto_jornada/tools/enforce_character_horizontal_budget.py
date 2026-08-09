@@ -8,9 +8,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CHARACTERS_PATH = ROOT / "data" / "characters.json"
 ABILITIES_PATH = ROOT / "data" / "abilities.json"
 
-# These are intentionally narrow corrections from the first controlled 10.2
-# matrix. Both characters were outliers even under the same `balanced` policy;
-# the other four failing Domains were policy-comparison confounds, not kit power.
+# Intentionally narrow corrections derived from controlled Phase 10.2 matrices.
+# Each override addresses a measured kit-level outlier; policy-comparison
+# confounds and later item-economy effects are handled by their own experiments.
 ABILITY_TUNING = {
     "Vigia de Maré": {
         "guard": {"power": 5, "cost": 2},
@@ -28,6 +28,9 @@ ABILITY_TUNING = {
     },
     "Portador da Brasa": {
         "damage": {"power": 4, "cost": 1},
+    },
+    "Tecelã de Metal": {
+        "status": {"power": 3, "cost": 2},
     },
 }
 
