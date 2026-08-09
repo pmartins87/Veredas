@@ -11,7 +11,7 @@
 - Fase 7: **7.1, 7.2, 7.6, 7.7 e 7.9 ✅**; 7.3–7.5/7.8 em produção; 7.10 pendente.
 - Fase 8: **8.1–8.10 ✅ — FASE CONCLUÍDA**.
 - Fase 9: **9.1–9.10 ✅ — FASE CONCLUÍDA**.
-- Fase 10: **10.1–10.3 ✅ certificados; 10.4 é o próximo passo**.
+- Fase 10: **10.1–10.4 ✅ certificados; 10.5 está em andamento**.
 
 ## Certificação real da engine
 A branch canônica possui CI estrita em GitHub Actions com Godot 4.7.1 stable. A CI reconstrói o catálogo, valida conteúdo, importa o projeto sem tolerar erros de parser e executa testes runtime.
@@ -31,11 +31,13 @@ Baselines importantes:
 - run 31236557869: `MULTI_JOURNEY_LOOP_CERTIFICATION PASS: 9.10`, junto com todos os gates anteriores da Fase 9;
 - run 31237017275: CI completa novamente verde após o marcador determinístico Android, incluindo 9.1–9.10;
 - run 31237251316: matriz final Android real — API 29/Android 10 e API 34/Android 14 verdes no mesmo APK, com prontidão do app, seed 881001, schema 3, pause/autosave por recriação física do save, force-stop, relaunch, retomada e segundo autosave certificados;
-- run 31299621611: `CHARACTER_BALANCE_CERTIFICATION PASS: 10.2` + `ENEMY_BALANCE_CERTIFICATION PASS: 10.3` no mesmo HEAD, após 1.296 jornadas de balanceamento de personagens e 2.340 combates da matriz inimiga.
+- run 31299621611: `CHARACTER_BALANCE_CERTIFICATION PASS: 10.2` + `ENEMY_BALANCE_CERTIFICATION PASS: 10.3` no mesmo HEAD, após 1.296 jornadas de balanceamento de personagens e 2.340 combates da matriz inimiga;
+- run 31304747936 / commit `0f0ebd1`: `JOURNEY_SIMULATION_CERTIFICATION PASS: 10.1`, `CHARACTER_BALANCE_CERTIFICATION PASS: 10.2`, `ENEMY_BALANCE_CERTIFICATION PASS: 10.3` e `ITEM_ECONOMY_CERTIFICATION PASS: 10.4` no mesmo HEAD. O gate 10.4 certificou os 1.116 itens, 12 tipos funcionais de bônus/afixos, preços e raridades, 7.680 ofertas amostradas de mercador, loot determinístico e taxas observadas de 40,3% para inimigos normais e 90,0% para elites.
 
 ## Catálogo canônico
 - 5.160 registros; 12 mundos; 120 localidades; 96 famílias; 300 monstros; 60 chefes/subchefes; 1.116 itens; 300 NPCs; 204 Marcas; 120 Dívidas; 36 personagens; 72 habilidades; 2.544 eventos; 36 finais; 144 pools.
 - 88,719% de estruturas narrativas normalizadas únicas; 968 assinaturas de escolhas; 0 erros estruturais no QA certificado.
+- Pirâmide econômica dos itens certificada: 480 comuns, 288 incomuns, 168 raros, 96 singulares, 60 relíquias e 24 Ecos.
 
 ## Fase 7
 - 7.1 ✅ Direção de arte.
@@ -77,15 +79,16 @@ Baselines importantes:
 - 10.1 ✅ Simulador completo de jornadas e políticas de jogador.
 - 10.2 ✅ Balanceamento dos 36 personagens e suas curvas de aprendizado — certificado com 1.296 jornadas controladas.
 - 10.3 ✅ Balanceamento dos 300 monstros, elites e 60 chefes/subchefes — certificado com 2.340 combates, fases funcionais e timeouts dentro do gate.
-- 10.4 ⏭ Balanceamento dos 1.116 itens, afixos, loot e economia de jornada.
-- 10.5–10.10 ⏳ Pendentes após certificação de 10.4.
+- 10.4 ✅ Balanceamento dos 1.116 itens, afixos, loot e economia de jornada — raridades, preços, mercadores, drops, upgrades e efeitos de equipamento integrados e certificados.
+- 10.5 🟡 Frequências de eventos, Marcas, Dívidas, callbacks e arcos narrativos — em andamento.
+- 10.6–10.10 ⏳ Pendentes após certificação de 10.5.
 
 ## Integridade do roadmap
 - `ROADMAP_MASTER.md`: roadmap 0.1–12.10.
 - `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida das fases 8–12.
 
 ## Contagem formal
-- **98/130 passos concluídos segundo seus gates.**
+- **99/130 passos concluídos segundo seus gates.**
 
 ## Ponto final
 O roadmap só termina em 12.10 com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
