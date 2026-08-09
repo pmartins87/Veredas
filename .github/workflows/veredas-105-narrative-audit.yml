@@ -1,0 +1,34 @@
+name: Veredas 10.5 Narrative Audit
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - '.github/workflows/veredas-105-narrative-audit.yml'
+      - 'projeto_jornada/tools/audit_narrative_balance.py'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild canonical content
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py
+          python tools/refine_npc_authenticity.py
+          python tools/refine_character_balance.py
+          python tools/enforce_character_horizontal_budget.py
+          python tools/refine_enemy_balance.py
+          python tools/refine_item_economy.py
+      - name: Audit Phase 10.5 narrative balance schema
+        working-directory: projeto_jornada
+        run: python tools/audit_narrative_balance.py
