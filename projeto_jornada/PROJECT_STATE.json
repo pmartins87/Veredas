@@ -1,25 +1,25 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 99,
+  "completed_steps": 100,
   "current_phase": 10,
-  "completed_through": "10.4",
-  "current_step": "10.5",
-  "current_step_title": "Frequências de eventos, Marcas, Dívidas, callbacks e arcos narrativos",
+  "completed_through": "10.5",
+  "current_step": "10.6",
+  "current_step_title": "Calibração dos quatro modos de dificuldade",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
     "10.3": "certified",
     "10.4": "certified",
-    "10.5": "in_progress",
-    "10.6": "pending",
+    "10.5": "certified",
+    "10.6": "in_progress",
     "10.7": "pending",
     "10.8": "pending",
     "10.9": "pending",
     "10.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31304747936,
-    "commit": "0f0ebd1d29d46949167b1842cfcf9f44978c0019",
+    "run_id": 31337983973,
+    "commit": "4a4e714885a7f702f7c69f05b63918992c226947",
     "character_balance_runs": 1296,
     "character_balance_result": "PASS",
     "enemy_balance_combats": 2340,
@@ -28,7 +28,18 @@
     "item_economy_result": "PASS",
     "merchant_sample_offers": 7680,
     "normal_loot_rate": 0.403,
-    "elite_loot_rate": 0.900
+    "elite_loot_rate": 0.900,
+    "narrative_balance_runs": 216,
+    "narrative_selections": 12960,
+    "narrative_coverage": 0.927,
+    "narrative_debt_origins": 693,
+    "narrative_exact_callbacks": 352,
+    "narrative_transit_callbacks": 569,
+    "narrative_arc_share": 0.027,
+    "narrative_arc_unique": 85,
+    "narrative_max_arc_stage": 4,
+    "narrative_balance_result": "PASS",
+    "integrated_journey_regression_result": "PASS"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
