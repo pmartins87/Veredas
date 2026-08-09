@@ -1,7 +1,8 @@
 extends Node
 
 func trading_disabled() -> bool:
-    return bool((GameState.run.get("flags", {}) as Dictionary).get("modifier.no_trade", false))
+    var flags: Dictionary = GameState.run.get("flags", {}) as Dictionary
+    return bool(flags.get("modifier.no_trade", false)) or bool(flags.get("simulation.disable_item_economy", false))
 
 func price(item_id: String) -> int:
     return ItemEconomyEngine.buy_price(item_id)
