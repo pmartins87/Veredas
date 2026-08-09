@@ -44,20 +44,14 @@ def append_effect(choice: dict[str, Any], effect: dict[str, Any]) -> None:
     set_effects(choice, rows)
 
 
-def first_ref(value: Any, key_name: str) -> str:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            if key == key_name and isinstance(child, str) and child:
-                return child
-            nested = first_ref(child, key_name)
-            if nested:
-                return nested
-    elif isinstance(value, list):
-        for child in value:
-            nested = first_ref(child, key_name)
-            if nested:
-                return nested
-    return ""
+def replace_first_mark_effect(choice: dict[str, Any], mark_id: str) -> None:
+    rows = effects(choice)
+    for row in rows:
+        if str(row.get("op", "")) == "mark_add":
+            row["mark_id"] = mark_id
+            set_effects(choice, rows)
+            return
+    raise SystemExit("Expected first debt-origin choice to contain mark_add")
 
 
 def combine_condition(existing: Any, extra: dict[str, Any]) -> dict[str, Any]:
@@ -78,13 +72,39 @@ def main() -> None:
         )
 
     debt_by_location: dict[str, dict[str, Any]] = {}
+    debts_by_world: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for debt in debts:
         location_id = str(debt.get("origin_location_id", ""))
         if not location_id or location_id in debt_by_location:
             raise SystemExit(f"Debt origin is not 1:1 at {location_id!r}")
         debt_by_location[location_id] = debt
+        debts_by_world[str(debt.get("world_id", ""))].append(debt)
     if len(debt_by_location) != 120:
         raise SystemExit(f"Expected 120 unique debt origins, got {len(debt_by_location)}")
+
+    marks_by_world: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for mark in marks:
+        marks_by_world[str(mark.get("world_id", ""))].append(mark)
+    for world_id, rows in marks_by_world.items():
+        rows.sort(key=lambda row: str(row.get("id", "")))
+        if len(rows) != 17:
+            raise SystemExit(f"{world_id} has {len(rows)} marks instead of 17")
+
+    # Allocate one distinct memory Mark to each debt in a Domain. We reuse ten
+    # of the seventeen canonical Marks; the other seven remain available for
+    # broader world/arc/event consequences.
+    memory_mark_by_debt: dict[str, str] = {}
+    for world in worlds:
+        world_id = str(world.get("id", ""))
+        world_debts = sorted(
+            debts_by_world.get(world_id, []),
+            key=lambda row: str(row.get("origin_location_id", "")),
+        )
+        world_marks = marks_by_world.get(world_id, [])
+        if len(world_debts) != 10 or len(world_marks) != 17:
+            raise SystemExit(f"{world_id} cannot allocate 10 distinct debt memory marks")
+        for index, debt in enumerate(world_debts):
+            memory_mark_by_debt[str(debt.get("id", ""))] = str(world_marks[index].get("id", ""))
 
     debt_events: dict[str, dict[str, Any]] = {}
     callback_events: dict[str, dict[str, Any]] = {}
@@ -117,17 +137,19 @@ def main() -> None:
         debt_id = str(debt.get("id", ""))
         origin = debt_events[location_id]
         callback = callback_events[location_id]
+        mark_id = memory_mark_by_debt[debt_id]
 
         origin["debt_id"] = debt_id
+        origin["memory_mark_id"] = mark_id
         origin["narrative_role"] = "debt_origin"
         origin["condition"] = {"op": "not", "condition": {"op": "debt_active", "debt_id": debt_id}}
-        for choice in origin.get("choices", []):
+        origin_choices = origin.get("choices", [])
+        if len(origin_choices) != 3:
+            raise SystemExit(f"Debt origin {origin.get('id')} does not have three choices")
+        replace_first_mark_effect(origin_choices[0], mark_id)
+        for choice in origin_choices:
             if isinstance(choice, dict):
                 append_effect(choice, {"op": "debt_create", "debt_id": debt_id})
-
-        mark_id = first_ref(origin, "mark_id")
-        if not mark_id:
-            raise SystemExit(f"Debt origin {origin.get('id')} has no mark consequence to link")
         linked_marks.add(mark_id)
 
         callback["debt_id"] = debt_id
@@ -147,8 +169,8 @@ def main() -> None:
         for choice in choices:
             append_effect(choice, {"op": "debt_resolve", "debt_id": debt_id})
 
-    if len(linked_marks) < 60:
-        raise SystemExit(f"Debt callbacks reuse too few origin marks: {len(linked_marks)}")
+    if len(linked_marks) != 120:
+        raise SystemExit(f"Expected 120 distinct debt memory marks, got {len(linked_marks)}")
 
     # Transit consequences are a pressure-release valve for any unresolved debt,
     # not ambient events that appear when nothing is owed.
@@ -199,7 +221,8 @@ def main() -> None:
     write("events", events)
     print(
         "NARRATIVE_BALANCE_REFINEMENT PASS: "
-        "120 debt loops + 12 transit pressure callbacks + 36 causal arcs / 204 stages"
+        "120 debt loops + 120 unique memory Marks + 12 transit pressure callbacks + "
+        "36 causal arcs / 204 stages"
     )
 
 
