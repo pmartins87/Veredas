@@ -117,6 +117,7 @@ func _simulation_gate() -> void:
                     "character_id":character_id,
                     "policy_id":policy_id,
                     "build_id":"baseline",
+                    "economy_enabled":false,
                     "seed":seed_value,
                     "max_steps":MAX_STEPS,
                 })

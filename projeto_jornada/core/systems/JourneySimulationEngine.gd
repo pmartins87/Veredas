@@ -183,6 +183,7 @@ func _simulate_internal(config: Dictionary) -> Dictionary:
     flags["simulation.no_persist"] = true
     flags["simulation.policy"] = policy_id
     flags["simulation.build"] = build_id
+    flags["simulation.disable_item_economy"] = not bool(config.get("economy_enabled", true))
     GameState.run.flags = flags
     var build_items := _apply_build(world_id, build_id)
 
@@ -348,6 +349,8 @@ func _simulate_combat(policy_id: String, stats: Dictionary) -> void:
         stats.combat_losses = int(stats.combat_losses) + 1
 
 func _equip_loot_upgrades(policy_id: String) -> void:
+    if bool((GameState.run.get("flags", {}) as Dictionary).get("simulation.disable_item_economy", false)):
+        return
     var seen: Dictionary = {}
     for item_variant in GameState.run.get("loot_found", []) as Array:
         var item_id := str(item_variant)
