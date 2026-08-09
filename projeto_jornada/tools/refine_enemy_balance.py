@@ -75,6 +75,19 @@ def clamp(value: int, low: int, high: int) -> int:
     return max(low, min(high, value))
 
 
+def distinct_phase_mechanics(candidates: list[str]) -> list[str]:
+    """Keep the generated identity while guaranteeing three behavioral phases."""
+    chosen: list[str] = []
+    for candidate in candidates:
+        index = MECHANICS.index(candidate)
+        for offset in range(len(MECHANICS)):
+            mechanic = MECHANICS[(index + offset) % len(MECHANICS)]
+            if mechanic not in chosen:
+                chosen.append(mechanic)
+                break
+    return chosen
+
+
 def main() -> None:
     worlds = read("worlds")
     families = read("families")
@@ -106,7 +119,9 @@ def main() -> None:
         base_posture = 7 + tier + posture_adjust
         monster["encounter_tier"] = tier + 1
         monster["rank"] = "elite" if elite else "normal"
-        monster["hp"] = clamp(base_hp + (5 + tier if elite else 0), 8, 30)
+        # Elites retain a clear encounter premium, but one point less raw HP
+        # prevents rare guard/recovery cycles from crossing the 80-round gate.
+        monster["hp"] = clamp(base_hp + (4 + tier if elite else 0), 8, 30)
         monster["posture"] = clamp(base_posture + (3 if elite else 0), 5, 18)
         monster["mechanic"] = MECHANICS[local_index % len(MECHANICS)]
         monster["domain_status"] = DOMAIN_STATUS.get(domain_id, "fear")
@@ -148,11 +163,11 @@ def main() -> None:
         boss["domain_status"] = DOMAIN_STATUS.get(domain_id, "fear")
         boss["mechanic"] = MECHANICS[(wi + bi * 2) % len(MECHANICS)]
         boss["damage_bonus"] = 0
-        phase_mechanics = [
+        phase_mechanics = distinct_phase_mechanics([
             MECHANICS[(wi + bi) % 8],
             MECHANICS[(wi * 3 + bi * 2 + 1) % 8],
             MECHANICS[(wi * 5 + bi * 3 + 2) % 8],
-        ]
+        ])
         phases = [
             {
                 "threshold":1.0,
