@@ -31,7 +31,7 @@ KIT = {
     "Monge do Vento": ("move", "posture", "explorer", "expert", "skirmisher", "rooted"),
     "Ferreiro de Guerra": ("damage", "guard", "aggressive", "approachable", "bruiser", "burning"),
     "Desertor da Forja": ("counter", "resource", "balanced", "intermediate", "reactor", "burning"),
-    "Tecelã de Metal": ("status", "mark", "explorer", "expert", "controller", "shock"),
+    "Tecelã de Metal": ("status", "mark", "balanced", "expert", "controller", "shock"),
     "Penitente Cinzento": ("guard", "debt", "cautious", "approachable", "survivor", "fear"),
     "Necrógrafa": ("status", "echo", "explorer", "intermediate", "controller", "poison"),
     "Sem-Nome": ("move", "mark", "balanced", "expert", "skirmisher", "fear"),
