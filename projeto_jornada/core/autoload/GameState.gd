@@ -34,7 +34,7 @@ func new_run(character_id: String, seed_value: int) -> void:
         "resources":{"fragments":12,"essence":0,"provisions":3},
         "marks":{},"flags":{},"inventory":[],"equipped":{},"debts":[],
         "recent_events":[],"event_counts":{},"turn":0,
-        "visited_locations":[first_location],"defeated_enemies":[],"purchases":[],"ending_id":"",
+        "visited_locations":[first_location],"defeated_enemies":[],"purchases":[],"loot_found":[],"ending_id":"",
         "echo_context":{},
         "seed":seed_value,"rng":RNGService.snapshot()
     }
