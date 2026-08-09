@@ -29,6 +29,17 @@ ABILITY_TUNING = {
     "Portador da Brasa": {
         "damage": {"power": 4, "cost": 1},
     },
+    # The controlled 10.2 probe showed that the approachable bulwark needed
+    # one point of counter efficiency to reward deliberate defensive play.
+    "Guardião de Casca": {
+        "counter": {"power": 4, "cost": 3},
+    },
+    # Desertor was the sole high outlier in Forja Rubra. Raising the resource
+    # cost by one preserves the reactive fantasy while removing the dominant
+    # efficiency that opened the Domain spread beyond the 0.650 gate.
+    "Desertor da Forja": {
+        "counter": {"power": 4, "cost": 3},
+    },
 }
 
 # Tecelã de Metal is a setup-only expert controller (status + mark). The
