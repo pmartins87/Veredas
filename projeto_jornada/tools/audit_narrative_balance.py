@@ -43,6 +43,20 @@ def walk_refs(value: Any, key_name: str, bucket: collections.Counter[str]) -> No
             walk_refs(child, key_name, bucket)
 
 
+def compact_choice(choice: dict[str, Any]) -> dict[str, Any]:
+    effects = choice.get("effect", {})
+    ops: collections.Counter[str] = collections.Counter()
+    walk_ops(effects, ops)
+    refs: collections.Counter[str] = collections.Counter()
+    walk_refs(effects, "debt_id", refs)
+    return {
+        "keys": sorted(choice),
+        "effect_ops": dict(sorted(ops.items())),
+        "debt_refs": sorted(refs),
+        "has_condition": "condition" in choice,
+    }
+
+
 def main() -> None:
     events = read("events")
     marks = read("marks")
@@ -76,10 +90,12 @@ def main() -> None:
     world_counts = collections.Counter(str(row.get("world_id", "<none>")) for row in events)
     max_counts = collections.Counter(int(row.get("max_per_run", 99)) for row in events)
     weights = collections.Counter(float(row.get("weight", 1.0)) for row in events)
+    choice_counts = collections.Counter(len(row.get("choices", [])) for row in events)
     print("NARRATIVE_AUDIT event_pools", dict(sorted(pool_counts.items())))
     print("NARRATIVE_AUDIT events_per_world", dict(sorted(world_counts.items())))
     print("NARRATIVE_AUDIT max_per_run", dict(sorted(max_counts.items())))
     print("NARRATIVE_AUDIT base_weights", dict(sorted(weights.items())))
+    print("NARRATIVE_AUDIT choice_counts", dict(sorted(choice_counts.items())))
 
     condition_ops: collections.Counter[str] = collections.Counter()
     effect_ops: collections.Counter[str] = collections.Counter()
@@ -114,7 +130,6 @@ def main() -> None:
     print("NARRATIVE_AUDIT debt_refs missing=%d unreferenced=%d" % (len(missing_debt_refs), len(unreferenced_debts)))
     print("NARRATIVE_AUDIT mark_refs missing=%d unreferenced=%d" % (len(missing_mark_refs), len(unreferenced_marks)))
 
-    # Inspect how callback/debt rows advertise their relationship to a debt.
     callback_like = [row for row in events if str(row.get("pool", "")) in {"callback", "transit_callback", "debt"}]
     explicit_link_keys = collections.Counter[str]()
     explicit_link_values = collections.Counter[str]()
@@ -130,7 +145,6 @@ def main() -> None:
         len(explicit_link_values), list(sorted(explicit_link_values.items()))[:20]
     ))
 
-    # Per pool/world coverage shows whether one Domain or pool can starve another.
     pool_world: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
     for event in events:
         pool_world[str(event.get("pool", "<none>"))][str(event.get("world_id", "<none>"))] += 1
@@ -141,7 +155,6 @@ def main() -> None:
             pool_name, len(counts), min(values), max(values), sum(values)
         ))
 
-    # Debt deadline/growth distributions matter for callback pressure.
     soft = collections.Counter(int(row.get("soft_deadline", 4)) for row in debts)
     hard = collections.Counter(int(row.get("hard_deadline", 10)) for row in debts)
     growth = collections.Counter(float(row.get("pressure_growth", 0.2)) for row in debts)
@@ -151,17 +164,23 @@ def main() -> None:
     print("NARRATIVE_AUDIT debt_pressure_growth", dict(sorted(growth.items())))
     print("NARRATIVE_AUDIT debts_per_world", dict(sorted(debt_world.items())))
 
-    # Show representative callback/debt rows without dumping narrative prose.
-    for event in callback_like[:12]:
+    representative_pools = ["debt", "callback", "transit_callback", "arc", "mark"]
+    for pool_name in representative_pools:
+        sample = next((event for event in events if str(event.get("pool", "")) == pool_name), None)
+        if sample is None:
+            continue
         compact = {
-            key: event.get(key)
-            for key in event.keys()
+            key: sample.get(key)
+            for key in sample.keys()
             if key in {"id", "world_id", "location_id", "pool", "weight", "max_per_run", "debt_id", "callback_for", "arc_id", "stage"}
         }
-        refs: collections.Counter[str] = collections.Counter()
-        walk_refs(event, "debt_id", refs)
-        compact["nested_debt_refs"] = sorted(refs)
-        print("NARRATIVE_AUDIT callback_example", json.dumps(compact, ensure_ascii=False, sort_keys=True))
+        compact["choices"] = [compact_choice(choice) for choice in sample.get("choices", []) if isinstance(choice, dict)]
+        print("NARRATIVE_AUDIT pool_example", json.dumps(compact, ensure_ascii=False, sort_keys=True))
+
+    debt_origin = collections.Counter(str(row.get("origin_location_id", "")) for row in debts)
+    print("NARRATIVE_AUDIT debt_origin unique=%d min=%d max=%d" % (
+        len(debt_origin), min(debt_origin.values()), max(debt_origin.values())
+    ))
 
 
 if __name__ == "__main__":
