@@ -29,7 +29,7 @@ KIT = {
     "Duelista do Abismo": ("counter", "damage", "aggressive", "approachable", "duelist", "fear"),
     "Engenheira de Pontes": ("guard", "resource", "cautious", "intermediate", "bulwark", "shock"),
     "Monge do Vento": ("move", "posture", "explorer", "expert", "skirmisher", "rooted"),
-    "Ferreiro de Guerra": ("damage", "guard", "aggressive", "approachable", "bruiser", "burning"),
+    "Ferreiro de Guerra": ("damage", "guard", "balanced", "approachable", "bruiser", "burning"),
     "Desertor da Forja": ("counter", "resource", "balanced", "intermediate", "reactor", "burning"),
     "Tecelã de Metal": ("status", "mark", "balanced", "expert", "controller", "shock"),
     "Penitente Cinzento": ("guard", "debt", "cautious", "approachable", "survivor", "fear"),
