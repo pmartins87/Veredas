@@ -1,0 +1,25 @@
+name: Veredas Balance Freeze
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-balance-freeze-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-freeze-10-10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen balance surface
+        run: python projeto_jornada/tools/verify_balance_freeze.py

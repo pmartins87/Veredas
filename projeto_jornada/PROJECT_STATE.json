@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 103,
+  "completed_steps": 104,
   "current_phase": 10,
-  "completed_through": "10.8",
-  "current_step": "10.9",
-  "current_step_title": "Playtests adversariais/manuais e correção dos resultados da simulação",
+  "completed_through": "10.9",
+  "current_step": "10.10",
+  "current_step_title": "Freeze de balanceamento com gates estatísticos aprovados",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -14,12 +14,14 @@
     "10.6": "certified",
     "10.7": "certified",
     "10.8": "certified",
-    "10.9": "in_progress",
-    "10.10": "pending"
+    "10.9": "certified",
+    "10.10": "in_progress"
   },
   "last_certified_ci": {
-    "run_id": 31344471146,
-    "commit": "31baec22cfd7f29c7a0c944302fad36de854befb",
+    "run_id": 31345097609,
+    "adversarial_run_id": 31345097632,
+    "commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
+    "same_head": true,
     "character_balance_runs": 1296,
     "character_balance_result": "PASS",
     "enemy_balance_combats": 2340,
@@ -39,38 +41,20 @@
     "mass_simulation_deadlocks": 0,
     "mass_simulation_stalemate_rate": 0.0027,
     "mass_simulation_very_long_rate": 0.0221,
-    "policy_context_wins": {
-      "balanced": 130,
-      "aggressive": 102,
-      "cautious": 191,
-      "explorer": 90,
-      "ties": 63
-    },
-    "build_context_wins": {
-      "offense": 415,
-      "defense": 167,
-      "utility": 81,
-      "ties": 57
-    },
-    "rupture_synthetic_build_victory": {
-      "baseline": 0.0111,
-      "offense": 0.2731,
-      "defense": 0.1389,
-      "utility": 0.0722
-    },
-    "recommendation_worst_regret": 0.290,
     "feasible_rupture_runs": 4608,
     "feasible_rupture_victory": 0.0126,
     "feasible_rupture_stalemate_rate": 0.0004,
     "feasible_rupture_max_local_victory": 0.219,
-    "mass_simulation_result": "PASS"
+    "recommendation_worst_regret": 0.290,
+    "mass_simulation_result": "PASS",
+    "adversarial_playtest_scenarios": 9,
+    "adversarial_playtest_result": "PASS"
   },
-  "current_10_9_diagnostic": {
-    "run_id": 31344835943,
-    "commit": "35f5f82e77e3a2ee8f3fa7b0af13c73004c9aa53",
-    "scenarios": 9,
-    "result": "PASS",
-    "status": "awaiting_same_head_permanent_workflow_certification"
+  "balance_freeze": {
+    "status": "in_progress",
+    "baseline_commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
+    "manifest": "BALANCE_FREEZE.json",
+    "verification_tool": "tools/verify_balance_freeze.py"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }

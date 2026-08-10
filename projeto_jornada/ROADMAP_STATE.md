@@ -11,7 +11,7 @@
 - Fase 7: **7.1, 7.2, 7.6, 7.7 e 7.9 ✅**; 7.3–7.5/7.8 em produção; 7.10 pendente.
 - Fase 8: **8.1–8.10 ✅ — FASE CONCLUÍDA**.
 - Fase 9: **9.1–9.10 ✅ — FASE CONCLUÍDA**.
-- Fase 10: **10.1–10.8 ✅ certificados; 10.9 está em andamento**.
+- Fase 10: **10.1–10.9 ✅ certificados; 10.10 está em andamento**.
 
 ## Certificação real da engine
 A branch canônica possui CI estrita em GitHub Actions com Godot 4.7.1 stable. A CI reconstrói o catálogo, valida conteúdo, importa o projeto sem tolerar erros de parser e executa testes runtime.
@@ -36,8 +36,8 @@ Baselines importantes:
 - run 31337983973 / commit `4a4e714`: CI canônica limpa com 10.1–10.5 verdes, incluindo `NARRATIVE_BALANCE_CERTIFICATION PASS: 10.5` e regressão integrada 10.1 pós-narrativa. A matriz 10.5 executou 216 jornadas / 12.960 seleções, cobertura narrativa de 92,7%, 693 origens de Dívida, 352 callbacks exatos, 569 consequências de trânsito, participação de arco de 2,7%, 85 estágios distintos alcançados e progressão até estágio 4;
 - run 31339193258 / commit `c5b40d5`: CI canônica limpa com `DIFFICULTY_BALANCE_CERTIFICATION PASS: 10.6`. A matriz 10.6 executou 1.728 jornadas pareadas e certificou a curva monotônica Contemplativa → Andarilho → Severa → Ruptura, com zero deadlocks estruturais;
 - run 31340262854 / commit `00dde061`: CI canônica limpa com 10.1–10.7 verdes e `JOURNEY_PACING_CERTIFICATION PASS: 10.7`. A matriz executou 1.728 jornadas; Provisões passaram a gerar attrition real `Provisão → Vigor → Vida`; `world.varzea_espelhos` permaneceu como maior duração média e foi levado explicitamente à etapa 10.8;
-- run 31344471146 / commit `31baec22`: CI canônica limpa com **10.1–10.8 todos verdes** e `MASS_SIMULATION_CERTIFICATION PASS: 10.8`. A matriz principal executou 17.280 jornadas com 0 inválidas, 0 deadlocks, 0,27% de stalemates e 2,21% acima de 35 passos. Políticas permaneceram plurais (`balanced` 130, `aggressive` 102, `cautious` 191, `explorer` 90, 63 empates) e builds também (`offense` 415, `defense` 167, `utility` 81, 57 empates). O stress factível em Ruptura executou mais 4.608 jornadas, com 1,26% de vitória agregada, 0,04% de stalemates e máximo local de 21,9%. O cap de Guarda inicial em 6 e as recomendações empíricas de política permaneceram verdes. Todos os workflows/probes temporários da 10.8 e probes órfãos antigos foram removidos antes deste gate final;
-- run 31344835943 / commit `35f5f82`: diagnóstico dirigido da 10.9 com **9/9 roteiros adversariais/manual-style verdes**: empilhamento/spam de Guarda, ação inválida, movement lock, Dívida/callback, attrition de viagem, arbitragem de mercador, escolha/cooldown de evento, determinismo manual e isolamento dos builds sintéticos. A etapa 10.9 só será marcada concluída depois do workflow adversarial permanente e da CI 10.1–10.8 passarem no mesmo HEAD.
+- run 31344471146 / commit `31baec22`: CI canônica limpa com 10.1–10.8 todos verdes e `MASS_SIMULATION_CERTIFICATION PASS: 10.8`. A matriz principal executou 17.280 jornadas com 0 inválidas, 0 deadlocks, 0,27% de stalemates e 2,21% acima de 35 passos. Políticas permaneceram plurais (`balanced` 130, `aggressive` 102, `cautious` 191, `explorer` 90, 63 empates) e builds também (`offense` 415, `defense` 167, `utility` 81, 57 empates). O stress factível em Ruptura executou mais 4.608 jornadas, com 1,26% de vitória agregada, 0,04% de stalemates e máximo local de 21,9%;
+- runs **31345097609** (`Veredas da Trama CI`) e **31345097632** (`Veredas Adversarial Playtests`) / commit **`e922d928`**: certificação same-HEAD da Fase 10 até 10.9. A CI longa passou 10.1–10.8; o workflow adversarial permanente passou 9/9 roteiros manual-style: empilhamento/spam de Guarda, ação inválida, movement lock, Dívida/callback, attrition de viagem, arbitragem de mercador, escolha/cooldown de evento, determinismo manual e isolamento dos builds sintéticos.
 
 ## Catálogo canônico
 - 5.160 registros; 12 mundos; 120 localidades; 96 famílias; 300 monstros; 60 chefes/subchefes; 1.116 itens; 300 NPCs; 204 Marcas; 120 Dívidas; 36 personagens; 72 habilidades; 2.544 eventos; 36 finais; 144 pools.
@@ -69,8 +69,8 @@ Baselines importantes:
 - 8.10 ✅ Install/launch/pause-autosave/force-stop/relaunch: prontidão real do app, seed 881001 + schema 3, recriação do save no pause, relaunch da jornada persistida e segundo autosave coerente.
 
 ## Fase 9 — Metaprogressão — CONCLUÍDA
-- 9.1 ✅ Nó de Vigília funcional — hub persistente horizontal, instalações, residentes, rotas e crescimento por marcos.
-- 9.2 ✅ Desbloqueios horizontais de personagens, rotas, modos e Códice, sem aumento de poder-base.
+- 9.1 ✅ Nó de Vigília funcional como hub persistente.
+- 9.2 ✅ Desbloqueios de personagens, rotas, modos e Códice, sem aumento de poder-base.
 - 9.3 ✅ Marcas de Eco, finais e consequências persistentes entre jornadas; condições narrativas consultam a memória sem bônus automáticos de Vida/dano.
 - 9.4 ✅ Preparação da jornada — rota, Andarilho, modo, quatro perfis de dificuldade, seed e modificadores; setup persistente e normalizado.
 - 9.5 ✅ Arquivo de Ecos/Códice — coleção por categoria, conquistas, histórico, migração do Códice legado e save/load; repetição não duplica histórico.
@@ -89,15 +89,15 @@ Baselines importantes:
 - 10.6 ✅ Calibração dos quatro modos de dificuldade — 1.728 jornadas pareadas, quatro curvas distintas e monotônicas, Andarilho preservado como baseline, zero deadlocks estruturais.
 - 10.7 ✅ Ritmo de progressão, duração, recursos e attrition das jornadas — 1.728 jornadas; Provisões funcionais, fallback para Vigor/Vida, cadência/cauda/fluxo econômico certificados.
 - 10.8 ✅ Simulações massivas, detecção de outliers e estratégias dominantes — 17.280 jornadas massivas + 4.608 jornadas factíveis em Ruptura, zero deadlocks estruturais, dominância/regret/outliers certificados.
-- 10.9 🟡 Playtests adversariais/manuais e correção dos resultados da simulação — em andamento; 9 roteiros manual-style já verdes no diagnóstico dedicado.
-- 10.10 ⏳ Freeze final de balanceamento após certificação de 10.9.
+- 10.9 ✅ Playtests adversariais/manuais e correção dos resultados da simulação — 9 roteiros manual-style certificados em workflow permanente no mesmo HEAD da CI 10.1–10.8.
+- 10.10 🟡 Freeze de balanceamento com gates estatísticos aprovados — em implementação; o manifesto de freeze protegerá regras, geradores e gates sem congelar arte/texto/UX.
 
 ## Integridade do roadmap
 - `ROADMAP_MASTER.md`: roadmap 0.1–12.10.
 - `ROADMAP_RECOVERY.md`: registro transparente da restauração da redação perdida das fases 8–12.
 
 ## Contagem formal
-- **103/130 passos concluídos segundo seus gates.**
+- **104/130 passos concluídos segundo seus gates.**
 
 ## Ponto final
 O roadmap só termina em 12.10 com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
