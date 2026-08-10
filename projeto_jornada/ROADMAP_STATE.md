@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1–11.2 ✅; 11.3 em andamento**.
+- Fase 11: **11.1–11.2 ✅; 11.3 em andamento por depender de medição física; 11.4 iniciado em paralelo**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -24,16 +24,39 @@ Commit limpo `0afd8f2`:
 - 48/48 cenários live com evento, viagem, mercador e combate em todos os 12 Domínios.
 
 ### 11.2 — Fuzzing/migração de saves e compatibilidade ✅
-Core certificado no commit `39a811c` com CI `31349296775`, adversarial `31349296777`, regression `31349296779` e save-fuzz `31349296790` verdes no mesmo HEAD.
+Core certificado no commit `39a811c` e re-freeze verificado no commit `7aec534`.
 - 192 perfis deformados migráveis: 192 aceitos e normalizados para schema 3;
-- 64 estados de jornada deformados: 16 variantes explicitamente recuperáveis aceitas e 48 semanticamente impossíveis rejeitadas;
-- 8/8 arquivos JSON de save corrompidos recusados;
-- rejeições são transacionais: profile, run, RNG e fingerprint vivos permanecem intactos;
-- RNG ausente em save legado é reconstruído deterministicamente com `seed` + `state` canônicos;
-- estado sentinela legítimo do Hub (`mode=hub`, `active=false`) possui contrato separado de integridade, sem relaxar validação de jornadas ativas;
-- round-trip canônico preserva schema 3 e progresso.
+- 64 estados de jornada deformados: 16 variantes recuperáveis aceitas e 48 semanticamente impossíveis rejeitadas;
+- 8/8 arquivos JSON corrompidos recusados;
+- rejeições transacionais preservam profile, run, RNG e fingerprint;
+- RNG legado ausente é reconstruído deterministicamente;
+- estado sentinela legítimo do Hub possui contrato separado de integridade;
+- CI, adversarial, regression, save-fuzz e balance-freeze verdes no mesmo re-freeze.
 
-A correção da 11.2 alterou `core`, por isso o freeze de balanceamento foi intencionalmente reaberto. Toda a Fase 9, 10.1–10.8, adversarial 10.9 e regressão 11.1 foram reexecutadas antes do novo baseline. `BALANCE_FREEZE.json` agora aponta para `39a811c`; o commit de estado/freeze ainda deve passar sua verificação same-HEAD antes de o re-freeze ser considerado definitivamente fechado.
+### 11.3 — Performance, memória, bateria, térmica e loading 🟡
+A parte automatizada/reproduzível está concluída, mas o gate formal exige aparelho físico conforme `mobile/performance_budgets.json`.
+
+**11.3-A — runtime/headless PASS** (`31349922193`):
+- Hub cold load 40,75 ms;
+- instanciação do Hub p95 14,95 ms;
+- simulação de jornada p95 11,77 ms em 120 ciclos;
+- save p95 0,84 ms / load p95 0,88 ms em 24 round-trips;
+- pico estático ~68,75 MB; RSS máximo do processo ~159,5 MB;
+- deriva pós-aquecimento 0,02 MB;
+- zero node drift.
+
+**11.3-B — Android emulator proxy PASS** (`31352049842`, mesmo APK em API 29 e 34):
+- API 29 / Android 10: cold 1.715 ms, resume p95 649 ms, pico PSS 200,94 MB, deriva no soak +0,01 MB;
+- API 34 / Android 14: cold 1.455 ms, resume p95 1.065 ms, pico PSS 192,50 MB, deriva ~0 MB;
+- 12 resumes + 12 amostras de soak em cada API;
+- install, pause/autosave, force-stop, relaunch, retomada e persistência continuaram verdes;
+- bateria/térmica de emulador são **somente proxy**, não evidência física.
+
+Durante 11.3-B foram encontrados dois problemas de infraestrutura, ambos corrigidos sem alterar gameplay:
+1. `swiftshader_indirect` era um backend obsoleto/instável no Android Emulator atual; a CI permanente usa agora `-gpu software`;
+2. o coletor tinha colisão de variável POSIX `sh`, que criava loop infinito nos resumes; os contadores foram isolados e o gate passou nas duas APIs.
+
+**11.3-C — aparelho físico pendente:** o protocolo permanente `tools/android_performance_profile.sh` aceita `source=physical` e recusa soak menor que 1.800 s. Sem essa evidência, 11.3 não é marcada concluída.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -50,8 +73,8 @@ A correção da 11.2 alterou `core`, por isso o freeze de balanceamento foi inte
 ## Fase 11 — QA, acessibilidade e localização
 - 11.1 ✅ Matriz ampla de regressão automatizada e testes de integração.
 - 11.2 ✅ Fuzzing/migração de saves e compatibilidade com versões anteriores.
-- 11.3 🟡 Performance, memória, bateria, térmica e loading em hardware representativo.
-- 11.4 ⏳ UI responsiva/acessibilidade em matriz de dispositivos.
+- 11.3 🟡 Performance, memória, bateria, térmica e loading — automatização e emuladores verdes; aparelho físico ainda obrigatório.
+- 11.4 🟡 UI responsiva/acessibilidade em matriz de dispositivos — iniciado em paralelo enquanto 11.3 aguarda evidência física.
 - 11.5 ⏳ Arquitetura de localização e idiomas.
 - 11.6 ⏳ QA linguístico, overflow, iconografia e terminologia.
 - 11.7 ⏳ QA audiovisual em contexto real.
