@@ -40,10 +40,17 @@ jobs:
           set -o pipefail
           output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
           if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then printf '%s\n' "$output"; exit 1; fi
-      - name: Phase 11 save fuzzing and migration certification 11.2
+      - name: Phase 11 profile/save fuzzing certification 11.2
         run: |
           bash projeto_jornada/tools/run_godot_gate.sh \
             /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
             res://tests/save_fuzz_certification.tscn \
             'SAVE_FUZZ_CERTIFICATION FAIL' \
             'SAVE_FUZZ_CERTIFICATION PASS: 11.2'
+      - name: Phase 11 strict run-state integrity certification 11.2
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/run_state_integrity_certification.tscn \
+            'RUN_STATE_INTEGRITY_CERTIFICATION FAIL' \
+            'RUN_STATE_INTEGRITY_CERTIFICATION PASS: 11.2'

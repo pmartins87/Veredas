@@ -72,23 +72,25 @@ func deserialize(data: Dictionary) -> bool:
         push_error("Profile schema is newer than this build")
         return false
 
+    var run_check := RunStateIntegrityEngine.new().normalize_and_audit(run_raw as Dictionary)
+    if not bool(run_check.get("ok", false)):
+        push_error("Run state integrity failure: %s" % str(run_check.get("errors", [])))
+        return false
+
     var previous_profile := profile.duplicate(true)
     var previous_run := run.duplicate(true)
+    var previous_rng := RNGService.snapshot().duplicate(true)
     profile = migration.migrate_raw(raw_profile)
-    run = (run_raw as Dictionary).duplicate(true)
+    run = (run_check.get("run", {}) as Dictionary).duplicate(true)
 
     var report := migration.normalize_live_profile()
     if not bool(report.get("ok", false)):
         push_error("Profile migration integrity failure: %s" % str(report.get("errors", [])))
         profile = previous_profile
         run = previous_run
+        RNGService.restore(previous_rng)
         return false
 
-    if not run.is_empty():
-        var setup_engine := JourneySetupEngine.new()
-        run = setup_engine.normalize_run_state(run)
-        if not run.has("event_last_turn"):
-            run.event_last_turn = {}
     if not run.is_empty() and run.has("rng"):
         RNGService.restore(run.rng)
     return true
