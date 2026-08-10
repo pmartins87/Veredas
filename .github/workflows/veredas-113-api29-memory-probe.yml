@@ -12,6 +12,9 @@ permissions:
   actions: read
   contents: read
 
+env:
+  PROBE_REPEAT: '2'
+
 concurrency:
   group: veredas-113-api29-memory-probe-${{ github.ref }}
   cancel-in-progress: true
@@ -52,7 +55,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: veredas-api29-relaunch-memory-probe
+          name: veredas-api29-relaunch-memory-probe-repeat-${{ env.PROBE_REPEAT }}
           path: android-api29-relaunch-probe/
           if-no-files-found: warn
           retention-days: 2
