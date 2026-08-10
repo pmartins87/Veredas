@@ -10,6 +10,7 @@ on:
       - 'projeto_jornada/mobile/**'
       - 'projeto_jornada/.android-build-trigger'
       - 'projeto_jornada/tools/android_emulator_certify.sh'
+      - 'projeto_jornada/tools/android_performance_profile.sh'
       - '.github/workflows/veredas-android.yml'
   workflow_dispatch:
 
@@ -205,7 +206,7 @@ jobs:
           echo "path=$APK" >> "$GITHUB_OUTPUT"
           ls -lh "$APK"
 
-      - name: Android ${{ matrix.api-level }} install-launch-resume certification
+      - name: Android ${{ matrix.api-level }} install-launch-resume and performance proxy
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -213,7 +214,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu swiftshader_indirect
-          script: sh projeto_jornada/tools/android_emulator_certify.sh com.veredasdatrama.preview '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}'
+          script: sh projeto_jornada/tools/android_emulator_certify.sh com.veredasdatrama.preview '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}' && sh projeto_jornada/tools/android_performance_profile.sh com.veredasdatrama.preview '${{ matrix.api-level }}' emulator 60
 
       - name: Upload emulator diagnostics
         if: always()
@@ -241,6 +242,8 @@ jobs:
             'resumed_application_readiness=pass' \
             'seed_persistence=pass' \
             'profile_schema_version=3' \
+            'performance_proxy=pass' \
+            'performance_source=emulator' \
             > compatibility/${{ matrix.label }}.txt
 
       - name: Upload compatibility evidence
