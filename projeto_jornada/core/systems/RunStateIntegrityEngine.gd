@@ -9,6 +9,9 @@ func normalize_and_audit(raw_run: Dictionary) -> Dictionary:
         return {"ok":true,"run":{},"errors":[]}
 
     var result := raw_run.duplicate(true)
+    if str(result.get("mode", "")) == "hub" and not bool(result.get("active", true)):
+        return _normalize_hub_state(result)
+
     var errors: Array[String] = []
 
     if result.has("setup"):
@@ -139,13 +142,7 @@ func normalize_and_audit(raw_run: Dictionary) -> Dictionary:
                 errors.append("equipped_not_owned:%s" % item_id)
 
     if typeof(result.get("marks")) == TYPE_DICTIONARY:
-        for mark_variant in (result.get("marks", {}) as Dictionary).keys():
-            var mark_id := str(mark_variant)
-            var amount = (result.get("marks", {}) as Dictionary).get(mark_variant)
-            if ContentRegistry.get_record(mark_id).is_empty() or not mark_id.begins_with("mark."):
-                errors.append("mark:%s" % mark_id)
-            elif not _is_number(amount) or int(amount) < 0 or int(amount) > 5:
-                errors.append("mark_amount:%s" % mark_id)
+        _audit_marks(result.get("marks", {}) as Dictionary, errors)
 
     if typeof(result.get("debts")) == TYPE_ARRAY:
         var seen_debts := {}
@@ -182,11 +179,47 @@ func normalize_and_audit(raw_run: Dictionary) -> Dictionary:
     elif typeof(result.get("rng")) != TYPE_DICTIONARY:
         errors.append("type:rng")
     else:
-        var rng: Dictionary = result.get("rng", {}) as Dictionary
-        if not rng.has("seed") or not _is_number(rng.get("seed")) or int(rng.get("seed", 0)) <= 0:
-            errors.append("rng_seed")
-        if not rng.has("state") or not _is_number(rng.get("state")):
-            errors.append("rng_state")
+        _audit_rng(result.get("rng", {}) as Dictionary, false, errors)
+
+    return {"ok":errors.is_empty(),"run":result,"errors":errors}
+
+func _normalize_hub_state(result: Dictionary) -> Dictionary:
+    var errors: Array[String] = []
+    var world_id := str(result.get("world_id", ""))
+    var location_id := str(result.get("location_id", ""))
+    var world := ContentRegistry.get_record(world_id)
+    if world_id == "" or world.is_empty() or not world_id.begins_with("world."):
+        errors.append("hub_world_id")
+    if location_id == "" or ContentRegistry.get_record(location_id).is_empty() or not location_id.begins_with("location."):
+        errors.append("hub_location_id")
+    elif not world.is_empty() and location_id not in (world.get("locations", []) as Array):
+        errors.append("hub_location_world_mismatch")
+
+    _nonnegative_bounded(result, "health", "max_health", errors)
+    _nonnegative_bounded(result, "vigor", "max_vigor", errors)
+    if not _is_number(result.get("seed", null)) or int(result.get("seed", 0)) < 0:
+        errors.append("hub_seed")
+
+    if not result.has("resources") or typeof(result.get("resources")) != TYPE_DICTIONARY:
+        errors.append("hub_type:resources")
+    else:
+        var resources: Dictionary = result.get("resources", {}) as Dictionary
+        for key_variant in resources.keys():
+            if not _is_number(resources.get(key_variant)) or int(resources.get(key_variant, 0)) < 0:
+                errors.append("hub_resource:%s" % str(key_variant))
+
+    if not result.has("marks"):
+        result.marks = {}
+    elif typeof(result.get("marks")) != TYPE_DICTIONARY:
+        errors.append("hub_type:marks")
+    else:
+        _audit_marks(result.get("marks", {}) as Dictionary, errors)
+
+    if result.has("rng"):
+        if typeof(result.get("rng")) != TYPE_DICTIONARY:
+            errors.append("hub_type:rng")
+        else:
+            _audit_rng(result.get("rng", {}) as Dictionary, true, errors)
 
     return {"ok":errors.is_empty(),"run":result,"errors":errors}
 
@@ -201,6 +234,34 @@ func _positive_bounded(data: Dictionary, value_key: String, max_key: String, err
     var maximum := int(data.get(max_key, 0))
     if value < 0 or value > maximum:
         errors.append(value_key)
+
+func _nonnegative_bounded(data: Dictionary, value_key: String, max_key: String, errors: Array[String]) -> void:
+    if not _is_number(data.get(max_key, null)) or int(data.get(max_key, 0)) < 0:
+        errors.append("hub_%s" % max_key)
+        return
+    if not _is_number(data.get(value_key, null)):
+        errors.append("hub_%s" % value_key)
+        return
+    var value := int(data.get(value_key, 0))
+    var maximum := int(data.get(max_key, 0))
+    if value < 0 or value > maximum:
+        errors.append("hub_%s" % value_key)
+
+func _audit_marks(marks: Dictionary, errors: Array[String]) -> void:
+    for mark_variant in marks.keys():
+        var mark_id := str(mark_variant)
+        var amount = marks.get(mark_variant)
+        if ContentRegistry.get_record(mark_id).is_empty() or not mark_id.begins_with("mark."):
+            errors.append("mark:%s" % mark_id)
+        elif not _is_number(amount) or int(amount) < 0 or int(amount) > 5:
+            errors.append("mark_amount:%s" % mark_id)
+
+func _audit_rng(rng: Dictionary, allow_zero_seed: bool, errors: Array[String]) -> void:
+    var minimum_seed := 0 if allow_zero_seed else 1
+    if not rng.has("seed") or not _is_number(rng.get("seed")) or int(rng.get("seed", -1)) < minimum_seed:
+        errors.append("rng_seed")
+    if not rng.has("state") or not _is_number(rng.get("state")):
+        errors.append("rng_state")
 
 func _audit_content_array(raw, prefix: String, label: String, errors: Array[String]) -> void:
     if typeof(raw) != TYPE_ARRAY:
