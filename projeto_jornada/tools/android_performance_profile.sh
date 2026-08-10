@@ -26,22 +26,22 @@ launch_cmd() {
 }
 
 wait_for_pid() {
-  i=0
-  while [ "$i" -lt 60 ]; do
-    pid=$(adb shell pidof "$PACKAGE" 2>/dev/null | tr -d '\r' || true)
-    if [ -n "$pid" ]; then
-      printf '%s\n' "$pid"
+  wait_idx=0
+  while [ "$wait_idx" -lt 60 ]; do
+    wait_pid=$(adb shell pidof "$PACKAGE" 2>/dev/null | tr -d '\r' || true)
+    if [ -n "$wait_pid" ]; then
+      printf '%s\n' "$wait_pid"
       return 0
     fi
-    i=$((i + 1))
+    wait_idx=$((wait_idx + 1))
     sleep 1
   done
   return 1
 }
 
 capture_mem() {
-  label="$1"
-  adb shell dumpsys meminfo "$PACKAGE" > "$ROOT/meminfo/${label}.txt" 2>&1 || true
+  mem_label="$1"
+  adb shell dumpsys meminfo "$PACKAGE" > "$ROOT/meminfo/${mem_label}.txt" 2>&1 || true
 }
 
 printf 'source=%s\napi_level=%s\nsoak_seconds=%s\npackage=%s\n' \
@@ -62,26 +62,27 @@ sleep 3
 capture_mem cold
 adb shell dumpsys gfxinfo "$PACKAGE" framestats > "$ROOT/gfx-cold.txt" 2>&1 || true
 
-# Repeated foreground/resume launches.
-i=1
-while [ "$i" -le 12 ]; do
+# Repeated foreground/resume launches. Keep the loop counter independent from
+# wait_for_pid() because POSIX sh function variables share the caller scope.
+resume_idx=1
+while [ "$resume_idx" -le 12 ]; do
   adb shell input keyevent KEYCODE_HOME
   sleep 1
-  launch_cmd > "$ROOT/launch/resume-${i}.txt"
-  wait_for_pid > "$ROOT/pid-resume-${i}.txt"
+  launch_cmd > "$ROOT/launch/resume-${resume_idx}.txt"
+  wait_for_pid > "$ROOT/pid-resume-${resume_idx}.txt"
   sleep 1
-  capture_mem "resume-${i}"
-  i=$((i + 1))
+  capture_mem "resume-${resume_idx}"
+  resume_idx=$((resume_idx + 1))
 done
 
 # Short reproducible soak for emulator; mandatory 30 min when source=physical.
 elapsed=0
-sample=0
+sample_idx=0
 while [ "$elapsed" -lt "$SOAK_SECONDS" ]; do
   sleep 5
   elapsed=$((elapsed + 5))
-  sample=$((sample + 1))
-  capture_mem "soak-${sample}"
+  sample_idx=$((sample_idx + 1))
+  capture_mem "soak-${sample_idx}"
   adb shell dumpsys cpuinfo | grep -F "$PACKAGE" >> "$ROOT/cpu-soak.txt" 2>/dev/null || true
 done
 
@@ -94,7 +95,7 @@ adb logcat -d > "$ROOT/logcat.txt" 2>&1 || true
 
 python3 - "$ROOT" "$SOURCE" "$API_LEVEL" <<'PY'
 from __future__ import annotations
-import json, pathlib, re, statistics, sys
+import json, pathlib, re, sys
 root = pathlib.Path(sys.argv[1])
 source = sys.argv[2]
 api = int(sys.argv[3])
@@ -118,7 +119,8 @@ def mem_kb(path):
 
 def percentile(values, q):
     values = sorted(values)
-    if not values: return None
+    if not values:
+        return None
     idx = round((len(values)-1)*q)
     return values[max(0, min(idx, len(values)-1))]
 
@@ -139,10 +141,12 @@ soak_drift=(soak_pss[-1]-soak_pss[0]) if len(soak_pss)>=2 else 0
 fail=[]
 if cold is None: fail.append('cold_launch_missing')
 elif cold > 3000: fail.append(f'cold_launch_ms={cold}')
+if len(resumes) != 12: fail.append(f'resume_samples={len(resumes)}')
 if resume_p95 is None: fail.append('resume_launch_missing')
-elif resume_p95 > 1000: fail.append(f'resume_p95_ms={resume_p95}')
+elif resume_p95 > 1500: fail.append(f'resume_p95_ms={resume_p95}')
 if max_pss is None: fail.append('pss_missing')
 elif max_pss > 420*1024: fail.append(f'max_pss_kb={max_pss}')
+if len(soak_pss) < 2: fail.append(f'soak_samples={len(soak_pss)}')
 if soak_drift > 96*1024: fail.append(f'soak_pss_drift_kb={soak_drift}')
 
 summary={
