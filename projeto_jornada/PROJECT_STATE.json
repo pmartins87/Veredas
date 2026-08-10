@@ -20,8 +20,8 @@
   "phase11": {
     "11.1": "certified",
     "11.2": "certified",
-    "11.3": "in_progress",
-    "11.4": "pending",
+    "11.3": "in_progress_physical_device_required",
+    "11.4": "in_progress_parallel",
     "11.5": "pending",
     "11.6": "pending",
     "11.7": "pending",
@@ -30,16 +30,18 @@
     "11.10": "pending"
   },
   "last_certified_ci": {
-    "commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
+    "commit": "7aec53472328cbec734853182489a7da62aa9a3f",
     "same_head": true,
-    "main_ci_run_id": 31349296775,
+    "main_ci_run_id": 31349557595,
     "main_ci_result": "PASS",
-    "adversarial_run_id": 31349296777,
+    "adversarial_run_id": 31349557600,
     "adversarial_result": "PASS",
-    "regression_run_id": 31349296779,
+    "regression_run_id": 31349557591,
     "regression_result": "PASS",
-    "save_fuzz_run_id": 31349296790,
-    "save_fuzz_result": "PASS"
+    "save_fuzz_run_id": 31349557594,
+    "save_fuzz_result": "PASS",
+    "freeze_run_id": 31349557593,
+    "freeze_result": "PASS"
   },
   "phase11_1": {
     "status": "certified",
@@ -69,9 +71,59 @@
     "hub_sentinel_compatibility": true,
     "result": "PASS"
   },
+  "phase11_3": {
+    "status": "in_progress_physical_device_required",
+    "automated_profile": {
+      "status": "PASS",
+      "run_id": 31349922193,
+      "commit": "6a27520c341c592ded9a49c4de13a35560ce925a",
+      "hub_cold_load_ms": 40.75,
+      "hub_instantiate_p95_ms": 14.95,
+      "journey_simulation_p95_ms": 11.77,
+      "save_p95_ms": 0.84,
+      "load_p95_ms": 0.88,
+      "static_peak_memory_mb": 68.75,
+      "process_max_rss_mb": 159.5,
+      "post_warmup_memory_drift_mb": 0.02,
+      "node_drift": 0,
+      "journey_soak_cycles": 120,
+      "save_load_rounds": 24
+    },
+    "android_emulator_proxy": {
+      "status": "PASS",
+      "run_id": 31352049842,
+      "commit": "eaa740a7d9b6a119f4583bb82492e3763300f27d",
+      "gpu_mode": "software",
+      "api29": {
+        "cold_launch_ms": 1715,
+        "resume_samples": 12,
+        "resume_p95_ms": 649,
+        "max_pss_mb": 200.94,
+        "soak_samples": 12,
+        "soak_pss_drift_mb": 0.01
+      },
+      "api34": {
+        "cold_launch_ms": 1455,
+        "resume_samples": 12,
+        "resume_p95_ms": 1065,
+        "max_pss_mb": 192.5,
+        "soak_samples": 12,
+        "soak_pss_drift_mb": 0.0
+      },
+      "battery_thermal_semantics": "proxy_only"
+    },
+    "physical_device": {
+      "status": "required_pending",
+      "minimum_soak_seconds": 1800,
+      "protocol": "tools/android_performance_profile.sh source=physical",
+      "required_by": "mobile/performance_budgets.json"
+    }
+  },
   "balance_freeze": {
-    "status": "rebaselined_pending_same_head_verification",
+    "status": "certified",
     "baseline_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
+    "verification_commit": "7aec53472328cbec734853182489a7da62aa9a3f",
+    "verification_run_id": 31349557593,
     "manifest": "BALANCE_FREEZE.json",
     "verification_tool": "tools/verify_balance_freeze.py"
   },
