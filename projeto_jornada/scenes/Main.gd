@@ -65,6 +65,8 @@ func _build_ui() -> void:
     title_row.add_child(ornament)
     header = Label.new()
     header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    header.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.set_meta("base_font_size", 32)
     title_row.add_child(header)
@@ -78,6 +80,8 @@ func _build_ui() -> void:
 
     location_label = Label.new()
     location_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    location_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    location_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     location_label.set_meta("base_font_size", 16)
     page.add_child(location_label)
 
@@ -96,13 +100,24 @@ func _build_ui() -> void:
     story.set_meta("base_font_size", 19)
     page.add_child(story)
 
-    choices = VBoxContainer.new()
-    choices.add_theme_constant_override("separation", 8)
-    page.add_child(choices)
+    var choices_scroll := ScrollContainer.new()
+    choices_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    choices_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+    choices_scroll.follow_focus = true
+    choices_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    choices_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    page.add_child(choices_scroll)
 
-    var nav := HBoxContainer.new()
-    nav.alignment = BoxContainer.ALIGNMENT_CENTER
-    nav.add_theme_constant_override("separation", 7)
+    choices = VBoxContainer.new()
+    choices.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    choices.add_theme_constant_override("separation", 8)
+    choices_scroll.add_child(choices)
+
+    var nav := HFlowContainer.new()
+    nav.alignment = FlowContainer.ALIGNMENT_CENTER
+    nav.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    nav.add_theme_constant_override("h_separation", 7)
+    nav.add_theme_constant_override("v_separation", 7)
     nav_story = _nav_button("Jornada", func(): RunFlowEngine.resume_story(); current_event = {}; _refresh())
     nav_inventory = _nav_button("Inventário", func(): RunFlowEngine.open_inventory(); _refresh())
     nav_travel = _nav_button("Veredas", func(): RunFlowEngine.open_travel(); _refresh())
