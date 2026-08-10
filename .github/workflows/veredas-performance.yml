@@ -1,0 +1,78 @@
+name: Veredas Performance Profile
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/tests/PerformanceProfileCertification.gd'
+      - 'projeto_jornada/tests/performance_profile_certification.tscn'
+      - 'projeto_jornada/mobile/PerformanceBudgetService.gd'
+      - 'projeto_jornada/mobile/performance_budgets.json'
+      - '.github/workflows/veredas-performance.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  automated-profile-11-3a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild integrated fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
+      - name: Download Godot
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then printf '%s\n' "$output"; exit 1; fi
+      - name: Existing Phase 8 performance budget baseline
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/performance_budget_certification.tscn \
+            'PERFORMANCE_BUDGET_CERTIFICATION FAIL' \
+            'PERFORMANCE_BUDGET_CERTIFICATION PASS: 8.5'
+      - name: Phase 11 automated runtime performance profile 11.3-A
+        run: |
+          mkdir -p build/performance-profile
+          set +e
+          /usr/bin/time -v -o build/performance-profile/process-time.txt \
+            bash projeto_jornada/tools/run_godot_gate.sh \
+              /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+              res://tests/performance_profile_certification.tscn \
+              'PERFORMANCE_PROFILE_AUTOMATED FAIL' \
+              'PERFORMANCE_PROFILE_AUTOMATED PASS: 11.3-A' \
+            2>&1 | tee build/performance-profile/runtime-profile.log
+          status=${PIPESTATUS[0]}
+          set -e
+          cat build/performance-profile/process-time.txt
+          exit "$status"
+      - name: Upload profiling evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-performance-profile-11-3a
+          path: build/performance-profile/
+          if-no-files-found: warn
+          retention-days: 14
