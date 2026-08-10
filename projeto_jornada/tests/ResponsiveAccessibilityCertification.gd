@@ -113,17 +113,27 @@ func _real_scene_matrix() -> void:
     for viewport in VIEWPORTS:
         get_tree().root.size = viewport
         await get_tree().process_frame
+        var logical := _expanded_logical_canvas(viewport)
+        print("11.4 viewport physical=%s logical=%s" % [str(viewport),str(logical)])
         for scale_variant in FONT_SCALES:
             var scale := float(scale_variant)
             AccessibilityService.set_font_scale(scale)
             for scene_spec_variant in SCENES:
                 var scene_spec: Dictionary = scene_spec_variant as Dictionary
-                await _exercise_scene(scene_spec, viewport, scale)
+                await _exercise_scene(scene_spec, viewport, logical, scale)
     get_tree().root.size = original_size
     await get_tree().process_frame
     print("11.4 real scene matrix: scene_cases=%d mode_cases=%d buttons=%d font_checks=%d" % [scene_cases,mode_cases,button_checks,font_checks])
 
-func _exercise_scene(spec: Dictionary, viewport: Vector2i, scale: float) -> void:
+func _expanded_logical_canvas(physical: Vector2i) -> Vector2:
+    var scale_x := float(physical.x) / float(MobilePlatformService.DESIGN_WIDTH)
+    var scale_y := float(physical.y) / float(MobilePlatformService.DESIGN_HEIGHT)
+    var stretch_scale := minf(scale_x, scale_y)
+    if stretch_scale <= 0.0:
+        return Vector2(MobilePlatformService.DESIGN_WIDTH, MobilePlatformService.DESIGN_HEIGHT)
+    return Vector2(float(physical.x) / stretch_scale, float(physical.y) / stretch_scale)
+
+func _exercise_scene(spec: Dictionary, viewport: Vector2i, logical: Vector2, scale: float) -> void:
     _remove_runtime_save()
     GameState.reset_profile()
     if bool(spec.get("needs_run", false)):
@@ -140,26 +150,26 @@ func _exercise_scene(spec: Dictionary, viewport: Vector2i, scale: float) -> void
     MobilePlatformService.apply_touch_targets(instance)
     await get_tree().process_frame
     scene_cases += 1
-    _validate_scene_tree(instance, str(spec.label), viewport, scale, "default")
+    _validate_scene_tree(instance, str(spec.label), viewport, logical, scale, "default")
 
     if str(spec.label) == "Main":
         RunFlowEngine.open_inventory()
         instance.call("_refresh")
         await get_tree().process_frame
         mode_cases += 1
-        _validate_scene_tree(instance, "Main", viewport, scale, "inventory")
+        _validate_scene_tree(instance, "Main", viewport, logical, scale, "inventory")
 
         RunFlowEngine.open_travel()
         instance.call("_refresh")
         await get_tree().process_frame
         mode_cases += 1
-        _validate_scene_tree(instance, "Main", viewport, scale, "travel")
+        _validate_scene_tree(instance, "Main", viewport, logical, scale, "travel")
 
         RunFlowEngine.open_merchant(8)
         instance.call("_refresh")
         await get_tree().process_frame
         mode_cases += 1
-        _validate_scene_tree(instance, "Main", viewport, scale, "merchant")
+        _validate_scene_tree(instance, "Main", viewport, logical, scale, "merchant")
 
         RunFlowEngine.resume_story()
         var monsters := RunFlowEngine.local_monsters()
@@ -168,21 +178,21 @@ func _exercise_scene(spec: Dictionary, viewport: Vector2i, scale: float) -> void
             instance.call("_refresh")
             await get_tree().process_frame
             mode_cases += 1
-            _validate_scene_tree(instance, "Main", viewport, scale, "combat")
+            _validate_scene_tree(instance, "Main", viewport, logical, scale, "combat")
 
     instance.queue_free()
     await get_tree().process_frame
     await get_tree().process_frame
 
-func _validate_scene_tree(root: Node, scene_label: String, viewport: Vector2i, scale: float, mode: String) -> void:
+func _validate_scene_tree(root: Node, scene_label: String, physical: Vector2i, logical: Vector2, scale: float, mode: String) -> void:
     if root is Control:
         var root_control := root as Control
         var minimum := root_control.get_combined_minimum_size()
-        expect(minimum.x <= float(viewport.x) + GEOMETRY_EPS, "11.4 %s/%s min width %.1f exceeds viewport %d at scale %.2f" % [scene_label,mode,minimum.x,viewport.x,scale])
-        expect(minimum.y <= float(viewport.y) + GEOMETRY_EPS, "11.4 %s/%s min height %.1f exceeds viewport %d at scale %.2f" % [scene_label,mode,minimum.y,viewport.y,scale])
-    _validate_node_recursive(root, root, scene_label, viewport, scale, mode)
+        expect(minimum.x <= logical.x + GEOMETRY_EPS, "11.4 %s/%s min width %.1f exceeds logical %.1f for physical %s at scale %.2f" % [scene_label,mode,minimum.x,logical.x,str(physical),scale])
+        expect(minimum.y <= logical.y + GEOMETRY_EPS, "11.4 %s/%s min height %.1f exceeds logical %.1f for physical %s at scale %.2f" % [scene_label,mode,minimum.y,logical.y,str(physical),scale])
+    _validate_node_recursive(root, root, scene_label, physical, logical, scale, mode)
 
-func _validate_node_recursive(node: Node, scene_root: Node, scene_label: String, viewport: Vector2i, scale: float, mode: String) -> void:
+func _validate_node_recursive(node: Node, scene_root: Node, scene_label: String, physical: Vector2i, logical: Vector2, scale: float, mode: String) -> void:
     if node is Control and (node as Control).is_visible_in_tree():
         var control := node as Control
         var size := control.size
@@ -190,9 +200,9 @@ func _validate_node_recursive(node: Node, scene_root: Node, scene_label: String,
         expect(is_finite(size.x) and is_finite(size.y) and is_finite(pos.x) and is_finite(pos.y), "11.4 non-finite geometry %s/%s node=%s" % [scene_label,mode,node.name])
         expect(size.x >= -GEOMETRY_EPS and size.y >= -GEOMETRY_EPS, "11.4 negative control size %s/%s node=%s size=%s" % [scene_label,mode,node.name,str(size)])
         if node != scene_root:
-            expect(pos.x + size.x >= -GEOMETRY_EPS and pos.x <= float(viewport.x) + GEOMETRY_EPS, "11.4 control horizontally unreachable %s/%s node=%s rect=%s,%s" % [scene_label,mode,node.name,str(pos),str(size)])
+            expect(pos.x + size.x >= -GEOMETRY_EPS and pos.x <= logical.x + GEOMETRY_EPS, "11.4 control horizontally unreachable %s/%s node=%s rect=%s,%s logical=%s physical=%s" % [scene_label,mode,node.name,str(pos),str(size),str(logical),str(physical)])
             if not _has_scroll_ancestor(node, scene_root):
-                expect(pos.y + size.y >= -GEOMETRY_EPS and pos.y <= float(viewport.y) + GEOMETRY_EPS, "11.4 control vertically unreachable %s/%s node=%s rect=%s,%s" % [scene_label,mode,node.name,str(pos),str(size)])
+                expect(pos.y + size.y >= -GEOMETRY_EPS and pos.y <= logical.y + GEOMETRY_EPS, "11.4 control vertically unreachable %s/%s node=%s rect=%s,%s logical=%s physical=%s" % [scene_label,mode,node.name,str(pos),str(size),str(logical),str(physical)])
         if node is BaseButton:
             var button := node as BaseButton
             button_checks += 1
@@ -207,7 +217,7 @@ func _validate_node_recursive(node: Node, scene_root: Node, scene_label: String,
             font_checks += 1
             expect(actual_size == expected_size, "11.4 font scale not applied %s/%s node=%s expected=%d actual=%d scale=%.2f" % [scene_label,mode,node.name,expected_size,actual_size,scale])
     for child in node.get_children():
-        _validate_node_recursive(child, scene_root, scene_label, viewport, scale, mode)
+        _validate_node_recursive(child, scene_root, scene_label, physical, logical, scale, mode)
 
 func _has_scroll_ancestor(node: Node, stop: Node) -> bool:
     var current := node.get_parent()
