@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 104,
-  "current_phase": 10,
-  "completed_through": "10.9",
-  "current_step": "10.10",
-  "current_step_title": "Freeze de balanceamento com gates estatísticos aprovados",
+  "completed_steps": 105,
+  "current_phase": 11,
+  "completed_through": "10.10",
+  "current_step": "11.1",
+  "current_step_title": "Matriz ampla de regressão automatizada e testes de integração",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -15,13 +15,27 @@
     "10.7": "certified",
     "10.8": "certified",
     "10.9": "certified",
-    "10.10": "in_progress"
+    "10.10": "certified"
+  },
+  "phase11": {
+    "11.1": "in_progress",
+    "11.2": "pending",
+    "11.3": "pending",
+    "11.4": "pending",
+    "11.5": "pending",
+    "11.6": "pending",
+    "11.7": "pending",
+    "11.8": "pending",
+    "11.9": "pending",
+    "11.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31345097609,
-    "adversarial_run_id": 31345097632,
-    "commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
+    "run_id": 31345451902,
+    "adversarial_run_id": 31345451903,
+    "freeze_run_id": 31345451930,
+    "commit": "1e81f7894c4756ec3b899b2961df83ecefa2bbc6",
     "same_head": true,
+    "phase10_certified_through": "10.10",
     "character_balance_runs": 1296,
     "character_balance_result": "PASS",
     "enemy_balance_combats": 2340,
@@ -48,13 +62,23 @@
     "recommendation_worst_regret": 0.290,
     "mass_simulation_result": "PASS",
     "adversarial_playtest_scenarios": 9,
-    "adversarial_playtest_result": "PASS"
+    "adversarial_playtest_result": "PASS",
+    "balance_freeze_result": "PASS"
   },
   "balance_freeze": {
-    "status": "in_progress",
+    "status": "certified",
     "baseline_commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
+    "certified_commit": "1e81f7894c4756ec3b899b2961df83ecefa2bbc6",
+    "verification_run_id": 31345451930,
     "manifest": "BALANCE_FREEZE.json",
     "verification_tool": "tools/verify_balance_freeze.py"
+  },
+  "phase11_1": {
+    "status": "in_progress",
+    "target_complete_journeys": 288,
+    "target_determinism_pairs": 48,
+    "target_live_cross_system_scenarios": 48,
+    "workflow": "veredas-regression.yml"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
