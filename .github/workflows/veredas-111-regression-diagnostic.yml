@@ -37,14 +37,25 @@ jobs:
           chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
       - name: Import
         run: /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit >/dev/null 2>&1
-      - name: Focused 11.1 diagnostics
+      - name: Capture focused 11.1 diagnostics
         run: |
           set +e
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/regression_matrix_certification.tscn 2>&1)
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/regression_matrix_certification.tscn > /tmp/regression-full.log 2>&1
           status=$?
-          printf '%s\n' "$output" | grep -E '^(11\.1|ERROR: REGRESSION_MATRIX_CERTIFICATION|REGRESSION_MATRIX_CERTIFICATION)' || true
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
-            printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script' || true
-            exit 1
-          fi
-          exit $status
+          grep -E '^(11\.1|ERROR: REGRESSION_MATRIX_CERTIFICATION|REGRESSION_MATRIX_CERTIFICATION|SCRIPT ERROR|Parse Error|Failed to load script)' /tmp/regression-full.log > /tmp/regression-111.txt || true
+          printf '%s\n' "$status" > /tmp/regression-status.txt
+          cat /tmp/regression-111.txt
+          exit 0
+      - name: Upload focused diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-111-diagnostics
+          path: |
+            /tmp/regression-111.txt
+            /tmp/regression-status.txt
+          if-no-files-found: error
+          retention-days: 1
+      - name: Enforce diagnostic result
+        run: |
+          status=$(cat /tmp/regression-status.txt)
+          test "$status" -eq 0
