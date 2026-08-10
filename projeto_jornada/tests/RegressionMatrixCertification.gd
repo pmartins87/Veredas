@@ -250,11 +250,11 @@ func _live_scenario(character: Dictionary, difficulty_id: String, world_index: i
     expect(stock.size() <= 4, "11.1 merchant exceeded requested stock size")
     var unique := {}
     for item_variant in stock:
-        var item_id := str(item_variant)
+        var item: Dictionary = item_variant as Dictionary
+        var item_id := str(item.get("id", ""))
         expect(item_id != "" and not ContentRegistry.get_record(item_id).is_empty(), "11.1 merchant returned invalid item %s" % item_id)
         expect(not unique.has(item_id), "11.1 merchant returned duplicate item %s" % item_id)
         unique[item_id] = true
-        var item := ContentRegistry.get_record(item_id)
         expect(str(item.get("world_id", "")) == expected_world, "11.1 merchant leaked cross-Domain item %s into %s" % [item_id,expected_world])
     live_merchants += 1
     RunFlowEngine.resume_story()
