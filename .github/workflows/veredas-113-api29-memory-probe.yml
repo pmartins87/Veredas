@@ -8,6 +8,10 @@ on:
       - '.github/workflows/veredas-113-api29-memory-probe.yml'
       - 'projeto_jornada/tools/android_api29_relaunch_probe.sh'
 
+permissions:
+  actions: read
+  contents: read
+
 concurrency:
   group: veredas-113-api29-memory-probe-${{ github.ref }}
   cancel-in-progress: true
