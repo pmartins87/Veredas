@@ -2,17 +2,25 @@
   "schema": 1,
   "freeze_step": "10.10",
   "freeze_title": "Freeze de balanceamento com gates estatísticos aprovados",
-  "baseline_commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
+  "baseline_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
   "policy": "Qualquer alteração em protected_paths exige reexecução explícita dos gates 10.1–10.9 e atualização deliberada deste manifesto. Arte, UX, áudio, localização, documentação e QA fora da superfície protegida não exigem re-freeze.",
+  "rebaseline_reason": "11.2 adicionou validação transacional de integridade de saves/run states em core. A mudança foi re-certificada contra toda a CI histórica, regressão ampla, playtests adversariais e fuzzing de saves antes deste re-freeze.",
   "certification": {
     "phase10_certified_through": "10.9",
-    "main_ci_run_id": 31345097609,
+    "main_ci_run_id": 31349296775,
     "main_ci_result": "PASS",
-    "main_ci_scope": "10.1-10.8",
-    "adversarial_run_id": 31345097632,
+    "main_ci_scope": "1.x-10.8 incluindo 9.1-9.10 e 10.1-10.8",
+    "adversarial_run_id": 31349296777,
     "adversarial_result": "PASS",
     "adversarial_scope": "10.9",
-    "same_head": true
+    "regression_run_id": 31349296779,
+    "regression_result": "PASS",
+    "regression_scope": "11.1",
+    "save_fuzz_run_id": 31349296790,
+    "save_fuzz_result": "PASS",
+    "save_fuzz_scope": "11.2",
+    "same_head": true,
+    "certified_head": "39a811cab7418fcfdb3d53ebf49076fc87dc2254"
   },
   "statistical_evidence": {
     "character_balance_runs": 1296,
@@ -29,6 +37,19 @@
     "feasible_rupture_stalemate_rate": 0.0004,
     "feasible_rupture_max_local_victory": 0.219,
     "recommendation_worst_regret": 0.290
+  },
+  "qa_integrity_evidence": {
+    "profile_fuzz_cases": 192,
+    "profile_fuzz_accepted": 192,
+    "run_fuzz_cases": 64,
+    "run_fuzz_accepted_recoverable": 16,
+    "run_fuzz_rejected_impossible": 48,
+    "corrupted_save_files_rejected": 8,
+    "corrupted_save_files_total": 8,
+    "canonical_roundtrip_schema": 3,
+    "transactional_rejection": true,
+    "legacy_rng_recovery": true,
+    "hub_sentinel_compatibility": true
   },
   "adversarial_scenarios": 9,
   "protected_paths": [

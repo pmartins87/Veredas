@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 106,
+  "completed_steps": 107,
   "current_phase": 11,
-  "completed_through": "11.1",
-  "current_step": "11.2",
-  "current_step_title": "Fuzzing/migração de saves e compatibilidade com versões anteriores",
+  "completed_through": "11.2",
+  "current_step": "11.3",
+  "current_step_title": "Performance, memória, bateria, térmica e loading em hardware representativo",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -19,8 +19,8 @@
   },
   "phase11": {
     "11.1": "certified",
-    "11.2": "in_progress",
-    "11.3": "pending",
+    "11.2": "certified",
+    "11.3": "in_progress",
     "11.4": "pending",
     "11.5": "pending",
     "11.6": "pending",
@@ -30,46 +30,50 @@
     "11.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31346357529,
-    "regression_run_id": 31346357540,
-    "commit": "0afd8f2ae374985e233b2662e066eeef91e62824",
+    "commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
     "same_head": true,
-    "phase10_result": "PASS",
-    "regression_11_1_result": "PASS",
-    "regression_complete_journeys": 288,
-    "regression_outcomes": {"defeat": 223, "victory": 65},
-    "regression_max_steps": 79,
-    "regression_deadlocks": 0,
-    "regression_combat_timeouts": 0,
-    "regression_determinism_pairs": 48,
-    "regression_state_restoration": "PASS",
-    "regression_live_scenarios": 48,
-    "regression_live_events": 48,
-    "regression_live_travels": 48,
-    "regression_live_merchants": 48,
-    "regression_live_combats": 48
-  },
-  "balance_freeze": {
-    "status": "certified",
-    "baseline_commit": "e922d92876e02e97beb352eef74e09684dbdbdc6",
-    "certified_commit": "1e81f7894c4756ec3b899b2961df83ecefa2bbc6",
-    "manifest": "BALANCE_FREEZE.json",
-    "verification_tool": "tools/verify_balance_freeze.py"
+    "main_ci_run_id": 31349296775,
+    "main_ci_result": "PASS",
+    "adversarial_run_id": 31349296777,
+    "adversarial_result": "PASS",
+    "regression_run_id": 31349296779,
+    "regression_result": "PASS",
+    "save_fuzz_run_id": 31349296790,
+    "save_fuzz_result": "PASS"
   },
   "phase11_1": {
     "status": "certified",
     "clean_commit": "0afd8f2ae374985e233b2662e066eeef91e62824",
     "complete_journeys": 288,
+    "outcomes": {"defeat": 223, "victory": 65},
+    "max_steps": 79,
+    "deadlocks": 0,
+    "combat_timeouts": 0,
     "determinism_pairs": 48,
     "live_cross_system_scenarios": 48,
     "result": "PASS"
   },
   "phase11_2": {
-    "status": "in_progress",
-    "target_profile_fuzz_cases": 192,
-    "target_run_fuzz_cases": 64,
-    "target_corrupted_save_files": 8,
-    "workflow": "veredas-save-fuzz.yml"
+    "status": "certified",
+    "certified_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
+    "profile_fuzz_cases": 192,
+    "profile_fuzz_accepted": 192,
+    "run_fuzz_cases": 64,
+    "run_fuzz_accepted_recoverable": 16,
+    "run_fuzz_rejected_impossible": 48,
+    "corrupted_save_files_rejected": 8,
+    "corrupted_save_files_total": 8,
+    "canonical_schema": 3,
+    "transactional_rejection": true,
+    "legacy_rng_recovery": true,
+    "hub_sentinel_compatibility": true,
+    "result": "PASS"
+  },
+  "balance_freeze": {
+    "status": "rebaselined_pending_same_head_verification",
+    "baseline_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
+    "manifest": "BALANCE_FREEZE.json",
+    "verification_tool": "tools/verify_balance_freeze.py"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
