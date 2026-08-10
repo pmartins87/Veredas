@@ -268,3 +268,11 @@ jobs:
             res://tests/journey_pacing_certification.tscn \
             'JOURNEY_PACING_CERTIFICATION FAIL' \
             'JOURNEY_PACING_CERTIFICATION PASS: 10.7'
+
+      - name: Phase 10 mass simulation, outlier and dominance certification 10.8
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/mass_simulation_certification.tscn \
+            'MASS_SIMULATION_CERTIFICATION FAIL' \
+            'MASS_SIMULATION_CERTIFICATION PASS: 10.8'
