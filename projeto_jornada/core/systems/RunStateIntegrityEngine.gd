@@ -176,7 +176,9 @@ func normalize_and_audit(raw_run: Dictionary) -> Dictionary:
 
     if not result.has("rng"):
         if _is_number(result.get("seed", null)) and int(result.get("seed", 0)) > 0:
-            result.rng = {"seed":int(result.seed)}
+            var local_rng := RandomNumberGenerator.new()
+            local_rng.seed = int(result.seed)
+            result.rng = {"seed":int(result.seed), "state":local_rng.state}
     elif typeof(result.get("rng")) != TYPE_DICTIONARY:
         errors.append("type:rng")
     else:
