@@ -6,6 +6,8 @@ signal application_resumed
 signal back_requested
 
 const DESIGN_SIZE := Vector2i(540, 960)
+const DESIGN_WIDTH := 540
+const DESIGN_HEIGHT := 960
 const BASE_MARGIN := 18
 const MIN_TOUCH_TARGET := 48
 
