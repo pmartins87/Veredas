@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 102,
+  "completed_steps": 103,
   "current_phase": 10,
-  "completed_through": "10.7",
-  "current_step": "10.8",
-  "current_step_title": "Simulações massivas, detecção de outliers e estratégias dominantes",
+  "completed_through": "10.8",
+  "current_step": "10.9",
+  "current_step_title": "Playtests adversariais/manuais e correção dos resultados da simulação",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -13,44 +13,64 @@
     "10.5": "certified",
     "10.6": "certified",
     "10.7": "certified",
-    "10.8": "in_progress",
-    "10.9": "pending",
+    "10.8": "certified",
+    "10.9": "in_progress",
     "10.10": "pending"
   },
   "last_certified_ci": {
-    "run_id": 31340262854,
-    "commit": "00dde061523835601001cdcc8edf3de1b140c5a6",
+    "run_id": 31344471146,
+    "commit": "31baec22cfd7f29c7a0c944302fad36de854befb",
     "character_balance_runs": 1296,
     "character_balance_result": "PASS",
     "enemy_balance_combats": 2340,
     "enemy_balance_result": "PASS",
     "item_economy_items": 1116,
     "item_economy_result": "PASS",
-    "merchant_sample_offers": 7680,
-    "normal_loot_rate": 0.403,
-    "elite_loot_rate": 0.900,
     "narrative_balance_runs": 216,
     "narrative_selections": 12960,
     "narrative_coverage": 0.927,
-    "narrative_debt_origins": 693,
-    "narrative_exact_callbacks": 352,
-    "narrative_transit_callbacks": 569,
-    "narrative_arc_share": 0.027,
-    "narrative_arc_unique": 85,
-    "narrative_max_arc_stage": 4,
     "narrative_balance_result": "PASS",
-    "integrated_journey_regression_result": "PASS",
     "difficulty_balance_runs": 1728,
     "difficulty_balance_result": "PASS",
     "journey_pacing_runs": 1728,
     "journey_pacing_result": "PASS",
-    "journey_pacing_modes": {
-      "contemplativa": {"victory": 0.488, "steps": 12.84, "events": 9.85, "combats": 1.41, "rounds_per_combat": 12.76, "first_combat": 7.68, "boss_step": 9.87, "very_long_rate": 0.049, "provisions_spent": 1.04, "fragment_gain": 9.36, "fragment_spend": 6.48},
-      "andarilho": {"victory": 0.218, "steps": 12.23, "events": 9.66, "combats": 1.35, "rounds_per_combat": 12.76, "first_combat": 7.68, "boss_step": 9.66, "very_long_rate": 0.037, "provisions_spent": 0.98, "fragment_gain": 5.10, "fragment_spend": 4.74},
-      "severa": {"victory": 0.123, "steps": 12.32, "events": 9.83, "combats": 1.30, "rounds_per_combat": 12.62, "first_combat": 7.68, "boss_step": 9.77, "very_long_rate": 0.049, "provisions_spent": 0.92, "fragment_gain": 3.50, "fragment_spend": 4.33},
-      "ruptura": {"victory": 0.023, "steps": 10.85, "events": 8.67, "combats": 1.19, "rounds_per_combat": 10.77, "first_combat": 7.68, "boss_step": 9.46, "very_long_rate": 0.028, "provisions_spent": 0.44, "fragment_gain": 1.38, "fragment_spend": 3.06}
+    "mass_simulation_runs": 17280,
+    "mass_simulation_invalid": 0,
+    "mass_simulation_deadlocks": 0,
+    "mass_simulation_stalemate_rate": 0.0027,
+    "mass_simulation_very_long_rate": 0.0221,
+    "policy_context_wins": {
+      "balanced": 130,
+      "aggressive": 102,
+      "cautious": 191,
+      "explorer": 90,
+      "ties": 63
     },
-    "journey_pacing_longest_average_domain": "world.varzea_espelhos"
+    "build_context_wins": {
+      "offense": 415,
+      "defense": 167,
+      "utility": 81,
+      "ties": 57
+    },
+    "rupture_synthetic_build_victory": {
+      "baseline": 0.0111,
+      "offense": 0.2731,
+      "defense": 0.1389,
+      "utility": 0.0722
+    },
+    "recommendation_worst_regret": 0.290,
+    "feasible_rupture_runs": 4608,
+    "feasible_rupture_victory": 0.0126,
+    "feasible_rupture_stalemate_rate": 0.0004,
+    "feasible_rupture_max_local_victory": 0.219,
+    "mass_simulation_result": "PASS"
+  },
+  "current_10_9_diagnostic": {
+    "run_id": 31344835943,
+    "commit": "35f5f82e77e3a2ee8f3fa7b0af13c73004c9aa53",
+    "scenarios": 9,
+    "result": "PASS",
+    "status": "awaiting_same_head_permanent_workflow_certification"
   },
   "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
