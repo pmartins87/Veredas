@@ -2,19 +2,57 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCOPES = [ROOT / "scenes", ROOT / "ui"]
-EXCLUDE = {
-    ROOT / "ui" / "LocalizationService.gd",
+EXCLUDE = {ROOT / "ui" / "LocalizationService.gd"}
+STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"')
+ALPHA_RE = re.compile(r"[A-Za-zÀ-ÿ]")
+INTERNAL_PREFIXES = (
+    "res://", "user://", "world.", "location.", "character.", "monster.", "boss.",
+    "item.", "npc.", "mark.", "debt.", "event.", "ending.", "ability.", "family.",
+    "arc.", "pool.", "mode.", "modifier.", "achievement.", "entitlement.", "meta.",
+)
+TECHNICAL_EXACT = {
+    "mata_fio_verde", "normal", "selected", "compact", "detailed", "cosmetic", "plain",
 }
-PATTERNS = [
-    ("property", re.compile(r"\.(?:text|tooltip_text|placeholder_text)\s*=\s*\"([^\"]*[A-Za-zÀ-ÿ][^\"]*)\"")),
-    ("item", re.compile(r"\.add_item\(\s*\"([^\"]*[A-Za-zÀ-ÿ][^\"]*)\"")),
-]
+LOWER_TOKEN_RE = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*$")
+FORMAT_TOKEN_RE = re.compile(r"%(?:\d+\$)?[-+0-9.]*[sdif]|\{[A-Za-z0-9_]+\}")
+BB_TAG_RE = re.compile(r"\[/?[A-Za-z_]+(?:=[^\]]+)?\]")
+ESCAPE_RE = re.compile(r"\\[nrt\\\"]")
+
+
+def decode_literal(token: str) -> str:
+    try:
+        return ast.literal_eval(token)
+    except Exception:
+        return token[1:-1]
+
+
+def language_payload(value: str) -> str:
+    cleaned = ESCAPE_RE.sub(" ", value)
+    cleaned = FORMAT_TOKEN_RE.sub(" ", cleaned)
+    cleaned = BB_TAG_RE.sub(" ", cleaned)
+    cleaned = re.sub(r"[•★✓×—–:;,.!?()/%+\-\d\s]+", " ", cleaned)
+    return cleaned.strip()
+
+
+def is_user_facing_candidate(value: str) -> bool:
+    raw = value.strip()
+    if not raw:
+        return False
+    if raw.startswith(INTERNAL_PREFIXES):
+        return False
+    if raw in TECHNICAL_EXACT:
+        return False
+    if LOWER_TOKEN_RE.fullmatch(raw):
+        return False
+    payload = language_payload(raw)
+    return bool(ALPHA_RE.search(payload))
 
 
 def scan() -> list[dict]:
@@ -28,22 +66,22 @@ def scan() -> list[dict]:
                 stripped = line.strip()
                 if stripped.startswith("#"):
                     continue
-                for kind, regex in PATTERNS:
-                    for match in regex.finditer(line):
-                        value = match.group(1).strip()
-                        if not value:
-                            continue
-                        rows.append({
-                            "file": str(path.relative_to(ROOT)),
-                            "line": line_no,
-                            "kind": kind,
-                            "literal": value,
-                        })
+                for match in STRING_RE.finditer(line):
+                    token = match.group(0)
+                    value = decode_literal(token)
+                    if not is_user_facing_candidate(value):
+                        continue
+                    rows.append({
+                        "file": str(path.relative_to(ROOT)),
+                        "line": line_no,
+                        "literal": value,
+                        "source_line": stripped,
+                    })
     return rows
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Inventory hardcoded user-facing UI literals in GDScript scenes/UI.")
+    parser = argparse.ArgumentParser(description="Inventory hardcoded user-facing string literals in GDScript scenes/UI.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--require-zero", action="store_true")
     args = parser.parse_args()
@@ -60,6 +98,8 @@ def main() -> int:
         print("UI_HARDCODED %s: %d" % (file_name, count))
     if args.require_zero and rows:
         print("UI_LOCALIZATION_INVENTORY FAIL: hardcoded user-facing literals remain")
+        for row in rows[:80]:
+            print("UI_LITERAL %s:%d: %s" % (row["file"], row["line"], row["literal"].replace("\n", "\\n")))
         return 1
     print("UI_LOCALIZATION_INVENTORY PASS: report_only require_zero=%s" % str(args.require_zero).lower())
     return 0
