@@ -818,6 +818,294 @@
   "event.mata_fio_verde.loc01.01": {
     "choices.0.text": "Inspect the black sap before deciding"
   },
+  "family.arquivo_ecos.01": {
+    "name": "Erasures"
+  },
+  "family.arquivo_ecos.02": {
+    "name": "Empty Copyists"
+  },
+  "family.arquivo_ecos.03": {
+    "name": "Dead Librarians"
+  },
+  "family.arquivo_ecos.04": {
+    "name": "Predatory Echoes"
+  },
+  "family.arquivo_ecos.05": {
+    "name": "Living Indexes"
+  },
+  "family.arquivo_ecos.06": {
+    "name": "Ink Stains"
+  },
+  "family.arquivo_ecos.07": {
+    "name": "Cutting Pages"
+  },
+  "family.arquivo_ecos.08": {
+    "name": "Orphaned Memories"
+  },
+  "family.chapada_sol_oco.01": {
+    "name": "Sun Men"
+  },
+  "family.chapada_sol_oco.02": {
+    "name": "Shadow Scorpions"
+  },
+  "family.chapada_sol_oco.03": {
+    "name": "Glass Lizards"
+  },
+  "family.chapada_sol_oco.04": {
+    "name": "Midday Vultures"
+  },
+  "family.chapada_sol_oco.05": {
+    "name": "Heat Serpents"
+  },
+  "family.chapada_sol_oco.06": {
+    "name": "Eclipse Goats"
+  },
+  "family.chapada_sol_oco.07": {
+    "name": "Obelisk Beetles"
+  },
+  "family.chapada_sol_oco.08": {
+    "name": "Light Sights"
+  },
+  "family.cidade_mil_portas.01": {
+    "name": "Door Mimics"
+  },
+  "family.cidade_mil_portas.02": {
+    "name": "Threshold Hounds"
+  },
+  "family.cidade_mil_portas.03": {
+    "name": "Empty Locksmiths"
+  },
+  "family.cidade_mil_portas.04": {
+    "name": "Lock Spiders"
+  },
+  "family.cidade_mil_portas.05": {
+    "name": "Threshold Guards"
+  },
+  "family.cidade_mil_portas.06": {
+    "name": "Corridor Rats"
+  },
+  "family.cidade_mil_portas.07": {
+    "name": "Address Shadows"
+  },
+  "family.cidade_mil_portas.08": {
+    "name": "Hungry Doors"
+  },
+  "family.costa_sinos_afogados.01": {
+    "name": "Coral Knights"
+  },
+  "family.costa_sinos_afogados.02": {
+    "name": "Storm Gulls"
+  },
+  "family.costa_sinos_afogados.03": {
+    "name": "Bronze Crabs"
+  },
+  "family.costa_sinos_afogados.04": {
+    "name": "Bell Eels"
+  },
+  "family.costa_sinos_afogados.05": {
+    "name": "Drowned of Odria"
+  },
+  "family.costa_sinos_afogados.06": {
+    "name": "Nacre Jellyfish"
+  },
+  "family.costa_sinos_afogados.07": {
+    "name": "Foam Wolves"
+  },
+  "family.costa_sinos_afogados.08": {
+    "name": "Lesser Leviathans"
+  },
+  "family.forja_rubra.01": {
+    "name": "Unfinished Soldiers"
+  },
+  "family.forja_rubra.02": {
+    "name": "Slag Hounds"
+  },
+  "family.forja_rubra.03": {
+    "name": "Hammer Automatons"
+  },
+  "family.forja_rubra.04": {
+    "name": "Furnace Worms"
+  },
+  "family.forja_rubra.05": {
+    "name": "Wire Weavers"
+  },
+  "family.forja_rubra.06": {
+    "name": "Iron Gargoyles"
+  },
+  "family.forja_rubra.07": {
+    "name": "Rivet Swarms"
+  },
+  "family.forja_rubra.08": {
+    "name": "Living Molds"
+  },
+  "family.mar_cinza.01": {
+    "name": "Mark Devourers"
+  },
+  "family.mar_cinza.02": {
+    "name": "Soot Wolves"
+  },
+  "family.mar_cinza.03": {
+    "name": "Empty Monks"
+  },
+  "family.mar_cinza.04": {
+    "name": "Lost Names"
+  },
+  "family.mar_cinza.05": {
+    "name": "Ash Crows"
+  },
+  "family.mar_cinza.06": {
+    "name": "Erased Figures"
+  },
+  "family.mar_cinza.07": {
+    "name": "Trackless Deer"
+  },
+  "family.mar_cinza.08": {
+    "name": "Erasers"
+  },
+  "family.mata_fio_verde.01": {
+    "name": "Bark Hounds"
+  },
+  "family.mata_fio_verde.02": {
+    "name": "Bark Jaguars"
+  },
+  "family.mata_fio_verde.03": {
+    "name": "Knot Spiders"
+  },
+  "family.mata_fio_verde.04": {
+    "name": "Vine Monkeys"
+  },
+  "family.mata_fio_verde.05": {
+    "name": "Sap Wasps"
+  },
+  "family.mata_fio_verde.06": {
+    "name": "Moss Deer"
+  },
+  "family.mata_fio_verde.07": {
+    "name": "Walking Fungi"
+  },
+  "family.mata_fio_verde.08": {
+    "name": "Root Predators"
+  },
+  "family.noite_iscara.01": {
+    "name": "Glass Wolves"
+  },
+  "family.noite_iscara.02": {
+    "name": "Aurora Bears"
+  },
+  "family.noite_iscara.03": {
+    "name": "Ice Deer"
+  },
+  "family.noite_iscara.04": {
+    "name": "Future Owls"
+  },
+  "family.noite_iscara.05": {
+    "name": "Ember Serpents"
+  },
+  "family.noite_iscara.06": {
+    "name": "Boreal Specters"
+  },
+  "family.noite_iscara.07": {
+    "name": "Crystal Caribou"
+  },
+  "family.noite_iscara.08": {
+    "name": "Snow Hunters"
+  },
+  "family.salinas_ossamar.01": {
+    "name": "Walking Fossils"
+  },
+  "family.salinas_ossamar.02": {
+    "name": "Salt Lizards"
+  },
+  "family.salinas_ossamar.03": {
+    "name": "Bone Vultures"
+  },
+  "family.salinas_ossamar.04": {
+    "name": "Calcified Scorpions"
+  },
+  "family.salinas_ossamar.05": {
+    "name": "Sand Fish"
+  },
+  "family.salinas_ossamar.06": {
+    "name": "Shell Worms"
+  },
+  "family.salinas_ossamar.07": {
+    "name": "Brine Rams"
+  },
+  "family.salinas_ossamar.08": {
+    "name": "Dry Sirens"
+  },
+  "family.tear_desfeito.01": {
+    "name": "Aborted Futures"
+  },
+  "family.tear_desfeito.02": {
+    "name": "Hungry Knots"
+  },
+  "family.tear_desfeito.03": {
+    "name": "Inverted Weavers"
+  },
+  "family.tear_desfeito.04": {
+    "name": "Beasts of Possibility"
+  },
+  "family.tear_desfeito.05": {
+    "name": "Human Fragments"
+  },
+  "family.tear_desfeito.06": {
+    "name": "Walking Ruptures"
+  },
+  "family.tear_desfeito.07": {
+    "name": "Lesser Paradoxes"
+  },
+  "family.tear_desfeito.08": {
+    "name": "Causeless Forms"
+  },
+  "family.varzea_espelhos.01": {
+    "name": "Hungry Reflections"
+  },
+  "family.varzea_espelhos.02": {
+    "name": "Mirror Caimans"
+  },
+  "family.varzea_espelhos.03": {
+    "name": "Double-Bodied Eels"
+  },
+  "family.varzea_espelhos.04": {
+    "name": "Inverted Herons"
+  },
+  "family.varzea_espelhos.05": {
+    "name": "Shoals of Memory"
+  },
+  "family.varzea_espelhos.06": {
+    "name": "Reflective Slimes"
+  },
+  "family.varzea_espelhos.07": {
+    "name": "Silver Amphibians"
+  },
+  "family.varzea_espelhos.08": {
+    "name": "Faceless Drowned"
+  },
+  "family.vertice.01": {
+    "name": "Cloud Serpents"
+  },
+  "family.vertice.02": {
+    "name": "Cable Crows"
+  },
+  "family.vertice.03": {
+    "name": "Cliff Goats"
+  },
+  "family.vertice.04": {
+    "name": "Bridge Spiders"
+  },
+  "family.vertice.05": {
+    "name": "Wind Mantles"
+  },
+  "family.vertice.06": {
+    "name": "Counterweight Golems"
+  },
+  "family.vertice.07": {
+    "name": "Abyss Bats"
+  },
+  "family.vertice.08": {
+    "name": "Tension Hawks"
+  },
   "item.arquivo_ecos.001": {
     "description": "Carries signs of smell of fresh ink and was adapted to preserve a memory.",
     "name": "Living Ink Blade of the Oath"
@@ -5881,6 +6169,906 @@
     "conflict": "save a bridge",
     "secret": "the abyss contains a city",
     "sensory": "ropes vibrating like instruments"
+  },
+  "monster.arquivo_ecos.01": {
+    "name": "Young Erasures"
+  },
+  "monster.arquivo_ecos.02": {
+    "name": "Ancient Empty Copyists"
+  },
+  "monster.arquivo_ecos.03": {
+    "name": "Wandering Dead Librarians"
+  },
+  "monster.arquivo_ecos.04": {
+    "name": "Pale Predatory Echoes"
+  },
+  "monster.arquivo_ecos.05": {
+    "name": "Split Living Indexes"
+  },
+  "monster.arquivo_ecos.06": {
+    "name": "Swift Ink Stains"
+  },
+  "monster.arquivo_ecos.07": {
+    "name": "Armored Cutting Pages"
+  },
+  "monster.arquivo_ecos.08": {
+    "name": "Silent Orphaned Memories"
+  },
+  "monster.arquivo_ecos.09": {
+    "name": "Hungry Erasures"
+  },
+  "monster.arquivo_ecos.10": {
+    "name": "Resonant Empty Copyists"
+  },
+  "monster.arquivo_ecos.11": {
+    "name": "Blind Dead Librarians"
+  },
+  "monster.arquivo_ecos.12": {
+    "name": "Red Predatory Echoes"
+  },
+  "monster.arquivo_ecos.13": {
+    "name": "Hollow Living Indexes"
+  },
+  "monster.arquivo_ecos.14": {
+    "name": "Watchful Ink Stains"
+  },
+  "monster.arquivo_ecos.15": {
+    "name": "Solitary Cutting Pages"
+  },
+  "monster.arquivo_ecos.16": {
+    "name": "Deformed Orphaned Memories"
+  },
+  "monster.arquivo_ecos.17": {
+    "name": "Marked Erasures"
+  },
+  "monster.arquivo_ecos.18": {
+    "name": "Climbing Empty Copyists"
+  },
+  "monster.arquivo_ecos.19": {
+    "name": "Submerged Dead Librarians"
+  },
+  "monster.arquivo_ecos.20": {
+    "name": "Twilight Predatory Echoes"
+  },
+  "monster.arquivo_ecos.21": {
+    "name": "Shimmering Living Indexes"
+  },
+  "monster.arquivo_ecos.22": {
+    "name": "Rooted Ink Stains"
+  },
+  "monster.arquivo_ecos.23": {
+    "name": "Migratory Cutting Pages"
+  },
+  "monster.arquivo_ecos.24": {
+    "name": "Guardian Orphaned Memories"
+  },
+  "monster.arquivo_ecos.25": {
+    "name": "Predatory Erasures"
+  },
+  "monster.chapada_sol_oco.01": {
+    "name": "Young Sun Men"
+  },
+  "monster.chapada_sol_oco.02": {
+    "name": "Ancient Shadow Scorpions"
+  },
+  "monster.chapada_sol_oco.03": {
+    "name": "Wandering Glass Lizards"
+  },
+  "monster.chapada_sol_oco.04": {
+    "name": "Pale Midday Vultures"
+  },
+  "monster.chapada_sol_oco.05": {
+    "name": "Split Heat Serpents"
+  },
+  "monster.chapada_sol_oco.06": {
+    "name": "Swift Eclipse Goats"
+  },
+  "monster.chapada_sol_oco.07": {
+    "name": "Armored Obelisk Beetles"
+  },
+  "monster.chapada_sol_oco.08": {
+    "name": "Silent Light Sights"
+  },
+  "monster.chapada_sol_oco.09": {
+    "name": "Hungry Sun Men"
+  },
+  "monster.chapada_sol_oco.10": {
+    "name": "Resonant Shadow Scorpions"
+  },
+  "monster.chapada_sol_oco.11": {
+    "name": "Blind Glass Lizards"
+  },
+  "monster.chapada_sol_oco.12": {
+    "name": "Red Midday Vultures"
+  },
+  "monster.chapada_sol_oco.13": {
+    "name": "Hollow Heat Serpents"
+  },
+  "monster.chapada_sol_oco.14": {
+    "name": "Watchful Eclipse Goats"
+  },
+  "monster.chapada_sol_oco.15": {
+    "name": "Solitary Obelisk Beetles"
+  },
+  "monster.chapada_sol_oco.16": {
+    "name": "Deformed Light Sights"
+  },
+  "monster.chapada_sol_oco.17": {
+    "name": "Marked Sun Men"
+  },
+  "monster.chapada_sol_oco.18": {
+    "name": "Climbing Shadow Scorpions"
+  },
+  "monster.chapada_sol_oco.19": {
+    "name": "Submerged Glass Lizards"
+  },
+  "monster.chapada_sol_oco.20": {
+    "name": "Twilight Midday Vultures"
+  },
+  "monster.chapada_sol_oco.21": {
+    "name": "Shimmering Heat Serpents"
+  },
+  "monster.chapada_sol_oco.22": {
+    "name": "Rooted Eclipse Goats"
+  },
+  "monster.chapada_sol_oco.23": {
+    "name": "Migratory Obelisk Beetles"
+  },
+  "monster.chapada_sol_oco.24": {
+    "name": "Guardian Light Sights"
+  },
+  "monster.chapada_sol_oco.25": {
+    "name": "Predatory Sun Men"
+  },
+  "monster.cidade_mil_portas.01": {
+    "name": "Young Door Mimics"
+  },
+  "monster.cidade_mil_portas.02": {
+    "name": "Ancient Threshold Hounds"
+  },
+  "monster.cidade_mil_portas.03": {
+    "name": "Wandering Empty Locksmiths"
+  },
+  "monster.cidade_mil_portas.04": {
+    "name": "Pale Lock Spiders"
+  },
+  "monster.cidade_mil_portas.05": {
+    "name": "Split Threshold Guards"
+  },
+  "monster.cidade_mil_portas.06": {
+    "name": "Swift Corridor Rats"
+  },
+  "monster.cidade_mil_portas.07": {
+    "name": "Armored Address Shadows"
+  },
+  "monster.cidade_mil_portas.08": {
+    "name": "Silent Hungry Doors"
+  },
+  "monster.cidade_mil_portas.09": {
+    "name": "Hungry Door Mimics"
+  },
+  "monster.cidade_mil_portas.10": {
+    "name": "Resonant Threshold Hounds"
+  },
+  "monster.cidade_mil_portas.11": {
+    "name": "Blind Empty Locksmiths"
+  },
+  "monster.cidade_mil_portas.12": {
+    "name": "Red Lock Spiders"
+  },
+  "monster.cidade_mil_portas.13": {
+    "name": "Hollow Threshold Guards"
+  },
+  "monster.cidade_mil_portas.14": {
+    "name": "Watchful Corridor Rats"
+  },
+  "monster.cidade_mil_portas.15": {
+    "name": "Solitary Address Shadows"
+  },
+  "monster.cidade_mil_portas.16": {
+    "name": "Deformed Hungry Doors"
+  },
+  "monster.cidade_mil_portas.17": {
+    "name": "Marked Door Mimics"
+  },
+  "monster.cidade_mil_portas.18": {
+    "name": "Climbing Threshold Hounds"
+  },
+  "monster.cidade_mil_portas.19": {
+    "name": "Submerged Empty Locksmiths"
+  },
+  "monster.cidade_mil_portas.20": {
+    "name": "Twilight Lock Spiders"
+  },
+  "monster.cidade_mil_portas.21": {
+    "name": "Shimmering Threshold Guards"
+  },
+  "monster.cidade_mil_portas.22": {
+    "name": "Rooted Corridor Rats"
+  },
+  "monster.cidade_mil_portas.23": {
+    "name": "Migratory Address Shadows"
+  },
+  "monster.cidade_mil_portas.24": {
+    "name": "Guardian Hungry Doors"
+  },
+  "monster.cidade_mil_portas.25": {
+    "name": "Predatory Door Mimics"
+  },
+  "monster.costa_sinos_afogados.01": {
+    "name": "Young Coral Knights"
+  },
+  "monster.costa_sinos_afogados.02": {
+    "name": "Ancient Storm Gulls"
+  },
+  "monster.costa_sinos_afogados.03": {
+    "name": "Wandering Bronze Crabs"
+  },
+  "monster.costa_sinos_afogados.04": {
+    "name": "Pale Bell Eels"
+  },
+  "monster.costa_sinos_afogados.05": {
+    "name": "Split Drowned of Odria"
+  },
+  "monster.costa_sinos_afogados.06": {
+    "name": "Swift Nacre Jellyfish"
+  },
+  "monster.costa_sinos_afogados.07": {
+    "name": "Armored Foam Wolves"
+  },
+  "monster.costa_sinos_afogados.08": {
+    "name": "Silent Lesser Leviathans"
+  },
+  "monster.costa_sinos_afogados.09": {
+    "name": "Hungry Coral Knights"
+  },
+  "monster.costa_sinos_afogados.10": {
+    "name": "Resonant Storm Gulls"
+  },
+  "monster.costa_sinos_afogados.11": {
+    "name": "Blind Bronze Crabs"
+  },
+  "monster.costa_sinos_afogados.12": {
+    "name": "Red Bell Eels"
+  },
+  "monster.costa_sinos_afogados.13": {
+    "name": "Hollow Drowned of Odria"
+  },
+  "monster.costa_sinos_afogados.14": {
+    "name": "Watchful Nacre Jellyfish"
+  },
+  "monster.costa_sinos_afogados.15": {
+    "name": "Solitary Foam Wolves"
+  },
+  "monster.costa_sinos_afogados.16": {
+    "name": "Deformed Lesser Leviathans"
+  },
+  "monster.costa_sinos_afogados.17": {
+    "name": "Marked Coral Knights"
+  },
+  "monster.costa_sinos_afogados.18": {
+    "name": "Climbing Storm Gulls"
+  },
+  "monster.costa_sinos_afogados.19": {
+    "name": "Submerged Bronze Crabs"
+  },
+  "monster.costa_sinos_afogados.20": {
+    "name": "Twilight Bell Eels"
+  },
+  "monster.costa_sinos_afogados.21": {
+    "name": "Shimmering Drowned of Odria"
+  },
+  "monster.costa_sinos_afogados.22": {
+    "name": "Rooted Nacre Jellyfish"
+  },
+  "monster.costa_sinos_afogados.23": {
+    "name": "Migratory Foam Wolves"
+  },
+  "monster.costa_sinos_afogados.24": {
+    "name": "Guardian Lesser Leviathans"
+  },
+  "monster.costa_sinos_afogados.25": {
+    "name": "Predatory Coral Knights"
+  },
+  "monster.forja_rubra.01": {
+    "name": "Young Unfinished Soldiers"
+  },
+  "monster.forja_rubra.02": {
+    "name": "Ancient Slag Hounds"
+  },
+  "monster.forja_rubra.03": {
+    "name": "Wandering Hammer Automatons"
+  },
+  "monster.forja_rubra.04": {
+    "name": "Pale Furnace Worms"
+  },
+  "monster.forja_rubra.05": {
+    "name": "Split Wire Weavers"
+  },
+  "monster.forja_rubra.06": {
+    "name": "Swift Iron Gargoyles"
+  },
+  "monster.forja_rubra.07": {
+    "name": "Armored Rivet Swarms"
+  },
+  "monster.forja_rubra.08": {
+    "name": "Silent Living Molds"
+  },
+  "monster.forja_rubra.09": {
+    "name": "Hungry Unfinished Soldiers"
+  },
+  "monster.forja_rubra.10": {
+    "name": "Resonant Slag Hounds"
+  },
+  "monster.forja_rubra.11": {
+    "name": "Blind Hammer Automatons"
+  },
+  "monster.forja_rubra.12": {
+    "name": "Red Furnace Worms"
+  },
+  "monster.forja_rubra.13": {
+    "name": "Hollow Wire Weavers"
+  },
+  "monster.forja_rubra.14": {
+    "name": "Watchful Iron Gargoyles"
+  },
+  "monster.forja_rubra.15": {
+    "name": "Solitary Rivet Swarms"
+  },
+  "monster.forja_rubra.16": {
+    "name": "Deformed Living Molds"
+  },
+  "monster.forja_rubra.17": {
+    "name": "Marked Unfinished Soldiers"
+  },
+  "monster.forja_rubra.18": {
+    "name": "Climbing Slag Hounds"
+  },
+  "monster.forja_rubra.19": {
+    "name": "Submerged Hammer Automatons"
+  },
+  "monster.forja_rubra.20": {
+    "name": "Twilight Furnace Worms"
+  },
+  "monster.forja_rubra.21": {
+    "name": "Shimmering Wire Weavers"
+  },
+  "monster.forja_rubra.22": {
+    "name": "Rooted Iron Gargoyles"
+  },
+  "monster.forja_rubra.23": {
+    "name": "Migratory Rivet Swarms"
+  },
+  "monster.forja_rubra.24": {
+    "name": "Guardian Living Molds"
+  },
+  "monster.forja_rubra.25": {
+    "name": "Predatory Unfinished Soldiers"
+  },
+  "monster.mar_cinza.01": {
+    "name": "Young Mark Devourers"
+  },
+  "monster.mar_cinza.02": {
+    "name": "Ancient Soot Wolves"
+  },
+  "monster.mar_cinza.03": {
+    "name": "Wandering Empty Monks"
+  },
+  "monster.mar_cinza.04": {
+    "name": "Pale Lost Names"
+  },
+  "monster.mar_cinza.05": {
+    "name": "Split Ash Crows"
+  },
+  "monster.mar_cinza.06": {
+    "name": "Swift Erased Figures"
+  },
+  "monster.mar_cinza.07": {
+    "name": "Armored Trackless Deer"
+  },
+  "monster.mar_cinza.08": {
+    "name": "Silent Erasers"
+  },
+  "monster.mar_cinza.09": {
+    "name": "Hungry Mark Devourers"
+  },
+  "monster.mar_cinza.10": {
+    "name": "Resonant Soot Wolves"
+  },
+  "monster.mar_cinza.11": {
+    "name": "Blind Empty Monks"
+  },
+  "monster.mar_cinza.12": {
+    "name": "Red Lost Names"
+  },
+  "monster.mar_cinza.13": {
+    "name": "Hollow Ash Crows"
+  },
+  "monster.mar_cinza.14": {
+    "name": "Watchful Erased Figures"
+  },
+  "monster.mar_cinza.15": {
+    "name": "Solitary Trackless Deer"
+  },
+  "monster.mar_cinza.16": {
+    "name": "Deformed Erasers"
+  },
+  "monster.mar_cinza.17": {
+    "name": "Marked Mark Devourers"
+  },
+  "monster.mar_cinza.18": {
+    "name": "Climbing Soot Wolves"
+  },
+  "monster.mar_cinza.19": {
+    "name": "Submerged Empty Monks"
+  },
+  "monster.mar_cinza.20": {
+    "name": "Twilight Lost Names"
+  },
+  "monster.mar_cinza.21": {
+    "name": "Shimmering Ash Crows"
+  },
+  "monster.mar_cinza.22": {
+    "name": "Rooted Erased Figures"
+  },
+  "monster.mar_cinza.23": {
+    "name": "Migratory Trackless Deer"
+  },
+  "monster.mar_cinza.24": {
+    "name": "Guardian Erasers"
+  },
+  "monster.mar_cinza.25": {
+    "name": "Predatory Mark Devourers"
+  },
+  "monster.mata_fio_verde.01": {
+    "name": "Young Bark Hounds"
+  },
+  "monster.mata_fio_verde.02": {
+    "name": "Ancient Bark Jaguars"
+  },
+  "monster.mata_fio_verde.03": {
+    "name": "Wandering Knot Spiders"
+  },
+  "monster.mata_fio_verde.04": {
+    "name": "Pale Vine Monkeys"
+  },
+  "monster.mata_fio_verde.05": {
+    "name": "Split Sap Wasps"
+  },
+  "monster.mata_fio_verde.06": {
+    "name": "Swift Moss Deer"
+  },
+  "monster.mata_fio_verde.07": {
+    "name": "Armored Walking Fungi"
+  },
+  "monster.mata_fio_verde.08": {
+    "name": "Silent Root Predators"
+  },
+  "monster.mata_fio_verde.09": {
+    "name": "Hungry Bark Hounds"
+  },
+  "monster.mata_fio_verde.10": {
+    "name": "Resonant Bark Jaguars"
+  },
+  "monster.mata_fio_verde.11": {
+    "name": "Blind Knot Spiders"
+  },
+  "monster.mata_fio_verde.12": {
+    "name": "Red Vine Monkeys"
+  },
+  "monster.mata_fio_verde.13": {
+    "name": "Hollow Sap Wasps"
+  },
+  "monster.mata_fio_verde.14": {
+    "name": "Watchful Moss Deer"
+  },
+  "monster.mata_fio_verde.15": {
+    "name": "Solitary Walking Fungi"
+  },
+  "monster.mata_fio_verde.16": {
+    "name": "Deformed Root Predators"
+  },
+  "monster.mata_fio_verde.17": {
+    "name": "Marked Bark Hounds"
+  },
+  "monster.mata_fio_verde.18": {
+    "name": "Climbing Bark Jaguars"
+  },
+  "monster.mata_fio_verde.19": {
+    "name": "Submerged Knot Spiders"
+  },
+  "monster.mata_fio_verde.20": {
+    "name": "Twilight Vine Monkeys"
+  },
+  "monster.mata_fio_verde.21": {
+    "name": "Shimmering Sap Wasps"
+  },
+  "monster.mata_fio_verde.22": {
+    "name": "Rooted Moss Deer"
+  },
+  "monster.mata_fio_verde.23": {
+    "name": "Migratory Walking Fungi"
+  },
+  "monster.mata_fio_verde.24": {
+    "name": "Guardian Root Predators"
+  },
+  "monster.mata_fio_verde.25": {
+    "name": "Predatory Bark Hounds"
+  },
+  "monster.noite_iscara.01": {
+    "name": "Young Glass Wolves"
+  },
+  "monster.noite_iscara.02": {
+    "name": "Ancient Aurora Bears"
+  },
+  "monster.noite_iscara.03": {
+    "name": "Wandering Ice Deer"
+  },
+  "monster.noite_iscara.04": {
+    "name": "Pale Future Owls"
+  },
+  "monster.noite_iscara.05": {
+    "name": "Split Ember Serpents"
+  },
+  "monster.noite_iscara.06": {
+    "name": "Swift Boreal Specters"
+  },
+  "monster.noite_iscara.07": {
+    "name": "Armored Crystal Caribou"
+  },
+  "monster.noite_iscara.08": {
+    "name": "Silent Snow Hunters"
+  },
+  "monster.noite_iscara.09": {
+    "name": "Hungry Glass Wolves"
+  },
+  "monster.noite_iscara.10": {
+    "name": "Resonant Aurora Bears"
+  },
+  "monster.noite_iscara.11": {
+    "name": "Blind Ice Deer"
+  },
+  "monster.noite_iscara.12": {
+    "name": "Red Future Owls"
+  },
+  "monster.noite_iscara.13": {
+    "name": "Hollow Ember Serpents"
+  },
+  "monster.noite_iscara.14": {
+    "name": "Watchful Boreal Specters"
+  },
+  "monster.noite_iscara.15": {
+    "name": "Solitary Crystal Caribou"
+  },
+  "monster.noite_iscara.16": {
+    "name": "Deformed Snow Hunters"
+  },
+  "monster.noite_iscara.17": {
+    "name": "Marked Glass Wolves"
+  },
+  "monster.noite_iscara.18": {
+    "name": "Climbing Aurora Bears"
+  },
+  "monster.noite_iscara.19": {
+    "name": "Submerged Ice Deer"
+  },
+  "monster.noite_iscara.20": {
+    "name": "Twilight Future Owls"
+  },
+  "monster.noite_iscara.21": {
+    "name": "Shimmering Ember Serpents"
+  },
+  "monster.noite_iscara.22": {
+    "name": "Rooted Boreal Specters"
+  },
+  "monster.noite_iscara.23": {
+    "name": "Migratory Crystal Caribou"
+  },
+  "monster.noite_iscara.24": {
+    "name": "Guardian Snow Hunters"
+  },
+  "monster.noite_iscara.25": {
+    "name": "Predatory Glass Wolves"
+  },
+  "monster.salinas_ossamar.01": {
+    "name": "Young Walking Fossils"
+  },
+  "monster.salinas_ossamar.02": {
+    "name": "Ancient Salt Lizards"
+  },
+  "monster.salinas_ossamar.03": {
+    "name": "Wandering Bone Vultures"
+  },
+  "monster.salinas_ossamar.04": {
+    "name": "Pale Calcified Scorpions"
+  },
+  "monster.salinas_ossamar.05": {
+    "name": "Split Sand Fish"
+  },
+  "monster.salinas_ossamar.06": {
+    "name": "Swift Shell Worms"
+  },
+  "monster.salinas_ossamar.07": {
+    "name": "Armored Brine Rams"
+  },
+  "monster.salinas_ossamar.08": {
+    "name": "Silent Dry Sirens"
+  },
+  "monster.salinas_ossamar.09": {
+    "name": "Hungry Walking Fossils"
+  },
+  "monster.salinas_ossamar.10": {
+    "name": "Resonant Salt Lizards"
+  },
+  "monster.salinas_ossamar.11": {
+    "name": "Blind Bone Vultures"
+  },
+  "monster.salinas_ossamar.12": {
+    "name": "Red Calcified Scorpions"
+  },
+  "monster.salinas_ossamar.13": {
+    "name": "Hollow Sand Fish"
+  },
+  "monster.salinas_ossamar.14": {
+    "name": "Watchful Shell Worms"
+  },
+  "monster.salinas_ossamar.15": {
+    "name": "Solitary Brine Rams"
+  },
+  "monster.salinas_ossamar.16": {
+    "name": "Deformed Dry Sirens"
+  },
+  "monster.salinas_ossamar.17": {
+    "name": "Marked Walking Fossils"
+  },
+  "monster.salinas_ossamar.18": {
+    "name": "Climbing Salt Lizards"
+  },
+  "monster.salinas_ossamar.19": {
+    "name": "Submerged Bone Vultures"
+  },
+  "monster.salinas_ossamar.20": {
+    "name": "Twilight Calcified Scorpions"
+  },
+  "monster.salinas_ossamar.21": {
+    "name": "Shimmering Sand Fish"
+  },
+  "monster.salinas_ossamar.22": {
+    "name": "Rooted Shell Worms"
+  },
+  "monster.salinas_ossamar.23": {
+    "name": "Migratory Brine Rams"
+  },
+  "monster.salinas_ossamar.24": {
+    "name": "Guardian Dry Sirens"
+  },
+  "monster.salinas_ossamar.25": {
+    "name": "Predatory Walking Fossils"
+  },
+  "monster.tear_desfeito.01": {
+    "name": "Young Aborted Futures"
+  },
+  "monster.tear_desfeito.02": {
+    "name": "Ancient Hungry Knots"
+  },
+  "monster.tear_desfeito.03": {
+    "name": "Wandering Inverted Weavers"
+  },
+  "monster.tear_desfeito.04": {
+    "name": "Pale Beasts of Possibility"
+  },
+  "monster.tear_desfeito.05": {
+    "name": "Split Human Fragments"
+  },
+  "monster.tear_desfeito.06": {
+    "name": "Swift Walking Ruptures"
+  },
+  "monster.tear_desfeito.07": {
+    "name": "Armored Lesser Paradoxes"
+  },
+  "monster.tear_desfeito.08": {
+    "name": "Silent Causeless Forms"
+  },
+  "monster.tear_desfeito.09": {
+    "name": "Hungry Aborted Futures"
+  },
+  "monster.tear_desfeito.10": {
+    "name": "Resonant Hungry Knots"
+  },
+  "monster.tear_desfeito.11": {
+    "name": "Blind Inverted Weavers"
+  },
+  "monster.tear_desfeito.12": {
+    "name": "Red Beasts of Possibility"
+  },
+  "monster.tear_desfeito.13": {
+    "name": "Hollow Human Fragments"
+  },
+  "monster.tear_desfeito.14": {
+    "name": "Watchful Walking Ruptures"
+  },
+  "monster.tear_desfeito.15": {
+    "name": "Solitary Lesser Paradoxes"
+  },
+  "monster.tear_desfeito.16": {
+    "name": "Deformed Causeless Forms"
+  },
+  "monster.tear_desfeito.17": {
+    "name": "Marked Aborted Futures"
+  },
+  "monster.tear_desfeito.18": {
+    "name": "Climbing Hungry Knots"
+  },
+  "monster.tear_desfeito.19": {
+    "name": "Submerged Inverted Weavers"
+  },
+  "monster.tear_desfeito.20": {
+    "name": "Twilight Beasts of Possibility"
+  },
+  "monster.tear_desfeito.21": {
+    "name": "Shimmering Human Fragments"
+  },
+  "monster.tear_desfeito.22": {
+    "name": "Rooted Walking Ruptures"
+  },
+  "monster.tear_desfeito.23": {
+    "name": "Migratory Lesser Paradoxes"
+  },
+  "monster.tear_desfeito.24": {
+    "name": "Guardian Causeless Forms"
+  },
+  "monster.tear_desfeito.25": {
+    "name": "Predatory Aborted Futures"
+  },
+  "monster.varzea_espelhos.01": {
+    "name": "Young Hungry Reflections"
+  },
+  "monster.varzea_espelhos.02": {
+    "name": "Ancient Mirror Caimans"
+  },
+  "monster.varzea_espelhos.03": {
+    "name": "Wandering Double-Bodied Eels"
+  },
+  "monster.varzea_espelhos.04": {
+    "name": "Pale Inverted Herons"
+  },
+  "monster.varzea_espelhos.05": {
+    "name": "Split Shoals of Memory"
+  },
+  "monster.varzea_espelhos.06": {
+    "name": "Swift Reflective Slimes"
+  },
+  "monster.varzea_espelhos.07": {
+    "name": "Armored Silver Amphibians"
+  },
+  "monster.varzea_espelhos.08": {
+    "name": "Silent Faceless Drowned"
+  },
+  "monster.varzea_espelhos.09": {
+    "name": "Hungry Hungry Reflections"
+  },
+  "monster.varzea_espelhos.10": {
+    "name": "Resonant Mirror Caimans"
+  },
+  "monster.varzea_espelhos.11": {
+    "name": "Blind Double-Bodied Eels"
+  },
+  "monster.varzea_espelhos.12": {
+    "name": "Red Inverted Herons"
+  },
+  "monster.varzea_espelhos.13": {
+    "name": "Hollow Shoals of Memory"
+  },
+  "monster.varzea_espelhos.14": {
+    "name": "Watchful Reflective Slimes"
+  },
+  "monster.varzea_espelhos.15": {
+    "name": "Solitary Silver Amphibians"
+  },
+  "monster.varzea_espelhos.16": {
+    "name": "Deformed Faceless Drowned"
+  },
+  "monster.varzea_espelhos.17": {
+    "name": "Marked Hungry Reflections"
+  },
+  "monster.varzea_espelhos.18": {
+    "name": "Climbing Mirror Caimans"
+  },
+  "monster.varzea_espelhos.19": {
+    "name": "Submerged Double-Bodied Eels"
+  },
+  "monster.varzea_espelhos.20": {
+    "name": "Twilight Inverted Herons"
+  },
+  "monster.varzea_espelhos.21": {
+    "name": "Shimmering Shoals of Memory"
+  },
+  "monster.varzea_espelhos.22": {
+    "name": "Rooted Reflective Slimes"
+  },
+  "monster.varzea_espelhos.23": {
+    "name": "Migratory Silver Amphibians"
+  },
+  "monster.varzea_espelhos.24": {
+    "name": "Guardian Faceless Drowned"
+  },
+  "monster.varzea_espelhos.25": {
+    "name": "Predatory Hungry Reflections"
+  },
+  "monster.vertice.01": {
+    "name": "Young Cloud Serpents"
+  },
+  "monster.vertice.02": {
+    "name": "Ancient Cable Crows"
+  },
+  "monster.vertice.03": {
+    "name": "Wandering Cliff Goats"
+  },
+  "monster.vertice.04": {
+    "name": "Pale Bridge Spiders"
+  },
+  "monster.vertice.05": {
+    "name": "Split Wind Mantles"
+  },
+  "monster.vertice.06": {
+    "name": "Swift Counterweight Golems"
+  },
+  "monster.vertice.07": {
+    "name": "Armored Abyss Bats"
+  },
+  "monster.vertice.08": {
+    "name": "Silent Tension Hawks"
+  },
+  "monster.vertice.09": {
+    "name": "Hungry Cloud Serpents"
+  },
+  "monster.vertice.10": {
+    "name": "Resonant Cable Crows"
+  },
+  "monster.vertice.11": {
+    "name": "Blind Cliff Goats"
+  },
+  "monster.vertice.12": {
+    "name": "Red Bridge Spiders"
+  },
+  "monster.vertice.13": {
+    "name": "Hollow Wind Mantles"
+  },
+  "monster.vertice.14": {
+    "name": "Watchful Counterweight Golems"
+  },
+  "monster.vertice.15": {
+    "name": "Solitary Abyss Bats"
+  },
+  "monster.vertice.16": {
+    "name": "Deformed Tension Hawks"
+  },
+  "monster.vertice.17": {
+    "name": "Marked Cloud Serpents"
+  },
+  "monster.vertice.18": {
+    "name": "Climbing Cable Crows"
+  },
+  "monster.vertice.19": {
+    "name": "Submerged Cliff Goats"
+  },
+  "monster.vertice.20": {
+    "name": "Twilight Bridge Spiders"
+  },
+  "monster.vertice.21": {
+    "name": "Shimmering Wind Mantles"
+  },
+  "monster.vertice.22": {
+    "name": "Rooted Counterweight Golems"
+  },
+  "monster.vertice.23": {
+    "name": "Migratory Abyss Bats"
+  },
+  "monster.vertice.24": {
+    "name": "Guardian Tension Hawks"
+  },
+  "monster.vertice.25": {
+    "name": "Predatory Cloud Serpents"
   },
   "world.mata_fio_verde": {
     "name": "Green Thread Forest"

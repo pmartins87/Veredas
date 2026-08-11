@@ -818,6 +818,294 @@
   "event.mata_fio_verde.loc01.01": {
     "choices.0.text": "Examinar la savia negra antes de decidir"
   },
+  "family.arquivo_ecos.01": {
+    "name": "Borraduras"
+  },
+  "family.arquivo_ecos.02": {
+    "name": "Copistas Vacíos"
+  },
+  "family.arquivo_ecos.03": {
+    "name": "Bibliotecarios Muertos"
+  },
+  "family.arquivo_ecos.04": {
+    "name": "Ecos Depredadores"
+  },
+  "family.arquivo_ecos.05": {
+    "name": "Índices Vivos"
+  },
+  "family.arquivo_ecos.06": {
+    "name": "Manchas de Tinta"
+  },
+  "family.arquivo_ecos.07": {
+    "name": "Hojas Cortantes"
+  },
+  "family.arquivo_ecos.08": {
+    "name": "Memorias Huérfanas"
+  },
+  "family.chapada_sol_oco.01": {
+    "name": "Hombres del Sol"
+  },
+  "family.chapada_sol_oco.02": {
+    "name": "Escorpiones de Sombra"
+  },
+  "family.chapada_sol_oco.03": {
+    "name": "Lagartos de Vidrio"
+  },
+  "family.chapada_sol_oco.04": {
+    "name": "Buitres del Mediodía"
+  },
+  "family.chapada_sol_oco.05": {
+    "name": "Serpientes de Calor"
+  },
+  "family.chapada_sol_oco.06": {
+    "name": "Cabras del Eclipse"
+  },
+  "family.chapada_sol_oco.07": {
+    "name": "Escarabajos de Obelisco"
+  },
+  "family.chapada_sol_oco.08": {
+    "name": "Miras de Luz"
+  },
+  "family.cidade_mil_portas.01": {
+    "name": "Mímicos de Puerta"
+  },
+  "family.cidade_mil_portas.02": {
+    "name": "Perros de Umbral"
+  },
+  "family.cidade_mil_portas.03": {
+    "name": "Cerrajeros Vacíos"
+  },
+  "family.cidade_mil_portas.04": {
+    "name": "Arañas de Cerradura"
+  },
+  "family.cidade_mil_portas.05": {
+    "name": "Guardias del Umbral"
+  },
+  "family.cidade_mil_portas.06": {
+    "name": "Ratas de Corredor"
+  },
+  "family.cidade_mil_portas.07": {
+    "name": "Sombras de Dirección"
+  },
+  "family.cidade_mil_portas.08": {
+    "name": "Puertas Hambrientas"
+  },
+  "family.costa_sinos_afogados.01": {
+    "name": "Caballeros de Coral"
+  },
+  "family.costa_sinos_afogados.02": {
+    "name": "Gaviotas de Tormenta"
+  },
+  "family.costa_sinos_afogados.03": {
+    "name": "Cangrejos de Bronce"
+  },
+  "family.costa_sinos_afogados.04": {
+    "name": "Anguilas de Campana"
+  },
+  "family.costa_sinos_afogados.05": {
+    "name": "Ahogados de Odria"
+  },
+  "family.costa_sinos_afogados.06": {
+    "name": "Medusas de Nácar"
+  },
+  "family.costa_sinos_afogados.07": {
+    "name": "Lobos de Espuma"
+  },
+  "family.costa_sinos_afogados.08": {
+    "name": "Leviatanes Menores"
+  },
+  "family.forja_rubra.01": {
+    "name": "Soldados Inacabados"
+  },
+  "family.forja_rubra.02": {
+    "name": "Perros de Escoria"
+  },
+  "family.forja_rubra.03": {
+    "name": "Autómatas de Martillo"
+  },
+  "family.forja_rubra.04": {
+    "name": "Gusanos de Horno"
+  },
+  "family.forja_rubra.05": {
+    "name": "Tejedores de Alambre"
+  },
+  "family.forja_rubra.06": {
+    "name": "Gárgolas de Hierro"
+  },
+  "family.forja_rubra.07": {
+    "name": "Enjambres de Remaches"
+  },
+  "family.forja_rubra.08": {
+    "name": "Moldes Vivos"
+  },
+  "family.mar_cinza.01": {
+    "name": "Devoradores de Marcas"
+  },
+  "family.mar_cinza.02": {
+    "name": "Lobos de Hollín"
+  },
+  "family.mar_cinza.03": {
+    "name": "Monjes Vacíos"
+  },
+  "family.mar_cinza.04": {
+    "name": "Nombres Perdidos"
+  },
+  "family.mar_cinza.05": {
+    "name": "Cuervos de Ceniza"
+  },
+  "family.mar_cinza.06": {
+    "name": "Siluetas Borradas"
+  },
+  "family.mar_cinza.07": {
+    "name": "Ciervos sin Rastro"
+  },
+  "family.mar_cinza.08": {
+    "name": "Borradores"
+  },
+  "family.mata_fio_verde.01": {
+    "name": "Perros de Corteza"
+  },
+  "family.mata_fio_verde.02": {
+    "name": "Jaguares de Corteza"
+  },
+  "family.mata_fio_verde.03": {
+    "name": "Arañas de Nudo"
+  },
+  "family.mata_fio_verde.04": {
+    "name": "Monos de Liana"
+  },
+  "family.mata_fio_verde.05": {
+    "name": "Avispas de Savia"
+  },
+  "family.mata_fio_verde.06": {
+    "name": "Ciervos de Musgo"
+  },
+  "family.mata_fio_verde.07": {
+    "name": "Hongos Caminantes"
+  },
+  "family.mata_fio_verde.08": {
+    "name": "Depredadores de Raíz"
+  },
+  "family.noite_iscara.01": {
+    "name": "Lobos de Vidrio"
+  },
+  "family.noite_iscara.02": {
+    "name": "Osos de Aurora"
+  },
+  "family.noite_iscara.03": {
+    "name": "Ciervos de Hielo"
+  },
+  "family.noite_iscara.04": {
+    "name": "Búhos del Futuro"
+  },
+  "family.noite_iscara.05": {
+    "name": "Serpientes de Brasa"
+  },
+  "family.noite_iscara.06": {
+    "name": "Espectros Boreales"
+  },
+  "family.noite_iscara.07": {
+    "name": "Caribúes de Cristal"
+  },
+  "family.noite_iscara.08": {
+    "name": "Cazadores de Nieve"
+  },
+  "family.salinas_ossamar.01": {
+    "name": "Fósiles Caminantes"
+  },
+  "family.salinas_ossamar.02": {
+    "name": "Lagartos de Sal"
+  },
+  "family.salinas_ossamar.03": {
+    "name": "Buitres de Hueso"
+  },
+  "family.salinas_ossamar.04": {
+    "name": "Escorpiones Calcificados"
+  },
+  "family.salinas_ossamar.05": {
+    "name": "Peces de Arena"
+  },
+  "family.salinas_ossamar.06": {
+    "name": "Gusanos de Concha"
+  },
+  "family.salinas_ossamar.07": {
+    "name": "Carneros de Salmuera"
+  },
+  "family.salinas_ossamar.08": {
+    "name": "Sirenas Secas"
+  },
+  "family.tear_desfeito.01": {
+    "name": "Futuros Abortados"
+  },
+  "family.tear_desfeito.02": {
+    "name": "Nudos Hambrientos"
+  },
+  "family.tear_desfeito.03": {
+    "name": "Tejedores Invertidos"
+  },
+  "family.tear_desfeito.04": {
+    "name": "Bestias de Posibilidad"
+  },
+  "family.tear_desfeito.05": {
+    "name": "Fragmentos Humanos"
+  },
+  "family.tear_desfeito.06": {
+    "name": "Rupturas Ambulantes"
+  },
+  "family.tear_desfeito.07": {
+    "name": "Paradojas Menores"
+  },
+  "family.tear_desfeito.08": {
+    "name": "Formas sin Causa"
+  },
+  "family.varzea_espelhos.01": {
+    "name": "Reflejos Hambrientos"
+  },
+  "family.varzea_espelhos.02": {
+    "name": "Caimanes de Espejo"
+  },
+  "family.varzea_espelhos.03": {
+    "name": "Anguilas de Doble Cuerpo"
+  },
+  "family.varzea_espelhos.04": {
+    "name": "Garzas Invertidas"
+  },
+  "family.varzea_espelhos.05": {
+    "name": "Cardúmenes de Memoria"
+  },
+  "family.varzea_espelhos.06": {
+    "name": "Lodos Reflexivos"
+  },
+  "family.varzea_espelhos.07": {
+    "name": "Anfibios de Plata"
+  },
+  "family.varzea_espelhos.08": {
+    "name": "Ahogados sin Rostro"
+  },
+  "family.vertice.01": {
+    "name": "Serpientes de Nube"
+  },
+  "family.vertice.02": {
+    "name": "Cuervos de Cable"
+  },
+  "family.vertice.03": {
+    "name": "Cabras de Acantilado"
+  },
+  "family.vertice.04": {
+    "name": "Arañas de Puente"
+  },
+  "family.vertice.05": {
+    "name": "Mantos de Viento"
+  },
+  "family.vertice.06": {
+    "name": "Gólems de Contrapeso"
+  },
+  "family.vertice.07": {
+    "name": "Murciélagos de Abismo"
+  },
+  "family.vertice.08": {
+    "name": "Halcones de Tensión"
+  },
   "item.arquivo_ecos.001": {
     "description": "Muestra señales de olor a tinta fresca y fue adaptado para preservar un recuerdo.",
     "name": "Hoja de Tinta Viva del Juramento"
@@ -5881,6 +6169,906 @@
     "conflict": "salvar un puente",
     "secret": "el abismo contiene una ciudad",
     "sensory": "cuerdas vibrando como instrumentos"
+  },
+  "monster.arquivo_ecos.01": {
+    "name": "Borraduras — Jóvenes"
+  },
+  "monster.arquivo_ecos.02": {
+    "name": "Copistas Vacíos — Ancestrales"
+  },
+  "monster.arquivo_ecos.03": {
+    "name": "Bibliotecarios Muertos — Errantes"
+  },
+  "monster.arquivo_ecos.04": {
+    "name": "Ecos Depredadores — de Palidez Espectral"
+  },
+  "monster.arquivo_ecos.05": {
+    "name": "Índices Vivos — con Fisuras"
+  },
+  "monster.arquivo_ecos.06": {
+    "name": "Manchas de Tinta — Veloces"
+  },
+  "monster.arquivo_ecos.07": {
+    "name": "Hojas Cortantes — con Coraza"
+  },
+  "monster.arquivo_ecos.08": {
+    "name": "Memorias Huérfanas — Silentes"
+  },
+  "monster.arquivo_ecos.09": {
+    "name": "Borraduras — Voraces"
+  },
+  "monster.arquivo_ecos.10": {
+    "name": "Copistas Vacíos — Resonantes"
+  },
+  "monster.arquivo_ecos.11": {
+    "name": "Bibliotecarios Muertos — sin Vista"
+  },
+  "monster.arquivo_ecos.12": {
+    "name": "Ecos Depredadores — Carmesí"
+  },
+  "monster.arquivo_ecos.13": {
+    "name": "Índices Vivos — de Interior Vacío"
+  },
+  "monster.arquivo_ecos.14": {
+    "name": "Manchas de Tinta — Vigilantes"
+  },
+  "monster.arquivo_ecos.15": {
+    "name": "Hojas Cortantes — en Soledad"
+  },
+  "monster.arquivo_ecos.16": {
+    "name": "Memorias Huérfanas — Deformes"
+  },
+  "monster.arquivo_ecos.17": {
+    "name": "Borraduras — con Marca"
+  },
+  "monster.arquivo_ecos.18": {
+    "name": "Copistas Vacíos — que Trepan"
+  },
+  "monster.arquivo_ecos.19": {
+    "name": "Bibliotecarios Muertos — bajo el Agua"
+  },
+  "monster.arquivo_ecos.20": {
+    "name": "Ecos Depredadores — Crepusculares"
+  },
+  "monster.arquivo_ecos.21": {
+    "name": "Índices Vivos — Centelleantes"
+  },
+  "monster.arquivo_ecos.22": {
+    "name": "Manchas de Tinta — con Raíces"
+  },
+  "monster.arquivo_ecos.23": {
+    "name": "Hojas Cortantes — Migrantes"
+  },
+  "monster.arquivo_ecos.24": {
+    "name": "Memorias Huérfanas — de Guardia"
+  },
+  "monster.arquivo_ecos.25": {
+    "name": "Borraduras — de Caza"
+  },
+  "monster.chapada_sol_oco.01": {
+    "name": "Hombres del Sol — Jóvenes"
+  },
+  "monster.chapada_sol_oco.02": {
+    "name": "Escorpiones de Sombra — Ancestrales"
+  },
+  "monster.chapada_sol_oco.03": {
+    "name": "Lagartos de Vidrio — Errantes"
+  },
+  "monster.chapada_sol_oco.04": {
+    "name": "Buitres del Mediodía — de Palidez Espectral"
+  },
+  "monster.chapada_sol_oco.05": {
+    "name": "Serpientes de Calor — con Fisuras"
+  },
+  "monster.chapada_sol_oco.06": {
+    "name": "Cabras del Eclipse — Veloces"
+  },
+  "monster.chapada_sol_oco.07": {
+    "name": "Escarabajos de Obelisco — con Coraza"
+  },
+  "monster.chapada_sol_oco.08": {
+    "name": "Miras de Luz — Silentes"
+  },
+  "monster.chapada_sol_oco.09": {
+    "name": "Hombres del Sol — Voraces"
+  },
+  "monster.chapada_sol_oco.10": {
+    "name": "Escorpiones de Sombra — Resonantes"
+  },
+  "monster.chapada_sol_oco.11": {
+    "name": "Lagartos de Vidrio — sin Vista"
+  },
+  "monster.chapada_sol_oco.12": {
+    "name": "Buitres del Mediodía — Carmesí"
+  },
+  "monster.chapada_sol_oco.13": {
+    "name": "Serpientes de Calor — de Interior Vacío"
+  },
+  "monster.chapada_sol_oco.14": {
+    "name": "Cabras del Eclipse — Vigilantes"
+  },
+  "monster.chapada_sol_oco.15": {
+    "name": "Escarabajos de Obelisco — en Soledad"
+  },
+  "monster.chapada_sol_oco.16": {
+    "name": "Miras de Luz — Deformes"
+  },
+  "monster.chapada_sol_oco.17": {
+    "name": "Hombres del Sol — con Marca"
+  },
+  "monster.chapada_sol_oco.18": {
+    "name": "Escorpiones de Sombra — que Trepan"
+  },
+  "monster.chapada_sol_oco.19": {
+    "name": "Lagartos de Vidrio — bajo el Agua"
+  },
+  "monster.chapada_sol_oco.20": {
+    "name": "Buitres del Mediodía — Crepusculares"
+  },
+  "monster.chapada_sol_oco.21": {
+    "name": "Serpientes de Calor — Centelleantes"
+  },
+  "monster.chapada_sol_oco.22": {
+    "name": "Cabras del Eclipse — con Raíces"
+  },
+  "monster.chapada_sol_oco.23": {
+    "name": "Escarabajos de Obelisco — Migrantes"
+  },
+  "monster.chapada_sol_oco.24": {
+    "name": "Miras de Luz — de Guardia"
+  },
+  "monster.chapada_sol_oco.25": {
+    "name": "Hombres del Sol — de Caza"
+  },
+  "monster.cidade_mil_portas.01": {
+    "name": "Mímicos de Puerta — Jóvenes"
+  },
+  "monster.cidade_mil_portas.02": {
+    "name": "Perros de Umbral — Ancestrales"
+  },
+  "monster.cidade_mil_portas.03": {
+    "name": "Cerrajeros Vacíos — Errantes"
+  },
+  "monster.cidade_mil_portas.04": {
+    "name": "Arañas de Cerradura — de Palidez Espectral"
+  },
+  "monster.cidade_mil_portas.05": {
+    "name": "Guardias del Umbral — con Fisuras"
+  },
+  "monster.cidade_mil_portas.06": {
+    "name": "Ratas de Corredor — Veloces"
+  },
+  "monster.cidade_mil_portas.07": {
+    "name": "Sombras de Dirección — con Coraza"
+  },
+  "monster.cidade_mil_portas.08": {
+    "name": "Puertas Hambrientas — Silentes"
+  },
+  "monster.cidade_mil_portas.09": {
+    "name": "Mímicos de Puerta — Voraces"
+  },
+  "monster.cidade_mil_portas.10": {
+    "name": "Perros de Umbral — Resonantes"
+  },
+  "monster.cidade_mil_portas.11": {
+    "name": "Cerrajeros Vacíos — sin Vista"
+  },
+  "monster.cidade_mil_portas.12": {
+    "name": "Arañas de Cerradura — Carmesí"
+  },
+  "monster.cidade_mil_portas.13": {
+    "name": "Guardias del Umbral — de Interior Vacío"
+  },
+  "monster.cidade_mil_portas.14": {
+    "name": "Ratas de Corredor — Vigilantes"
+  },
+  "monster.cidade_mil_portas.15": {
+    "name": "Sombras de Dirección — en Soledad"
+  },
+  "monster.cidade_mil_portas.16": {
+    "name": "Puertas Hambrientas — Deformes"
+  },
+  "monster.cidade_mil_portas.17": {
+    "name": "Mímicos de Puerta — con Marca"
+  },
+  "monster.cidade_mil_portas.18": {
+    "name": "Perros de Umbral — que Trepan"
+  },
+  "monster.cidade_mil_portas.19": {
+    "name": "Cerrajeros Vacíos — bajo el Agua"
+  },
+  "monster.cidade_mil_portas.20": {
+    "name": "Arañas de Cerradura — Crepusculares"
+  },
+  "monster.cidade_mil_portas.21": {
+    "name": "Guardias del Umbral — Centelleantes"
+  },
+  "monster.cidade_mil_portas.22": {
+    "name": "Ratas de Corredor — con Raíces"
+  },
+  "monster.cidade_mil_portas.23": {
+    "name": "Sombras de Dirección — Migrantes"
+  },
+  "monster.cidade_mil_portas.24": {
+    "name": "Puertas Hambrientas — de Guardia"
+  },
+  "monster.cidade_mil_portas.25": {
+    "name": "Mímicos de Puerta — de Caza"
+  },
+  "monster.costa_sinos_afogados.01": {
+    "name": "Caballeros de Coral — Jóvenes"
+  },
+  "monster.costa_sinos_afogados.02": {
+    "name": "Gaviotas de Tormenta — Ancestrales"
+  },
+  "monster.costa_sinos_afogados.03": {
+    "name": "Cangrejos de Bronce — Errantes"
+  },
+  "monster.costa_sinos_afogados.04": {
+    "name": "Anguilas de Campana — de Palidez Espectral"
+  },
+  "monster.costa_sinos_afogados.05": {
+    "name": "Ahogados de Odria — con Fisuras"
+  },
+  "monster.costa_sinos_afogados.06": {
+    "name": "Medusas de Nácar — Veloces"
+  },
+  "monster.costa_sinos_afogados.07": {
+    "name": "Lobos de Espuma — con Coraza"
+  },
+  "monster.costa_sinos_afogados.08": {
+    "name": "Leviatanes Menores — Silentes"
+  },
+  "monster.costa_sinos_afogados.09": {
+    "name": "Caballeros de Coral — Voraces"
+  },
+  "monster.costa_sinos_afogados.10": {
+    "name": "Gaviotas de Tormenta — Resonantes"
+  },
+  "monster.costa_sinos_afogados.11": {
+    "name": "Cangrejos de Bronce — sin Vista"
+  },
+  "monster.costa_sinos_afogados.12": {
+    "name": "Anguilas de Campana — Carmesí"
+  },
+  "monster.costa_sinos_afogados.13": {
+    "name": "Ahogados de Odria — de Interior Vacío"
+  },
+  "monster.costa_sinos_afogados.14": {
+    "name": "Medusas de Nácar — Vigilantes"
+  },
+  "monster.costa_sinos_afogados.15": {
+    "name": "Lobos de Espuma — en Soledad"
+  },
+  "monster.costa_sinos_afogados.16": {
+    "name": "Leviatanes Menores — Deformes"
+  },
+  "monster.costa_sinos_afogados.17": {
+    "name": "Caballeros de Coral — con Marca"
+  },
+  "monster.costa_sinos_afogados.18": {
+    "name": "Gaviotas de Tormenta — que Trepan"
+  },
+  "monster.costa_sinos_afogados.19": {
+    "name": "Cangrejos de Bronce — bajo el Agua"
+  },
+  "monster.costa_sinos_afogados.20": {
+    "name": "Anguilas de Campana — Crepusculares"
+  },
+  "monster.costa_sinos_afogados.21": {
+    "name": "Ahogados de Odria — Centelleantes"
+  },
+  "monster.costa_sinos_afogados.22": {
+    "name": "Medusas de Nácar — con Raíces"
+  },
+  "monster.costa_sinos_afogados.23": {
+    "name": "Lobos de Espuma — Migrantes"
+  },
+  "monster.costa_sinos_afogados.24": {
+    "name": "Leviatanes Menores — de Guardia"
+  },
+  "monster.costa_sinos_afogados.25": {
+    "name": "Caballeros de Coral — de Caza"
+  },
+  "monster.forja_rubra.01": {
+    "name": "Soldados Inacabados — Jóvenes"
+  },
+  "monster.forja_rubra.02": {
+    "name": "Perros de Escoria — Ancestrales"
+  },
+  "monster.forja_rubra.03": {
+    "name": "Autómatas de Martillo — Errantes"
+  },
+  "monster.forja_rubra.04": {
+    "name": "Gusanos de Horno — de Palidez Espectral"
+  },
+  "monster.forja_rubra.05": {
+    "name": "Tejedores de Alambre — con Fisuras"
+  },
+  "monster.forja_rubra.06": {
+    "name": "Gárgolas de Hierro — Veloces"
+  },
+  "monster.forja_rubra.07": {
+    "name": "Enjambres de Remaches — con Coraza"
+  },
+  "monster.forja_rubra.08": {
+    "name": "Moldes Vivos — Silentes"
+  },
+  "monster.forja_rubra.09": {
+    "name": "Soldados Inacabados — Voraces"
+  },
+  "monster.forja_rubra.10": {
+    "name": "Perros de Escoria — Resonantes"
+  },
+  "monster.forja_rubra.11": {
+    "name": "Autómatas de Martillo — sin Vista"
+  },
+  "monster.forja_rubra.12": {
+    "name": "Gusanos de Horno — Carmesí"
+  },
+  "monster.forja_rubra.13": {
+    "name": "Tejedores de Alambre — de Interior Vacío"
+  },
+  "monster.forja_rubra.14": {
+    "name": "Gárgolas de Hierro — Vigilantes"
+  },
+  "monster.forja_rubra.15": {
+    "name": "Enjambres de Remaches — en Soledad"
+  },
+  "monster.forja_rubra.16": {
+    "name": "Moldes Vivos — Deformes"
+  },
+  "monster.forja_rubra.17": {
+    "name": "Soldados Inacabados — con Marca"
+  },
+  "monster.forja_rubra.18": {
+    "name": "Perros de Escoria — que Trepan"
+  },
+  "monster.forja_rubra.19": {
+    "name": "Autómatas de Martillo — bajo el Agua"
+  },
+  "monster.forja_rubra.20": {
+    "name": "Gusanos de Horno — Crepusculares"
+  },
+  "monster.forja_rubra.21": {
+    "name": "Tejedores de Alambre — Centelleantes"
+  },
+  "monster.forja_rubra.22": {
+    "name": "Gárgolas de Hierro — con Raíces"
+  },
+  "monster.forja_rubra.23": {
+    "name": "Enjambres de Remaches — Migrantes"
+  },
+  "monster.forja_rubra.24": {
+    "name": "Moldes Vivos — de Guardia"
+  },
+  "monster.forja_rubra.25": {
+    "name": "Soldados Inacabados — de Caza"
+  },
+  "monster.mar_cinza.01": {
+    "name": "Devoradores de Marcas — Jóvenes"
+  },
+  "monster.mar_cinza.02": {
+    "name": "Lobos de Hollín — Ancestrales"
+  },
+  "monster.mar_cinza.03": {
+    "name": "Monjes Vacíos — Errantes"
+  },
+  "monster.mar_cinza.04": {
+    "name": "Nombres Perdidos — de Palidez Espectral"
+  },
+  "monster.mar_cinza.05": {
+    "name": "Cuervos de Ceniza — con Fisuras"
+  },
+  "monster.mar_cinza.06": {
+    "name": "Siluetas Borradas — Veloces"
+  },
+  "monster.mar_cinza.07": {
+    "name": "Ciervos sin Rastro — con Coraza"
+  },
+  "monster.mar_cinza.08": {
+    "name": "Borradores — Silentes"
+  },
+  "monster.mar_cinza.09": {
+    "name": "Devoradores de Marcas — Voraces"
+  },
+  "monster.mar_cinza.10": {
+    "name": "Lobos de Hollín — Resonantes"
+  },
+  "monster.mar_cinza.11": {
+    "name": "Monjes Vacíos — sin Vista"
+  },
+  "monster.mar_cinza.12": {
+    "name": "Nombres Perdidos — Carmesí"
+  },
+  "monster.mar_cinza.13": {
+    "name": "Cuervos de Ceniza — de Interior Vacío"
+  },
+  "monster.mar_cinza.14": {
+    "name": "Siluetas Borradas — Vigilantes"
+  },
+  "monster.mar_cinza.15": {
+    "name": "Ciervos sin Rastro — en Soledad"
+  },
+  "monster.mar_cinza.16": {
+    "name": "Borradores — Deformes"
+  },
+  "monster.mar_cinza.17": {
+    "name": "Devoradores de Marcas — con Marca"
+  },
+  "monster.mar_cinza.18": {
+    "name": "Lobos de Hollín — que Trepan"
+  },
+  "monster.mar_cinza.19": {
+    "name": "Monjes Vacíos — bajo el Agua"
+  },
+  "monster.mar_cinza.20": {
+    "name": "Nombres Perdidos — Crepusculares"
+  },
+  "monster.mar_cinza.21": {
+    "name": "Cuervos de Ceniza — Centelleantes"
+  },
+  "monster.mar_cinza.22": {
+    "name": "Siluetas Borradas — con Raíces"
+  },
+  "monster.mar_cinza.23": {
+    "name": "Ciervos sin Rastro — Migrantes"
+  },
+  "monster.mar_cinza.24": {
+    "name": "Borradores — de Guardia"
+  },
+  "monster.mar_cinza.25": {
+    "name": "Devoradores de Marcas — de Caza"
+  },
+  "monster.mata_fio_verde.01": {
+    "name": "Perros de Corteza — Jóvenes"
+  },
+  "monster.mata_fio_verde.02": {
+    "name": "Jaguares de Corteza — Ancestrales"
+  },
+  "monster.mata_fio_verde.03": {
+    "name": "Arañas de Nudo — Errantes"
+  },
+  "monster.mata_fio_verde.04": {
+    "name": "Monos de Liana — de Palidez Espectral"
+  },
+  "monster.mata_fio_verde.05": {
+    "name": "Avispas de Savia — con Fisuras"
+  },
+  "monster.mata_fio_verde.06": {
+    "name": "Ciervos de Musgo — Veloces"
+  },
+  "monster.mata_fio_verde.07": {
+    "name": "Hongos Caminantes — con Coraza"
+  },
+  "monster.mata_fio_verde.08": {
+    "name": "Depredadores de Raíz — Silentes"
+  },
+  "monster.mata_fio_verde.09": {
+    "name": "Perros de Corteza — Voraces"
+  },
+  "monster.mata_fio_verde.10": {
+    "name": "Jaguares de Corteza — Resonantes"
+  },
+  "monster.mata_fio_verde.11": {
+    "name": "Arañas de Nudo — sin Vista"
+  },
+  "monster.mata_fio_verde.12": {
+    "name": "Monos de Liana — Carmesí"
+  },
+  "monster.mata_fio_verde.13": {
+    "name": "Avispas de Savia — de Interior Vacío"
+  },
+  "monster.mata_fio_verde.14": {
+    "name": "Ciervos de Musgo — Vigilantes"
+  },
+  "monster.mata_fio_verde.15": {
+    "name": "Hongos Caminantes — en Soledad"
+  },
+  "monster.mata_fio_verde.16": {
+    "name": "Depredadores de Raíz — Deformes"
+  },
+  "monster.mata_fio_verde.17": {
+    "name": "Perros de Corteza — con Marca"
+  },
+  "monster.mata_fio_verde.18": {
+    "name": "Jaguares de Corteza — que Trepan"
+  },
+  "monster.mata_fio_verde.19": {
+    "name": "Arañas de Nudo — bajo el Agua"
+  },
+  "monster.mata_fio_verde.20": {
+    "name": "Monos de Liana — Crepusculares"
+  },
+  "monster.mata_fio_verde.21": {
+    "name": "Avispas de Savia — Centelleantes"
+  },
+  "monster.mata_fio_verde.22": {
+    "name": "Ciervos de Musgo — con Raíces"
+  },
+  "monster.mata_fio_verde.23": {
+    "name": "Hongos Caminantes — Migrantes"
+  },
+  "monster.mata_fio_verde.24": {
+    "name": "Depredadores de Raíz — de Guardia"
+  },
+  "monster.mata_fio_verde.25": {
+    "name": "Perros de Corteza — de Caza"
+  },
+  "monster.noite_iscara.01": {
+    "name": "Lobos de Vidrio — Jóvenes"
+  },
+  "monster.noite_iscara.02": {
+    "name": "Osos de Aurora — Ancestrales"
+  },
+  "monster.noite_iscara.03": {
+    "name": "Ciervos de Hielo — Errantes"
+  },
+  "monster.noite_iscara.04": {
+    "name": "Búhos del Futuro — de Palidez Espectral"
+  },
+  "monster.noite_iscara.05": {
+    "name": "Serpientes de Brasa — con Fisuras"
+  },
+  "monster.noite_iscara.06": {
+    "name": "Espectros Boreales — Veloces"
+  },
+  "monster.noite_iscara.07": {
+    "name": "Caribúes de Cristal — con Coraza"
+  },
+  "monster.noite_iscara.08": {
+    "name": "Cazadores de Nieve — Silentes"
+  },
+  "monster.noite_iscara.09": {
+    "name": "Lobos de Vidrio — Voraces"
+  },
+  "monster.noite_iscara.10": {
+    "name": "Osos de Aurora — Resonantes"
+  },
+  "monster.noite_iscara.11": {
+    "name": "Ciervos de Hielo — sin Vista"
+  },
+  "monster.noite_iscara.12": {
+    "name": "Búhos del Futuro — Carmesí"
+  },
+  "monster.noite_iscara.13": {
+    "name": "Serpientes de Brasa — de Interior Vacío"
+  },
+  "monster.noite_iscara.14": {
+    "name": "Espectros Boreales — Vigilantes"
+  },
+  "monster.noite_iscara.15": {
+    "name": "Caribúes de Cristal — en Soledad"
+  },
+  "monster.noite_iscara.16": {
+    "name": "Cazadores de Nieve — Deformes"
+  },
+  "monster.noite_iscara.17": {
+    "name": "Lobos de Vidrio — con Marca"
+  },
+  "monster.noite_iscara.18": {
+    "name": "Osos de Aurora — que Trepan"
+  },
+  "monster.noite_iscara.19": {
+    "name": "Ciervos de Hielo — bajo el Agua"
+  },
+  "monster.noite_iscara.20": {
+    "name": "Búhos del Futuro — Crepusculares"
+  },
+  "monster.noite_iscara.21": {
+    "name": "Serpientes de Brasa — Centelleantes"
+  },
+  "monster.noite_iscara.22": {
+    "name": "Espectros Boreales — con Raíces"
+  },
+  "monster.noite_iscara.23": {
+    "name": "Caribúes de Cristal — Migrantes"
+  },
+  "monster.noite_iscara.24": {
+    "name": "Cazadores de Nieve — de Guardia"
+  },
+  "monster.noite_iscara.25": {
+    "name": "Lobos de Vidrio — de Caza"
+  },
+  "monster.salinas_ossamar.01": {
+    "name": "Fósiles Caminantes — Jóvenes"
+  },
+  "monster.salinas_ossamar.02": {
+    "name": "Lagartos de Sal — Ancestrales"
+  },
+  "monster.salinas_ossamar.03": {
+    "name": "Buitres de Hueso — Errantes"
+  },
+  "monster.salinas_ossamar.04": {
+    "name": "Escorpiones Calcificados — de Palidez Espectral"
+  },
+  "monster.salinas_ossamar.05": {
+    "name": "Peces de Arena — con Fisuras"
+  },
+  "monster.salinas_ossamar.06": {
+    "name": "Gusanos de Concha — Veloces"
+  },
+  "monster.salinas_ossamar.07": {
+    "name": "Carneros de Salmuera — con Coraza"
+  },
+  "monster.salinas_ossamar.08": {
+    "name": "Sirenas Secas — Silentes"
+  },
+  "monster.salinas_ossamar.09": {
+    "name": "Fósiles Caminantes — Voraces"
+  },
+  "monster.salinas_ossamar.10": {
+    "name": "Lagartos de Sal — Resonantes"
+  },
+  "monster.salinas_ossamar.11": {
+    "name": "Buitres de Hueso — sin Vista"
+  },
+  "monster.salinas_ossamar.12": {
+    "name": "Escorpiones Calcificados — Carmesí"
+  },
+  "monster.salinas_ossamar.13": {
+    "name": "Peces de Arena — de Interior Vacío"
+  },
+  "monster.salinas_ossamar.14": {
+    "name": "Gusanos de Concha — Vigilantes"
+  },
+  "monster.salinas_ossamar.15": {
+    "name": "Carneros de Salmuera — en Soledad"
+  },
+  "monster.salinas_ossamar.16": {
+    "name": "Sirenas Secas — Deformes"
+  },
+  "monster.salinas_ossamar.17": {
+    "name": "Fósiles Caminantes — con Marca"
+  },
+  "monster.salinas_ossamar.18": {
+    "name": "Lagartos de Sal — que Trepan"
+  },
+  "monster.salinas_ossamar.19": {
+    "name": "Buitres de Hueso — bajo el Agua"
+  },
+  "monster.salinas_ossamar.20": {
+    "name": "Escorpiones Calcificados — Crepusculares"
+  },
+  "monster.salinas_ossamar.21": {
+    "name": "Peces de Arena — Centelleantes"
+  },
+  "monster.salinas_ossamar.22": {
+    "name": "Gusanos de Concha — con Raíces"
+  },
+  "monster.salinas_ossamar.23": {
+    "name": "Carneros de Salmuera — Migrantes"
+  },
+  "monster.salinas_ossamar.24": {
+    "name": "Sirenas Secas — de Guardia"
+  },
+  "monster.salinas_ossamar.25": {
+    "name": "Fósiles Caminantes — de Caza"
+  },
+  "monster.tear_desfeito.01": {
+    "name": "Futuros Abortados — Jóvenes"
+  },
+  "monster.tear_desfeito.02": {
+    "name": "Nudos Hambrientos — Ancestrales"
+  },
+  "monster.tear_desfeito.03": {
+    "name": "Tejedores Invertidos — Errantes"
+  },
+  "monster.tear_desfeito.04": {
+    "name": "Bestias de Posibilidad — de Palidez Espectral"
+  },
+  "monster.tear_desfeito.05": {
+    "name": "Fragmentos Humanos — con Fisuras"
+  },
+  "monster.tear_desfeito.06": {
+    "name": "Rupturas Ambulantes — Veloces"
+  },
+  "monster.tear_desfeito.07": {
+    "name": "Paradojas Menores — con Coraza"
+  },
+  "monster.tear_desfeito.08": {
+    "name": "Formas sin Causa — Silentes"
+  },
+  "monster.tear_desfeito.09": {
+    "name": "Futuros Abortados — Voraces"
+  },
+  "monster.tear_desfeito.10": {
+    "name": "Nudos Hambrientos — Resonantes"
+  },
+  "monster.tear_desfeito.11": {
+    "name": "Tejedores Invertidos — sin Vista"
+  },
+  "monster.tear_desfeito.12": {
+    "name": "Bestias de Posibilidad — Carmesí"
+  },
+  "monster.tear_desfeito.13": {
+    "name": "Fragmentos Humanos — de Interior Vacío"
+  },
+  "monster.tear_desfeito.14": {
+    "name": "Rupturas Ambulantes — Vigilantes"
+  },
+  "monster.tear_desfeito.15": {
+    "name": "Paradojas Menores — en Soledad"
+  },
+  "monster.tear_desfeito.16": {
+    "name": "Formas sin Causa — Deformes"
+  },
+  "monster.tear_desfeito.17": {
+    "name": "Futuros Abortados — con Marca"
+  },
+  "monster.tear_desfeito.18": {
+    "name": "Nudos Hambrientos — que Trepan"
+  },
+  "monster.tear_desfeito.19": {
+    "name": "Tejedores Invertidos — bajo el Agua"
+  },
+  "monster.tear_desfeito.20": {
+    "name": "Bestias de Posibilidad — Crepusculares"
+  },
+  "monster.tear_desfeito.21": {
+    "name": "Fragmentos Humanos — Centelleantes"
+  },
+  "monster.tear_desfeito.22": {
+    "name": "Rupturas Ambulantes — con Raíces"
+  },
+  "monster.tear_desfeito.23": {
+    "name": "Paradojas Menores — Migrantes"
+  },
+  "monster.tear_desfeito.24": {
+    "name": "Formas sin Causa — de Guardia"
+  },
+  "monster.tear_desfeito.25": {
+    "name": "Futuros Abortados — de Caza"
+  },
+  "monster.varzea_espelhos.01": {
+    "name": "Reflejos Hambrientos — Jóvenes"
+  },
+  "monster.varzea_espelhos.02": {
+    "name": "Caimanes de Espejo — Ancestrales"
+  },
+  "monster.varzea_espelhos.03": {
+    "name": "Anguilas de Doble Cuerpo — Errantes"
+  },
+  "monster.varzea_espelhos.04": {
+    "name": "Garzas Invertidas — de Palidez Espectral"
+  },
+  "monster.varzea_espelhos.05": {
+    "name": "Cardúmenes de Memoria — con Fisuras"
+  },
+  "monster.varzea_espelhos.06": {
+    "name": "Lodos Reflexivos — Veloces"
+  },
+  "monster.varzea_espelhos.07": {
+    "name": "Anfibios de Plata — con Coraza"
+  },
+  "monster.varzea_espelhos.08": {
+    "name": "Ahogados sin Rostro — Silentes"
+  },
+  "monster.varzea_espelhos.09": {
+    "name": "Reflejos Hambrientos — Voraces"
+  },
+  "monster.varzea_espelhos.10": {
+    "name": "Caimanes de Espejo — Resonantes"
+  },
+  "monster.varzea_espelhos.11": {
+    "name": "Anguilas de Doble Cuerpo — sin Vista"
+  },
+  "monster.varzea_espelhos.12": {
+    "name": "Garzas Invertidas — Carmesí"
+  },
+  "monster.varzea_espelhos.13": {
+    "name": "Cardúmenes de Memoria — de Interior Vacío"
+  },
+  "monster.varzea_espelhos.14": {
+    "name": "Lodos Reflexivos — Vigilantes"
+  },
+  "monster.varzea_espelhos.15": {
+    "name": "Anfibios de Plata — en Soledad"
+  },
+  "monster.varzea_espelhos.16": {
+    "name": "Ahogados sin Rostro — Deformes"
+  },
+  "monster.varzea_espelhos.17": {
+    "name": "Reflejos Hambrientos — con Marca"
+  },
+  "monster.varzea_espelhos.18": {
+    "name": "Caimanes de Espejo — que Trepan"
+  },
+  "monster.varzea_espelhos.19": {
+    "name": "Anguilas de Doble Cuerpo — bajo el Agua"
+  },
+  "monster.varzea_espelhos.20": {
+    "name": "Garzas Invertidas — Crepusculares"
+  },
+  "monster.varzea_espelhos.21": {
+    "name": "Cardúmenes de Memoria — Centelleantes"
+  },
+  "monster.varzea_espelhos.22": {
+    "name": "Lodos Reflexivos — con Raíces"
+  },
+  "monster.varzea_espelhos.23": {
+    "name": "Anfibios de Plata — Migrantes"
+  },
+  "monster.varzea_espelhos.24": {
+    "name": "Ahogados sin Rostro — de Guardia"
+  },
+  "monster.varzea_espelhos.25": {
+    "name": "Reflejos Hambrientos — de Caza"
+  },
+  "monster.vertice.01": {
+    "name": "Serpientes de Nube — Jóvenes"
+  },
+  "monster.vertice.02": {
+    "name": "Cuervos de Cable — Ancestrales"
+  },
+  "monster.vertice.03": {
+    "name": "Cabras de Acantilado — Errantes"
+  },
+  "monster.vertice.04": {
+    "name": "Arañas de Puente — de Palidez Espectral"
+  },
+  "monster.vertice.05": {
+    "name": "Mantos de Viento — con Fisuras"
+  },
+  "monster.vertice.06": {
+    "name": "Gólems de Contrapeso — Veloces"
+  },
+  "monster.vertice.07": {
+    "name": "Murciélagos de Abismo — con Coraza"
+  },
+  "monster.vertice.08": {
+    "name": "Halcones de Tensión — Silentes"
+  },
+  "monster.vertice.09": {
+    "name": "Serpientes de Nube — Voraces"
+  },
+  "monster.vertice.10": {
+    "name": "Cuervos de Cable — Resonantes"
+  },
+  "monster.vertice.11": {
+    "name": "Cabras de Acantilado — sin Vista"
+  },
+  "monster.vertice.12": {
+    "name": "Arañas de Puente — Carmesí"
+  },
+  "monster.vertice.13": {
+    "name": "Mantos de Viento — de Interior Vacío"
+  },
+  "monster.vertice.14": {
+    "name": "Gólems de Contrapeso — Vigilantes"
+  },
+  "monster.vertice.15": {
+    "name": "Murciélagos de Abismo — en Soledad"
+  },
+  "monster.vertice.16": {
+    "name": "Halcones de Tensión — Deformes"
+  },
+  "monster.vertice.17": {
+    "name": "Serpientes de Nube — con Marca"
+  },
+  "monster.vertice.18": {
+    "name": "Cuervos de Cable — que Trepan"
+  },
+  "monster.vertice.19": {
+    "name": "Cabras de Acantilado — bajo el Agua"
+  },
+  "monster.vertice.20": {
+    "name": "Arañas de Puente — Crepusculares"
+  },
+  "monster.vertice.21": {
+    "name": "Mantos de Viento — Centelleantes"
+  },
+  "monster.vertice.22": {
+    "name": "Gólems de Contrapeso — con Raíces"
+  },
+  "monster.vertice.23": {
+    "name": "Murciélagos de Abismo — Migrantes"
+  },
+  "monster.vertice.24": {
+    "name": "Halcones de Tensión — de Guardia"
+  },
+  "monster.vertice.25": {
+    "name": "Serpientes de Nube — de Caza"
   },
   "world.mata_fio_verde": {
     "name": "Bosque del Hilo Verde"
