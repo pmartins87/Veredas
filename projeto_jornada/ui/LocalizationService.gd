@@ -182,32 +182,59 @@ func _merge_content_shards(locale_id: String, base_catalog: Dictionary) -> Dicti
         merged = _merge_overlay_catalog(locale_id, "shard:%s" % file_name, merged, shard)
     return merged
 
+func _read_content_pack_encoded(locale_id: String) -> String:
+    var single_path := "%s/%s.json.gz.b64" % [CONTENT_PACK_DIR, locale_id]
+    if FileAccess.file_exists(single_path):
+        var single_file := FileAccess.open(single_path, FileAccess.READ)
+        if single_file == null:
+            _errors.append("content_pack_open:%s:%s" % [locale_id, single_path])
+            return ""
+        return single_file.get_as_text().strip_edges()
+    var part_path := "%s/%s" % [CONTENT_PACK_DIR, locale_id]
+    var dir := DirAccess.open(part_path)
+    if dir == null:
+        return ""
+    var files := dir.get_files()
+    files.sort()
+    var encoded := ""
+    var part_count := 0
+    for file_name_variant in files:
+        var file_name := str(file_name_variant)
+        if not file_name.ends_with(".b64part"):
+            continue
+        var path := "%s/%s" % [part_path, file_name]
+        var part_file := FileAccess.open(path, FileAccess.READ)
+        if part_file == null:
+            _errors.append("content_pack_part_open:%s:%s" % [locale_id, path])
+            continue
+        var part := part_file.get_as_text().strip_edges()
+        if part == "":
+            _errors.append("content_pack_part_empty:%s:%s" % [locale_id, path])
+            continue
+        encoded += part
+        part_count += 1
+    if part_count == 0:
+        return ""
+    return encoded
+
 func _merge_content_pack(locale_id: String, base_catalog: Dictionary) -> Dictionary:
     var merged := base_catalog.duplicate(true)
     if locale_id == source_locale():
         return merged
-    var pack_path := "%s/%s.json.gz.b64" % [CONTENT_PACK_DIR, locale_id]
-    if not FileAccess.file_exists(pack_path):
-        return merged
-    var file := FileAccess.open(pack_path, FileAccess.READ)
-    if file == null:
-        _errors.append("content_pack_open:%s:%s" % [locale_id, pack_path])
-        return merged
-    var encoded := file.get_as_text().strip_edges()
+    var encoded := _read_content_pack_encoded(locale_id)
     if encoded == "":
-        _errors.append("content_pack_empty:%s:%s" % [locale_id, pack_path])
         return merged
     var compressed := Marshalls.base64_to_raw(encoded)
     if compressed.is_empty():
-        _errors.append("content_pack_base64:%s:%s" % [locale_id, pack_path])
+        _errors.append("content_pack_base64:%s" % locale_id)
         return merged
     var raw := compressed.decompress_dynamic(CONTENT_PACK_MAX_BYTES, FileAccess.COMPRESSION_GZIP)
     if raw.is_empty():
-        _errors.append("content_pack_gzip:%s:%s" % [locale_id, pack_path])
+        _errors.append("content_pack_gzip:%s" % locale_id)
         return merged
     var parsed = JSON.parse_string(raw.get_string_from_utf8())
     if typeof(parsed) != TYPE_DICTIONARY:
-        _errors.append("content_pack_json:%s:%s" % [locale_id, pack_path])
+        _errors.append("content_pack_json:%s" % locale_id)
         return merged
     return _merge_overlay_catalog(locale_id, "pack", merged, parsed as Dictionary)
 
