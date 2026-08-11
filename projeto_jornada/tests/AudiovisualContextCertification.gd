@@ -32,6 +32,33 @@ func _run() -> void:
     _expect((audit.get("missing_buses", []) as Array).is_empty(), "runtime audio buses must exist")
     _expect((audit.get("invalid_domains", []) as Array).is_empty(), "every domain needs at least three signature motifs")
 
+    var mix: Dictionary = AudioRouter.audit_mix()
+    _expect(int(mix.get("schema_version", 0)) == 1, "audio mix schema must be v1")
+    _expect(str(mix.get("principle", "")) == "sound_supports_reading", "reading-first mix principle missing")
+    _expect((mix.get("missing_levels", []) as Array).is_empty(), "every required bus needs an explicit launch level")
+    _expect(bool(mix.get("music_within_cap", false)), "music bus exceeds reading-first cap")
+    _expect(bool(mix.get("ambience_within_cap", false)), "ambience bus exceeds reading-first cap")
+    var margin_required := float(mix.get("foreground_min_margin_db", 4.0))
+    _expect(float(mix.get("music_foreground_margin_db", 0.0)) >= margin_required, "music/foreground margin is too small")
+    _expect(float(mix.get("ambience_foreground_margin_db", 0.0)) >= margin_required, "ambience/foreground margin is too small")
+    _expect(not bool(mix.get("essential_information_requires_audio", true)), "essential gameplay information cannot require audio")
+    _expect(bool(mix.get("visual_text_feedback_required", false)), "sound-relevant feedback must also have visual/text presentation")
+
+    for bus_name in ["Master", "Music", "Ambience", "SFX", "UI"]:
+        var index := AudioServer.get_bus_index(bus_name)
+        _expect(index >= 0, "runtime bus missing: %s" % bus_name)
+    var expected_levels := {
+        "Master": 0.0,
+        "Music": -15.0,
+        "Ambience": -18.0,
+        "SFX": -9.0,
+        "UI": -8.0,
+    }
+    for bus_name in expected_levels:
+        var index := AudioServer.get_bus_index(bus_name)
+        if index >= 0:
+            _expect(absf(AudioServer.get_bus_volume_db(index) - float(expected_levels[bus_name])) < 0.01, "runtime bus level mismatch: %s" % bus_name)
+
     # Exercise the actual presentation layer used by gameplay. Missing final audio
     # must never break page/choice/combat feedback or make the UI unusable.
     PresentationBus.page()
@@ -75,9 +102,9 @@ func _run() -> void:
 
     if failures.is_empty():
         if missing_assets.is_empty():
-            print("AUDIOVISUAL_CONTEXT_CERTIFICATION PASS: 11.7 routes=6 domains=12 assets=38/38 buses=5")
+            print("AUDIOVISUAL_CONTEXT_CERTIFICATION PASS: 11.7 routes=6 domains=12 assets=38/38 buses=5 mix=reading-first")
         else:
-            print("AUDIOVISUAL_CONTEXT_PREFLIGHT PASS: routes=6 domains=12 buses=5 final_assets_missing=%d" % missing_assets.size())
+            print("AUDIOVISUAL_CONTEXT_PREFLIGHT PASS: routes=6 domains=12 buses=5 mix=reading-first final_assets_missing=%d" % missing_assets.size())
             print("AUDIOVISUAL_CONTEXT_BLOCKED: 7.8/7.10 final audio assets are required before 11.7 can be promoted")
         get_tree().quit(0)
         return
