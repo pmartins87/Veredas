@@ -29,6 +29,17 @@ def flatten_overlay(catalog: dict) -> set[str]:
     return keys
 
 
+def flatten_labels(catalog: dict) -> set[str]:
+    keys: set[str] = set()
+    for field, values in catalog.items():
+        if not isinstance(values, dict):
+            continue
+        for canonical, translated in values.items():
+            if isinstance(translated, str) and translated.strip():
+                keys.add(f"label.{field}.{canonical}")
+    return keys
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Report linguistic coverage and glossary integrity.")
     parser.add_argument("--output", type=Path, default=None)
@@ -42,6 +53,7 @@ def main() -> int:
     launch_locales = [str(v) for v in manifest.get("launch_locales", [])]
     targets = [v for v in launch_locales if v != source_locale]
     source_content_keys = {row["key"] for row in catalog["units"] if str(row["key"]).startswith("content.")}
+    source_label_keys = {row["key"] for row in catalog["units"] if str(row["key"]).startswith("label.")}
     required_ui = {str(v) for v in manifest.get("ui_required_keys", [])}
 
     errors: list[str] = []
@@ -64,37 +76,52 @@ def main() -> int:
     for locale_id in targets:
         content_catalog = read_object(LOC / "content" / f"{locale_id}.json")
         translated_content = flatten_overlay(content_catalog)
-        unknown = translated_content - source_content_keys
-        if unknown:
-            errors.append(f"{locale_id}: {len(unknown)} translated content keys are outside source inventory")
+        unknown_content = translated_content - source_content_keys
+        if unknown_content:
+            errors.append(f"{locale_id}: {len(unknown_content)} translated content keys are outside source inventory")
         translated_content &= source_content_keys
+
+        label_catalog = read_object(LOC / "labels" / f"{locale_id}.json")
+        translated_labels = flatten_labels(label_catalog)
+        unknown_labels = translated_labels - source_label_keys
+        if unknown_labels:
+            errors.append(f"{locale_id}: {len(unknown_labels)} translated label keys are outside source inventory")
+        translated_labels &= source_label_keys
 
         ui_catalog = read_object(LOC / "ui" / f"{locale_id}.json")
         translated_ui = {key for key in required_ui if isinstance(ui_catalog.get(key), str) and str(ui_catalog[key]).strip()}
         content_total = len(source_content_keys)
+        label_total = len(source_label_keys)
         ui_total = len(required_ui)
         locale_reports[locale_id] = {
             "content_translated": len(translated_content),
             "content_total": content_total,
             "content_coverage": round(len(translated_content) / content_total, 6) if content_total else 1.0,
+            "labels_translated": len(translated_labels),
+            "labels_total": label_total,
+            "labels_coverage": round(len(translated_labels) / label_total, 6) if label_total else 1.0,
             "ui_translated": len(translated_ui),
             "ui_total": ui_total,
             "ui_coverage": round(len(translated_ui) / ui_total, 6) if ui_total else 1.0,
             "missing_content": content_total - len(translated_content),
+            "missing_labels": label_total - len(translated_labels),
             "missing_ui": ui_total - len(translated_ui),
         }
         if args.require_complete:
             if len(translated_content) != content_total:
                 errors.append(f"{locale_id}: content translation incomplete {len(translated_content)}/{content_total}")
+            if len(translated_labels) != label_total:
+                errors.append(f"{locale_id}: label translation incomplete {len(translated_labels)}/{label_total}")
             if len(translated_ui) != ui_total:
                 errors.append(f"{locale_id}: UI translation incomplete {len(translated_ui)}/{ui_total}")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "source_locale": source_locale,
         "targets": targets,
         "source_records": catalog["record_count"],
         "source_content_units": len(source_content_keys),
+        "source_label_units": len(source_label_keys),
         "required_ui_units": len(required_ui),
         "glossary_terms": len(terms),
         "locales": locale_reports,
@@ -108,12 +135,12 @@ def main() -> int:
     for locale_id in targets:
         row = locale_reports[locale_id]
         print(
-            "LINGUISTIC_COVERAGE %s: content=%d/%d (%.4f%%) ui=%d/%d (%.2f%%) missing_content=%d"
+            "LINGUISTIC_COVERAGE %s: content=%d/%d (%.4f%%) labels=%d/%d (%.2f%%) ui=%d/%d (%.2f%%)"
             % (
                 locale_id,
                 row["content_translated"], row["content_total"], row["content_coverage"] * 100.0,
+                row["labels_translated"], row["labels_total"], row["labels_coverage"] * 100.0,
                 row["ui_translated"], row["ui_total"], row["ui_coverage"] * 100.0,
-                row["missing_content"],
             )
         )
     if errors:
@@ -122,8 +149,8 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     print(
-        "LINGUISTIC_REPORT PASS: structure_only glossary_terms=%d source_content_units=%d require_complete=%s"
-        % (len(terms), len(source_content_keys), str(args.require_complete).lower())
+        "LINGUISTIC_REPORT PASS: structure_only glossary_terms=%d source_content_units=%d source_label_units=%d require_complete=%s"
+        % (len(terms), len(source_content_keys), len(source_label_keys), str(args.require_complete).lower())
     )
     return 0
 

@@ -4,10 +4,12 @@ class_name LocalizationService
 const MANIFEST_PATH := "res://localization/manifest.json"
 const UI_DIR := "res://localization/ui"
 const CONTENT_DIR := "res://localization/content"
+const LABEL_DIR := "res://localization/labels"
 
 var _manifest: Dictionary = {}
 var _ui_catalogs: Dictionary = {}
 var _content_catalogs: Dictionary = {}
+var _label_catalogs: Dictionary = {}
 var _errors: Array[String] = []
 
 func _init() -> void:
@@ -106,6 +108,19 @@ func placeholders(locale_id: String, key: String) -> Array[String]:
     var raw := _catalog_text(resolved, key)
     return _placeholders_in(raw)
 
+func label(field: String, canonical_value: String, locale_id: String = "") -> String:
+    var locale := current_locale() if locale_id == "" else resolve_locale(locale_id, true)
+    var translated := _label_text(locale, field, canonical_value)
+    if translated == "" and locale != source_locale():
+        translated = _label_text(source_locale(), field, canonical_value)
+    return canonical_value if translated == "" else translated
+
+func has_label(locale_id: String, field: String, canonical_value: String) -> bool:
+    var resolved := resolve_locale(locale_id, false)
+    if resolved == "":
+        return false
+    return _label_text(resolved, field, canonical_value) != ""
+
 func content_value(record: Dictionary, path: String, locale_id: String = "") -> Variant:
     var localized := localize_record(record, locale_id)
     return _value_at_path(localized, path)
@@ -135,24 +150,26 @@ func _load() -> void:
     _errors.clear()
     _ui_catalogs.clear()
     _content_catalogs.clear()
+    _label_catalogs.clear()
     _manifest = _load_json_object(MANIFEST_PATH, "manifest")
     if _manifest.is_empty():
         return
     for locale_id in launch_locales():
         _ui_catalogs[locale_id] = _load_json_object("%s/%s.json" % [UI_DIR, locale_id], "ui:%s" % locale_id)
         _content_catalogs[locale_id] = _load_json_object("%s/%s.json" % [CONTENT_DIR, locale_id], "content:%s" % locale_id)
+        _label_catalogs[locale_id] = _load_json_object("%s/%s.json" % [LABEL_DIR, locale_id], "labels:%s" % locale_id)
 
-func _load_json_object(path: String, label: String) -> Dictionary:
+func _load_json_object(path: String, label_name: String) -> Dictionary:
     if not FileAccess.file_exists(path):
-        _errors.append("missing:%s:%s" % [label, path])
+        _errors.append("missing:%s:%s" % [label_name, path])
         return {}
     var file := FileAccess.open(path, FileAccess.READ)
     if file == null:
-        _errors.append("open:%s:%s" % [label, path])
+        _errors.append("open:%s:%s" % [label_name, path])
         return {}
     var parsed = JSON.parse_string(file.get_as_text())
     if typeof(parsed) != TYPE_DICTIONARY:
-        _errors.append("json_object:%s:%s" % [label, path])
+        _errors.append("json_object:%s:%s" % [label_name, path])
         return {}
     return (parsed as Dictionary).duplicate(true)
 
@@ -161,6 +178,16 @@ func _catalog_text(locale_id: String, key: String) -> String:
         return ""
     var catalog: Dictionary = _ui_catalogs[locale_id] as Dictionary
     return str(catalog.get(key, ""))
+
+func _label_text(locale_id: String, field: String, canonical_value: String) -> String:
+    if not _label_catalogs.has(locale_id):
+        return ""
+    var catalog: Dictionary = _label_catalogs[locale_id] as Dictionary
+    var field_map_variant = catalog.get(field, {})
+    if typeof(field_map_variant) != TYPE_DICTIONARY:
+        return ""
+    var field_map: Dictionary = field_map_variant as Dictionary
+    return str(field_map.get(canonical_value, ""))
 
 func _content_overlay(locale_id: String, record_id: String) -> Dictionary:
     if record_id == "" or not _content_catalogs.has(locale_id):

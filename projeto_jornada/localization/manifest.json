@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source_locale": "pt_BR",
   "fallback_locale": "pt_BR",
   "launch_locales": ["pt_BR", "en", "es_419"],
@@ -9,21 +9,10 @@
     "es_419": {"native_name": "Español (Latinoamérica)", "english_name": "Latin American Spanish"}
   },
   "aliases": {
-    "pt": "pt_BR",
-    "pt_BR": "pt_BR",
-    "pt-BR": "pt_BR",
-    "en": "en",
-    "en_US": "en",
-    "en-US": "en",
-    "en_GB": "en",
-    "en-GB": "en",
-    "es": "es_419",
-    "es_419": "es_419",
-    "es-419": "es_419",
-    "es_MX": "es_419",
-    "es-MX": "es_419",
-    "es_AR": "es_419",
-    "es-AR": "es_419"
+    "pt": "pt_BR", "pt_BR": "pt_BR", "pt-BR": "pt_BR",
+    "en": "en", "en_US": "en", "en-US": "en", "en_GB": "en", "en-GB": "en",
+    "es": "es_419", "es_419": "es_419", "es-419": "es_419",
+    "es_MX": "es_419", "es-MX": "es_419", "es_AR": "es_419", "es-AR": "es_419"
   },
   "ui_required_keys": [
     "settings.accessibility.title",
@@ -43,12 +32,24 @@
   ],
   "content_overlay_fields": [
     "name", "title", "description", "text", "voice", "objective", "pressure",
-    "ecology", "counterplay", "passive", "weakness", "telegraph", "signature"
+    "ecology", "counterplay", "passive", "weakness", "telegraph", "signature",
+    "premise", "secret", "conflict", "sensory", "personal_question", "epilogue", "teaching_note"
+  ],
+  "content_internal_string_fields": [
+    "arc_id", "balance_signature", "callback_mark_id", "character_id", "combat_signature",
+    "debt_id", "domain_id", "family_id", "id", "intent_signature", "key", "location_id",
+    "mark_id", "memory_mark_id", "narrative_role", "op", "origin_location_id", "pool",
+    "state_signature", "status_id", "visual_archetype", "world_id"
+  ],
+  "content_label_fields": [
+    "combat_role", "domain_status", "elite_affix", "kind", "learning_tier", "mechanic",
+    "rank", "rarity", "recommended_policy", "resource", "role", "status", "tier", "type"
   ],
   "policy": {
     "canonical_content_immutable": true,
     "runtime_rules_use_source_records": true,
     "presentation_uses_stable_id_overlays": true,
+    "logic_values_use_separate_label_catalogs": true,
     "missing_translation_falls_back_to_source": true,
     "translation_completeness_gate_step": "11.6"
   }

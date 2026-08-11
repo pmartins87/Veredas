@@ -20,28 +20,50 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def walk_strings(record_id: str, value: Any, fields: set[str], path: tuple[str, ...], out: list[dict]) -> None:
+def walk_units(
+    record_id: str,
+    value: Any,
+    overlay_fields: set[str],
+    label_fields: set[str],
+    path: tuple[str, ...],
+    content_out: list[dict],
+    labels_out: dict[str, set[str]],
+) -> None:
     if isinstance(value, dict):
         for key, child in value.items():
             key_s = str(key)
             child_path = path + (key_s,)
-            if key_s in fields and isinstance(child, str) and child.strip():
-                out.append({
-                    "key": f"content.{record_id}." + ".".join(child_path),
-                    "record_id": record_id,
-                    "path": ".".join(child_path),
-                    "source": child,
-                })
-            walk_strings(record_id, child, fields, child_path, out)
+            if isinstance(child, str) and child.strip():
+                if key_s in overlay_fields:
+                    content_out.append({
+                        "key": f"content.{record_id}." + ".".join(child_path),
+                        "record_id": record_id,
+                        "path": ".".join(child_path),
+                        "source": child,
+                    })
+                if key_s in label_fields:
+                    labels_out.setdefault(key_s, set()).add(child)
+            walk_units(record_id, child, overlay_fields, label_fields, child_path, content_out, labels_out)
     elif isinstance(value, list):
         for index, child in enumerate(value):
-            walk_strings(record_id, child, fields, path + (str(index),), out)
+            walk_units(record_id, child, overlay_fields, label_fields, path + (str(index),), content_out, labels_out)
+
+
+def source_label(catalog: dict, field: str, canonical: str) -> str:
+    field_map = catalog.get(field, {})
+    if isinstance(field_map, dict):
+        value = field_map.get(canonical)
+        if isinstance(value, str) and value.strip():
+            return value
+    return canonical
 
 
 def build_catalog() -> dict:
     manifest = read_json(MANIFEST)
-    fields = {str(v) for v in manifest.get("content_overlay_fields", [])}
+    overlay_fields = {str(v) for v in manifest.get("content_overlay_fields", [])}
+    label_fields = {str(v) for v in manifest.get("content_label_fields", [])}
     content_units: list[dict] = []
+    label_values: dict[str, set[str]] = {}
     record_count = 0
     for dataset in DATASETS:
         rows = read_json(DATA / f"{dataset}.json")
@@ -51,7 +73,9 @@ def build_catalog() -> dict:
             if not isinstance(record, dict) or not str(record.get("id", "")):
                 raise SystemExit(f"invalid record in {dataset}")
             record_count += 1
-            walk_strings(str(record["id"]), record, fields, (), content_units)
+            walk_units(
+                str(record["id"]), record, overlay_fields, label_fields, (), content_units, label_values
+            )
 
     source_locale = str(manifest.get("source_locale", "pt_BR"))
     source_ui = read_json(LOC / "ui" / f"{source_locale}.json")
@@ -60,14 +84,26 @@ def build_catalog() -> dict:
         for key, value in sorted(source_ui.items())
         if isinstance(value, str) and value.strip()
     ]
+    source_labels = read_json(LOC / "labels" / f"{source_locale}.json")
+    label_units: list[dict] = []
+    for field in sorted(label_values):
+        for canonical in sorted(label_values[field]):
+            label_units.append({
+                "key": f"label.{field}.{canonical}",
+                "field": field,
+                "canonical": canonical,
+                "source": source_label(source_labels, field, canonical),
+            })
     content_units.sort(key=lambda row: row["key"])
+    label_units.sort(key=lambda row: row["key"])
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source_locale": source_locale,
         "record_count": record_count,
         "content_unit_count": len(content_units),
+        "label_unit_count": len(label_units),
         "ui_unit_count": len(ui_units),
-        "units": ui_units + content_units,
+        "units": ui_units + label_units + content_units,
     }
 
 
@@ -80,12 +116,10 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(catalog, ensure_ascii=False, indent=2), encoding="utf-8")
     print(
-        "LOCALIZATION_CATALOG PASS: records=%d content_units=%d ui_units=%d total_units=%d"
+        "LOCALIZATION_CATALOG PASS: records=%d content_units=%d label_units=%d ui_units=%d total_units=%d"
         % (
-            catalog["record_count"],
-            catalog["content_unit_count"],
-            catalog["ui_unit_count"],
-            len(catalog["units"]),
+            catalog["record_count"], catalog["content_unit_count"], catalog["label_unit_count"],
+            catalog["ui_unit_count"], len(catalog["units"]),
         )
     )
     return 0

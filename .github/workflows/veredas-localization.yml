@@ -51,9 +51,9 @@ jobs:
       - name: Report linguistic coverage and glossary integrity
         working-directory: projeto_jornada
         run: python tools/localization_linguistic_report.py --output /tmp/veredas-linguistic-report.json
-      - name: Audit content string field classification
+      - name: Require full classification of content string fields
         working-directory: projeto_jornada
-        run: python tools/localization_schema_audit.py --output /tmp/veredas-localization-schema-audit.json
+        run: python tools/localization_schema_audit.py --require-classified --output /tmp/veredas-localization-schema-audit.json
       - name: Inventory hardcoded UI literals
         working-directory: projeto_jornada
         run: python tools/ui_localization_inventory.py --output /tmp/veredas-ui-localization-inventory.json

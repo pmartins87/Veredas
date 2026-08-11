@@ -5,6 +5,7 @@ var localization := LocalizationService.new()
 var alias_checks := 0
 var ui_key_checks := 0
 var content_overlay_checks := 0
+var label_checks := 0
 var panel_checks := 0
 
 func _ready() -> void:
@@ -13,6 +14,7 @@ func _ready() -> void:
     _architecture_gate()
     _locale_resolution_gate()
     _ui_catalog_gate()
+    _label_catalog_gate()
     _profile_persistence_gate()
     _content_overlay_gate()
     await _panel_integration_gate()
@@ -21,17 +23,17 @@ func _ready() -> void:
 func _architecture_gate() -> void:
     expect(localization.is_ready(), "11.5 localization service did not load: %s" % str(localization.errors()))
     var manifest := localization.manifest()
-    expect(int(manifest.get("schema_version", 0)) == 1, "11.5 localization manifest schema mismatch")
+    expect(int(manifest.get("schema_version", 0)) == 2, "11.5 localization manifest schema mismatch")
     expect(localization.source_locale() == "pt_BR", "11.5 source locale must be pt_BR")
     expect(localization.launch_locales() == ["pt_BR", "en", "es_419"], "11.5 launch locales mismatch: %s" % str(localization.launch_locales()))
+    expect((manifest.get("content_overlay_fields", []) as Array).size() == 20, "11.5 overlay field classification count mismatch")
+    expect((manifest.get("content_internal_string_fields", []) as Array).size() == 22, "11.5 internal string field classification count mismatch")
+    expect((manifest.get("content_label_fields", []) as Array).size() == 14, "11.5 logical label field classification count mismatch")
+    expect(bool((manifest.get("policy", {}) as Dictionary).get("logic_values_use_separate_label_catalogs", false)), "11.5 logical values are not protected by separate label catalogs")
     expect(str((manifest.get("policy", {}) as Dictionary).get("translation_completeness_gate_step", "")) == "11.6", "11.5 translation completeness must be deferred to 11.6")
 
 func _locale_resolution_gate() -> void:
-    var cases := {
-        "pt-BR":"pt_BR",
-        "en-US":"en",
-        "es-MX":"es_419",
-    }
+    var cases := {"pt-BR":"pt_BR", "en-US":"en", "es-MX":"es_419"}
     for raw_variant in cases.keys():
         var raw := str(raw_variant)
         expect(localization.resolve_locale(raw, false) == str(cases[raw_variant]), "11.5 locale alias failed: %s" % raw)
@@ -55,13 +57,30 @@ func _ui_catalog_gate() -> void:
     expect(localization.text("architecture.source_only_probe", {}, "en") == "Texto de fallback canônico", "11.5 English missing-key fallback failed")
     expect(localization.text("architecture.source_only_probe", {}, "es_419") == "Texto de fallback canônico", "11.5 Spanish missing-key fallback failed")
 
+func _label_catalog_gate() -> void:
+    var cases := [
+        ["rarity", "common", "Comum", "Common", "Común"],
+        ["status", "rooted", "Enraizado", "Rooted", "Enraizado"],
+        ["kind", "equipment", "Equipamento", "Equipment", "Equipo"],
+        ["tier", "intermediate", "Intermediário", "Intermediate", "Intermedio"],
+    ]
+    for case_variant in cases:
+        var row: Array = case_variant as Array
+        var field := str(row[0])
+        var canonical := str(row[1])
+        expect(localization.label(field, canonical, "pt_BR") == str(row[2]), "11.5 pt_BR label failed: %s:%s" % [field,canonical])
+        expect(localization.label(field, canonical, "en") == str(row[3]), "11.5 English label failed: %s:%s" % [field,canonical])
+        expect(localization.label(field, canonical, "es_419") == str(row[4]), "11.5 Spanish label failed: %s:%s" % [field,canonical])
+        label_checks += 3
+    expect(localization.label("resource", "ValorDesconhecido", "en") == "ValorDesconhecido", "11.5 missing logical label did not fall back to canonical value")
+    expect(not localization.has_label("en", "resource", "ValorDesconhecido"), "11.5 unknown logical label reported as translated")
+
 func _profile_persistence_gate() -> void:
     expect(localization.set_locale("en-US", false), "11.5 could not set supported locale alias")
     expect(localization.current_locale() == "en", "11.5 locale alias did not normalize in profile")
     var settings_before: Dictionary = GameState.profile.get("settings", {}) as Dictionary
     expect(not localization.set_locale("zz-ZZ", false), "11.5 invalid locale mutation was accepted")
     expect(GameState.profile.get("settings", {}) == settings_before, "11.5 invalid locale mutation changed profile settings")
-
     var payload := GameState.serialize()
     GameState.reset_profile()
     expect(localization.current_locale() == "pt_BR", "11.5 reset profile did not return to source locale")
@@ -111,7 +130,6 @@ func _panel_integration_gate() -> void:
     _check_panel(panel_en, "Accessibility", "Language", "Done")
     panel_en.queue_free()
     await get_tree().process_frame
-
     expect(localization.set_locale("es_419", false), "11.5 could not switch to Spanish for panel integration")
     var panel_es := AccessibilityPanel.new()
     add_child(panel_es)
@@ -144,7 +162,7 @@ func expect(condition: bool, message: String) -> void:
 
 func _finish() -> void:
     if failures.is_empty():
-        print("LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5 launch_locales=3 aliases=%d ui_checks=%d content_overlays=%d panels=%d nested_paths=2" % [alias_checks,ui_key_checks,content_overlay_checks,panel_checks])
+        print("LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5 schema=2 launch_locales=3 aliases=%d ui_checks=%d label_checks=%d content_overlays=%d panels=%d nested_paths=2" % [alias_checks,ui_key_checks,label_checks,content_overlay_checks,panel_checks])
         get_tree().quit(0)
     else:
         print("LOCALIZATION_ARCHITECTURE_CERTIFICATION FAIL: %d" % failures.size())
