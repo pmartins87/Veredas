@@ -1,4 +1,4 @@
-name: Veredas 11.6 Curated Apply
+name: Veredas 11.6 Full Content Apply
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     paths:
       - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'
       - 'projeto_jornada/tools/seed_structured_narrative_localization.py'
+      - 'projeto_jornada/tools/seed_event_localization.py'
       - '.github/workflows/veredas-116-world-location-apply.yml'
   workflow_dispatch:
 
@@ -14,13 +15,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: veredas-116-curated-apply-${{ github.ref }}
+  group: veredas-116-full-content-apply-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  apply-curated-blocks:
+  apply-full-content:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,11 +36,15 @@ jobs:
       - name: Apply deterministic non-event narrative
         working-directory: projeto_jornada
         run: python tools/seed_structured_narrative_localization.py --apply
+      - name: Apply every event localization unit
+        working-directory: projeto_jornada
+        run: python tools/seed_event_localization.py --apply
       - name: Certify newly applied blocks
         working-directory: projeto_jornada
         run: |
           python tools/seed_world_location_derived_name_localization.py --check
           python tools/seed_structured_narrative_localization.py --check
+          python tools/seed_event_localization.py --check
       - name: Validate every prior protected localization block
         working-directory: projeto_jornada
         run: |
@@ -51,13 +56,27 @@ jobs:
       - name: Validate token and markup integrity
         working-directory: projeto_jornada
         run: python tools/localization_quality_gate.py --output /tmp/veredas-localization-quality.json
-      - name: Measure resulting linguistic coverage
+      - name: Require complete launch-language coverage
         working-directory: projeto_jornada
-        run: python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/veredas-linguistic-report.json
-      - name: Rebuild remaining-only translation batches
+        run: python tools/localization_linguistic_report.py --require-complete --output /tmp/veredas-linguistic-report.json
+      - name: Prove no translation batches remain
         working-directory: projeto_jornada
-        run: python tools/localization_translation_batches.py --max-units 400 --output /tmp/veredas-translation-batches.json
-      - name: Promote both blocks into permanent localization gate
+        run: |
+          python tools/localization_translation_batches.py --max-units 400 --output /tmp/veredas-translation-batches.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/tmp/veredas-translation-batches.json')
+          report = json.loads(p.read_text(encoding='utf-8'))
+          batches = report.get('batches', [])
+          remaining = report.get('remaining_units', report.get('remaining', 0))
+          if isinstance(remaining, dict):
+              remaining = sum(int(v) for v in remaining.values())
+          if batches or int(remaining or 0) != 0:
+              raise SystemExit(f'translation queue not empty: batches={len(batches)} remaining={remaining}')
+          print('TRANSLATION_QUEUE PASS: zero remaining units')
+          PY
+      - name: Promote completed coverage into permanent localization gate
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -65,33 +84,43 @@ jobs:
           s = p.read_text(encoding='utf-8')
           path_anchor = "      - 'projeto_jornada/tools/seed_family_monster_name_localization.py'\n"
           check_anchor = '          python tools/seed_family_monster_name_localization.py --check\n'
-          additions = [
-              ('path', "      - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'\n"),
-              ('path', "      - 'projeto_jornada/tools/seed_structured_narrative_localization.py'\n"),
-              ('check', '          python tools/seed_world_location_derived_name_localization.py --check\n'),
-              ('check', '          python tools/seed_structured_narrative_localization.py --check\n'),
+          path_additions = [
+              "      - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'\n",
+              "      - 'projeto_jornada/tools/seed_structured_narrative_localization.py'\n",
+              "      - 'projeto_jornada/tools/seed_event_localization.py'\n",
+          ]
+          check_additions = [
+              '          python tools/seed_world_location_derived_name_localization.py --check\n',
+              '          python tools/seed_structured_narrative_localization.py --check\n',
+              '          python tools/seed_event_localization.py --check\n',
           ]
           if path_anchor not in s or check_anchor not in s:
               raise SystemExit('permanent localization workflow anchor missing')
-          path_insert = ''.join(value for kind, value in additions if kind == 'path' and value not in s)
-          if path_insert:
-              s = s.replace(path_anchor, path_anchor + path_insert, 1)
-          check_insert = ''.join(value for kind, value in additions if kind == 'check' and value not in s)
-          if check_insert:
-              s = s.replace(check_anchor, check_anchor + check_insert, 1)
+          missing_paths = ''.join(value for value in path_additions if value not in s)
+          if missing_paths:
+              s = s.replace(path_anchor, path_anchor + missing_paths, 1)
+          missing_checks = ''.join(value for value in check_additions if value not in s)
+          if missing_checks:
+              s = s.replace(check_anchor, check_anchor + missing_checks, 1)
+          old_report = 'python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/veredas-linguistic-report.json'
+          new_report = 'python tools/localization_linguistic_report.py --require-complete --output /tmp/veredas-linguistic-report.json'
+          if old_report in s:
+              s = s.replace(old_report, new_report, 1)
+          elif new_report not in s:
+              raise SystemExit('linguistic coverage gate anchor missing')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Retire one-shot applicator
         run: rm .github/workflows/veredas-116-world-location-apply.yml
-      - name: Persist validated localization blocks
+      - name: Persist fully localized launch catalogs
         run: |
           git config user.name 'Veredas CI'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
           git diff --cached --check
           if git diff --cached --quiet; then
-            echo 'Curated blocks already persisted.'
+            echo 'Full content localization already persisted.'
             exit 0
           fi
-          git commit -m 'i18n: apply curated non-event localization through 11.6'
+          git commit -m 'i18n: complete launch-language content coverage for 11.6'
           git push origin HEAD:projeto-jornada-snapshots
