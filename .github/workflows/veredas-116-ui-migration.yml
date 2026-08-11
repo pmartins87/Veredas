@@ -7,6 +7,7 @@ on:
     paths:
       - 'projeto_jornada/tools/migrate_scene_ui_localization.py'
       - 'projeto_jornada/tools/localization_inventory.py'
+      - 'projeto_jornada/tools/ui_localization_inventory.py'
       - '.github/workflows/veredas-116-ui-migration.yml'
   workflow_dispatch:
 
@@ -29,7 +30,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Upgrade legacy UI-key inventory contract
+      - name: Upgrade localization inventory contracts
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -47,6 +48,16 @@ jobs:
               s = s.replace(old_print, new_print, 1)
           elif new_print not in s:
               raise SystemExit('UI inventory PASS output anchor missing')
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('projeto_jornada/tools/ui_localization_inventory.py')
+          s = p.read_text(encoding='utf-8')
+          anchor = '    "add_theme_constant_override(", ".name =", " name =", "call_deferred(",\n'
+          replacement = '    "add_theme_constant_override(", ".name =", " name =", "call_deferred(", "_add_toggle(",\n'
+          if anchor in s:
+              s = s.replace(anchor, replacement, 1)
+          elif replacement not in s:
+              raise SystemExit('UI technical-node filter anchor missing')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Apply deterministic UI localization migration
@@ -107,7 +118,8 @@ jobs:
             projeto_jornada/localization/ui/pt_BR.json \
             projeto_jornada/localization/ui/en.json \
             projeto_jornada/localization/ui/es_419.json \
-            projeto_jornada/tools/localization_inventory.py
+            projeto_jornada/tools/localization_inventory.py \
+            projeto_jornada/tools/ui_localization_inventory.py
           git diff --cached --check
           if git diff --cached --quiet; then
             echo 'UI localization migration already persisted.'
