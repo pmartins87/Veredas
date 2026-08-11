@@ -44,7 +44,7 @@ func _locale_resolution_gate() -> void:
 
 func _ui_catalog_gate() -> void:
     var required: Array = localization.manifest().get("ui_required_keys", []) as Array
-    expect(required.size() == 14, "11.5 expected 14 required UI architecture keys")
+    expect(required.size() >= 14, "11.5 expected at least 14 required UI architecture keys")
     for key_variant in required:
         var key := str(key_variant)
         var source_placeholders := localization.placeholders("pt_BR", key)

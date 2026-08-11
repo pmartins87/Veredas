@@ -1,5 +1,7 @@
 extends Control
 
+var localization := LocalizationService.new()
+
 const ANDROID_CI_MARKER := "user://android_ci_autostart"
 const ANDROID_CI_READY := "user://android_ci_ready"
 const ANDROID_CI_SEED := 881001
@@ -104,7 +106,7 @@ func _build_ui() -> void:
     ornament.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     top.add_child(ornament)
     title = Label.new()
-    title.text = "Nó de Vigília"
+    title.text = localization.text("hub.title")
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     title.set_meta("base_font_size", 34)
@@ -137,14 +139,14 @@ func _render() -> void:
     var unlocks: Dictionary = MetaUnlockEngine.summary()
     var echoes: Dictionary = EchoConsequenceEngine.summary()
     var lines: Array[String] = []
-    lines.append("[font_size=%d][b]Um ponto estável entre Veredas instáveis.[/b][/font_size]" % AccessibilityService.font_size(23))
+    lines.append(localization.text("hub.tagline") % AccessibilityService.font_size(23))
     lines.append("")
-    lines.append("Estágio do Nó: [b]%s/5[/b]   •   Visitas: %s   •   Residentes: %s" % [hub.stage, hub.visits, hub.residents])
-    lines.append("Andarilhos: [b]%s/36[/b]   •   Rotas: [b]%s/12[/b]   •   Modos: [b]%s/4[/b]   •   Códice: [b]%s[/b]" % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
-    lines.append("Conquistas: [b]%s/%s[/b]   •   Ecos persistentes: [b]%s[/b]   •   Consequências: [b]%s[/b]" % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size(), echoes.echo_marks, echoes.consequences])
-    lines.append("Fios de Vigília: [b]%s[/b]   •   Gastos: %s   •   Aquisições: %s" % [economy_summary.balance, economy_summary.lifetime_spent, economy_summary.purchases])
+    lines.append(localization.text("hub.stats.stage") % [hub.stage, hub.visits, hub.residents])
+    lines.append(localization.text("hub.stats.unlocks") % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
+    lines.append(localization.text("hub.stats.echoes") % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size(), echoes.echo_marks, echoes.consequences])
+    lines.append(localization.text("hub.stats.threads") % [economy_summary.balance, economy_summary.lifetime_spent, economy_summary.purchases])
     lines.append("")
-    lines.append("[b]Instalações[/b]")
+    lines.append(localization.text("hub.facilities"))
     for facility_variant in hub.facilities:
         var facility: Dictionary = facility_variant as Dictionary
         var marker := "✓" if bool(facility.unlocked) else "·"
@@ -153,32 +155,34 @@ func _render() -> void:
     var modes: Array = MetaUnlockEngine.unlocked_modes()
     if not modes.is_empty():
         lines.append("")
-        lines.append("[b]Formas de jornada conhecidas[/b]")
+        lines.append(localization.text("hub.modes"))
         for mode_variant in modes:
             var mode: Dictionary = mode_variant as Dictionary
             lines.append("• %s — %s" % [mode.name, mode.description])
 
     if not HubEngine.residents().is_empty():
         lines.append("")
-        lines.append("[b]Pessoas que encontraram abrigo no Nó[/b]")
+        lines.append(localization.text("hub.residents"))
         for npc_id_variant in HubEngine.residents().slice(0, 6):
             var npc_id: String = str(npc_id_variant)
             var npc: Dictionary = ContentRegistry.get_record(npc_id)
-            lines.append("• %s" % npc.get("name", npc_id))
+            var npc_view := localization.localize_record(npc)
+            lines.append("• %s" % npc_view.get("name", npc_id))
     summary.text = "\n".join(lines)
 
     if loaded_active_run:
-        _button("Continuar jornada", _continue_run, true)
-        _button("Abandonar jornada e retornar ao Nó", _abandon_run, false)
+        _button(localization.text("hub.continue"), _continue_run, true)
+        _button(localization.text("hub.abandon"), _abandon_run, false)
     else:
-        _button("Preparar jornada", _open_journey_setup, true)
+        _button(localization.text("hub.prepare"), _open_journey_setup, true)
         for world_id_variant in HubEngine.routes():
             var world_id: String = str(world_id_variant)
             var world: Dictionary = ContentRegistry.get_record(world_id)
-            _button("Examinar rota — %s" % world.get("name", world_id), func(): _show_route(world_id), false)
-    _button("Arquivo de Ecos", _open_codex, false)
-    _button("Mesa dos Fios", _open_meta_economy, false)
-    _button("Acessibilidade", _open_accessibility, false)
+            var world_view := localization.localize_record(world)
+            _button(localization.text("hub.examine_route") % world_view.get("name", world_id), func(): _show_route(world_id), false)
+    _button(localization.text("common.echo_archive"), _open_codex, false)
+    _button(localization.text("hub.thread_table"), _open_meta_economy, false)
+    _button(localization.text("common.accessibility"), _open_accessibility, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
     var button := Button.new()
@@ -213,8 +217,9 @@ func _abandon_run() -> void:
 
 func _show_route(world_id: String) -> void:
     var world: Dictionary = ContentRegistry.get_record(world_id)
+    var world_view := localization.localize_record(world)
     var characters: Array = MetaUnlockEngine.unlocked_characters(world_id)
-    summary.append_text("\n\n[i]A Mesa das Veredas conhece o caminho para %s. Andarilhos disponíveis nesta rota: %d. Use Preparar jornada para selecionar rota, Andarilho, modo, dificuldade, seed e modificadores.[/i]" % [world.get("name", world_id), characters.size()])
+    summary.append_text(localization.text("hub.route_detail") % [world_view.get("name", world_id), characters.size()])
 
 func _open_accessibility() -> void:
     var panel := AccessibilityPanel.new()

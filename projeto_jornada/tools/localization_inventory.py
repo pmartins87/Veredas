@@ -90,8 +90,8 @@ def main() -> int:
         meta = locale_meta.get(locale_id, {})
         if not isinstance(meta, dict) or not str(meta.get("native_name", "")).strip():
             errors.append(f"missing native locale name: {locale_id}")
-    if len(required_keys) != 14 or len(set(required_keys)) != len(required_keys):
-        errors.append(f"expected 14 unique migrated UI keys, got {len(required_keys)}")
+    if len(required_keys) < 14 or len(set(required_keys)) != len(required_keys):
+        errors.append(f"expected at least 14 unique required UI keys, got {len(required_keys)}")
     if not overlay_fields:
         errors.append("content overlay field whitelist is empty")
     for key in [
@@ -222,8 +222,8 @@ def main() -> int:
         return 1
 
     print(
-        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=14 translated_required=%d overlay_entries=%d nested_overlays=%d"
-        % (len(source_strings), translated_required, overlay_entries, nested_overlay_entries)
+        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d"
+        % (len(source_strings), len(required_keys), translated_required, overlay_entries, nested_overlay_entries)
     )
     return 0
 

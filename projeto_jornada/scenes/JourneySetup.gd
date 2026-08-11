@@ -1,5 +1,7 @@
 extends Control
 
+var localization := LocalizationService.new()
+
 var setup_engine := JourneySetupEngine.new()
 var route_option: OptionButton
 var character_option: OptionButton
@@ -59,27 +61,27 @@ func _build_ui() -> void:
     scroll.add_child(column)
 
     var heading := Label.new()
-    heading.text = "Preparar a Jornada"
+    heading.text = localization.text("journey_setup.title")
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.set_meta("base_font_size", 32)
     BookCardStyle.apply_heading(heading, "mata_fio_verde", DomainThemeService, 1)
     column.add_child(heading)
 
     var intro := Label.new()
-    intro.text = "Escolha a Vereda, o Andarilho e as regras desta travessia. Dificuldade é registrada agora; a calibração numérica final pertence à fase 10.6."
+    intro.text = localization.text("journey_setup.intro")
     intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     intro.set_meta("base_font_size", 16)
     column.add_child(intro)
 
-    route_option = _field(column, "Rota")
+    route_option = _field(column, localization.text("journey_setup.route"))
     route_option.item_selected.connect(_on_route_selected)
-    character_option = _field(column, "Andarilho")
-    mode_option = _field(column, "Modo")
+    character_option = _field(column, localization.text("journey_setup.wanderer"))
+    mode_option = _field(column, localization.text("journey_setup.mode"))
     mode_option.item_selected.connect(_on_mode_selected)
-    difficulty_option = _field(column, "Dificuldade")
+    difficulty_option = _field(column, localization.text("journey_setup.difficulty"))
 
     var seed_label := Label.new()
-    seed_label.text = "Seed — deixe 0 para gerar automaticamente; Trama Compartilhada exige valor positivo"
+    seed_label.text = localization.text("journey_setup.seed_help")
     seed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     seed_label.set_meta("base_font_size", 14)
     column.add_child(seed_label)
@@ -91,7 +93,7 @@ func _build_ui() -> void:
     column.add_child(seed_edit)
 
     var modifier_title := Label.new()
-    modifier_title.text = "Modificadores"
+    modifier_title.text = localization.text("journey_setup.modifiers")
     modifier_title.set_meta("base_font_size", 19)
     column.add_child(modifier_title)
     modifier_box = VBoxContainer.new()
@@ -104,7 +106,7 @@ func _build_ui() -> void:
     column.add_child(status_label)
 
     var start_button := Button.new()
-    start_button.text = "Partir"
+    start_button.text = localization.text("journey_setup.start")
     start_button.custom_minimum_size.y = 56
     start_button.set_meta("base_font_size", 17)
     BookCardStyle.apply_button(start_button, "mata_fio_verde", DomainThemeService, true)
@@ -112,7 +114,7 @@ func _build_ui() -> void:
     column.add_child(start_button)
 
     var back_button := Button.new()
-    back_button.text = "Voltar ao Nó"
+    back_button.text = localization.text("common.back_to_hub")
     back_button.custom_minimum_size.y = 52
     back_button.set_meta("base_font_size", 16)
     BookCardStyle.apply_button(back_button, "mata_fio_verde", DomainThemeService, false)
@@ -138,7 +140,8 @@ func _populate_routes() -> void:
         var world: Dictionary = world_variant as Dictionary
         var world_id := str(world.get("id", ""))
         _route_ids.append(world_id)
-        route_option.add_item(str(world.get("name", world_id)))
+        var world_view := localization.localize_record(world)
+        route_option.add_item(str(world_view.get("name", world_id)))
 
 func _populate_modes() -> void:
     mode_option.clear()
@@ -183,11 +186,12 @@ func _on_route_selected(index: int) -> void:
         var character: Dictionary = character_variant as Dictionary
         var character_id := str(character.get("id", ""))
         _character_ids.append(character_id)
-        character_option.add_item(str(character.get("name", character_id)))
+        var character_view := localization.localize_record(character)
+        character_option.add_item(str(character_view.get("name", character_id)))
 
 func _on_mode_selected(_index: int) -> void:
     if _selected_id(_mode_ids, mode_option) == "fixed_seed" and seed_edit.text.strip_edges() == "0":
-        status_label.text = "Trama Compartilhada exige uma seed positiva para que a jornada possa ser repetida."
+        status_label.text = localization.text("journey_setup.fixed_seed_required")
     else:
         status_label.text = ""
 
@@ -206,10 +210,10 @@ func _start() -> void:
     }
     var check := setup_engine.validate(setup)
     if not bool(check.get("ok", false)):
-        status_label.text = "Configuração inválida: %s" % ", ".join(check.get("errors", []))
+        status_label.text = localization.text("journey_setup.invalid") % ", ".join(check.get("errors", []))
         return
     if not setup_engine.start(setup):
-        status_label.text = "Não foi possível iniciar esta jornada."
+        status_label.text = localization.text("journey_setup.start_failed")
         return
     get_tree().change_scene_to_file("res://scenes/Main.tscn")
 

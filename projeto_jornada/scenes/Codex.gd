@@ -1,21 +1,22 @@
 extends Control
 
-const CATEGORY_NAMES := {
-    "world":"Domínios",
-    "location":"Localidades",
-    "character":"Andarilhos",
-    "monster":"Monstros",
-    "boss":"Chefes",
-    "item":"Itens",
-    "npc":"Pessoas",
-    "mark":"Marcas",
-    "debt":"Dívidas Narrativas",
-    "event":"Situações",
-    "ending":"Finais",
-    "ability":"Habilidades",
-    "other":"Outros",
-}
+var localization := LocalizationService.new()
 
+const CATEGORY_NAMES := {
+    "world":"codex.category.world",
+    "location":"codex.category.location",
+    "character":"codex.category.character",
+    "monster":"codex.category.monster",
+    "boss":"codex.category.boss",
+    "item":"codex.category.item",
+    "npc":"codex.category.npc",
+    "mark":"codex.category.mark",
+    "debt":"codex.category.debt",
+    "event":"codex.category.event",
+    "ending":"codex.category.ending",
+    "ability":"codex.category.ability",
+    "other":"codex.category.other",
+}
 var codex := CodexProgressEngine.new()
 var body: RichTextLabel
 
@@ -57,14 +58,14 @@ func _build_ui() -> void:
     margin.add_child(column)
 
     var heading := Label.new()
-    heading.text = "Arquivo de Ecos"
+    heading.text = localization.text("codex.title")
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.set_meta("base_font_size", 32)
     BookCardStyle.apply_heading(heading, "mata_fio_verde", DomainThemeService, 1)
     column.add_child(heading)
 
     var subtitle := Label.new()
-    subtitle.text = "O Códice registra o que foi encontrado; não concede poder por completar listas."
+    subtitle.text = localization.text("codex.subtitle")
     subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     subtitle.set_meta("base_font_size", 15)
@@ -79,7 +80,7 @@ func _build_ui() -> void:
     column.add_child(body)
 
     var back := Button.new()
-    back.text = "Voltar ao Nó"
+    back.text = localization.text("common.back_to_hub")
     back.custom_minimum_size.y = 54
     back.set_meta("base_font_size", 16)
     BookCardStyle.apply_button(back, "mata_fio_verde", DomainThemeService, true)
@@ -92,20 +93,20 @@ func _render() -> void:
     var total: Dictionary = collection.get("total", {}) as Dictionary
     var lines: Array[String] = []
 
-    lines.append("[font_size=%d][b]Coleção[/b][/font_size]" % AccessibilityService.font_size(23))
-    lines.append("Registros distintos: [b]%d[/b]" % int(collection.get("overall", 0)))
+    lines.append(localization.text("codex.collection") % AccessibilityService.font_size(23))
+    lines.append(localization.text("codex.distinct_records") % int(collection.get("overall", 0)))
     var category_order := ["world","location","character","monster","boss","item","npc","mark","debt","event","ending","ability","other"]
     for category in category_order:
         var found := int(discovered.get(category, 0))
         var maximum := int(total.get(category, 0))
         if found == 0 and maximum == 0:
             continue
-        var label := str(CATEGORY_NAMES.get(category, category))
+        var label := _category_name(str(category))
         lines.append("• %s: [b]%d[/b]%s" % [label, found, " / %d" % maximum if maximum > 0 else ""])
 
     lines.append("")
-    lines.append("[font_size=%d][b]Conquistas[/b][/font_size]" % AccessibilityService.font_size(23))
-    lines.append("Desbloqueadas: [b]%d / %d[/b]" % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size()])
+    lines.append(localization.text("codex.achievements") % AccessibilityService.font_size(23))
+    lines.append(localization.text("codex.unlocked") % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size()])
     for achievement_variant in codex.achievements():
         var achievement: Dictionary = achievement_variant as Dictionary
         var unlocked := bool(achievement.get("unlocked", false))
@@ -114,18 +115,19 @@ func _render() -> void:
         lines.append("%s [b]%s[/b] — %s [%d/%d]" % [marker, achievement.get("name", ""), achievement.get("description", ""), progress, int(achievement.get("target", 1))])
 
     lines.append("")
-    lines.append("[font_size=%d][b]Descobertas recentes[/b][/font_size]" % AccessibilityService.font_size(23))
+    lines.append(localization.text("codex.recent") % AccessibilityService.font_size(23))
     var recent: Array = codex.history(30)
     if recent.is_empty():
-        lines.append("[i]As primeiras páginas ainda aguardam traços novos.[/i]")
+        lines.append(localization.text("codex.empty"))
     else:
         recent.reverse()
         for entry_variant in recent:
             var entry: Dictionary = entry_variant as Dictionary
             var content_id := str(entry.get("id", ""))
             var record: Dictionary = ContentRegistry.get_record(content_id)
-            var name := str(record.get("name", content_id))
-            var category := str(CATEGORY_NAMES.get(str(entry.get("category", "other")), entry.get("category", "other")))
+            var record_view := localization.localize_record(record)
+            var name := str(record_view.get("name", content_id))
+            var category := _category_name(str(entry.get("category", "other")))
             var source := _source_name(str(entry.get("source", "journey")))
             lines.append("• [b]%s[/b] — %s • %s%s" % [name, category, source, _date_suffix(int(entry.get("at", 0)))])
 
@@ -133,10 +135,14 @@ func _render() -> void:
 
 func _source_name(source: String) -> String:
     match source:
-        "route_unlock": return "rota aberta"
-        "character_unlock": return "Andarilho liberado"
-        "legacy": return "registro anterior"
-        _: return "jornada"
+        "route_unlock": return localization.text("codex.source.route")
+        "character_unlock": return localization.text("codex.source.character")
+        "legacy": return localization.text("codex.source.legacy")
+        _: return localization.text("codex.source.journey")
+
+func _category_name(category: String) -> String:
+    var key := str(CATEGORY_NAMES.get(category, "codex.category.other"))
+    return localization.text(key)
 
 func _date_suffix(unix_time: int) -> String:
     if unix_time <= 0:

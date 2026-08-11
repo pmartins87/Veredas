@@ -1,5 +1,7 @@
 extends Control
 
+var localization := LocalizationService.new()
+
 var current_event: Dictionary = {}
 var story: RichTextLabel
 var choices: VBoxContainer
@@ -118,11 +120,11 @@ func _build_ui() -> void:
     nav.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     nav.add_theme_constant_override("h_separation", 7)
     nav.add_theme_constant_override("v_separation", 7)
-    nav_story = _nav_button("Jornada", func(): RunFlowEngine.resume_story(); current_event = {}; _refresh())
-    nav_inventory = _nav_button("Inventário", func(): RunFlowEngine.open_inventory(); _refresh())
-    nav_travel = _nav_button("Veredas", func(): RunFlowEngine.open_travel(); _refresh())
-    var save := _nav_button("Salvar", func(): SaveService.save_game())
-    var access := _nav_button("Ajustes", _open_accessibility)
+    nav_story = _nav_button(localization.text("common.journey"), func(): RunFlowEngine.resume_story(); current_event = {}; _refresh())
+    nav_inventory = _nav_button(localization.text("common.inventory"), func(): RunFlowEngine.open_inventory(); _refresh())
+    nav_travel = _nav_button(localization.text("common.paths"), func(): RunFlowEngine.open_travel(); _refresh())
+    var save := _nav_button(localization.text("common.save"), func(): SaveService.save_game())
+    var access := _nav_button(localization.text("common.settings"), _open_accessibility)
     nav.add_child(nav_story)
     nav.add_child(nav_inventory)
     nav.add_child(nav_travel)
@@ -180,8 +182,10 @@ func _refresh() -> void:
     var loc := str(GameState.run.get("location_id", ""))
     var world := ContentRegistry.get_record(world_id)
     var location := ContentRegistry.get_record(loc)
-    header.text = str(world.get("name", "Veredas da Trama"))
-    location_label.text = str(location.get("name", "Uma Vereda sem nome"))
+    var world_view := localization.localize_record(world)
+    var location_view := localization.localize_record(location)
+    header.text = str(world_view.get("name", localization.text("main.game_title")))
+    location_label.text = str(location_view.get("name", localization.text("main.unnamed_path")))
     _apply_visuals(current_domain_id)
     _render_stats()
     _clear_choices()
@@ -207,17 +211,20 @@ func _render_story() -> void:
     if current_event.is_empty():
         current_event = RunFlowEngine.story_event()
     if current_event.is_empty():
-        story.text = "[b]A Vereda silencia.[/b]\n\nNenhuma situação está disponível aqui agora. Viaje para outra localidade."
+        story.text = localization.text("main.story.none")
         return
     var title_size := AccessibilityService.font_size(25)
-    story.text = "[font_size=%d][b]%s[/b][/font_size]\n\n%s" % [title_size, current_event.get("title","A Vereda aguarda"), current_event.get("text","")]
+    var event_view := localization.localize_record(current_event)
+    story.text = "[font_size=%d][b]%s[/b][/font_size]\n\n%s" % [title_size, event_view.get("title",localization.text("main.story.default_title")), event_view.get("text","")]
+    var localized_choices: Array = event_view.get("choices", []) as Array
     var available := EventDirector.available_choices(current_event)
     for entry in available:
         var idx := int(entry.get("index",0))
         var choice: Dictionary = entry.get("choice",{})
-        _add_action_button(str(choice.get("text","Escolher")), _choose_story.bind(idx), idx == 0)
+        var display_choice: Dictionary = (localized_choices[idx] as Dictionary) if idx >= 0 and idx < localized_choices.size() else choice
+        _add_action_button(str(display_choice.get("text",localization.text("main.story.choose"))), _choose_story.bind(idx), idx == 0)
     if int(GameState.run.get("turn",0)) >= 6 and not RunFlowEngine.local_bosses().is_empty():
-        _add_action_button("Enfrentar a ameaça que domina este lugar", _start_local_boss, false)
+        _add_action_button(localization.text("main.story.face_boss"), _start_local_boss, false)
 
 func _choose_story(index: int) -> void:
     var pool := str(current_event.get("pool", ""))
@@ -238,42 +245,45 @@ func _choose_story(index: int) -> void:
     _refresh()
 
 func _render_inventory() -> void:
-    story.text = "[font_size=%d][b]Inventário[/b][/font_size]\n\nItens carregados e equipamento atual." % AccessibilityService.font_size(25)
+    story.text = localization.text("main.inventory.body") % AccessibilityService.font_size(25)
     var inventory: Array = GameState.run.get("inventory", [])
     if inventory.is_empty():
-        story.add_text("\n\nVocê ainda não carrega nenhum item.")
+        story.add_text(localization.text("main.inventory.empty"))
     var shown := {}
     for item_id in inventory:
         if shown.has(str(item_id)):
             continue
         shown[str(item_id)] = true
         var item := ContentRegistry.get_record(str(item_id))
+        var item_view := localization.localize_record(item)
         var count := InventoryEngine.count_item(str(item_id))
-        var label := "%s%s" % [AffixEngine.display_name(item), " ×%d" % count if count > 1 else ""]
+        var label := "%s%s" % [AffixEngine.display_name(item_view), " ×%d" % count if count > 1 else ""]
         var slot := InventoryEngine.slot_for(item)
         if slot != "":
-            _add_action_button("Equipar — %s" % label, func(): InventoryEngine.equip(str(item_id)); _refresh(), false)
+            _add_action_button(localization.text("main.inventory.equip") % label, func(): InventoryEngine.equip(str(item_id)); _refresh(), false)
         elif str(item.get("kind","")) in ["consumable","tool"]:
-            _add_action_button("Usar — %s" % label, func(): InventoryEngine.use_item(str(item_id)); _refresh(), false)
-    _add_action_button("Voltar à jornada", func(): RunFlowEngine.resume_story(); current_event = {}; _refresh(), true)
+            _add_action_button(localization.text("main.inventory.use") % label, func(): InventoryEngine.use_item(str(item_id)); _refresh(), false)
+    _add_action_button(localization.text("main.back_to_journey"), func(): RunFlowEngine.resume_story(); current_event = {}; _refresh(), true)
 
 func _render_merchant() -> void:
-    story.text = "[font_size=%d][b]Mercador da Vereda[/b][/font_size]\n\nFragmentos disponíveis: %s. O estoque muda conforme a jornada avança." % [AccessibilityService.font_size(25), GameState.run.get("resources",{}).get("fragments",0)]
+    story.text = localization.text("main.merchant.body") % [AccessibilityService.font_size(25), GameState.run.get("resources",{}).get("fragments",0)]
     for item in MerchantEngine.stock(str(GameState.run.get("world_id","")), 8):
         var item_id := str(item.get("id",""))
         var cost := MerchantEngine.price(item_id)
-        var label := "%s — %d Fragmentos" % [AffixEngine.display_name(item), cost]
+        var item_view := localization.localize_record(item)
+        var label := localization.text("main.merchant.price") % [AffixEngine.display_name(item_view), cost]
         var button := _add_action_button(label, func(): RunFlowEngine.buy(item_id); _refresh(), false)
         button.disabled = not MerchantEngine.can_buy(item_id)
-    _add_action_button("Deixar o mercador", func(): RunFlowEngine.resume_story(); current_event = {}; _refresh(), true)
+    _add_action_button(localization.text("main.merchant.leave"), func(): RunFlowEngine.resume_story(); current_event = {}; _refresh(), true)
 
 func _render_travel() -> void:
-    story.text = "[font_size=%d][b]Veredas locais[/b][/font_size]\n\nEscolha a próxima localidade. Lugares já visitados permanecem registrados na jornada." % AccessibilityService.font_size(25)
+    story.text = localization.text("main.travel.body") % AccessibilityService.font_size(25)
     var current := str(GameState.run.get("location_id",""))
     for location_id in LocationEngine.available_locations():
         var loc := ContentRegistry.get_record(str(location_id))
-        var suffix := " — atual" if str(location_id) == current else ""
-        var button := _add_action_button("%s%s" % [loc.get("name",location_id), suffix], func(): RunFlowEngine.travel(str(location_id)); current_event = {}; _refresh(), false)
+        var loc_view := localization.localize_record(loc)
+        var suffix := localization.text("main.travel.current") if str(location_id) == current else ""
+        var button := _add_action_button("%s%s" % [loc_view.get("name",location_id), suffix], func(): RunFlowEngine.travel(str(location_id)); current_event = {}; _refresh(), false)
         button.disabled = str(location_id) == current
 
 func _render_combat() -> void:
@@ -286,13 +296,15 @@ func _render_combat() -> void:
     var player: Dictionary = combat.get("player",{})
     var intent: Dictionary = combat.get("intent",{})
     var resource: Dictionary = combat.get("signature_resource",{})
-    story.text = "[font_size=%d][b]%s[/b][/font_size]\n\nVida %s/%s • Postura %s/%s • Distância %s\n\n[b]Intenção:[/b] %s\n\nVocê: Vida %s/%s • Vigor %s/%s • Recurso %s" % [AccessibilityService.font_size(25), enemy.get("name","Ameaça"), enemy.get("hp",0), enemy.get("max_hp",0), enemy.get("posture",0), enemy.get("max_posture",0), player.get("distance",1), intent.get("telegraph","observa"), player.get("hp",0), player.get("max_hp",0), player.get("vigor",0), player.get("max_vigor",0), str(resource)]
+    story.text = localization.text("main.combat.summary") % [AccessibilityService.font_size(25), enemy.get("name",localization.text("main.combat.threat")), enemy.get("hp",0), enemy.get("max_hp",0), enemy.get("posture",0), enemy.get("max_posture",0), player.get("distance",1), intent.get("telegraph","observa"), player.get("hp",0), player.get("max_hp",0), player.get("vigor",0), player.get("max_vigor",0), str(resource)]
     for action in ["strike","precise","guard","advance","retreat"]:
-        var names := {"strike":"Golpear","precise":"Ataque preciso","guard":"Firmar guarda","advance":"Avançar","retreat":"Recuar"}
+        var names := {"strike":localization.text("main.combat.strike"),"precise":localization.text("main.combat.precise"),"guard":localization.text("main.combat.guard"),"advance":localization.text("main.combat.advance"),"retreat":localization.text("main.combat.retreat")}
         _add_action_button(str(names[action]), _combat_action.bind(action), action == "strike")
     for ability in CharacterKitEngine.abilities_for(str(GameState.run.get("character_id",""))):
         var cost := int(ability.get("cost",0))
-        var label := "★ %s — %d %s" % [ability.get("name","Habilidade"), cost, ability.get("resource","")]
+        var ability_view := localization.localize_record(ability)
+        var resource_label := localization.label("resource", str(ability.get("resource", "")))
+        var label := "★ %s — %d %s" % [ability_view.get("name",localization.text("main.combat.ability")), cost, resource_label]
         var button := _add_action_button(label, _combat_ability.bind(str(ability.get("id",""))), false)
         button.disabled = not CharacterKitEngine.can_pay(ability, combat.get("signature_resource",{}))
 
@@ -313,16 +325,18 @@ func _start_local_boss() -> void:
     _refresh()
 
 func _render_finals() -> void:
-    story.text = "[font_size=%d][b]Convergência local[/b][/font_size]\n\nA ameaça caiu, mas vencer não responde o que deve acontecer com este lugar. Escolha a consequência que sua jornada deixará." % AccessibilityService.font_size(25)
+    story.text = localization.text("main.finals.body") % AccessibilityService.font_size(25)
     for ending in RunFlowEngine.endings_for_current_world():
         var ending_id := str(ending.get("id",""))
-        _add_action_button(str(ending.get("name","Desfecho")), func(): RunFlowEngine.finish(ending_id); _refresh(), false)
+        var ending_view := localization.localize_record(ending)
+        _add_action_button(str(ending_view.get("name",localization.text("main.finals.default"))), func(): RunFlowEngine.finish(ending_id); _refresh(), false)
 
 func _render_debrief() -> void:
     var report := RunFlowEngine.debrief()
     var ending := ContentRegistry.get_record(str(report.get("ending_id","")))
-    story.text = "[font_size=%d][b]Fim da jornada[/b][/font_size]\n\nResultado: %s\nDesfecho: %s\nBatidas: %s\nLocalidades visitadas: %s\nInimigos derrotados: %s\nCompras: %s\nMarcas: %s" % [AccessibilityService.font_size(25), report.get("result",""), ending.get("name","—"), report.get("turns",0), report.get("visited_locations",[]).size(), report.get("defeated_enemies",[]).size(), report.get("purchases",[]).size(), report.get("marks",{}).size()]
-    _add_action_button("Iniciar outra jornada", func(): RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff); current_event = {}; _refresh(), true)
+    var ending_view := localization.localize_record(ending)
+    story.text = localization.text("main.debrief.body") % [AccessibilityService.font_size(25), report.get("result",""), ending_view.get("name","—"), report.get("turns",0), report.get("visited_locations",[]).size(), report.get("defeated_enemies",[]).size(), report.get("purchases",[]).size(), report.get("marks",{}).size()]
+    _add_action_button(localization.text("main.debrief.restart"), func(): RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff); current_event = {}; _refresh(), true)
 
 func _clear_choices() -> void:
     for child in choices.get_children():
@@ -373,7 +387,7 @@ func _on_mobile_back_requested() -> void:
             get_tree().quit()
             return
         _last_back_msec = now
-        story.append_text("\n\n[i]Jornada salva. Pressione Voltar novamente para sair.[/i]")
+        story.append_text(localization.text("main.save_exit"))
         AccessibilityService.haptic(22, 0.22)
         return
     SaveService.save_game()

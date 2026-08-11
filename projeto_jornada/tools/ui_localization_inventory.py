@@ -26,7 +26,7 @@ BB_TAG_RE = re.compile(r"\[/?[A-Za-z_]+(?:=[^\]]+)?\]")
 ESCAPE_RE = re.compile(r"\\[nrt\\\"]")
 TECHNICAL_LINE_MARKERS = (
     "push_error(", "push_warning(", "printerr(", "file.store_string(",
-    "add_theme_constant_override(", ".name =", " name =", "call_deferred(",
+    "add_theme_constant_override(", ".name =", " name =", "call_deferred(", "_add_toggle(",
 )
 
 

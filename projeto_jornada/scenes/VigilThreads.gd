@@ -1,5 +1,7 @@
 extends Control
 
+var localization := LocalizationService.new()
+
 var economy := MetaEconomyEngine.new()
 var body: RichTextLabel
 var products: VBoxContainer
@@ -46,14 +48,14 @@ func _build_ui() -> void:
     scroll.add_child(column)
 
     var heading := Label.new()
-    heading.text = "Fios de Vigília"
+    heading.text = localization.text("vigil.title")
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.set_meta("base_font_size", 32)
     BookCardStyle.apply_heading(heading, "mata_fio_verde", DomainThemeService, 1)
     column.add_child(heading)
 
     var intro := Label.new()
-    intro.text = "Fios são recebidos uma única vez por marcos de descoberta. Eles compram conveniência e expressão no Nó — nunca dano, Vida, Vigor ou vantagem estatística."
+    intro.text = localization.text("vigil.intro")
     intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     intro.set_meta("base_font_size", 15)
     column.add_child(intro)
@@ -76,7 +78,7 @@ func _build_ui() -> void:
     column.add_child(products)
 
     var back := Button.new()
-    back.text = "Voltar ao Nó"
+    back.text = localization.text("common.back_to_hub")
     back.custom_minimum_size.y = 54
     back.set_meta("base_font_size", 16)
     BookCardStyle.apply_button(back, "mata_fio_verde", DomainThemeService, true)
@@ -89,24 +91,24 @@ func _refresh(claim_rewards: bool = false) -> void:
         reward = economy.sync_rewards()
     var summary: Dictionary = economy.summary()
     var lines: Array[String] = []
-    lines.append("Saldo: [b]%d %s[/b]" % [int(summary.balance), summary.currency])
-    lines.append("Recebidos ao longo do perfil: %d   •   Gastos: %d" % [int(summary.lifetime_earned), int(summary.lifetime_spent)])
-    lines.append("Marcadores de jornada: %d   •   Seeds lembradas: %d   •   Fitas do Códice: %d" % [int(summary.journey_presets), int(summary.seed_notebook), int(summary.codex_pins)])
-    lines.append("Ornamento selecionado: %s" % _ornament_name(str(summary.selected_ornament)))
+    lines.append(localization.text("vigil.balance") % [int(summary.balance), localization.text("vigil.currency")])
+    lines.append(localization.text("vigil.lifetime") % [int(summary.lifetime_earned), int(summary.lifetime_spent)])
+    lines.append(localization.text("vigil.markers") % [int(summary.journey_presets), int(summary.seed_notebook), int(summary.codex_pins)])
+    lines.append(localization.text("vigil.ornament_selected") % _ornament_name(str(summary.selected_ornament)))
     body.text = "\n".join(lines)
 
     var awarded := int(reward.get("awarded", 0))
     if awarded > 0:
-        feedback.text = "+%d Fios recebidos por novos marcos desde a última visita." % awarded
+        feedback.text = localization.text("vigil.reward") % awarded
     elif claim_rewards:
-        feedback.text = "Nenhum marco novo aguardava recompensa. Repetir a mesma descoberta não gera Fios extras."
+        feedback.text = localization.text("vigil.no_reward")
 
     for child in products.get_children():
         child.queue_free()
     for product_variant in economy.catalog():
         var product: Dictionary = product_variant as Dictionary
         var button := Button.new()
-        var state := "Adquirido" if bool(product.owned) else "%d Fios" % int(product.cost)
+        var state := localization.text("vigil.owned") if bool(product.owned) else localization.text("vigil.price") % int(product.cost)
         button.text = "%s — %s\n%s" % [product.name, state, product.description]
         button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         button.custom_minimum_size.y = 68
@@ -118,16 +120,16 @@ func _refresh(claim_rewards: bool = false) -> void:
 
 func _purchase(product_id: String) -> void:
     if economy.purchase(product_id):
-        feedback.text = "Aquisição registrada. Nenhum atributo de combate foi alterado."
+        feedback.text = localization.text("vigil.purchase_success")
         var product: Dictionary = economy.product_state(product_id)
         if str(product.get("kind", "")) == "cosmetic":
             economy.select_ornament(str(product.get("value", "plain")))
         _refresh(false)
     else:
-        feedback.text = "Essa aquisição ainda não está disponível ou faltam Fios."
+        feedback.text = localization.text("vigil.purchase_unavailable")
 
 func _ornament_name(ornament_id: String) -> String:
     match ornament_id:
-        "ink": return "Moldura de Nanquim"
-        "echo": return "Selo de Eco"
-        _: return "Papel simples"
+        "ink": return localization.text("vigil.ornament.ink")
+        "echo": return localization.text("vigil.ornament.echo")
+        _: return localization.text("vigil.ornament.plain")
