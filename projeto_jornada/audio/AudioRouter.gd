@@ -1,5 +1,4 @@
 extends Node
-class_name AudioRouter
 
 signal event_routed(event_id: String, category: String, resolved: bool, path: String)
 signal domain_routed(domain_id: String, music_resolved: bool, ambience_resolved: bool)
