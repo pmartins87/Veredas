@@ -5,6 +5,8 @@ const MANIFEST_PATH := "res://localization/manifest.json"
 const UI_DIR := "res://localization/ui"
 const CONTENT_DIR := "res://localization/content"
 const CONTENT_SHARD_DIR := "res://localization/content_shards"
+const CONTENT_PACK_DIR := "res://localization/content_packs"
+const CONTENT_PACK_MAX_BYTES := 16 * 1024 * 1024
 const LABEL_DIR := "res://localization/labels"
 
 var _manifest: Dictionary = {}
@@ -158,7 +160,8 @@ func _load() -> void:
     for locale_id in launch_locales():
         _ui_catalogs[locale_id] = _load_json_object("%s/%s.json" % [UI_DIR, locale_id], "ui:%s" % locale_id)
         var base_content := _load_json_object("%s/%s.json" % [CONTENT_DIR, locale_id], "content:%s" % locale_id)
-        _content_catalogs[locale_id] = _merge_content_shards(locale_id, base_content)
+        var content_with_shards := _merge_content_shards(locale_id, base_content)
+        _content_catalogs[locale_id] = _merge_content_pack(locale_id, content_with_shards)
         _label_catalogs[locale_id] = _load_json_object("%s/%s.json" % [LABEL_DIR, locale_id], "labels:%s" % locale_id)
 
 func _merge_content_shards(locale_id: String, base_catalog: Dictionary) -> Dictionary:
@@ -176,30 +179,64 @@ func _merge_content_shards(locale_id: String, base_catalog: Dictionary) -> Dicti
         var shard := _load_json_object("%s/%s" % [shard_path, file_name], "content_shard:%s:%s" % [locale_id, file_name])
         if shard.is_empty():
             continue
-        for record_id_variant in shard.keys():
-            var record_id := str(record_id_variant)
-            var shard_record_variant = shard[record_id_variant]
-            if typeof(shard_record_variant) != TYPE_DICTIONARY:
-                _errors.append("content_shard_record:%s:%s:%s" % [locale_id, file_name, record_id])
+        merged = _merge_overlay_catalog(locale_id, "shard:%s" % file_name, merged, shard)
+    return merged
+
+func _merge_content_pack(locale_id: String, base_catalog: Dictionary) -> Dictionary:
+    var merged := base_catalog.duplicate(true)
+    if locale_id == source_locale():
+        return merged
+    var pack_path := "%s/%s.json.gz.b64" % [CONTENT_PACK_DIR, locale_id]
+    if not FileAccess.file_exists(pack_path):
+        return merged
+    var file := FileAccess.open(pack_path, FileAccess.READ)
+    if file == null:
+        _errors.append("content_pack_open:%s:%s" % [locale_id, pack_path])
+        return merged
+    var encoded := file.get_as_text().strip_edges()
+    if encoded == "":
+        _errors.append("content_pack_empty:%s:%s" % [locale_id, pack_path])
+        return merged
+    var compressed := Marshalls.base64_to_raw(encoded)
+    if compressed.is_empty():
+        _errors.append("content_pack_base64:%s:%s" % [locale_id, pack_path])
+        return merged
+    var raw := compressed.decompress_dynamic(CONTENT_PACK_MAX_BYTES, FileAccess.COMPRESSION_GZIP)
+    if raw.is_empty():
+        _errors.append("content_pack_gzip:%s:%s" % [locale_id, pack_path])
+        return merged
+    var parsed = JSON.parse_string(raw.get_string_from_utf8())
+    if typeof(parsed) != TYPE_DICTIONARY:
+        _errors.append("content_pack_json:%s:%s" % [locale_id, pack_path])
+        return merged
+    return _merge_overlay_catalog(locale_id, "pack", merged, parsed as Dictionary)
+
+func _merge_overlay_catalog(locale_id: String, source_name: String, base_catalog: Dictionary, overlay_catalog: Dictionary) -> Dictionary:
+    var merged := base_catalog.duplicate(true)
+    for record_id_variant in overlay_catalog.keys():
+        var record_id := str(record_id_variant)
+        var overlay_record_variant = overlay_catalog[record_id_variant]
+        if typeof(overlay_record_variant) != TYPE_DICTIONARY:
+            _errors.append("content_overlay_record:%s:%s:%s" % [locale_id, source_name, record_id])
+            continue
+        var overlay_record: Dictionary = overlay_record_variant as Dictionary
+        var merged_record_variant = merged.get(record_id, {})
+        if typeof(merged_record_variant) != TYPE_DICTIONARY:
+            _errors.append("content_base_record:%s:%s" % [locale_id, record_id])
+            continue
+        var merged_record: Dictionary = merged_record_variant as Dictionary
+        if not merged.has(record_id):
+            merged[record_id] = merged_record
+        for field_path_variant in overlay_record.keys():
+            var field_path := str(field_path_variant)
+            var translated = overlay_record[field_path_variant]
+            if typeof(translated) != TYPE_STRING or str(translated).strip_edges() == "":
+                _errors.append("content_overlay_value:%s:%s:%s:%s" % [locale_id, source_name, record_id, field_path])
                 continue
-            var shard_record: Dictionary = shard_record_variant as Dictionary
-            var merged_record_variant = merged.get(record_id, {})
-            if typeof(merged_record_variant) != TYPE_DICTIONARY:
-                _errors.append("content_base_record:%s:%s" % [locale_id, record_id])
+            if merged_record.has(field_path):
+                _errors.append("content_overlay_collision:%s:%s:%s:%s" % [locale_id, source_name, record_id, field_path])
                 continue
-            var merged_record: Dictionary = merged_record_variant as Dictionary
-            if not merged.has(record_id):
-                merged[record_id] = merged_record
-            for field_path_variant in shard_record.keys():
-                var field_path := str(field_path_variant)
-                var translated = shard_record[field_path_variant]
-                if typeof(translated) != TYPE_STRING or str(translated).strip_edges() == "":
-                    _errors.append("content_shard_value:%s:%s:%s:%s" % [locale_id, file_name, record_id, field_path])
-                    continue
-                if merged_record.has(field_path):
-                    _errors.append("content_shard_collision:%s:%s:%s:%s" % [locale_id, file_name, record_id, field_path])
-                    continue
-                merged_record[field_path] = translated
+            merged_record[field_path] = translated
     return merged
 
 func _load_json_object(path: String, label_name: String) -> Dictionary:
