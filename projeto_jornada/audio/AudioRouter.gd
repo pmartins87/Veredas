@@ -4,9 +4,11 @@ signal event_routed(event_id: String, category: String, resolved: bool, path: St
 signal domain_routed(domain_id: String, music_resolved: bool, ambience_resolved: bool)
 
 const MANIFEST_PATH := "res://audio/audio_events.json"
+const MIX_PATH := "res://audio/audio_mix.json"
 const REQUIRED_BUSES := ["Master", "Music", "Ambience", "SFX", "UI"]
 
 var _manifest: Dictionary = {}
+var _mix: Dictionary = {}
 var _ui_player: AudioStreamPlayer
 var _sfx_player: AudioStreamPlayer
 var _music_player: AudioStreamPlayer
@@ -14,7 +16,9 @@ var _ambience_player: AudioStreamPlayer
 
 func _ready() -> void:
     _load_manifest()
+    _load_mix()
     _ensure_audio_buses()
+    _apply_mix()
     _ui_player = _make_player("UI", "UI")
     _sfx_player = _make_player("SFX", "SFX")
     _music_player = _make_player("Music", "Music")
@@ -29,6 +33,14 @@ func _ensure_audio_buses() -> void:
         var index := AudioServer.bus_count - 1
         AudioServer.set_bus_name(index, bus_name)
 
+func _apply_mix() -> void:
+    var bus_levels: Dictionary = _mix.get("buses", {})
+    for bus_name in REQUIRED_BUSES:
+        var index := AudioServer.get_bus_index(bus_name)
+        if index < 0:
+            continue
+        AudioServer.set_bus_volume_db(index, float(bus_levels.get(bus_name, 0.0)))
+
 func _make_player(node_name: String, bus_name: String) -> AudioStreamPlayer:
     var player := AudioStreamPlayer.new()
     player.name = node_name
@@ -36,21 +48,26 @@ func _make_player(node_name: String, bus_name: String) -> AudioStreamPlayer:
     add_child(player)
     return player
 
-func _load_manifest() -> void:
-    _manifest.clear()
-    if not FileAccess.file_exists(MANIFEST_PATH):
-        push_error("AudioRouter: manifest missing")
-        return
-    var f := FileAccess.open(MANIFEST_PATH, FileAccess.READ)
+func _load_json_object(path: String, label: String) -> Dictionary:
+    if not FileAccess.file_exists(path):
+        push_error("AudioRouter: %s missing" % label)
+        return {}
+    var f := FileAccess.open(path, FileAccess.READ)
     if f == null:
-        push_error("AudioRouter: cannot open manifest")
-        return
+        push_error("AudioRouter: cannot open %s" % label)
+        return {}
     var parsed = JSON.parse_string(f.get_as_text())
     f.close()
-    if typeof(parsed) == TYPE_DICTIONARY:
-        _manifest = parsed
-    else:
-        push_error("AudioRouter: invalid manifest")
+    if typeof(parsed) != TYPE_DICTIONARY:
+        push_error("AudioRouter: invalid %s" % label)
+        return {}
+    return parsed
+
+func _load_manifest() -> void:
+    _manifest = _load_json_object(MANIFEST_PATH, "manifest")
+
+func _load_mix() -> void:
+    _mix = _load_json_object(MIX_PATH, "mix policy")
 
 func _bind_presentation_bus() -> void:
     if not PresentationBus.page_changed.is_connected(_on_page_changed):
@@ -112,12 +129,15 @@ func play_combat(event_id: String) -> void:
     var resolved := _play_path(_sfx_player, path)
     event_routed.emit(event_id, "combat", resolved, path)
 
-func enter_domain(domain_id: String, crossfade: float = 0.8) -> void:
+func enter_domain(domain_id: String, crossfade: float = -1.0) -> void:
     var domain: Dictionary = _manifest.get("domains", {}).get(domain_id, {})
     var music_path := str(domain.get("music", ""))
     var ambience_path := str(domain.get("ambience", ""))
-    var music_resolved := _crossfade_to(_music_player, music_path, crossfade)
-    var ambience_resolved := _crossfade_to(_ambience_player, ambience_path, crossfade)
+    var duration := crossfade
+    if duration < 0.0:
+        duration = float(_mix.get("limits", {}).get("crossfade_seconds", 0.8))
+    var music_resolved := _crossfade_to(_music_player, music_path, duration)
+    var ambience_resolved := _crossfade_to(_ambience_player, ambience_path, duration)
     domain_routed.emit(domain_id, music_resolved, ambience_resolved)
 
 func stop_domain_audio(fade: float = 0.5) -> void:
@@ -160,6 +180,37 @@ func _fade_out(player: AudioStreamPlayer, duration: float) -> void:
         player.stop()
         player.volume_db = 0.0
     )
+
+func audit_mix() -> Dictionary:
+    var bus_levels: Dictionary = _mix.get("buses", {})
+    var limits: Dictionary = _mix.get("limits", {})
+    var accessibility: Dictionary = _mix.get("accessibility", {})
+    var missing_levels: Array[String] = []
+    for bus_name in REQUIRED_BUSES:
+        if not bus_levels.has(bus_name):
+            missing_levels.append(bus_name)
+    var music_db := float(bus_levels.get("Music", 0.0))
+    var ambience_db := float(bus_levels.get("Ambience", 0.0))
+    var sfx_db := float(bus_levels.get("SFX", 0.0))
+    var ui_db := float(bus_levels.get("UI", 0.0))
+    var foreground_db := minf(sfx_db, ui_db)
+    var margin_required := float(limits.get("foreground_min_margin_db", 4.0))
+    return {
+        "schema_version": int(_mix.get("schema_version", 0)),
+        "principle": str(_mix.get("principle", "")),
+        "missing_levels": missing_levels,
+        "music_db": music_db,
+        "ambience_db": ambience_db,
+        "sfx_db": sfx_db,
+        "ui_db": ui_db,
+        "music_foreground_margin_db": foreground_db - music_db,
+        "ambience_foreground_margin_db": foreground_db - ambience_db,
+        "foreground_min_margin_db": margin_required,
+        "music_within_cap": music_db <= float(limits.get("music_max_db", -12.0)),
+        "ambience_within_cap": ambience_db <= float(limits.get("ambience_max_db", -15.0)),
+        "essential_information_requires_audio": bool(accessibility.get("essential_information_requires_audio", true)),
+        "visual_text_feedback_required": bool(accessibility.get("visual_text_feedback_required", false)),
+    }
 
 func audit_manifest() -> Dictionary:
     var missing_assets: Array[String] = []
