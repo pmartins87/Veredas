@@ -30,23 +30,20 @@ Automação e emuladores verdes. O gate formal continua aguardando aparelho fís
 Commit limpo `c988448`, run `31421360688`: 100 casos de cena, 80 modos dinâmicos, 1.560 checks de touch target, 2.320 tipográficos, 48 de contraste e 5 safe areas — todos PASS. A interface principal tornou-se responsiva e rolável sem reduzir fonte, contraste ou alvo mínimo de toque.
 
 ### 11.5 — Arquitetura de localização e idiomas ✅
-Commit certificado **`37878d1`**, workflow `31453146197`, com CI/regression/adversarial/save-fuzz/responsive/balance-freeze verdes no mesmo HEAD.
-- fonte/fallback canônicos: `pt_BR`;
-- idiomas de lançamento: `pt_BR`, `en`, `es_419`;
-- 5.160 IDs estáveis inventariados;
-- **18.156 strings de conteúdo localizáveis** inventariadas com contexto;
-- 14 chaves iniciais de UI × 3 idiomas certificadas;
-- aliases de locale e preferência em `profile.settings.locale` certificados;
-- overlays não alteram conteúdo canônico nem regras;
-- overlays suportam caminhos aninhados, como `choices.0.text`, além de campos de primeiro nível;
-- fallback para pt-BR e integridade de placeholders certificados.
+Commit certificado `37878d1`. Arquitetura de IDs estáveis + overlays de apresentação; fonte/fallback `pt_BR`; idiomas de lançamento `pt_BR`, `en`, `es_419`; conteúdo canônico permanece imutável para regras e balanceamento.
 
 ### 11.6 — QA linguístico, overflow, iconografia e terminologia 🟡
-Em andamento. A tradução integral **não** está sendo considerada pronta.
-- glossário canônico iniciado com 20 termos de lore/sistemas/mecânicas;
-- exportador contextual das 18.156 unidades em preparação;
-- relatório de cobertura por idioma em preparação;
-- cobertura de conteúdo alvo ainda é apenas a amostra arquitetural; o gate final 11.6 exigirá tradução completa + QA linguístico/overflow/terminologia.
+Em andamento; **não** será certificada antes da tradução integral e QA final.
+- inventário atual: **5.160 registros / 18.804 unidades de conteúdo localizáveis**;
+- UI principal: **0 strings hardcoded candidatas**;
+- UI obrigatória: **119/119 em pt-BR, 119/119 em inglês e 119/119 em espanhol latino-americano**;
+- labels mecânicos/lore: **165/165 em pt-BR, 165/165 em inglês e 165/165 em espanhol latino-americano**;
+- glossário canônico: 20 termos, com forma obrigatória por idioma;
+- conteúdo narrativo ainda traduzido: **2/18.804 em inglês e 2/18.804 em espanhol**;
+- corpus restante foi convertido em **48 lotes determinísticos**, máximo de 400 unidades, preservando registros e contexto;
+- SHA-256 das chaves-fonte: `19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63`;
+- gate permanente de labels/UI/source locale: commit `d9071f0`, run `31456801011`, PASS;
+- tradução integral, terminologia, placeholders e overflow localizado continuam obrigatórios antes de 11.6 ✅.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -66,7 +63,7 @@ Em andamento. A tradução integral **não** está sendo considerada pronta.
 - 11.3 🟡 Performance/memória/bateria/térmica/loading — aparelho físico obrigatório pendente.
 - 11.4 ✅ UI responsiva/acessibilidade em matriz de dispositivos.
 - 11.5 ✅ Arquitetura de localização e idiomas de lançamento.
-- 11.6 🟡 QA linguístico, overflow, iconografia e consistência terminológica.
+- 11.6 🟡 QA linguístico, overflow, iconografia e consistência terminológica — tradução integral em andamento.
 - 11.7 ⏳ QA audiovisual em contexto real.
 - 11.8 ⏳ Triage até zero blocker/critical.
 - 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
