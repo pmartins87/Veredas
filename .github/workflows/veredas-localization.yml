@@ -13,6 +13,7 @@ on:
       - 'projeto_jornada/tools/export_localization_catalog.py'
       - 'projeto_jornada/tools/localization_linguistic_report.py'
       - 'projeto_jornada/tools/localization_schema_audit.py'
+      - 'projeto_jornada/tools/localization_translation_batches.py'
       - 'projeto_jornada/tools/ui_localization_inventory.py'
       - 'projeto_jornada/tests/LocalizationArchitectureCertification.gd'
       - 'projeto_jornada/tests/localization_architecture_certification.tscn'
@@ -52,9 +53,12 @@ jobs:
       - name: Export contextual source catalog
         working-directory: projeto_jornada
         run: python tools/export_localization_catalog.py --output /tmp/veredas-localization-source.json
-      - name: Report linguistic coverage and glossary integrity
+      - name: Require complete labels and UI; report narrative coverage
         working-directory: projeto_jornada
-        run: python tools/localization_linguistic_report.py --output /tmp/veredas-linguistic-report.json
+        run: python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/veredas-linguistic-report.json
+      - name: Build deterministic narrative translation batches
+        working-directory: projeto_jornada
+        run: python tools/localization_translation_batches.py --max-units 400 --output /tmp/veredas-translation-batches.json
       - name: Require full classification of content string fields
         working-directory: projeto_jornada
         run: python tools/localization_schema_audit.py --require-classified --output /tmp/veredas-localization-schema-audit.json
@@ -84,4 +88,5 @@ jobs:
             /tmp/veredas-linguistic-report.json
             /tmp/veredas-localization-schema-audit.json
             /tmp/veredas-ui-localization-inventory.json
+            /tmp/veredas-translation-batches.json
           retention-days: 7
