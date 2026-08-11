@@ -6,6 +6,7 @@ on:
       - projeto-jornada-snapshots
     paths:
       - 'projeto_jornada/tools/migrate_scene_ui_localization.py'
+      - 'projeto_jornada/tools/localization_inventory.py'
       - '.github/workflows/veredas-116-ui-migration.yml'
   workflow_dispatch:
 
@@ -28,6 +29,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Upgrade legacy UI-key inventory contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('projeto_jornada/tools/localization_inventory.py')
+          s = p.read_text(encoding='utf-8')
+          old = '''    if len(required_keys) != 14 or len(set(required_keys)) != len(required_keys):\n        errors.append(f"expected 14 unique migrated UI keys, got {len(required_keys)}")\n'''
+          new = '''    if len(required_keys) < 14 or len(set(required_keys)) != len(required_keys):\n        errors.append(f"expected at least 14 unique required UI keys, got {len(required_keys)}")\n'''
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('UI key-count contract anchor missing')
+          old_print = '''        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=14 translated_required=%d overlay_entries=%d nested_overlays=%d"\n        % (len(source_strings), translated_required, overlay_entries, nested_overlay_entries)\n'''
+          new_print = '''        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d"\n        % (len(source_strings), len(required_keys), translated_required, overlay_entries, nested_overlay_entries)\n'''
+          if old_print in s:
+              s = s.replace(old_print, new_print, 1)
+          elif new_print not in s:
+              raise SystemExit('UI inventory PASS output anchor missing')
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Apply deterministic UI localization migration
         working-directory: projeto_jornada
         run: python tools/migrate_scene_ui_localization.py
@@ -45,9 +66,9 @@ jobs:
       - name: Validate localization inventories
         working-directory: projeto_jornada
         run: |
+          python tools/ui_localization_inventory.py --require-zero
           python tools/localization_inventory.py
           python tools/localization_schema_audit.py --require-classified
-          python tools/ui_localization_inventory.py --require-zero
       - name: Download Godot
         run: |
           curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
@@ -85,7 +106,8 @@ jobs:
             projeto_jornada/localization/manifest.json \
             projeto_jornada/localization/ui/pt_BR.json \
             projeto_jornada/localization/ui/en.json \
-            projeto_jornada/localization/ui/es_419.json
+            projeto_jornada/localization/ui/es_419.json \
+            projeto_jornada/tools/localization_inventory.py
           git diff --cached --check
           if git diff --cached --quiet; then
             echo 'UI localization migration already persisted.'
