@@ -1,399 +1,651 @@
 {
   "ability.arquivo_ecos.01.1": {
+    "name": "Cut Living Ink",
     "signature": "Mark · Power 1 · Cost 2 · Fear · Scholar · Memory"
   },
   "ability.arquivo_ecos.01.2": {
+    "name": "Cut Memory Paper",
     "signature": "Resource · Power 4 · Cost 0 · Fear · Scholar · Memory"
   },
   "ability.arquivo_ecos.02.1": {
+    "name": "Anchor Memory Paper",
     "signature": "Echo · Power 4 · Cost 2 · Fear · Reactor · Echo"
   },
   "ability.arquivo_ecos.02.2": {
+    "name": "Anchor Codex Leather",
     "signature": "Counter · Power 5 · Cost 2 · Fear · Reactor · Echo"
   },
   "ability.arquivo_ecos.03.1": {
+    "name": "Listen to Codex Leather",
     "signature": "Heal · Power 5 · Cost 2 · Fear · Survivor · Mend"
   },
   "ability.arquivo_ecos.03.2": {
+    "name": "Listen to Index Glass",
     "signature": "Echo · Power 2 · Cost 3 · Fear · Survivor · Mend"
   },
   "ability.chapada_sol_oco.01.1": {
+    "name": "Hook Sun Glass",
     "signature": "Damage · Power 4 · Cost 2 · Burning · Duelist · Heat"
   },
   "ability.chapada_sol_oco.01.2": {
+    "name": "Hook Orange Stone",
     "signature": "Range · Power 4 · Cost 3 · Burning · Duelist · Heat"
   },
   "ability.chapada_sol_oco.02.1": {
+    "name": "Bend Orange Stone",
     "signature": "Counter · Power 4 · Cost 2 · Fear · Skirmisher · Shadow"
   },
   "ability.chapada_sol_oco.02.2": {
+    "name": "Bend Shadowcloth",
     "signature": "Move · Power 2 · Cost 3 · Fear · Skirmisher · Shadow"
   },
   "ability.chapada_sol_oco.03.1": {
+    "name": "Resonate Shadowcloth",
     "signature": "Mark · Power 2 · Cost 2 · Burning · Seer · Clarity"
   },
   "ability.chapada_sol_oco.03.2": {
+    "name": "Resonate Heated Bronze",
     "signature": "Echo · Power 4 · Cost 2 · Burning · Seer · Clarity"
   },
   "ability.cidade_mil_portas.01.1": {
+    "name": "Hook Key Brass",
     "signature": "Range · Power 4 · Cost 2 · Rooted · Skirmisher · Key"
   },
   "ability.cidade_mil_portas.01.2": {
+    "name": "Hook Threshold Wood",
     "signature": "Move · Power 2 · Cost 3 · Rooted · Skirmisher · Key"
   },
   "ability.cidade_mil_portas.02.1": {
+    "name": "Bend Threshold Wood",
     "signature": "Move · Power 2 · Cost 2 · Fear · Raider · Shortcut"
   },
   "ability.cidade_mil_portas.02.2": {
+    "name": "Bend Topological Stone",
     "signature": "Debt · Power 6 · Cost 3 · Fear · Raider · Shortcut"
   },
   "ability.cidade_mil_portas.03.1": {
+    "name": "Resonate Topological Stone",
     "signature": "Mark · Power 2 · Cost 2 · Rooted · Sentinel · Jurisdiction"
   },
   "ability.cidade_mil_portas.03.2": {
+    "name": "Resonate Address Ink",
     "signature": "Guard · Power 4 · Cost 2 · Rooted · Sentinel · Jurisdiction"
   },
   "ability.costa_sinos_afogados.01.1": {
+    "name": "Cut Salted Bronze",
     "signature": "Posture · Power 6 · Cost 2 · Fear · Resonator · Resonance"
   },
   "ability.costa_sinos_afogados.01.2": {
+    "name": "Cut Black Coral",
     "signature": "Echo · Power 3 · Cost 3 · Fear · Resonator · Resonance"
   },
   "ability.costa_sinos_afogados.02.1": {
+    "name": "Anchor Black Coral",
     "signature": "Damage · Power 4 · Cost 2 · Bleeding · Raider · Plunder"
   },
   "ability.costa_sinos_afogados.02.2": {
+    "name": "Anchor Soaked Ropes",
     "signature": "Mark · Power 1 · Cost 3 · Bleeding · Raider · Plunder"
   },
   "ability.costa_sinos_afogados.03.1": {
+    "name": "Listen to Soaked Ropes",
     "signature": "Guard · Power 5 · Cost 2 · Wet · Sentinel · Tide"
   },
   "ability.costa_sinos_afogados.03.2": {
+    "name": "Listen to Cold Nacre",
     "signature": "Range · Power 4 · Cost 3 · Wet · Sentinel · Tide"
   },
   "ability.forja_rubra.01.1": {
+    "name": "Cut Living Iron",
     "signature": "Damage · Power 4 · Cost 2 · Burning · Bruiser · Forge Heat"
   },
   "ability.forja_rubra.01.2": {
+    "name": "Cut Hot Slag",
     "signature": "Guard · Power 5 · Cost 3 · Burning · Bruiser · Forge Heat"
   },
   "ability.forja_rubra.02.1": {
+    "name": "Anchor Hot Slag",
     "signature": "Counter · Power 4 · Cost 3 · Burning · Reactor · Desertion"
   },
   "ability.forja_rubra.02.2": {
+    "name": "Anchor Bronze Matrices",
     "signature": "Resource · Power 4 · Cost 0 · Burning · Reactor · Desertion"
   },
   "ability.forja_rubra.03.1": {
+    "name": "Listen to Bronze Matrices",
     "signature": "Status · Power 2 · Cost 2 · Shock · Controller · Metal Weave"
   },
   "ability.forja_rubra.03.2": {
+    "name": "Listen to Incandescent Rivets",
     "signature": "Mark · Power 2 · Cost 2 · Shock · Controller · Metal Weave"
   },
   "ability.mar_cinza.01.1": {
+    "name": "Hook Fine Ash",
     "signature": "Guard · Power 5 · Cost 2 · Fear · Survivor · Ash"
   },
   "ability.mar_cinza.01.2": {
+    "name": "Hook Nameless Stone",
     "signature": "Debt · Power 5 · Cost 3 · Fear · Survivor · Ash"
   },
   "ability.mar_cinza.02.1": {
+    "name": "Bend Nameless Stone",
     "signature": "Status · Power 1 · Cost 2 · Poison · Controller · Epitaph"
   },
   "ability.mar_cinza.02.2": {
+    "name": "Bend Cold Soot",
     "signature": "Echo · Power 3 · Cost 3 · Poison · Controller · Epitaph"
   },
   "ability.mar_cinza.03.1": {
+    "name": "Resonate Cold Soot",
     "signature": "Move · Power 3 · Cost 2 · Fear · Skirmisher · Absence"
   },
   "ability.mar_cinza.03.2": {
+    "name": "Resonate Burnt Paper",
     "signature": "Mark · Power 2 · Cost 2 · Fear · Skirmisher · Absence"
   },
   "ability.mata_fio_verde.01.1": {
+    "name": "Cut Black Sap",
     "signature": "Posture · Power 6 · Cost 2 · Rooted · Tracker · Tension"
   },
   "ability.mata_fio_verde.01.2": {
+    "name": "Cut Living Bark",
     "signature": "Range · Power 5 · Cost 3 · Rooted · Tracker · Tension"
   },
   "ability.mata_fio_verde.02.1": {
+    "name": "Anchor Living Bark",
     "signature": "Guard · Power 5 · Cost 2 · Rooted · Bulwark · Sap"
   },
   "ability.mata_fio_verde.02.2": {
+    "name": "Anchor Ancient Roots",
     "signature": "Counter · Power 4 · Cost 3 · Rooted · Bulwark · Sap"
   },
   "ability.mata_fio_verde.03.1": {
+    "name": "Listen to Ancient Roots",
     "signature": "Status · Power 2 · Cost 2 · Rooted · Controller · Chord"
   },
   "ability.mata_fio_verde.03.2": {
+    "name": "Listen to Taut Vines",
     "signature": "Resource · Power 5 · Cost 0 · Rooted · Controller · Chord"
   },
   "ability.noite_iscara.01.1": {
+    "name": "Cut Blue Ice",
     "signature": "Range · Power 4 · Cost 2 · Shock · Hunter · Glow"
   },
   "ability.noite_iscara.01.2": {
+    "name": "Cut White Ember",
     "signature": "Status · Power 1 · Cost 3 · Shock · Hunter · Glow"
   },
   "ability.noite_iscara.02.1": {
+    "name": "Anchor White Ember",
     "signature": "Damage · Power 4 · Cost 1 · Burning · Bruiser · Ember"
   },
   "ability.noite_iscara.02.2": {
+    "name": "Anchor Aurora Crystal",
     "signature": "Resource · Power 4 · Cost 0 · Burning · Bruiser · Ember"
   },
   "ability.noite_iscara.03.1": {
+    "name": "Listen to Aurora Crystal",
     "signature": "Echo · Power 4 · Cost 2 · Frozen · Seer · Dream"
   },
   "ability.noite_iscara.03.2": {
+    "name": "Listen to Snow Hide",
     "signature": "Status · Power 2 · Cost 2 · Frozen · Seer · Dream"
   },
   "ability.salinas_ossamar.01.1": {
+    "name": "Cut Living Salt",
     "signature": "Guard · Power 5 · Cost 2 · Bleeding · Bulwark · Bones"
   },
   "ability.salinas_ossamar.01.2": {
+    "name": "Cut Fossilized Bone",
     "signature": "Posture · Power 5 · Cost 3 · Bleeding · Bulwark · Bones"
   },
   "ability.salinas_ossamar.02.1": {
+    "name": "Anchor Fossilized Bone",
     "signature": "Heal · Power 4 · Cost 3 · Poison · Survivor · Thirst"
   },
   "ability.salinas_ossamar.02.2": {
+    "name": "Anchor Well Ropes",
     "signature": "Resource · Power 2 · Cost 0 · Poison · Survivor · Thirst"
   },
   "ability.salinas_ossamar.03.1": {
+    "name": "Listen to Well Ropes",
     "signature": "Range · Power 6 · Cost 2 · Bleeding · Hunter · Vestige"
   },
   "ability.salinas_ossamar.03.2": {
+    "name": "Listen to Dry Shells",
     "signature": "Status · Power 2 · Cost 2 · Bleeding · Hunter · Vestige"
   },
   "ability.tear_desfeito.01.1": {
+    "name": "Hook Causal Thread",
     "signature": "Resource · Power 5 · Cost 0 · Shock · Weaver · Fracture"
   },
   "ability.tear_desfeito.01.2": {
+    "name": "Hook Impossible Stone",
     "signature": "Status · Power 2 · Cost 2 · Shock · Weaver · Fracture"
   },
   "ability.tear_desfeito.02.1": {
+    "name": "Bend Impossible Stone",
     "signature": "Guard · Power 6 · Cost 2 · Rooted · Sentinel · Inheritance"
   },
   "ability.tear_desfeito.02.2": {
+    "name": "Bend Future Glass",
     "signature": "Mark · Power 1 · Cost 3 · Rooted · Sentinel · Inheritance"
   },
   "ability.tear_desfeito.03.1": {
+    "name": "Resonate Future Glass",
     "signature": "Damage · Power 4 · Cost 2 · Bleeding · Bruiser · Mutation"
   },
   "ability.tear_desfeito.03.2": {
+    "name": "Resonate Knots of Dim Light",
     "signature": "Debt · Power 5 · Cost 3 · Bleeding · Bruiser · Mutation"
   },
   "ability.varzea_espelhos.01.1": {
+    "name": "Hook Silvered Water",
     "signature": "Move · Power 2 · Cost 2 · Wet · Skirmisher · Reflection"
   },
   "ability.varzea_espelhos.01.2": {
+    "name": "Hook Bottomless Stakes",
     "signature": "Counter · Power 4 · Cost 3 · Wet · Skirmisher · Reflection"
   },
   "ability.varzea_espelhos.02.1": {
+    "name": "Bend Bottomless Stakes",
     "signature": "Range · Power 6 · Cost 2 · Fear · Seer · Omen"
   },
   "ability.varzea_espelhos.02.2": {
+    "name": "Bend Mirrored Silt",
     "signature": "Echo · Power 4 · Cost 2 · Fear · Seer · Omen"
   },
   "ability.varzea_espelhos.03.1": {
+    "name": "Resonate Mirrored Silt",
     "signature": "Heal · Power 6 · Cost 2 · Wet · Survivor · Drowned Breath"
   },
   "ability.varzea_espelhos.03.2": {
+    "name": "Resonate Two-Shadow Reeds",
     "signature": "Debt · Power 6 · Cost 3 · Wet · Survivor · Drowned Breath"
   },
   "ability.vertice.01.1": {
+    "name": "Hook Braided Cables",
     "signature": "Counter · Power 3 · Cost 2 · Fear · Duelist · Impulse"
   },
   "ability.vertice.01.2": {
+    "name": "Hook Suspended Stone",
     "signature": "Damage · Power 4 · Cost 3 · Fear · Duelist · Impulse"
   },
   "ability.vertice.02.1": {
+    "name": "Bend Suspended Stone",
     "signature": "Guard · Power 6 · Cost 2 · Shock · Bulwark · Cable Tension"
   },
   "ability.vertice.02.2": {
+    "name": "Bend Iron Counterweights",
     "signature": "Resource · Power 4 · Cost 0 · Shock · Bulwark · Cable Tension"
   },
   "ability.vertice.03.1": {
+    "name": "Resonate Iron Counterweights",
     "signature": "Move · Power 3 · Cost 2 · Rooted · Skirmisher · Breath"
   },
   "ability.vertice.03.2": {
+    "name": "Resonate Windcloth",
     "signature": "Posture · Power 7 · Cost 2 · Rooted · Skirmisher · Breath"
   },
   "boss.arquivo_ecos.01": {
-    "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened."
+    "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.02": {
-    "conflict": "Decide how to decide who may edit a record without ignoring that an index can erase someone."
+    "conflict": "Decide how to decide who may edit a record without ignoring that an index can erase someone.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.03": {
-    "conflict": "Decide how to free an Echo without ignoring that the Gallery records alternative deaths."
+    "conflict": "Decide how to free an Echo without ignoring that the Gallery records alternative deaths.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.04": {
-    "conflict": "Decide how to not confuse memory with truth without ignoring that the Archive may have caused the Pruning."
+    "conflict": "Decide how to not confuse memory with truth without ignoring that the Archive may have caused the Pruning.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.05": {
-    "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened."
+    "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.01": {
-    "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars."
+    "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.02": {
-    "conflict": "Decide how to decide who receives shade without ignoring that the obelisks uphold ancient privileges."
+    "conflict": "Decide how to decide who receives shade without ignoring that the obelisks uphold ancient privileges.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.03": {
-    "conflict": "Decide how to correct an unjust calendar without ignoring that the Hollow Sun once followed another path."
+    "conflict": "Decide how to correct an unjust calendar without ignoring that the Hollow Sun once followed another path.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.04": {
-    "conflict": "Decide how to preserve the night without ignoring that some districts buy shade from others."
+    "conflict": "Decide how to preserve the night without ignoring that some districts buy shade from others.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.05": {
-    "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars."
+    "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.01": {
-    "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates."
+    "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.02": {
-    "conflict": "Decide how to free a passage without ignoring that some keys are relationships, not objects."
+    "conflict": "Decide how to free a passage without ignoring that some keys are relationships, not objects.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.03": {
-    "conflict": "Decide how to judge who owns a key without ignoring that an address can be stolen."
+    "conflict": "Decide how to judge who owns a key without ignoring that an address can be stolen.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.04": {
-    "conflict": "Decide how to prevent a monopoly on routes without ignoring that the city has more doors than walls."
+    "conflict": "Decide how to prevent a monopoly on routes without ignoring that the city has more doors than walls.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.05": {
-    "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates."
+    "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.01": {
-    "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies."
+    "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.02": {
-    "conflict": "Decide how to choose a future route without ignoring that a chime disappeared on the night of the Rupture."
+    "conflict": "Decide how to choose a future route without ignoring that a chime disappeared on the night of the Rupture.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.03": {
-    "conflict": "Decide how to preserve a historic shipwreck without ignoring that sounds arrive before their cause."
+    "conflict": "Decide how to preserve a historic shipwreck without ignoring that sounds arrive before their cause.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.04": {
-    "conflict": "Decide how to decide who controls a current without ignoring that Odria has more than one history."
+    "conflict": "Decide how to decide who controls a current without ignoring that Odria has more than one history.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.05": {
-    "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies."
+    "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.01": {
-    "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom."
+    "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.02": {
-    "conflict": "Decide how to shut down a factory without ignoring that orders come from dead people."
+    "conflict": "Decide how to shut down a factory without ignoring that orders come from dead people.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.03": {
-    "conflict": "Decide how to finish a machine without ignoring that discarded parts return improved."
+    "conflict": "Decide how to finish a machine without ignoring that discarded parts return improved.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.04": {
-    "conflict": "Decide how to control the First Fire without ignoring that the First Fire remembers who lit it."
+    "conflict": "Decide how to control the First Fire without ignoring that the First Fire remembers who lit it.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.05": {
-    "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom."
+    "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.01": {
-    "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects."
+    "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.02": {
-    "conflict": "Decide how to take another's name without ignoring that names carry debts."
+    "conflict": "Decide how to take another's name without ignoring that names carry debts.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.03": {
-    "conflict": "Decide how to preserve a guilt without ignoring that the Ash preserves some truths by erasing them from everyone."
+    "conflict": "Decide how to preserve a guilt without ignoring that the Ash preserves some truths by erasing them from everyone.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.04": {
-    "conflict": "Decide how to stop a war without erasing the truth without ignoring that the Mouth returns altered stories."
+    "conflict": "Decide how to stop a war without erasing the truth without ignoring that the Mouth returns altered stories.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.05": {
-    "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects."
+    "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.01": {
-    "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes."
+    "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.02": {
-    "conflict": "Decide how to honor a promise without ignoring that a forgotten promise holds the passage together."
+    "conflict": "Decide how to honor a promise without ignoring that a forgotten promise holds the passage together.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.03": {
-    "conflict": "Decide how to save a traveler without ignoring that the sap comes from something that is not a tree."
+    "conflict": "Decide how to save a traveler without ignoring that the sap comes from something that is not a tree.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.04": {
-    "conflict": "Decide how to avoid destroying a living record without ignoring that names can be cultivated."
+    "conflict": "Decide how to avoid destroying a living record without ignoring that names can be cultivated.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.05": {
-    "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes."
+    "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.01": {
-    "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet."
+    "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.02": {
-    "conflict": "Decide how to choose which future to warn about without ignoring that the Absent Sun may be a choice."
+    "conflict": "Decide how to choose which future to warn about without ignoring that the Absent Sun may be a choice.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.03": {
-    "conflict": "Decide how to save someone from a future memory without ignoring that the aurora records discarded futures."
+    "conflict": "Decide how to save someone from a future memory without ignoring that the aurora records discarded futures.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.04": {
-    "conflict": "Decide how to decide whether the night should end without ignoring that a fire burns memories instead of wood."
+    "conflict": "Decide how to decide whether the night should end without ignoring that a fire burns memories instead of wood.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.05": {
-    "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet."
+    "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.01": {
-    "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world."
+    "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.02": {
-    "conflict": "Decide how to preserve a fossil archive without ignoring that wet objects appear in the desert."
+    "conflict": "Decide how to preserve a fossil archive without ignoring that wet objects appear in the desert.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.03": {
-    "conflict": "Decide how to follow a true mirage without ignoring that fossils hold inscriptions."
+    "conflict": "Decide how to follow a true mirage without ignoring that fossils hold inscriptions.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.04": {
-    "conflict": "Decide how to decide whether the sea should return without ignoring that a drop never falls."
+    "conflict": "Decide how to decide whether the sea should return without ignoring that a drop never falls.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.05": {
-    "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world."
+    "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.01": {
-    "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first."
+    "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.02": {
-    "conflict": "Decide how to reject a center without ignoring that the Rupture may have been containment."
+    "conflict": "Decide how to reject a center without ignoring that the Rupture may have been containment.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.03": {
-    "conflict": "Decide how to reconnect without creating tyranny without ignoring that some versions of the world refuse to converge."
+    "conflict": "Decide how to reconnect without creating tyranny without ignoring that some versions of the world refuse to converge.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.04": {
-    "conflict": "Decide how to accept multiple futures without ignoring that the Loom responds to Marks from previous journeys."
+    "conflict": "Decide how to accept multiple futures without ignoring that the Loom responds to Marks from previous journeys.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.05": {
-    "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first."
+    "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.01": {
-    "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost."
+    "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.02": {
-    "conflict": "Decide how to keep a community above the flood without ignoring that a second moon exists only in the reflection."
+    "conflict": "Decide how to keep a community above the flood without ignoring that a second moon exists only in the reflection.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.03": {
-    "conflict": "Decide how to prevent a reflection from replacing someone without ignoring that the house rests on another version of the ground."
+    "conflict": "Decide how to prevent a reflection from replacing someone without ignoring that the house rests on another version of the ground.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.04": {
-    "conflict": "Decide how to use an impossible tide without ignoring that some reflections remember rejected choices."
+    "conflict": "Decide how to use an impossible tide without ignoring that some reflections remember rejected choices.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.05": {
-    "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost."
+    "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.vertice.01": {
-    "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises."
+    "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.vertice.02": {
-    "conflict": "Decide how to save a bridge without ignoring that the abyss contains a city."
+    "conflict": "Decide how to save a bridge without ignoring that the abyss contains a city.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.vertice.03": {
-    "conflict": "Decide how to decide who may build without ignoring that a bridge casts a pillar that does not exist."
+    "conflict": "Decide how to decide who may build without ignoring that a bridge casts a pillar that does not exist.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.vertice.04": {
-    "conflict": "Decide how to keep a structural promise without ignoring that the wind repeats calculations."
+    "conflict": "Decide how to keep a structural promise without ignoring that the wind repeats calculations.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "boss.vertice.05": {
-    "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises."
+    "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises.",
+    "phases.0.name": "Reading",
+    "phases.1.name": "Rupture",
+    "phases.2.name": "Consequence"
   },
   "character.arquivo_ecos.01": {
     "learning_curve.teaching_note": "Requires alternating between basic actions and the signature resource to stay efficient."
