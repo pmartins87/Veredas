@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.6",
+  "source_locale": "pt_BR",
+  "targets": [
+    "en",
+    "es_419"
+  ],
+  "source_records": 5160,
+  "source_content_units": 18804,
+  "protected_base_plus_postbaseline_units": 3470,
+  "compact_delta_units_per_target": 15334,
+  "source_key_sha256": "19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63",
+  "packing": {
+    "format": "minified-json -> gzip -> base64 -> contiguous .b64part files",
+    "part_chars": 16000,
+    "runtime_policy": "sorted parts; fail closed on gap, collision, invalid base64/gzip/json, unknown key or invalid value"
+  },
+  "reference_build": {
+    "en": {
+      "raw_json_bytes": 1746843,
+      "gzip_bytes": 100177,
+      "base64_chars": 133572,
+      "parts": 10
+    },
+    "es_419": {
+      "raw_json_bytes": 1864691,
+      "gzip_bytes": 104735,
+      "base64_chars": 139648,
+      "parts": 9
+    }
+  },
+  "completion_equation": "3074 last-green baseline + 396 later protected names + 15334 compact delta = 18804 source content units per target",
+  "certification": {
+    "tool": "res://tools/localization_pack_certification.py",
+    "success_contract": "18804/18804 per target; pack_each=15334; collisions=0; unknown=0; token_errors=0",
+    "note": "The reference compressed byte counts document the locally generated checkpoint. Semantic equality, not gzip byte identity, is authoritative for reproducible rebuilds."
+  }
+}
