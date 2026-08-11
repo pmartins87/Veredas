@@ -4,6 +4,7 @@ class_name LocalizationService
 const MANIFEST_PATH := "res://localization/manifest.json"
 const UI_DIR := "res://localization/ui"
 const CONTENT_DIR := "res://localization/content"
+const CONTENT_SHARD_DIR := "res://localization/content_shards"
 const LABEL_DIR := "res://localization/labels"
 
 var _manifest: Dictionary = {}
@@ -156,8 +157,50 @@ func _load() -> void:
         return
     for locale_id in launch_locales():
         _ui_catalogs[locale_id] = _load_json_object("%s/%s.json" % [UI_DIR, locale_id], "ui:%s" % locale_id)
-        _content_catalogs[locale_id] = _load_json_object("%s/%s.json" % [CONTENT_DIR, locale_id], "content:%s" % locale_id)
+        var base_content := _load_json_object("%s/%s.json" % [CONTENT_DIR, locale_id], "content:%s" % locale_id)
+        _content_catalogs[locale_id] = _merge_content_shards(locale_id, base_content)
         _label_catalogs[locale_id] = _load_json_object("%s/%s.json" % [LABEL_DIR, locale_id], "labels:%s" % locale_id)
+
+func _merge_content_shards(locale_id: String, base_catalog: Dictionary) -> Dictionary:
+    var merged := base_catalog.duplicate(true)
+    var shard_path := "%s/%s" % [CONTENT_SHARD_DIR, locale_id]
+    var dir := DirAccess.open(shard_path)
+    if dir == null:
+        return merged
+    var files := dir.get_files()
+    files.sort()
+    for file_name_variant in files:
+        var file_name := str(file_name_variant)
+        if not file_name.ends_with(".json"):
+            continue
+        var shard := _load_json_object("%s/%s" % [shard_path, file_name], "content_shard:%s:%s" % [locale_id, file_name])
+        if shard.is_empty():
+            continue
+        for record_id_variant in shard.keys():
+            var record_id := str(record_id_variant)
+            var shard_record_variant = shard[record_id_variant]
+            if typeof(shard_record_variant) != TYPE_DICTIONARY:
+                _errors.append("content_shard_record:%s:%s:%s" % [locale_id, file_name, record_id])
+                continue
+            var shard_record: Dictionary = shard_record_variant as Dictionary
+            var merged_record_variant = merged.get(record_id, {})
+            if typeof(merged_record_variant) != TYPE_DICTIONARY:
+                _errors.append("content_base_record:%s:%s" % [locale_id, record_id])
+                continue
+            var merged_record: Dictionary = merged_record_variant as Dictionary
+            if not merged.has(record_id):
+                merged[record_id] = merged_record
+            for field_path_variant in shard_record.keys():
+                var field_path := str(field_path_variant)
+                var translated = shard_record[field_path_variant]
+                if typeof(translated) != TYPE_STRING or str(translated).strip_edges() == "":
+                    _errors.append("content_shard_value:%s:%s:%s:%s" % [locale_id, file_name, record_id, field_path])
+                    continue
+                if merged_record.has(field_path):
+                    _errors.append("content_shard_collision:%s:%s:%s:%s" % [locale_id, file_name, record_id, field_path])
+                    continue
+                merged_record[field_path] = translated
+    return merged
 
 func _load_json_object(path: String, label_name: String) -> Dictionary:
     if not FileAccess.file_exists(path):
