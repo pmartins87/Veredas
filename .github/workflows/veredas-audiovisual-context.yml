@@ -9,6 +9,7 @@ on:
       - 'projeto_jornada/project.godot'
       - 'projeto_jornada/tests/AudiovisualContextCertification.gd'
       - 'projeto_jornada/tests/audiovisual_context_certification.tscn'
+      - 'projeto_jornada/tools/audit_audio_assets.py'
       - 'projeto_jornada/tools/validate_phase7_integration.py'
       - '.github/workflows/veredas-audiovisual-context.yml'
   workflow_dispatch:
@@ -25,6 +26,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Audit 38-reference launch audio contract
+        working-directory: projeto_jornada
+        run: python tools/audit_audio_assets.py --output /tmp/veredas-audio-assets.json
       - name: Rebuild runtime content
         working-directory: projeto_jornada
         run: python tools/rebuild_content.py
@@ -49,3 +53,11 @@ jobs:
           printf '%s\n' "$output"
           if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|AUDIOVISUAL_CONTEXT_CERTIFICATION FAIL'; then exit 1; fi
           printf '%s\n' "$output" | grep -Eq 'AUDIOVISUAL_CONTEXT_(PREFLIGHT|CERTIFICATION) PASS'
+      - name: Upload audiovisual preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-audiovisual-context-11-7
+          path: /tmp/veredas-audio-assets.json
+          if-no-files-found: ignore
+          retention-days: 7
