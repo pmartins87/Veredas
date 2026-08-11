@@ -44,6 +44,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Report linguistic coverage and glossary integrity.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--require-complete", action="store_true", help="Fail unless every launch target covers every source unit.")
+    parser.add_argument("--require-complete-labels", action="store_true", help="Fail unless every launch target covers every canonical label.")
+    parser.add_argument("--require-complete-ui", action="store_true", help="Fail unless every launch target covers every required UI key.")
     args = parser.parse_args()
 
     manifest = read_object(LOC / "manifest.json")
@@ -107,16 +109,17 @@ def main() -> int:
             "missing_labels": label_total - len(translated_labels),
             "missing_ui": ui_total - len(translated_ui),
         }
-        if args.require_complete:
-            if len(translated_content) != content_total:
-                errors.append(f"{locale_id}: content translation incomplete {len(translated_content)}/{content_total}")
+        if args.require_complete or args.require_complete_labels:
             if len(translated_labels) != label_total:
                 errors.append(f"{locale_id}: label translation incomplete {len(translated_labels)}/{label_total}")
+        if args.require_complete or args.require_complete_ui:
             if len(translated_ui) != ui_total:
                 errors.append(f"{locale_id}: UI translation incomplete {len(translated_ui)}/{ui_total}")
+        if args.require_complete and len(translated_content) != content_total:
+            errors.append(f"{locale_id}: content translation incomplete {len(translated_content)}/{content_total}")
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "source_locale": source_locale,
         "targets": targets,
         "source_records": catalog["record_count"],
@@ -126,6 +129,8 @@ def main() -> int:
         "glossary_terms": len(terms),
         "locales": locale_reports,
         "complete_gate_requested": args.require_complete,
+        "complete_labels_gate_requested": args.require_complete_labels,
+        "complete_ui_gate_requested": args.require_complete_ui,
         "errors": errors,
     }
     if args.output:
@@ -149,8 +154,11 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     print(
-        "LINGUISTIC_REPORT PASS: structure_only glossary_terms=%d source_content_units=%d source_label_units=%d require_complete=%s"
-        % (len(terms), len(source_content_keys), len(source_label_keys), str(args.require_complete).lower())
+        "LINGUISTIC_REPORT PASS: glossary_terms=%d source_content_units=%d source_label_units=%d require_complete=%s require_labels=%s require_ui=%s"
+        % (
+            len(terms), len(source_content_keys), len(source_label_keys),
+            str(args.require_complete).lower(), str(args.require_complete_labels).lower(), str(args.require_complete_ui).lower(),
+        )
     )
     return 0
 
