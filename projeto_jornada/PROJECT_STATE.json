@@ -138,14 +138,14 @@
   },
   "phase11_6": {
     "status": "in_progress_parallel",
-    "latest_linguistic_gate_commit": "d9071f04a19772b7d7926bbc9f514c210bfe6b6b",
-    "latest_linguistic_gate_run_id": 31456801011,
+    "latest_linguistic_gate_commit": "781519e9699cfa8618160809e67d051eecd6adbd",
+    "latest_linguistic_gate_run_id": 31457895348,
     "latest_linguistic_gate_result": "PASS",
     "source_content_units": 18804,
     "target_locales": ["en", "es_419"],
     "content_coverage": {
-      "en": {"translated": 2, "total": 18804},
-      "es_419": {"translated": 2, "total": 18804}
+      "en": {"translated": 1958, "total": 18804, "coverage": 0.104127, "remaining": 16846},
+      "es_419": {"translated": 1958, "total": 18804, "coverage": 0.104127, "remaining": 16846}
     },
     "canonical_labels": {
       "pt_BR": "165/165",
@@ -159,8 +159,18 @@
     },
     "hardcoded_primary_ui_candidates": 0,
     "glossary_terms": 20,
-    "translation_batches": 48,
+    "protected_translation_layers": {
+      "structured_units_per_target": 1644,
+      "ability_names_per_target": 72,
+      "boss_phase_names_per_target": 180,
+      "curated_boss_names_per_target": 60
+    },
+    "remaining_translation_batches_per_target": 43,
     "max_units_per_batch": 400,
+    "remaining_unique_source_strings_per_target": 10956,
+    "translation_memory_candidate_groups_per_target": 2359,
+    "translation_memory_repeat_occurrences_per_target": 5890,
+    "remaining_key_sha256": "ff95e3923943fdcdc2039d2e2028b04b190535ec7d861e4099857c0ae1f87bbb",
     "translation_source_key_sha256": "19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63",
     "translation_completeness_required_before_certification": true,
     "tools": [
@@ -168,6 +178,9 @@
       "tools/localization_linguistic_report.py",
       "tools/localization_schema_audit.py",
       "tools/localization_translation_batches.py",
+      "tools/seed_structured_localization.py",
+      "tools/seed_structured_name_localization.py",
+      "tools/seed_boss_name_localization.py",
       "tools/ui_localization_inventory.py"
     ]
   },
