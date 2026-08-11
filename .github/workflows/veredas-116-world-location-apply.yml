@@ -1,4 +1,4 @@
-name: Veredas 11.6 World Location Apply
+name: Veredas 11.6 Curated Apply
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - projeto-jornada-snapshots
     paths:
       - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'
+      - 'projeto_jornada/tools/seed_structured_narrative_localization.py'
       - '.github/workflows/veredas-116-world-location-apply.yml'
   workflow_dispatch:
 
@@ -13,13 +14,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: veredas-116-world-location-apply-${{ github.ref }}
+  group: veredas-116-curated-apply-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  apply-curated-block:
+  apply-curated-blocks:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,13 +29,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply curated world/location-derived names
+      - name: Apply world/location and derived names
         working-directory: projeto_jornada
         run: python tools/seed_world_location_derived_name_localization.py --apply
-      - name: Certify curated block is complete
+      - name: Apply deterministic non-event narrative
         working-directory: projeto_jornada
-        run: python tools/seed_world_location_derived_name_localization.py --check
-      - name: Validate existing protected localization blocks
+        run: python tools/seed_structured_narrative_localization.py --apply
+      - name: Certify newly applied blocks
+        working-directory: projeto_jornada
+        run: |
+          python tools/seed_world_location_derived_name_localization.py --check
+          python tools/seed_structured_narrative_localization.py --check
+      - name: Validate every prior protected localization block
         working-directory: projeto_jornada
         run: |
           python tools/seed_structured_localization.py --check
@@ -48,37 +54,44 @@ jobs:
       - name: Measure resulting linguistic coverage
         working-directory: projeto_jornada
         run: python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/veredas-linguistic-report.json
-      - name: Promote block into permanent localization gate
+      - name: Rebuild remaining-only translation batches
+        working-directory: projeto_jornada
+        run: python tools/localization_translation_batches.py --max-units 400 --output /tmp/veredas-translation-batches.json
+      - name: Promote both blocks into permanent localization gate
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('.github/workflows/veredas-localization.yml')
           s = p.read_text(encoding='utf-8')
-          path_line = "      - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'\n"
-          if path_line not in s:
-              anchor = "      - 'projeto_jornada/tools/seed_family_monster_name_localization.py'\n"
-              if anchor not in s:
-                  raise SystemExit('permanent workflow path anchor missing')
-              s = s.replace(anchor, anchor + path_line, 1)
-          check_line = '          python tools/seed_world_location_derived_name_localization.py --check\n'
-          if check_line not in s:
-              anchor = '          python tools/seed_family_monster_name_localization.py --check\n'
-              if anchor not in s:
-                  raise SystemExit('permanent workflow check anchor missing')
-              s = s.replace(anchor, anchor + check_line, 1)
+          path_anchor = "      - 'projeto_jornada/tools/seed_family_monster_name_localization.py'\n"
+          check_anchor = '          python tools/seed_family_monster_name_localization.py --check\n'
+          additions = [
+              ('path', "      - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'\n"),
+              ('path', "      - 'projeto_jornada/tools/seed_structured_narrative_localization.py'\n"),
+              ('check', '          python tools/seed_world_location_derived_name_localization.py --check\n'),
+              ('check', '          python tools/seed_structured_narrative_localization.py --check\n'),
+          ]
+          if path_anchor not in s or check_anchor not in s:
+              raise SystemExit('permanent localization workflow anchor missing')
+          path_insert = ''.join(value for kind, value in additions if kind == 'path' and value not in s)
+          if path_insert:
+              s = s.replace(path_anchor, path_anchor + path_insert, 1)
+          check_insert = ''.join(value for kind, value in additions if kind == 'check' and value not in s)
+          if check_insert:
+              s = s.replace(check_anchor, check_anchor + check_insert, 1)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Retire one-shot applicator
         run: rm .github/workflows/veredas-116-world-location-apply.yml
-      - name: Persist validated localization block
+      - name: Persist validated localization blocks
         run: |
           git config user.name 'Veredas CI'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
           git diff --cached --check
           if git diff --cached --quiet; then
-            echo 'Curated block already persisted.'
+            echo 'Curated blocks already persisted.'
             exit 0
           fi
-          git commit -m 'i18n: apply 672 world location derived names per target'
+          git commit -m 'i18n: apply curated non-event localization through 11.6'
           git push origin HEAD:projeto-jornada-snapshots
