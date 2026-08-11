@@ -1,0 +1,49 @@
+name: Veredas 11.6 Localization Pack Export Filter
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/tools/ensure_localization_pack_export_filter.py'
+      - 'projeto_jornada/export_presets.cfg'
+      - '.github/workflows/veredas-116-pack-export-filter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-116-pack-export-filter-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  patch-and-certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply compact localization export filters
+        working-directory: projeto_jornada
+        run: python tools/ensure_localization_pack_export_filter.py --apply
+      - name: Certify final export filters
+        working-directory: projeto_jornada
+        run: python tools/ensure_localization_pack_export_filter.py --check
+      - name: Persist export preset guard
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/export_presets.cfg
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'Localization pack export filter already persisted.'
+            exit 0
+          fi
+          git commit -m 'build(android): include compact localization packs in exports'
+          git push origin HEAD:projeto-jornada-snapshots
