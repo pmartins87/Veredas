@@ -1,0 +1,41 @@
+name: Veredas Localization Quality 11.6
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/localization/**'
+      - 'projeto_jornada/data/**'
+      - 'projeto_jornada/tools/export_localization_catalog.py'
+      - 'projeto_jornada/tools/localization_quality_gate.py'
+      - '.github/workflows/veredas-localization-quality.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-localization-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linguistic-quality-11-6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate localization tokens and terminology
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_quality_gate.py \
+            --require-terminology \
+            --output /tmp/veredas-localization-quality.json
+      - name: Upload localization quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-localization-quality-report
+          path: /tmp/veredas-localization-quality.json
+          if-no-files-found: ignore
+          retention-days: 7
