@@ -1,0 +1,71 @@
+name: Veredas 11.6 Item Name Localization Apply
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/tools/seed_item_name_localization.py'
+      - '.github/workflows/veredas-116-item-name-apply.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-116-item-name-apply-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apply-item-names:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild integrated fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
+      - name: Apply deterministic item-name translations
+        working-directory: projeto_jornada
+        run: python tools/seed_item_name_localization.py --apply
+      - name: Validate protected localization layers
+        working-directory: projeto_jornada
+        run: |
+          python tools/seed_structured_localization.py --check
+          python tools/seed_structured_name_localization.py --check
+          python tools/seed_boss_name_localization.py --check
+          python tools/seed_item_name_localization.py --check
+          python tools/localization_inventory.py
+          python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/report.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/report.json',encoding='utf-8'))
+          for loc in ('en','es_419'):
+              got=d['locales'][loc]['content_translated']
+              assert got >= 3074, (loc,got)
+          PY
+      - name: Persist only validated overlays
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/localization/content/en.json projeto_jornada/localization/content/es_419.json
+          if git diff --cached --quiet; then
+            echo 'Item-name overlays already present.'
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m 'i18n: translate all 1116 item names for 11.6'
+          git push origin HEAD:projeto-jornada-snapshots
