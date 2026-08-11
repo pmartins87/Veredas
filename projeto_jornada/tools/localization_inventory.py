@@ -75,6 +75,7 @@ def main() -> int:
     source_locale = str(manifest.get("source_locale", ""))
     fallback_locale = str(manifest.get("fallback_locale", ""))
     launch_locales = [str(v) for v in manifest.get("launch_locales", []) if isinstance(v, str)]
+    target_locales = [v for v in launch_locales if v != source_locale]
     locale_meta = manifest.get("locales", {}) if isinstance(manifest.get("locales", {}), dict) else {}
     required_keys = [str(v) for v in manifest.get("ui_required_keys", []) if isinstance(v, str)]
     overlay_fields = {str(v) for v in manifest.get("content_overlay_fields", []) if isinstance(v, str)}
@@ -169,15 +170,17 @@ def main() -> int:
     probe_key = "architecture.source_only_probe"
     if not isinstance(source_ui.get(probe_key), str) or not source_ui.get(probe_key):
         errors.append("source-only fallback probe is missing")
-    for locale_id in [v for v in launch_locales if v != source_locale]:
+    for locale_id in target_locales:
         if probe_key in ui_catalogs.get(locale_id, {}):
             errors.append(f"fallback probe must be absent from target catalog: {locale_id}")
 
     overlay_entries = 0
+    nested_overlay_entries = 0
+    overlay_entries_by_locale = {locale_id: 0 for locale_id in target_locales}
+    nested_by_locale = {locale_id: 0 for locale_id in target_locales}
     source_overlay = content_catalogs.get(source_locale, {})
     if source_overlay:
         errors.append("source content overlay must stay empty; pt_BR canonical data is authoritative")
-    nested_overlay_entries = 0
     for locale_id in launch_locales:
         catalog = content_catalogs.get(locale_id, {})
         for record_id, overlay in catalog.items():
@@ -202,13 +205,24 @@ def main() -> int:
                     errors.append(f"overlay value must be non-empty string: {locale_id}:{record_id}:{path}")
                 if locale_id != source_locale:
                     overlay_entries += 1
+                    overlay_entries_by_locale[locale_id] += 1
                     if "." in path:
                         nested_overlay_entries += 1
+                        nested_by_locale[locale_id] += 1
 
-    if overlay_entries != 4:
-        errors.append(f"architecture probe expects exactly 4 target overlay entries, got {overlay_entries}")
-    if nested_overlay_entries != 2:
-        errors.append(f"architecture probe expects 2 nested target overlays, got {nested_overlay_entries}")
+    # The original 11.5 bootstrap used exactly two translations per target as an
+    # architecture probe. Production localization grows continuously, so the
+    # invariant is now monotonic: never regress below the bootstrap and retain
+    # nested-path coverage while every overlay remains validated against source.
+    for locale_id in target_locales:
+        if overlay_entries_by_locale[locale_id] < 2:
+            errors.append(f"target overlay coverage regressed below architecture bootstrap: {locale_id}:{overlay_entries_by_locale[locale_id]}")
+        if nested_by_locale[locale_id] < 1:
+            errors.append(f"target lost nested overlay coverage: {locale_id}")
+    if overlay_entries < 4:
+        errors.append(f"target overlay total regressed below architecture bootstrap: {overlay_entries}")
+    if nested_overlay_entries < 2:
+        errors.append(f"nested overlay total regressed below architecture bootstrap: {nested_overlay_entries}")
 
     aliases = manifest.get("aliases", {}) if isinstance(manifest.get("aliases", {}), dict) else {}
     for alias in ["pt-BR", "en-US", "es-MX"]:
@@ -222,8 +236,8 @@ def main() -> int:
         return 1
 
     print(
-        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d"
-        % (len(source_strings), len(required_keys), translated_required, overlay_entries, nested_overlay_entries)
+        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d per_target=%s"
+        % (len(source_strings), len(required_keys), translated_required, overlay_entries, nested_overlay_entries, str(overlay_entries_by_locale))
     )
     return 0
 
