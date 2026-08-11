@@ -1,0 +1,52 @@
+name: Veredas Full Linguistic Sanity 11.6
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/localization/**'
+      - 'projeto_jornada/data/**'
+      - 'projeto_jornada/tools/export_localization_catalog.py'
+      - 'projeto_jornada/tools/localization_quality_gate.py'
+      - 'projeto_jornada/tools/localization_pack_certification.py'
+      - 'projeto_jornada/tools/localization_full_linguistic_sanity.py'
+      - '.github/workflows/veredas-localization-full-linguistic.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-localization-full-linguistic-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  full-corpus-linguistic-11-6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Certify complete compact packs first
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_pack_certification.py \
+            --output /tmp/veredas-localization-pack-certification.json
+      - name: Run full-corpus linguistic sanity audit
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_full_linguistic_sanity.py \
+            --output /tmp/veredas-full-linguistic-sanity.json
+      - name: Upload linguistic reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-full-linguistic-sanity
+          path: |
+            /tmp/veredas-localization-pack-certification.json
+            /tmp/veredas-full-linguistic-sanity.json
+          if-no-files-found: ignore
+          retention-days: 7
