@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: veredas-116-full-content-apply-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   apply-full-content:
@@ -66,15 +66,23 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('/tmp/veredas-translation-batches.json')
-          report = json.loads(p.read_text(encoding='utf-8'))
-          batches = report.get('batches', [])
-          remaining = report.get('remaining_units', report.get('remaining', 0))
-          if isinstance(remaining, dict):
-              remaining = sum(int(v) for v in remaining.values())
-          if batches or int(remaining or 0) != 0:
-              raise SystemExit(f'translation queue not empty: batches={len(batches)} remaining={remaining}')
-          print('TRANSLATION_QUEUE PASS: zero remaining units')
+          report = json.loads(Path('/tmp/veredas-translation-batches.json').read_text(encoding='utf-8'))
+          errors = []
+          for key in ('common_remaining_units', 'union_remaining_units'):
+              if int(report.get(key, -1)) != 0:
+                  errors.append(f'{key}={report.get(key)}')
+          locales = report.get('locales', {})
+          for locale_id in ('en', 'es_419'):
+              row = locales.get(locale_id, {}) if isinstance(locales, dict) else {}
+              if int(row.get('remaining_units', -1)) != 0:
+                  errors.append(f'{locale_id}.remaining_units={row.get("remaining_units")}')
+              if int(row.get('batch_count', -1)) != 0:
+                  errors.append(f'{locale_id}.batch_count={row.get("batch_count")}')
+              if row.get('batches') not in ([], None):
+                  errors.append(f'{locale_id}.batches={len(row.get("batches", []))}')
+          if errors:
+              raise SystemExit('translation queue not empty: ' + ', '.join(errors))
+          print('TRANSLATION_QUEUE PASS: zero remaining units in both launch targets')
           PY
       - name: Promote completed coverage into permanent localization gate
         run: |
