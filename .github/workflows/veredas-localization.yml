@@ -14,6 +14,7 @@ on:
       - 'projeto_jornada/tools/localization_linguistic_report.py'
       - 'projeto_jornada/tools/localization_schema_audit.py'
       - 'projeto_jornada/tools/localization_translation_batches.py'
+      - 'projeto_jornada/tools/seed_structured_localization.py'
       - 'projeto_jornada/tools/ui_localization_inventory.py'
       - 'projeto_jornada/tests/LocalizationArchitectureCertification.gd'
       - 'projeto_jornada/tests/localization_architecture_certification.tscn'
@@ -47,6 +48,9 @@ jobs:
       - name: Require zero hardcoded primary UI text
         working-directory: projeto_jornada
         run: python tools/ui_localization_inventory.py --require-zero --output /tmp/veredas-ui-localization-inventory.json
+      - name: Require deterministic structured translations
+        working-directory: projeto_jornada
+        run: python tools/seed_structured_localization.py --check
       - name: Inventory stable-ID localization surface
         working-directory: projeto_jornada
         run: python tools/localization_inventory.py
