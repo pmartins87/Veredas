@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "release_blocking_severities": ["blocker", "critical"],
+    "allowed_statuses": ["open", "in_progress", "resolved", "verified", "wont_fix"],
+    "completion_rule_11_8": "zero open/in_progress product defects with severity blocker or critical"
+  },
+  "issues": [
+    {
+      "id": "LOC-116-001",
+      "kind": "product_defect",
+      "severity": "blocker",
+      "status": "in_progress",
+      "area": "localization",
+      "title": "Compact launch localization packs are not physically certified on the canonical branch",
+      "detected_on": "2026-08-11",
+      "evidence": [
+        "localization/content_packs/en/part_005.b64part is 59951 bytes while neighboring generated parts are 12000/16000-byte segments",
+        "localization/content_packs/es_419 currently contains only part_000 through part_002",
+        "Veredas 11.6 Reproducible Pack Build attempts ended before steps with runner_id=0, so no clean-branch certification exists"
+      ],
+      "impact": "11.6 cannot be promoted and release localization cannot be trusted until both launch target packs are rebuilt and certified from a clean checkout.",
+      "exit_criteria": [
+        "build_launch_localization_packs.py --build completes from the canonical branch",
+        "localization_pack_certification.py reports en=18804/18804 and es_419=18804/18804 with pack_each=15334",
+        "build_launch_localization_packs.py --check passes on a fresh checkout",
+        "localization quality/overflow/iconography gates execute on the same HEAD with no blocker or critical findings"
+      ]
+    }
+  ],
+  "non_defect_release_dependencies": [
+    {
+      "id": "DEP-113-PHYSICAL",
+      "area": "performance",
+      "roadmap": "11.3",
+      "status": "pending",
+      "description": "Physical-device 1800-second thermal/battery/performance soak remains required."
+    },
+    {
+      "id": "DEP-078-AUDIO",
+      "area": "audio",
+      "roadmap": "7.8/7.10/11.7",
+      "status": "pending",
+      "description": "38 final audio references and perceptual audiovisual QA remain production dependencies, not product defects."
+    },
+    {
+      "id": "DEP-073-075-ART",
+      "area": "art",
+      "roadmap": "7.3/7.4/7.5/7.10",
+      "status": "pending",
+      "description": "Final large illustrations for domains/locations, characters/NPCs and enemies/bosses remain production dependencies."
+    }
+  ]
+}
