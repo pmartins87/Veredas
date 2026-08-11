@@ -1,0 +1,48 @@
+name: Veredas QA Triage 11.8
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/qa/**'
+      - 'projeto_jornada/tools/qa_triage_gate.py'
+      - '.github/workflows/veredas-qa-triage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  triage-ledger-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate canonical issue ledger
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --output /tmp/veredas-qa-triage.json
+      - name: Upload triage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-qa-triage-11-8
+          path: /tmp/veredas-qa-triage.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  zero-blocker-critical-final:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enforce 11.8 completion rule
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --require-zero
