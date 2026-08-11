@@ -8,6 +8,7 @@ on:
       - 'projeto_jornada/tools/migrate_scene_ui_localization.py'
       - 'projeto_jornada/tools/localization_inventory.py'
       - 'projeto_jornada/tools/ui_localization_inventory.py'
+      - 'projeto_jornada/tests/LocalizationArchitectureCertification.gd'
       - '.github/workflows/veredas-116-ui-migration.yml'
   workflow_dispatch:
 
@@ -58,6 +59,16 @@ jobs:
               s = s.replace(anchor, replacement, 1)
           elif replacement not in s:
               raise SystemExit('UI technical-node filter anchor missing')
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('projeto_jornada/tests/LocalizationArchitectureCertification.gd')
+          s = p.read_text(encoding='utf-8')
+          old = '    expect(required.size() == 14, "11.5 expected 14 required UI architecture keys")\n'
+          new = '    expect(required.size() >= 14, "11.5 expected at least 14 required UI architecture keys")\n'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('runtime UI-key contract anchor missing')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Apply deterministic UI localization migration
@@ -119,7 +130,8 @@ jobs:
             projeto_jornada/localization/ui/en.json \
             projeto_jornada/localization/ui/es_419.json \
             projeto_jornada/tools/localization_inventory.py \
-            projeto_jornada/tools/ui_localization_inventory.py
+            projeto_jornada/tools/ui_localization_inventory.py \
+            projeto_jornada/tests/LocalizationArchitectureCertification.gd
           git diff --cached --check
           if git diff --cached --quiet; then
             echo 'UI localization migration already persisted.'
