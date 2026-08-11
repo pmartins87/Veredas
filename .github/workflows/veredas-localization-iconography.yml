@@ -1,0 +1,55 @@
+name: Veredas Localization Iconography 11.6
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/localization/**'
+      - 'projeto_jornada/scenes/**'
+      - 'projeto_jornada/ui/**'
+      - 'projeto_jornada/tests/LocalizationIconographyCertification.gd'
+      - 'projeto_jornada/tests/localization_iconography_certification.tscn'
+      - '.github/workflows/veredas-localization-iconography.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-localization-iconography-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  iconography-accessibility-11-6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            printf '%s\n' "$output"
+            exit 1
+          fi
+      - name: Certify localized iconography and accessible labels
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/localization_iconography_certification.tscn \
+            'LOCALIZATION_ICONOGRAPHY_CERTIFICATION FAIL' \
+            'LOCALIZATION_ICONOGRAPHY_CERTIFICATION PASS: 11.6'
+      - name: Preserve responsive/accessibility regression
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/responsive_accessibility_certification.tscn \
+            'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
+            'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
