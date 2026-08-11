@@ -1,0 +1,70 @@
+name: Veredas 11.6 Reproducible Pack Build
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/tools/build_launch_localization_packs.py'
+      - 'projeto_jornada/tools/seed_structured_narrative_localization.py'
+      - 'projeto_jornada/tools/seed_event_localization.py'
+      - 'projeto_jornada/tools/seed_world_location_derived_name_localization.py'
+      - '.github/workflows/veredas-116-pack-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-116-pack-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-certify-persist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build complete compact launch localization packs
+        working-directory: projeto_jornada
+        run: python tools/build_launch_localization_packs.py --build
+      - name: Certify 18,804-unit content coverage per target
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_pack_certification.py \
+            --output /tmp/veredas-localization-pack-certification.json
+      - name: Prove compiler reproducibility
+        working-directory: projeto_jornada
+        run: python tools/build_launch_localization_packs.py --check
+      - name: Preserve canonical data and balance surfaces
+        working-directory: projeto_jornada
+        run: |
+          git diff --exit-code -- data
+          git diff --exit-code -- localization/content/en.json localization/content/es_419.json
+          python tools/validate_canonical.py >/dev/null
+      - name: Persist certified compact packs
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/localization/content_packs
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'Reproducible launch packs already persisted.'
+            exit 0
+          fi
+          git commit -m 'i18n: persist reproducible complete launch content packs'
+          git push origin HEAD:projeto-jornada-snapshots
+      - name: Upload pack certification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-116-pack-build-report
+          path: /tmp/veredas-localization-pack-certification.json
+          if-no-files-found: ignore
+          retention-days: 7
