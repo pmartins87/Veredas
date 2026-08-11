@@ -16,7 +16,7 @@ def text(path: str) -> str:
     return p.read_text(encoding="utf-8") if p.exists() else ""
 
 project = text("project.godot")
-for singleton in ["DomainThemeService", "AccessibilityService", "PresentationBus", "PresentationVFXController"]:
+for singleton in ["DomainThemeService", "AccessibilityService", "PresentationBus", "PresentationVFXController", "AudioRouter"]:
     if f'{singleton}="*res://' not in project:
         errors.append(f"autoload missing: {singleton}")
 
@@ -25,6 +25,7 @@ for path, autoload_name in [
     ("ui/AccessibilityService.gd", "AccessibilityService"),
     ("ui/PresentationBus.gd", "PresentationBus"),
     ("ui/PresentationVFXController.gd", "PresentationVFXController"),
+    ("audio/AudioRouter.gd", "AudioRouter"),
 ]:
     source = text(path)
     if re.search(rf"^class_name\s+{re.escape(autoload_name)}\s*$", source, re.M):
@@ -75,9 +76,44 @@ for path in [
     need(path)
 
 presentation = text("ui/PresentationBus.gd")
-for signal_name in ["mark_added", "damage_applied", "intent_revealed", "boss_phase_changed", "location_changed"]:
+for signal_name in ["page_changed", "choice_committed", "mark_added", "damage_applied", "intent_revealed", "boss_phase_changed", "location_changed"]:
     if f"signal {signal_name}" not in presentation:
         errors.append(f"presentation signal missing: {signal_name}")
+
+audio_router = text("audio/AudioRouter.gd")
+for hook in [
+    "PresentationBus.page_changed.connect",
+    "PresentationBus.choice_committed.connect",
+    "PresentationBus.mark_added.connect",
+    "PresentationBus.damage_applied.connect",
+    "PresentationBus.intent_revealed.connect",
+    "PresentationBus.boss_phase_changed.connect",
+    "PresentationBus.location_changed.connect",
+]:
+    if hook not in audio_router:
+        errors.append(f"audio presentation hook missing: {hook}")
+for token in ["REQUIRED_BUSES", "audit_manifest", "play_ui", "play_combat", "enter_domain"]:
+    if token not in audio_router:
+        errors.append(f"audio router contract missing: {token}")
+
+audio_manifest_path = need("audio/audio_events.json")
+if audio_manifest_path.exists():
+    audio_manifest = json.loads(audio_manifest_path.read_text(encoding="utf-8"))
+    if audio_manifest.get("schema_version") != 1:
+        errors.append("audio manifest schema must be v1")
+    if len(audio_manifest.get("ui", {})) != 7:
+        errors.append("expected 7 UI audio events")
+    if len(audio_manifest.get("combat", {})) != 7:
+        errors.append("expected 7 combat audio events")
+    domains = audio_manifest.get("domains", {})
+    if len(domains) != 12:
+        errors.append("expected 12 domain audio identities")
+    for domain_id, domain in domains.items():
+        if len(domain.get("signature", [])) < 3:
+            errors.append(f"domain audio signature incomplete: {domain_id}")
+        for layer in ["music", "ambience"]:
+            if not str(domain.get(layer, "")):
+                errors.append(f"domain audio layer missing: {domain_id}.{layer}")
 
 combat = text("core/systems/CombatEngine.gd")
 for hook in ["PresentationBus.intent", "PresentationBus.damage", "BossPhaseEngine.transition_if_needed"]:
@@ -95,4 +131,4 @@ if errors:
     sys.exit(1)
 
 print("PHASE7_INTEGRATION PASS")
-print("12 domain palettes; VFX controller, accessibility and presentation hooks present")
+print("12 domain palettes; VFX, accessibility, presentation and audio routing hooks present")
