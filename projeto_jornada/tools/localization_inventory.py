@@ -11,20 +11,10 @@ DATA = ROOT / "data"
 LOC = ROOT / "localization"
 MANIFEST_PATH = LOC / "manifest.json"
 EXPECTED_DATA = {
-    "worlds": 12,
-    "locations": 120,
-    "families": 96,
-    "monsters": 300,
-    "bosses": 60,
-    "items": 1116,
-    "npcs": 300,
-    "marks": 204,
-    "debts": 120,
-    "characters": 36,
-    "abilities": 72,
-    "events": 2544,
-    "finals": 36,
-    "pools": 144,
+    "worlds": 12, "locations": 120, "families": 96, "monsters": 300,
+    "bosses": 60, "items": 1116, "npcs": 300, "marks": 204,
+    "debts": 120, "characters": 36, "abilities": 72, "events": 2544,
+    "finals": 36, "pools": 144,
 }
 PLACEHOLDER_RE = re.compile(r"\{([A-Za-z0-9_]+)\}")
 
@@ -60,6 +50,25 @@ def collect_source_strings(record_id: str, value, fields: set[str], path: tuple[
             collect_source_strings(record_id, child, fields, path + (str(index),), out)
 
 
+def value_at_path(root, path: str):
+    current = root
+    for part in path.split("."):
+        if isinstance(current, dict):
+            if part not in current:
+                return None, False
+            current = current[part]
+        elif isinstance(current, list):
+            if not part.isdigit():
+                return None, False
+            index = int(part)
+            if index < 0 or index >= len(current):
+                return None, False
+            current = current[index]
+        else:
+            return None, False
+    return current, True
+
+
 def main() -> int:
     errors: list[str] = []
     manifest = load_object(MANIFEST_PATH, errors, "manifest")
@@ -86,10 +95,8 @@ def main() -> int:
     if not overlay_fields:
         errors.append("content overlay field whitelist is empty")
     for key in [
-        "canonical_content_immutable",
-        "runtime_rules_use_source_records",
-        "presentation_uses_stable_id_overlays",
-        "missing_translation_falls_back_to_source",
+        "canonical_content_immutable", "runtime_rules_use_source_records",
+        "presentation_uses_stable_id_overlays", "missing_translation_falls_back_to_source",
     ]:
         if policy.get(key) is not True:
             errors.append(f"localization policy missing/false: {key}")
@@ -97,7 +104,7 @@ def main() -> int:
         errors.append("translation completeness must remain assigned to 11.6")
 
     records: list[dict] = []
-    known_ids: set[str] = set()
+    records_by_id: dict[str, dict] = {}
     for name, expected in EXPECTED_DATA.items():
         path = DATA / f"{name}.json"
         if not path.is_file():
@@ -121,13 +128,13 @@ def main() -> int:
             if not record_id:
                 errors.append(f"{name}: missing stable id")
                 continue
-            if record_id in known_ids:
+            if record_id in records_by_id:
                 errors.append(f"duplicate stable id: {record_id}")
-            known_ids.add(record_id)
+            records_by_id[record_id] = row
             records.append(row)
 
-    if len(records) != 5160 or len(known_ids) != 5160:
-        errors.append(f"expected 5160 stable records, got records={len(records)} ids={len(known_ids)}")
+    if len(records) != 5160 or len(records_by_id) != 5160:
+        errors.append(f"expected 5160 stable records, got records={len(records)} ids={len(records_by_id)}")
 
     source_strings: dict[str, str] = {}
     for record in records:
@@ -155,9 +162,7 @@ def main() -> int:
                 errors.append(f"required UI key missing/blank: {locale_id}:{key}")
                 continue
             if placeholders(value) != source_placeholders:
-                errors.append(
-                    f"placeholder mismatch {locale_id}:{key} source={source_placeholders} target={placeholders(value)}"
-                )
+                errors.append(f"placeholder mismatch {locale_id}:{key}")
             if locale_id != source_locale:
                 translated_required += 1
 
@@ -172,25 +177,38 @@ def main() -> int:
     source_overlay = content_catalogs.get(source_locale, {})
     if source_overlay:
         errors.append("source content overlay must stay empty; pt_BR canonical data is authoritative")
+    nested_overlay_entries = 0
     for locale_id in launch_locales:
         catalog = content_catalogs.get(locale_id, {})
         for record_id, overlay in catalog.items():
-            if record_id not in known_ids:
+            source_record = records_by_id.get(record_id)
+            if source_record is None:
                 errors.append(f"overlay references unknown stable id: {locale_id}:{record_id}")
                 continue
             if not isinstance(overlay, dict):
                 errors.append(f"overlay record is not an object: {locale_id}:{record_id}")
                 continue
-            for field, value in overlay.items():
-                if field not in overlay_fields:
-                    errors.append(f"overlay field not presentation-whitelisted: {locale_id}:{record_id}:{field}")
+            for field_path, value in overlay.items():
+                path = str(field_path)
+                terminal = path.split(".")[-1]
+                if terminal not in overlay_fields:
+                    errors.append(f"overlay terminal field not presentation-whitelisted: {locale_id}:{record_id}:{path}")
+                source_value, found = value_at_path(source_record, path)
+                if not found:
+                    errors.append(f"overlay path does not exist in canonical record: {locale_id}:{record_id}:{path}")
+                elif not isinstance(source_value, str):
+                    errors.append(f"overlay path does not target a string: {locale_id}:{record_id}:{path}")
                 if not isinstance(value, str) or not value.strip():
-                    errors.append(f"overlay value must be non-empty string: {locale_id}:{record_id}:{field}")
+                    errors.append(f"overlay value must be non-empty string: {locale_id}:{record_id}:{path}")
                 if locale_id != source_locale:
                     overlay_entries += 1
+                    if "." in path:
+                        nested_overlay_entries += 1
 
-    if overlay_entries != 2:
-        errors.append(f"architecture probe expects exactly 2 target overlay entries, got {overlay_entries}")
+    if overlay_entries != 4:
+        errors.append(f"architecture probe expects exactly 4 target overlay entries, got {overlay_entries}")
+    if nested_overlay_entries != 2:
+        errors.append(f"architecture probe expects 2 nested target overlays, got {nested_overlay_entries}")
 
     aliases = manifest.get("aliases", {}) if isinstance(manifest.get("aliases", {}), dict) else {}
     for alias in ["pt-BR", "en-US", "es-MX"]:
@@ -204,8 +222,8 @@ def main() -> int:
         return 1
 
     print(
-        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=14 translated_required=%d overlay_entries=%d"
-        % (len(source_strings), translated_required, overlay_entries)
+        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=14 translated_required=%d overlay_entries=%d nested_overlays=%d"
+        % (len(source_strings), translated_required, overlay_entries, nested_overlay_entries)
     )
     return 0
 

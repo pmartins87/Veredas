@@ -71,19 +71,35 @@ func _profile_persistence_gate() -> void:
     expect(bool(audit.get("ok", false)), "11.5 locale setting broke profile integrity: %s" % str(audit.get("errors", [])))
 
 func _content_overlay_gate() -> void:
-    var source_record := ContentRegistry.get_record("world.mata_fio_verde")
-    expect(not source_record.is_empty(), "11.5 overlay probe source record missing")
-    if source_record.is_empty():
-        return
-    var canonical_name := str(source_record.get("name", ""))
-    var english := localization.localize_record(source_record, "en")
-    var spanish := localization.localize_record(source_record, "es_419")
-    expect(str(english.get("name", "")) == "Green Thread Forest", "11.5 English stable-ID content overlay failed")
-    expect(str(spanish.get("name", "")) == "Bosque del Hilo Verde", "11.5 Spanish stable-ID content overlay failed")
-    expect(str(english.get("id", "")) == "world.mata_fio_verde", "11.5 localized record changed stable id")
-    expect(str(spanish.get("id", "")) == "world.mata_fio_verde", "11.5 localized record changed stable id in Spanish")
-    expect(str(ContentRegistry.get_record("world.mata_fio_verde").get("name", "")) == canonical_name, "11.5 presentation overlay mutated canonical content")
-    content_overlay_checks += 2
+    var source_world := ContentRegistry.get_record("world.mata_fio_verde")
+    expect(not source_world.is_empty(), "11.5 top-level overlay probe source record missing")
+    if not source_world.is_empty():
+        var canonical_name := str(source_world.get("name", ""))
+        var english_world := localization.localize_record(source_world, "en")
+        var spanish_world := localization.localize_record(source_world, "es_419")
+        expect(str(english_world.get("name", "")) == "Green Thread Forest", "11.5 English stable-ID content overlay failed")
+        expect(str(spanish_world.get("name", "")) == "Bosque del Hilo Verde", "11.5 Spanish stable-ID content overlay failed")
+        expect(str(english_world.get("id", "")) == "world.mata_fio_verde", "11.5 localized world changed stable id")
+        expect(str(ContentRegistry.get_record("world.mata_fio_verde").get("name", "")) == canonical_name, "11.5 top-level presentation overlay mutated canonical content")
+        content_overlay_checks += 2
+
+    var source_event := ContentRegistry.get_record("event.mata_fio_verde.loc01.01")
+    expect(not source_event.is_empty(), "11.5 nested overlay probe event missing")
+    if not source_event.is_empty():
+        var source_choices: Array = source_event.get("choices", []) as Array
+        expect(not source_choices.is_empty(), "11.5 nested overlay probe event has no choices")
+        if not source_choices.is_empty():
+            var canonical_choice := str((source_choices[0] as Dictionary).get("text", ""))
+            var english_event := localization.localize_record(source_event, "en")
+            var spanish_event := localization.localize_record(source_event, "es_419")
+            var english_choices: Array = english_event.get("choices", []) as Array
+            var spanish_choices: Array = spanish_event.get("choices", []) as Array
+            expect(str((english_choices[0] as Dictionary).get("text", "")) == "Inspect the black sap before deciding", "11.5 nested English choice overlay failed")
+            expect(str((spanish_choices[0] as Dictionary).get("text", "")) == "Examinar la savia negra antes de decidir", "11.5 nested Spanish choice overlay failed")
+            expect(str(localization.content_value(source_event, "choices.0.text", "en")) == "Inspect the black sap before deciding", "11.5 nested content_value path lookup failed")
+            var canonical_after: Array = ContentRegistry.get_record("event.mata_fio_verde.loc01.01").get("choices", []) as Array
+            expect(str((canonical_after[0] as Dictionary).get("text", "")) == canonical_choice, "11.5 nested presentation overlay mutated canonical event")
+            content_overlay_checks += 2
 
 func _panel_integration_gate() -> void:
     expect(localization.set_locale("en", false), "11.5 could not switch to English for panel integration")
@@ -128,7 +144,7 @@ func expect(condition: bool, message: String) -> void:
 
 func _finish() -> void:
     if failures.is_empty():
-        print("LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5 launch_locales=3 aliases=%d ui_checks=%d content_overlays=%d panels=%d" % [alias_checks,ui_key_checks,content_overlay_checks,panel_checks])
+        print("LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5 launch_locales=3 aliases=%d ui_checks=%d content_overlays=%d panels=%d nested_paths=2" % [alias_checks,ui_key_checks,content_overlay_checks,panel_checks])
         get_tree().quit(0)
     else:
         print("LOCALIZATION_ARCHITECTURE_CERTIFICATION FAIL: %d" % failures.size())

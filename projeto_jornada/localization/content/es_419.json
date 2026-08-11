@@ -1,5 +1,8 @@
 {
   "world.mata_fio_verde": {
     "name": "Bosque del Hilo Verde"
+  },
+  "event.mata_fio_verde.loc01.01": {
+    "choices.0.text": "Examinar la savia negra antes de decidir"
   }
 }

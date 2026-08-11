@@ -106,13 +106,9 @@ func placeholders(locale_id: String, key: String) -> Array[String]:
     var raw := _catalog_text(resolved, key)
     return _placeholders_in(raw)
 
-func content_value(record: Dictionary, field: String, locale_id: String = "") -> Variant:
-    var locale := current_locale() if locale_id == "" else resolve_locale(locale_id, true)
-    if locale != source_locale():
-        var overlay := _content_overlay(locale, str(record.get("id", "")))
-        if overlay.has(field):
-            return overlay.get(field)
-    return record.get(field)
+func content_value(record: Dictionary, path: String, locale_id: String = "") -> Variant:
+    var localized := localize_record(record, locale_id)
+    return _value_at_path(localized, path)
 
 func localize_record(record: Dictionary, locale_id: String = "") -> Dictionary:
     var result := record.duplicate(true)
@@ -121,14 +117,24 @@ func localize_record(record: Dictionary, locale_id: String = "") -> Dictionary:
         return result
     var overlay := _content_overlay(locale, str(record.get("id", "")))
     var allowed: Array = _manifest.get("content_overlay_fields", []) as Array
-    for field_variant in overlay.keys():
-        var field := str(field_variant)
-        if field in allowed:
-            result[field] = overlay[field_variant]
+    for path_variant in overlay.keys():
+        var path := str(path_variant)
+        var parts := path.split(".", false)
+        if parts.is_empty():
+            continue
+        var terminal := str(parts[parts.size() - 1])
+        if terminal not in allowed:
+            continue
+        var value = overlay[path_variant]
+        if typeof(value) != TYPE_STRING:
+            continue
+        _set_value_at_path(result, path, value)
     return result
 
 func _load() -> void:
     _errors.clear()
+    _ui_catalogs.clear()
+    _content_catalogs.clear()
     _manifest = _load_json_object(MANIFEST_PATH, "manifest")
     if _manifest.is_empty():
         return
@@ -162,6 +168,67 @@ func _content_overlay(locale_id: String, record_id: String) -> Dictionary:
     var catalog: Dictionary = _content_catalogs[locale_id] as Dictionary
     var raw = catalog.get(record_id, {})
     return (raw as Dictionary).duplicate(true) if typeof(raw) == TYPE_DICTIONARY else {}
+
+func _value_at_path(root: Variant, path: String) -> Variant:
+    var current = root
+    for part_variant in path.split(".", false):
+        var part := str(part_variant)
+        if typeof(current) == TYPE_DICTIONARY:
+            var dictionary: Dictionary = current as Dictionary
+            if not dictionary.has(part):
+                return null
+            current = dictionary[part]
+        elif typeof(current) == TYPE_ARRAY:
+            if not part.is_valid_int():
+                return null
+            var index := int(part)
+            var array: Array = current as Array
+            if index < 0 or index >= array.size():
+                return null
+            current = array[index]
+        else:
+            return null
+    return current
+
+func _set_value_at_path(root: Dictionary, path: String, value: String) -> bool:
+    var parts := path.split(".", false)
+    if parts.is_empty():
+        return false
+    var current: Variant = root
+    for i in range(parts.size() - 1):
+        var part := str(parts[i])
+        if typeof(current) == TYPE_DICTIONARY:
+            var dictionary: Dictionary = current as Dictionary
+            if not dictionary.has(part):
+                return false
+            current = dictionary[part]
+        elif typeof(current) == TYPE_ARRAY:
+            if not part.is_valid_int():
+                return false
+            var index := int(part)
+            var array: Array = current as Array
+            if index < 0 or index >= array.size():
+                return false
+            current = array[index]
+        else:
+            return false
+    var last := str(parts[parts.size() - 1])
+    if typeof(current) == TYPE_DICTIONARY:
+        var dictionary: Dictionary = current as Dictionary
+        if not dictionary.has(last) or typeof(dictionary[last]) != TYPE_STRING:
+            return false
+        dictionary[last] = value
+        return true
+    if typeof(current) == TYPE_ARRAY:
+        if not last.is_valid_int():
+            return false
+        var index := int(last)
+        var array: Array = current as Array
+        if index < 0 or index >= array.size() or typeof(array[index]) != TYPE_STRING:
+            return false
+        array[index] = value
+        return true
+    return false
 
 func _format(raw: String, values: Dictionary) -> String:
     var result := raw

@@ -1,5 +1,8 @@
 {
   "world.mata_fio_verde": {
     "name": "Green Thread Forest"
+  },
+  "event.mata_fio_verde.loc01.01": {
+    "choices.0.text": "Inspect the black sap before deciding"
   }
 }
