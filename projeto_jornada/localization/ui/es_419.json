@@ -1,0 +1,16 @@
+{
+  "settings.accessibility.title": "Accesibilidad",
+  "settings.accessibility.description": "Los ajustes pueden cambiarse en cualquier momento y no alteran las reglas de la jornada.",
+  "settings.language.label": "Idioma",
+  "settings.font_size": "Tamaño del texto: {percent}%",
+  "settings.high_contrast": "Alto contraste",
+  "settings.reduce_motion": "Reducir movimiento",
+  "settings.disable_flashes": "Desactivar destellos",
+  "settings.icon_labels": "Mostrar etiquetas junto a los iconos",
+  "settings.haptics": "Respuesta háptica",
+  "settings.combat_text_detail": "Detalle de los textos de combate",
+  "settings.combat_text.compact": "Compacto",
+  "settings.combat_text.normal": "Normal",
+  "settings.combat_text.detailed": "Detallado",
+  "common.done": "Listo"
+}

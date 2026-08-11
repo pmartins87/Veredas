@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 107,
+  "completed_steps": 108,
   "current_phase": 11,
   "completed_through": "11.2",
-  "current_step": "11.3",
-  "current_step_title": "Performance, memória, bateria, térmica e loading em hardware representativo",
+  "current_step": "11.5",
+  "current_step_title": "Arquitetura de localização e idiomas de lançamento",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -21,8 +21,8 @@
     "11.1": "certified",
     "11.2": "certified",
     "11.3": "in_progress_physical_device_required",
-    "11.4": "in_progress_parallel",
-    "11.5": "pending",
+    "11.4": "certified",
+    "11.5": "in_progress_parallel",
     "11.6": "pending",
     "11.7": "pending",
     "11.8": "pending",
@@ -30,18 +30,20 @@
     "11.10": "pending"
   },
   "last_certified_ci": {
-    "commit": "7aec53472328cbec734853182489a7da62aa9a3f",
+    "commit": "c988448e2546b0b684a3f048fd8b28fe0f3ed11e",
     "same_head": true,
-    "main_ci_run_id": 31349557595,
+    "main_ci_run_id": 31421360675,
     "main_ci_result": "PASS",
-    "adversarial_run_id": 31349557600,
+    "adversarial_run_id": 31421360719,
     "adversarial_result": "PASS",
-    "regression_run_id": 31349557591,
+    "regression_run_id": 31421360678,
     "regression_result": "PASS",
-    "save_fuzz_run_id": 31349557594,
+    "save_fuzz_run_id": 31421360695,
     "save_fuzz_result": "PASS",
-    "freeze_run_id": 31349557593,
-    "freeze_result": "PASS"
+    "freeze_run_id": 31421360712,
+    "freeze_result": "PASS",
+    "responsive_run_id": 31421360688,
+    "responsive_result": "PASS"
   },
   "phase11_1": {
     "status": "certified",
@@ -94,22 +96,8 @@
       "run_id": 31352049842,
       "commit": "eaa740a7d9b6a119f4583bb82492e3763300f27d",
       "gpu_mode": "software",
-      "api29": {
-        "cold_launch_ms": 1715,
-        "resume_samples": 12,
-        "resume_p95_ms": 649,
-        "max_pss_mb": 200.94,
-        "soak_samples": 12,
-        "soak_pss_drift_mb": 0.01
-      },
-      "api34": {
-        "cold_launch_ms": 1455,
-        "resume_samples": 12,
-        "resume_p95_ms": 1065,
-        "max_pss_mb": 192.5,
-        "soak_samples": 12,
-        "soak_pss_drift_mb": 0.0
-      },
+      "api29": {"cold_launch_ms": 1715, "resume_samples": 12, "resume_p95_ms": 649, "max_pss_mb": 200.94, "soak_samples": 12, "soak_pss_drift_mb": 0.01},
+      "api34": {"cold_launch_ms": 1455, "resume_samples": 12, "resume_p95_ms": 1065, "max_pss_mb": 192.5, "soak_samples": 12, "soak_pss_drift_mb": 0.0},
       "battery_thermal_semantics": "proxy_only"
     },
     "physical_device": {
@@ -119,11 +107,31 @@
       "required_by": "mobile/performance_budgets.json"
     }
   },
+  "phase11_4": {
+    "status": "certified",
+    "certified_commit": "c988448e2546b0b684a3f048fd8b28fe0f3ed11e",
+    "run_id": 31421360688,
+    "scene_cases": 100,
+    "mode_cases": 80,
+    "button_checks": 1560,
+    "font_checks": 2320,
+    "contrast_checks": 48,
+    "safe_area_cases": 5,
+    "main_ui_scrollable": true,
+    "result": "PASS"
+  },
+  "phase11_5": {
+    "status": "in_progress_parallel",
+    "source_locale": "pt_BR",
+    "launch_locales": ["pt_BR", "en", "es_419"],
+    "architecture": "stable_ids_plus_presentation_overlays",
+    "canonical_content_immutable": true,
+    "translation_completeness_gate": "11.6"
+  },
   "balance_freeze": {
     "status": "certified",
     "baseline_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
     "verification_commit": "7aec53472328cbec734853182489a7da62aa9a3f",
-    "verification_run_id": 31349557593,
     "manifest": "BALANCE_FREEZE.json",
     "verification_tool": "tools/verify_balance_freeze.py"
   },

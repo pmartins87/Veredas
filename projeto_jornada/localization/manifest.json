@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "source_locale": "pt_BR",
+  "fallback_locale": "pt_BR",
+  "launch_locales": ["pt_BR", "en", "es_419"],
+  "locales": {
+    "pt_BR": {"native_name": "Português (Brasil)", "english_name": "Brazilian Portuguese"},
+    "en": {"native_name": "English", "english_name": "English"},
+    "es_419": {"native_name": "Español (Latinoamérica)", "english_name": "Latin American Spanish"}
+  },
+  "aliases": {
+    "pt": "pt_BR",
+    "pt_BR": "pt_BR",
+    "pt-BR": "pt_BR",
+    "en": "en",
+    "en_US": "en",
+    "en-US": "en",
+    "en_GB": "en",
+    "en-GB": "en",
+    "es": "es_419",
+    "es_419": "es_419",
+    "es-419": "es_419",
+    "es_MX": "es_419",
+    "es-MX": "es_419",
+    "es_AR": "es_419",
+    "es-AR": "es_419"
+  },
+  "ui_required_keys": [
+    "settings.accessibility.title",
+    "settings.accessibility.description",
+    "settings.language.label",
+    "settings.font_size",
+    "settings.high_contrast",
+    "settings.reduce_motion",
+    "settings.disable_flashes",
+    "settings.icon_labels",
+    "settings.haptics",
+    "settings.combat_text_detail",
+    "settings.combat_text.compact",
+    "settings.combat_text.normal",
+    "settings.combat_text.detailed",
+    "common.done"
+  ],
+  "content_overlay_fields": [
+    "name", "title", "description", "text", "voice", "objective", "pressure",
+    "ecology", "counterplay", "passive", "weakness", "telegraph", "signature"
+  ],
+  "policy": {
+    "canonical_content_immutable": true,
+    "runtime_rules_use_source_records": true,
+    "presentation_uses_stable_id_overlays": true,
+    "missing_translation_falls_back_to_source": true,
+    "translation_completeness_gate_step": "11.6"
+  }
+}

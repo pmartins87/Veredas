@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1–11.2 ✅; 11.3 em andamento por depender de medição física; 11.4 iniciado em paralelo**.
+- Fase 11: **11.1, 11.2 e 11.4 ✅; 11.3 aguarda medição física; 11.5 em andamento em paralelo**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -21,42 +21,50 @@ Commit limpo `0afd8f2`:
 - máximo 79 passos, 0 deadlocks, 0 combat timeouts;
 - 48 pares determinísticos;
 - profile/run/RNG/combat restaurados após simulação;
-- 48/48 cenários live com evento, viagem, mercador e combate em todos os 12 Domínios.
+- 48/48 cenários live com evento, viagem, mercador e combate nos 12 Domínios.
 
 ### 11.2 — Fuzzing/migração de saves e compatibilidade ✅
-Core certificado no commit `39a811c` e re-freeze verificado no commit `7aec534`.
-- 192 perfis deformados migráveis: 192 aceitos e normalizados para schema 3;
-- 64 estados de jornada deformados: 16 variantes recuperáveis aceitas e 48 semanticamente impossíveis rejeitadas;
+Core certificado em `39a811c` e re-freeze verificado em `7aec534`:
+- 192 perfis deformados migráveis aceitos e normalizados para schema 3;
+- 64 estados de jornada: 16 recuperáveis aceitos e 48 impossíveis rejeitados;
 - 8/8 arquivos JSON corrompidos recusados;
-- rejeições transacionais preservam profile, run, RNG e fingerprint;
-- RNG legado ausente é reconstruído deterministicamente;
-- estado sentinela legítimo do Hub possui contrato separado de integridade;
-- CI, adversarial, regression, save-fuzz e balance-freeze verdes no mesmo re-freeze.
+- rejeição transacional preserva profile/run/RNG/fingerprint;
+- RNG legado reconstruído deterministicamente;
+- sentinel legítimo do Hub possui contrato separado.
 
 ### 11.3 — Performance, memória, bateria, térmica e loading 🟡
-A parte automatizada/reproduzível está concluída, mas o gate formal exige aparelho físico conforme `mobile/performance_budgets.json`.
+A automação está verde; o gate formal ainda exige aparelho físico por 30 minutos.
 
-**11.3-A — runtime/headless PASS** (`31349922193`):
-- Hub cold load 40,75 ms;
-- instanciação do Hub p95 14,95 ms;
-- simulação de jornada p95 11,77 ms em 120 ciclos;
-- save p95 0,84 ms / load p95 0,88 ms em 24 round-trips;
-- pico estático ~68,75 MB; RSS máximo do processo ~159,5 MB;
-- deriva pós-aquecimento 0,02 MB;
-- zero node drift.
+**11.3-A runtime/headless PASS** (`31349922193`): Hub cold 40,75 ms; instanciação p95 14,95 ms; jornada p95 11,77 ms; save/load p95 0,84/0,88 ms; pico estático ~68,75 MB; RSS ~159,5 MB; deriva 0,02 MB; zero node drift.
 
-**11.3-B — Android emulator proxy PASS** (`31352049842`, mesmo APK em API 29 e 34):
-- API 29 / Android 10: cold 1.715 ms, resume p95 649 ms, pico PSS 200,94 MB, deriva no soak +0,01 MB;
-- API 34 / Android 14: cold 1.455 ms, resume p95 1.065 ms, pico PSS 192,50 MB, deriva ~0 MB;
-- 12 resumes + 12 amostras de soak em cada API;
-- install, pause/autosave, force-stop, relaunch, retomada e persistência continuaram verdes;
-- bateria/térmica de emulador são **somente proxy**, não evidência física.
+**11.3-B Android proxy PASS** (`31352049842`):
+- API 29: cold 1.715 ms, resume p95 649 ms, PSS 200,94 MB, deriva +0,01 MB;
+- API 34: cold 1.455 ms, resume p95 1.065 ms, PSS 192,50 MB, deriva ~0 MB;
+- bateria/térmica de emulador são somente proxy.
 
-Durante 11.3-B foram encontrados dois problemas de infraestrutura, ambos corrigidos sem alterar gameplay:
-1. `swiftshader_indirect` era um backend obsoleto/instável no Android Emulator atual; a CI permanente usa agora `-gpu software`;
-2. o coletor tinha colisão de variável POSIX `sh`, que criava loop infinito nos resumes; os contadores foram isolados e o gate passou nas duas APIs.
+**11.3-C físico pendente:** `tools/android_performance_profile.sh source=physical`, soak mínimo 1.800 s.
 
-**11.3-C — aparelho físico pendente:** o protocolo permanente `tools/android_performance_profile.sh` aceita `source=physical` e recusa soak menor que 1.800 s. Sem essa evidência, 11.3 não é marcada concluída.
+### 11.4 — UI responsiva e acessibilidade ✅
+HEAD limpo `c988448`, workflow `Veredas Responsive Accessibility` run `31421360688`:
+- 100 casos de cena;
+- 80 modos dinâmicos;
+- 1.560 verificações de botões/touch targets;
+- 2.320 verificações tipográficas;
+- 48 verificações de contraste;
+- 5 casos de safe area;
+- todos PASS.
+
+O achado real foi a densidade vertical do `Main`; a interface principal foi tornada responsiva e rolável sem reduzir fonte, contraste ou alvo mínimo de toque. No mesmo HEAD também ficaram verdes CI, regression, save-fuzz, adversarial e balance-freeze.
+
+### 11.5 — Arquitetura de localização e idiomas 🟡
+Implementação em andamento:
+- fonte canônica `pt_BR`;
+- idiomas de lançamento: `pt_BR`, `en`, `es_419`;
+- conteúdo de regras permanece canônico e imutável;
+- apresentação usa overlays por IDs estáveis;
+- ausência de tradução cai para pt-BR;
+- preferência de idioma vive em `profile.settings.locale`, sem mudança de schema;
+- completude de tradução e QA linguístico pertencem ao gate 11.6.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -72,11 +80,11 @@ Durante 11.3-B foram encontrados dois problemas de infraestrutura, ambos corrigi
 
 ## Fase 11 — QA, acessibilidade e localização
 - 11.1 ✅ Matriz ampla de regressão automatizada e testes de integração.
-- 11.2 ✅ Fuzzing/migração de saves e compatibilidade com versões anteriores.
-- 11.3 🟡 Performance, memória, bateria, térmica e loading — automatização e emuladores verdes; aparelho físico ainda obrigatório.
-- 11.4 🟡 UI responsiva/acessibilidade em matriz de dispositivos — iniciado em paralelo enquanto 11.3 aguarda evidência física.
-- 11.5 ⏳ Arquitetura de localização e idiomas.
-- 11.6 ⏳ QA linguístico, overflow, iconografia e terminologia.
+- 11.2 ✅ Fuzzing/migração de saves e compatibilidade.
+- 11.3 🟡 Performance/memória/bateria/térmica/loading — automatização e emuladores verdes; aparelho físico obrigatório pendente.
+- 11.4 ✅ UI responsiva/acessibilidade em matriz de dispositivos.
+- 11.5 🟡 Arquitetura de localização e idiomas de lançamento.
+- 11.6 ⏳ QA linguístico, overflow, iconografia e consistência terminológica.
 - 11.7 ⏳ QA audiovisual em contexto real.
 - 11.8 ⏳ Triage até zero blocker/critical.
 - 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
@@ -90,7 +98,7 @@ Durante 11.3-B foram encontrados dois problemas de infraestrutura, ambos corrigi
 - 7.10 ⏳ QA audiovisual final.
 
 ## Contagem formal
-- **107/130 passos concluídos segundo seus gates.**
+- **108/130 passos concluídos segundo seus gates.**
 
 ## Ponto final
 O roadmap termina apenas em **12.10**, com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.

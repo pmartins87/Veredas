@@ -1,0 +1,16 @@
+{
+  "settings.accessibility.title": "Accessibility",
+  "settings.accessibility.description": "Settings can be changed at any time and do not alter journey rules.",
+  "settings.language.label": "Language",
+  "settings.font_size": "Text size: {percent}%",
+  "settings.high_contrast": "High contrast",
+  "settings.reduce_motion": "Reduce motion",
+  "settings.disable_flashes": "Disable flashes",
+  "settings.icon_labels": "Show labels alongside icons",
+  "settings.haptics": "Haptic feedback",
+  "settings.combat_text_detail": "Combat text detail",
+  "settings.combat_text.compact": "Compact",
+  "settings.combat_text.normal": "Normal",
+  "settings.combat_text.detailed": "Detailed",
+  "common.done": "Done"
+}
