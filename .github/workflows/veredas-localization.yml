@@ -17,6 +17,7 @@ on:
       - 'projeto_jornada/tools/seed_structured_localization.py'
       - 'projeto_jornada/tools/seed_structured_name_localization.py'
       - 'projeto_jornada/tools/seed_boss_name_localization.py'
+      - 'projeto_jornada/tools/seed_item_name_localization.py'
       - 'projeto_jornada/tools/ui_localization_inventory.py'
       - 'projeto_jornada/tests/LocalizationArchitectureCertification.gd'
       - 'projeto_jornada/tests/localization_architecture_certification.tscn'
@@ -56,6 +57,7 @@ jobs:
           python tools/seed_structured_localization.py --check
           python tools/seed_structured_name_localization.py --check
           python tools/seed_boss_name_localization.py --check
+          python tools/seed_item_name_localization.py --check
       - name: Inventory stable-ID localization surface
         working-directory: projeto_jornada
         run: python tools/localization_inventory.py
@@ -65,7 +67,7 @@ jobs:
       - name: Require complete labels and UI; report narrative coverage
         working-directory: projeto_jornada
         run: python tools/localization_linguistic_report.py --require-complete-labels --require-complete-ui --output /tmp/veredas-linguistic-report.json
-      - name: Build deterministic narrative translation batches
+      - name: Build deterministic remaining-only translation batches
         working-directory: projeto_jornada
         run: python tools/localization_translation_batches.py --max-units 400 --output /tmp/veredas-translation-batches.json
       - name: Require full classification of content string fields
