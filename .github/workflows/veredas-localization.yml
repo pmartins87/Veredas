@@ -6,6 +6,7 @@ on:
       - projeto-jornada-snapshots
     paths:
       - 'projeto_jornada/localization/**'
+      - 'projeto_jornada/scenes/*.gd'
       - 'projeto_jornada/ui/LocalizationService.gd'
       - 'projeto_jornada/ui/AccessibilityPanel.gd'
       - 'projeto_jornada/tools/localization_inventory.py'
@@ -42,6 +43,9 @@ jobs:
           python tools/refine_item_economy.py >/dev/null
           python tools/refine_narrative_balance.py >/dev/null
           python tools/validate_canonical.py >/dev/null
+      - name: Require zero hardcoded primary UI text
+        working-directory: projeto_jornada
+        run: python tools/ui_localization_inventory.py --require-zero --output /tmp/veredas-ui-localization-inventory.json
       - name: Inventory stable-ID localization surface
         working-directory: projeto_jornada
         run: python tools/localization_inventory.py
@@ -54,9 +58,6 @@ jobs:
       - name: Require full classification of content string fields
         working-directory: projeto_jornada
         run: python tools/localization_schema_audit.py --require-classified --output /tmp/veredas-localization-schema-audit.json
-      - name: Inventory hardcoded UI literals
-        working-directory: projeto_jornada
-        run: python tools/ui_localization_inventory.py --output /tmp/veredas-ui-localization-inventory.json
       - name: Download Godot
         run: |
           curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
