@@ -1,0 +1,71 @@
+name: Veredas Localization Pack 11.6
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/localization/content/**'
+      - 'projeto_jornada/localization/content_packs/**'
+      - 'projeto_jornada/localization/manifest.json'
+      - 'projeto_jornada/localization/glossary.json'
+      - 'projeto_jornada/data/**'
+      - 'projeto_jornada/ui/LocalizationService.gd'
+      - 'projeto_jornada/tools/export_localization_catalog.py'
+      - 'projeto_jornada/tools/localization_quality_gate.py'
+      - 'projeto_jornada/tools/localization_pack_certification.py'
+      - '.github/workflows/veredas-localization-pack.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-localization-pack-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compact-content-pack-11-6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Certify compact launch content packs
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_pack_certification.py \
+            --output /tmp/veredas-localization-pack-certification.json
+      - name: Validate localization architecture inventory
+        working-directory: projeto_jornada
+        run: python tools/localization_inventory.py
+      - name: Download Godot
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            printf '%s\n' "$output"
+            exit 1
+          fi
+      - name: Validate localization runtime remains fail-closed
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/localization_architecture_certification.tscn \
+            'LOCALIZATION_ARCHITECTURE_CERTIFICATION FAIL' \
+            'LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5'
+      - name: Upload pack certification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-localization-pack-certification
+          path: /tmp/veredas-localization-pack-certification.json
+          if-no-files-found: ignore
+          retention-days: 7
