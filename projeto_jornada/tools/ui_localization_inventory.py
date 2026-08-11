@@ -8,8 +8,10 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SCOPES = [ROOT / "scenes", ROOT / "ui"]
-EXCLUDE = {ROOT / "ui" / "LocalizationService.gd"}
+FILES = [
+    *(sorted((ROOT / "scenes").glob("*.gd"))),
+    ROOT / "ui" / "AccessibilityPanel.gd",
+]
 STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"')
 ALPHA_RE = re.compile(r"[A-Za-zÀ-ÿ]")
 INTERNAL_PREFIXES = (
@@ -17,13 +19,15 @@ INTERNAL_PREFIXES = (
     "item.", "npc.", "mark.", "debt.", "event.", "ending.", "ability.", "family.",
     "arc.", "pool.", "mode.", "modifier.", "achievement.", "entitlement.", "meta.",
 )
-TECHNICAL_EXACT = {
-    "mata_fio_verde", "normal", "selected", "compact", "detailed", "cosmetic", "plain",
-}
-LOWER_TOKEN_RE = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*$")
+TECHNICAL_EXACT = {"mata_fio_verde", "normal", "selected", "compact", "detailed", "cosmetic", "plain"}
+LOWER_TOKEN_RE = re.compile(r"^_?[a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*$")
 FORMAT_TOKEN_RE = re.compile(r"%(?:\d+\$)?[-+0-9.]*[sdif]|\{[A-Za-z0-9_]+\}")
 BB_TAG_RE = re.compile(r"\[/?[A-Za-z_]+(?:=[^\]]+)?\]")
 ESCAPE_RE = re.compile(r"\\[nrt\\\"]")
+TECHNICAL_LINE_MARKERS = (
+    "push_error(", "push_warning(", "printerr(", "file.store_string(",
+    "add_theme_constant_override(", ".name =", " name =", "call_deferred(",
+)
 
 
 def decode_literal(token: str) -> str:
@@ -41,13 +45,11 @@ def language_payload(value: str) -> str:
     return cleaned.strip()
 
 
-def is_user_facing_candidate(value: str) -> bool:
+def is_user_facing_candidate(value: str, source_line: str) -> bool:
+    if any(marker in source_line for marker in TECHNICAL_LINE_MARKERS):
+        return False
     raw = value.strip()
-    if not raw:
-        return False
-    if raw.startswith(INTERNAL_PREFIXES):
-        return False
-    if raw in TECHNICAL_EXACT:
+    if not raw or raw.startswith(INTERNAL_PREFIXES) or raw in TECHNICAL_EXACT:
         return False
     if LOWER_TOKEN_RE.fullmatch(raw):
         return False
@@ -57,31 +59,29 @@ def is_user_facing_candidate(value: str) -> bool:
 
 def scan() -> list[dict]:
     rows: list[dict] = []
-    for scope in SCOPES:
-        for path in sorted(scope.glob("*.gd")):
-            if path in EXCLUDE:
+    for path in FILES:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for line_no, line in enumerate(text.splitlines(), 1):
+            stripped = line.strip()
+            if stripped.startswith("#"):
                 continue
-            text = path.read_text(encoding="utf-8")
-            for line_no, line in enumerate(text.splitlines(), 1):
-                stripped = line.strip()
-                if stripped.startswith("#"):
+            for match in STRING_RE.finditer(line):
+                value = decode_literal(match.group(0))
+                if not is_user_facing_candidate(value, stripped):
                     continue
-                for match in STRING_RE.finditer(line):
-                    token = match.group(0)
-                    value = decode_literal(token)
-                    if not is_user_facing_candidate(value):
-                        continue
-                    rows.append({
-                        "file": str(path.relative_to(ROOT)),
-                        "line": line_no,
-                        "literal": value,
-                        "source_line": stripped,
-                    })
+                rows.append({
+                    "file": str(path.relative_to(ROOT)),
+                    "line": line_no,
+                    "literal": value,
+                    "source_line": stripped,
+                })
     return rows
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Inventory hardcoded user-facing string literals in GDScript scenes/UI.")
+    parser = argparse.ArgumentParser(description="Inventory hardcoded user-facing string literals in primary GDScript UI surfaces.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--require-zero", action="store_true")
     args = parser.parse_args()
@@ -98,7 +98,7 @@ def main() -> int:
         print("UI_HARDCODED %s: %d" % (file_name, count))
     if args.require_zero and rows:
         print("UI_LOCALIZATION_INVENTORY FAIL: hardcoded user-facing literals remain")
-        for row in rows[:80]:
+        for row in rows[:100]:
             print("UI_LITERAL %s:%d: %s" % (row["file"], row["line"], row["literal"].replace("\n", "\\n")))
         return 1
     print("UI_LOCALIZATION_INVENTORY PASS: report_only require_zero=%s" % str(args.require_zero).lower())

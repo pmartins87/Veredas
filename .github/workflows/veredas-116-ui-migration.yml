@@ -1,0 +1,95 @@
+name: Veredas 11.6 UI Migration
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/tools/migrate_scene_ui_localization.py'
+      - '.github/workflows/veredas-116-ui-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-116-ui-migration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migrate-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: projeto-jornada-snapshots
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply deterministic UI localization migration
+        working-directory: projeto_jornada
+        run: python tools/migrate_scene_ui_localization.py
+      - name: Rebuild integrated fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
+      - name: Validate localization inventories
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_inventory.py
+          python tools/localization_schema_audit.py --require-classified
+          python tools/ui_localization_inventory.py --require-zero
+      - name: Download Godot
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then printf '%s\n' "$output"; exit 1; fi
+      - name: Validate localization runtime
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/localization_architecture_certification.tscn \
+            'LOCALIZATION_ARCHITECTURE_CERTIFICATION FAIL' \
+            'LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5'
+      - name: Validate responsive regression
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/responsive_accessibility_certification.tscn \
+            'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
+            'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
+      - name: Persist validated migration
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            projeto_jornada/scenes/JourneySetup.gd \
+            projeto_jornada/scenes/VigilThreads.gd \
+            projeto_jornada/scenes/Hub.gd \
+            projeto_jornada/scenes/Main.gd \
+            projeto_jornada/scenes/Codex.gd \
+            projeto_jornada/localization/manifest.json \
+            projeto_jornada/localization/ui/pt_BR.json \
+            projeto_jornada/localization/ui/en.json \
+            projeto_jornada/localization/ui/es_419.json
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'UI localization migration already persisted.'
+            exit 0
+          fi
+          git commit -m 'i18n: migrate primary scene UI into launch catalogs'
+          git push origin HEAD:projeto-jornada-snapshots
