@@ -131,27 +131,44 @@
     "architecture": "stable_ids_plus_nested_presentation_overlays",
     "canonical_content_immutable": true,
     "records": 5160,
-    "source_content_strings": 18156,
-    "required_ui_keys": 14,
-    "translated_required_ui_checks": 28,
-    "architecture_probe_overlay_entries": 4,
-    "architecture_probe_nested_overlays": 2,
+    "current_source_content_units": 18804,
+    "current_required_ui_keys": 119,
     "runtime_alias_checks": 3,
-    "runtime_ui_checks": 42,
-    "runtime_panels": 2,
     "result": "PASS"
   },
   "phase11_6": {
     "status": "in_progress_parallel",
-    "source_content_units": 18156,
+    "latest_linguistic_gate_commit": "d9071f04a19772b7d7926bbc9f514c210bfe6b6b",
+    "latest_linguistic_gate_run_id": 31456801011,
+    "latest_linguistic_gate_result": "PASS",
+    "source_content_units": 18804,
     "target_locales": ["en", "es_419"],
-    "current_content_overlays_per_target": 2,
-    "current_required_ui_coverage": "14/14",
+    "content_coverage": {
+      "en": {"translated": 2, "total": 18804},
+      "es_419": {"translated": 2, "total": 18804}
+    },
+    "canonical_labels": {
+      "pt_BR": "165/165",
+      "en": "165/165",
+      "es_419": "165/165"
+    },
+    "required_ui_coverage": {
+      "pt_BR": "119/119",
+      "en": "119/119",
+      "es_419": "119/119"
+    },
+    "hardcoded_primary_ui_candidates": 0,
     "glossary_terms": 20,
+    "translation_batches": 48,
+    "max_units_per_batch": 400,
+    "translation_source_key_sha256": "19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63",
     "translation_completeness_required_before_certification": true,
     "tools": [
       "tools/export_localization_catalog.py",
-      "tools/localization_linguistic_report.py"
+      "tools/localization_linguistic_report.py",
+      "tools/localization_schema_audit.py",
+      "tools/localization_translation_batches.py",
+      "tools/ui_localization_inventory.py"
     ]
   },
   "balance_freeze": {
