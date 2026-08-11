@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "source_locale": "pt_BR",
+    "proper_names": "preserve_character_and_person_names; translate_descriptive_domain_and_system_names consistently",
+    "mechanical_terms": "must use exact glossary target; no synonyms inside UI or rules-facing text",
+    "narrative_terms": "prefer literary naturalness but preserve the glossary concept"
+  },
+  "terms": {
+    "game.title": {"pt_BR": "Veredas da Trama", "en": "Veredas da Trama", "es_419": "Veredas da Trama", "class": "proper_title"},
+    "world.weave": {"pt_BR": "Trama", "en": "Weave", "es_419": "Trama", "class": "lore"},
+    "world.path": {"pt_BR": "Vereda", "en": "Path", "es_419": "Senda", "class": "lore"},
+    "world.domain": {"pt_BR": "Domínio", "en": "Domain", "es_419": "Dominio", "class": "lore"},
+    "world.rupture": {"pt_BR": "Ruptura", "en": "Rupture", "es_419": "Ruptura", "class": "lore"},
+    "meta.vigil_knot": {"pt_BR": "Nó de Vigília", "en": "Vigil Knot", "es_419": "Nudo de Vigilia", "class": "system"},
+    "meta.vigil_threads": {"pt_BR": "Fios de Vigília", "en": "Vigil Threads", "es_419": "Hilos de Vigilia", "class": "system"},
+    "narrative.mark": {"pt_BR": "Marca", "en": "Mark", "es_419": "Marca", "class": "system"},
+    "narrative.debt": {"pt_BR": "Dívida Narrativa", "en": "Narrative Debt", "es_419": "Deuda Narrativa", "class": "system"},
+    "narrative.echo": {"pt_BR": "Eco", "en": "Echo", "es_419": "Eco", "class": "system"},
+    "time.beat": {"pt_BR": "Batida", "en": "Beat", "es_419": "Latido", "class": "system"},
+    "resource.health": {"pt_BR": "Vida", "en": "Health", "es_419": "Salud", "class": "mechanical"},
+    "resource.vigor": {"pt_BR": "Vigor", "en": "Vigor", "es_419": "Vigor", "class": "mechanical"},
+    "resource.fragments": {"pt_BR": "Fragmentos", "en": "Fragments", "es_419": "Fragmentos", "class": "mechanical"},
+    "resource.essence": {"pt_BR": "Essência", "en": "Essence", "es_419": "Esencia", "class": "mechanical"},
+    "resource.provisions": {"pt_BR": "Provisões", "en": "Provisions", "es_419": "Provisiones", "class": "mechanical"},
+    "combat.guard": {"pt_BR": "Guarda", "en": "Guard", "es_419": "Guardia", "class": "mechanical"},
+    "combat.posture": {"pt_BR": "Postura", "en": "Posture", "es_419": "Postura", "class": "mechanical"},
+    "combat.intent": {"pt_BR": "Intenção", "en": "Intent", "es_419": "Intención", "class": "mechanical"},
+    "journey.journey": {"pt_BR": "Jornada", "en": "Journey", "es_419": "Jornada", "class": "system"}
+  }
+}

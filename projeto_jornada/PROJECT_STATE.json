@@ -1,10 +1,10 @@
 {
   "roadmap_total_steps": 130,
-  "completed_steps": 108,
+  "completed_steps": 109,
   "current_phase": 11,
   "completed_through": "11.2",
-  "current_step": "11.5",
-  "current_step_title": "Arquitetura de localização e idiomas de lançamento",
+  "current_step": "11.6",
+  "current_step_title": "QA linguístico, overflow, iconografia e consistência terminológica",
   "phase10": {
     "10.1": "certified",
     "10.2": "certified",
@@ -22,28 +22,30 @@
     "11.2": "certified",
     "11.3": "in_progress_physical_device_required",
     "11.4": "certified",
-    "11.5": "in_progress_parallel",
-    "11.6": "pending",
+    "11.5": "certified",
+    "11.6": "in_progress_parallel",
     "11.7": "pending",
     "11.8": "pending",
     "11.9": "pending",
     "11.10": "pending"
   },
   "last_certified_ci": {
-    "commit": "c988448e2546b0b684a3f048fd8b28fe0f3ed11e",
+    "commit": "37878d119d429544bc83e12986acd09e720d47e0",
     "same_head": true,
-    "main_ci_run_id": 31421360675,
+    "main_ci_run_id": 31453146213,
     "main_ci_result": "PASS",
-    "adversarial_run_id": 31421360719,
+    "adversarial_run_id": 31453146234,
     "adversarial_result": "PASS",
-    "regression_run_id": 31421360678,
+    "regression_run_id": 31453146230,
     "regression_result": "PASS",
-    "save_fuzz_run_id": 31421360695,
+    "save_fuzz_run_id": 31453146206,
     "save_fuzz_result": "PASS",
-    "freeze_run_id": 31421360712,
+    "freeze_run_id": 31453146210,
     "freeze_result": "PASS",
-    "responsive_run_id": 31421360688,
-    "responsive_result": "PASS"
+    "responsive_run_id": 31453146229,
+    "responsive_result": "PASS",
+    "localization_run_id": 31453146197,
+    "localization_result": "PASS"
   },
   "phase11_1": {
     "status": "certified",
@@ -121,12 +123,36 @@
     "result": "PASS"
   },
   "phase11_5": {
-    "status": "in_progress_parallel",
+    "status": "certified",
+    "certified_commit": "37878d119d429544bc83e12986acd09e720d47e0",
+    "workflow_run_id": 31453146197,
     "source_locale": "pt_BR",
     "launch_locales": ["pt_BR", "en", "es_419"],
-    "architecture": "stable_ids_plus_presentation_overlays",
+    "architecture": "stable_ids_plus_nested_presentation_overlays",
     "canonical_content_immutable": true,
-    "translation_completeness_gate": "11.6"
+    "records": 5160,
+    "source_content_strings": 18156,
+    "required_ui_keys": 14,
+    "translated_required_ui_checks": 28,
+    "architecture_probe_overlay_entries": 4,
+    "architecture_probe_nested_overlays": 2,
+    "runtime_alias_checks": 3,
+    "runtime_ui_checks": 42,
+    "runtime_panels": 2,
+    "result": "PASS"
+  },
+  "phase11_6": {
+    "status": "in_progress_parallel",
+    "source_content_units": 18156,
+    "target_locales": ["en", "es_419"],
+    "current_content_overlays_per_target": 2,
+    "current_required_ui_coverage": "14/14",
+    "glossary_terms": 20,
+    "translation_completeness_required_before_certification": true,
+    "tools": [
+      "tools/export_localization_catalog.py",
+      "tools/localization_linguistic_report.py"
+    ]
   },
   "balance_freeze": {
     "status": "certified",

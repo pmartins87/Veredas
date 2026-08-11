@@ -9,6 +9,8 @@ on:
       - 'projeto_jornada/ui/LocalizationService.gd'
       - 'projeto_jornada/ui/AccessibilityPanel.gd'
       - 'projeto_jornada/tools/localization_inventory.py'
+      - 'projeto_jornada/tools/export_localization_catalog.py'
+      - 'projeto_jornada/tools/localization_linguistic_report.py'
       - 'projeto_jornada/tests/LocalizationArchitectureCertification.gd'
       - 'projeto_jornada/tests/localization_architecture_certification.tscn'
       - '.github/workflows/veredas-localization.yml'
@@ -19,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  localization-11-5:
+  localization-11-5-11-6:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -41,6 +43,12 @@ jobs:
       - name: Inventory stable-ID localization surface
         working-directory: projeto_jornada
         run: python tools/localization_inventory.py
+      - name: Export contextual source catalog
+        working-directory: projeto_jornada
+        run: python tools/export_localization_catalog.py --output /tmp/veredas-localization-source.json
+      - name: Report linguistic coverage and glossary integrity
+        working-directory: projeto_jornada
+        run: python tools/localization_linguistic_report.py --output /tmp/veredas-linguistic-report.json
       - name: Download Godot
         run: |
           curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
@@ -58,3 +66,11 @@ jobs:
             res://tests/localization_architecture_certification.tscn \
             'LOCALIZATION_ARCHITECTURE_CERTIFICATION FAIL' \
             'LOCALIZATION_ARCHITECTURE_CERTIFICATION PASS: 11.5'
+      - name: Upload linguistic working reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-localization-working-report
+          path: |
+            /tmp/veredas-localization-source.json
+            /tmp/veredas-linguistic-report.json
+          retention-days: 7
