@@ -289,360 +289,420 @@
   },
   "boss.arquivo_ecos.01": {
     "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened.",
+    "name": "Mother-Erasure",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.02": {
     "conflict": "Decide how to decide who may edit a record without ignoring that an index can erase someone.",
+    "name": "Librarian of Deaths",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.03": {
     "conflict": "Decide how to free an Echo without ignoring that the Gallery records alternative deaths.",
+    "name": "Index That Reads People",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.04": {
     "conflict": "Decide how to not confuse memory with truth without ignoring that the Archive may have caused the Pruning.",
+    "name": "Memory Without an Author",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.arquivo_ecos.05": {
     "conflict": "Decide how to preserve a memory without ignoring that some pages remember journeys that never happened.",
+    "name": "Archive That Defends Itself",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.01": {
     "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars.",
+    "name": "Midday Pack",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.02": {
     "conflict": "Decide how to decide who receives shade without ignoring that the obelisks uphold ancient privileges.",
+    "name": "Living Observatory",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.03": {
     "conflict": "Decide how to correct an unjust calendar without ignoring that the Hollow Sun once followed another path.",
+    "name": "Scorpion of the Single Shadow",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.04": {
     "conflict": "Decide how to preserve the night without ignoring that some districts buy shade from others.",
+    "name": "Shadowless Man",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.chapada_sol_oco.05": {
     "conflict": "Decide how to redistribute water without ignoring that the eighth shadow does not appear on the calendars.",
+    "name": "Heart of the Hollow Sun",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.01": {
     "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates.",
+    "name": "Judge of Door Zero",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.02": {
     "conflict": "Decide how to free a passage without ignoring that some keys are relationships, not objects.",
+    "name": "Key That Chooses Its Owner",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.03": {
     "conflict": "Decide how to judge who owns a key without ignoring that an address can be stolen.",
+    "name": "District Without an Address",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.04": {
     "conflict": "Decide how to prevent a monopoly on routes without ignoring that the city has more doors than walls.",
+    "name": "Mimic of the Twelve Thresholds",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.cidade_mil_portas.05": {
     "conflict": "Decide how to control access without ignoring that Door Zero opens onto places without coordinates.",
+    "name": "City That Closes",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.01": {
     "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies.",
+    "name": "Matriarch of the Coral Bells",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.02": {
     "conflict": "Decide how to choose a future route without ignoring that a chime disappeared on the night of the Rupture.",
+    "name": "Admiral of Drowned Odria",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.03": {
     "conflict": "Decide how to preserve a historic shipwreck without ignoring that sounds arrive before their cause.",
+    "name": "Storm of Wings",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.04": {
     "conflict": "Decide how to decide who controls a current without ignoring that Odria has more than one history.",
+    "name": "Calcified Captain",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.costa_sinos_afogados.05": {
     "conflict": "Decide how to save a port without ignoring that the lighthouse illuminates destinies.",
+    "name": "Synchronous Leviathan",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.01": {
     "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom.",
+    "name": "Master-Matrix Zero",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.02": {
     "conflict": "Decide how to shut down a factory without ignoring that orders come from dead people.",
+    "name": "Dreaming Boiler",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.03": {
     "conflict": "Decide how to finish a machine without ignoring that discarded parts return improved.",
+    "name": "Unfinished General",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.04": {
     "conflict": "Decide how to control the First Fire without ignoring that the First Fire remembers who lit it.",
+    "name": "Syndicate of a Thousand Hammers",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.forja_rubra.05": {
     "conflict": "Decide how to grant rights to the Unfinished without ignoring that a machine points toward the Loom.",
+    "name": "First Fire",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.01": {
     "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects.",
+    "name": "Nameless King",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.02": {
     "conflict": "Decide how to take another's name without ignoring that names carry debts.",
+    "name": "Abbess of the Last Memory",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.03": {
     "conflict": "Decide how to preserve a guilt without ignoring that the Ash preserves some truths by erasing them from everyone.",
+    "name": "Lighthouse That Forgets",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.04": {
     "conflict": "Decide how to stop a war without erasing the truth without ignoring that the Mouth returns altered stories.",
+    "name": "Nobody City",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mar_cinza.05": {
     "conflict": "Decide how to decide what deserves to be remembered without ignoring that something forgotten can keep causing effects.",
+    "name": "Maw of Oblivion",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.01": {
     "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes.",
+    "name": "Hungry Heartwood",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.02": {
     "conflict": "Decide how to honor a promise without ignoring that a forgotten promise holds the passage together.",
+    "name": "Oathbound Samaúma",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.03": {
     "conflict": "Decide how to save a traveler without ignoring that the sap comes from something that is not a tree.",
+    "name": "Rooted Cartographer",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.04": {
     "conflict": "Decide how to avoid destroying a living record without ignoring that names can be cultivated.",
+    "name": "Queen of Names",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.mata_fio_verde.05": {
     "conflict": "Decide how to preserve a route without ignoring that a map grows as trust changes.",
+    "name": "Guardian of the Knot-Tree",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.01": {
     "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet.",
+    "name": "Bear of the Broken Future",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.02": {
     "conflict": "Decide how to choose which future to warn about without ignoring that the Absent Sun may be a choice.",
+    "name": "Queen of the Low Aurora",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.03": {
     "conflict": "Decide how to save someone from a future memory without ignoring that the aurora records discarded futures.",
+    "name": "Fire That Remembers",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.04": {
     "conflict": "Decide how to decide whether the night should end without ignoring that a fire burns memories instead of wood.",
+    "name": "Palace Beneath the Ice",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.noite_iscara.05": {
     "conflict": "Decide how to keep a fire burning without ignoring that some memories have not happened yet.",
+    "name": "Night Without Tomorrow",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.01": {
     "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world.",
+    "name": "Salt Leviathan",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.02": {
     "conflict": "Decide how to preserve a fossil archive without ignoring that wet objects appear in the desert.",
+    "name": "Guardian of the Seven Ropes",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.03": {
     "conflict": "Decide how to follow a true mirage without ignoring that fossils hold inscriptions.",
+    "name": "Drinking Mirage",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.04": {
     "conflict": "Decide how to decide whether the sea should return without ignoring that a drop never falls.",
+    "name": "Walking Ossuary",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.salinas_ossamar.05": {
     "conflict": "Decide how to share water without ignoring that the ocean may still be pressing against the world.",
+    "name": "Eye of the Absent Sea",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.01": {
     "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first.",
+    "name": "Future That Refused to Die",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.02": {
     "conflict": "Decide how to reject a center without ignoring that the Rupture may have been containment.",
+    "name": "Original Hungry Knot",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.03": {
     "conflict": "Decide how to reconnect without creating tyranny without ignoring that some versions of the world refuse to converge.",
+    "name": "Inverted Weaver",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.04": {
     "conflict": "Decide how to accept multiple futures without ignoring that the Loom responds to Marks from previous journeys.",
+    "name": "Throne of Convergence",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.tear_desfeito.05": {
     "conflict": "Decide how to choose what should converge without ignoring that the Original Knot is not necessarily the first.",
+    "name": "Last Thread",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.01": {
     "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost.",
+    "name": "King of the Deep Reflection",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.02": {
     "conflict": "Decide how to keep a community above the flood without ignoring that a second moon exists only in the reflection.",
+    "name": "Matriarch of the Two Moons",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.03": {
     "conflict": "Decide how to prevent a reflection from replacing someone without ignoring that the house rests on another version of the ground.",
+    "name": "House That Walks",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.04": {
     "conflict": "Decide how to use an impossible tide without ignoring that some reflections remember rejected choices.",
+    "name": "Drowned One Without a First Face",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.varzea_espelhos.05": {
     "conflict": "Decide how to decide which version to believe without ignoring that objects arrive before they are lost.",
+    "name": "Returning Tide",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.vertice.01": {
     "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises.",
+    "name": "Serpent of a Thousand Bridges",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.vertice.02": {
     "conflict": "Decide how to save a bridge without ignoring that the abyss contains a city.",
+    "name": "Master of Counterweights",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.vertice.03": {
     "conflict": "Decide how to decide who may build without ignoring that a bridge casts a pillar that does not exist.",
+    "name": "Wind with a Name",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.vertice.04": {
     "conflict": "Decide how to keep a structural promise without ignoring that the wind repeats calculations.",
+    "name": "Abyss That Answers",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
   },
   "boss.vertice.05": {
     "conflict": "Decide how to redistribute weight without ignoring that some structures are held up by promises.",
+    "name": "Oathbound Bridge",
     "phases.0.name": "Reading",
     "phases.1.name": "Rupture",
     "phases.2.name": "Consequence"
