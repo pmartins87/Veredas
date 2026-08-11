@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1, 11.2, 11.4 e 11.5 ✅; 11.3 aguarda medição física; 11.6 em andamento em paralelo**.
+- Fase 11: **11.1, 11.2, 11.4 e 11.5 ✅; 11.3 aguarda medição física; 11.6, 11.7 e 11.8 em andamento com gates fail-closed**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -33,17 +33,38 @@ Commit limpo `c988448`, run `31421360688`: 100 casos de cena, 80 modos dinâmico
 Commit certificado `37878d1`. Arquitetura de IDs estáveis + overlays de apresentação; fonte/fallback `pt_BR`; idiomas de lançamento `pt_BR`, `en`, `es_419`; conteúdo canônico permanece imutável para regras e balanceamento.
 
 ### 11.6 — QA linguístico, overflow, iconografia e terminologia 🟡
-Em andamento; **não** será certificada antes da tradução integral e QA final.
-- inventário atual: **5.160 registros / 18.804 unidades de conteúdo localizáveis**;
-- UI principal: **0 strings hardcoded candidatas**;
-- UI obrigatória: **119/119 em pt-BR, 119/119 em inglês e 119/119 em espanhol latino-americano**;
-- labels mecânicos/lore: **165/165 em pt-BR, 165/165 em inglês e 165/165 em espanhol latino-americano**;
-- glossário canônico: 20 termos, com forma obrigatória por idioma;
-- conteúdo narrativo ainda traduzido: **2/18.804 em inglês e 2/18.804 em espanhol**;
-- corpus restante foi convertido em **48 lotes determinísticos**, máximo de 400 unidades, preservando registros e contexto;
-- SHA-256 das chaves-fonte: `19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63`;
-- gate permanente de labels/UI/source locale: commit `d9071f0`, run `31456801011`, PASS;
-- tradução integral, terminologia, placeholders e overflow localizado continuam obrigatórios antes de 11.6 ✅.
+A cobertura lógica foi ampliada, mas a etapa **não está certificada no branch canônico**.
+- inventário congelado: **5.160 registros / 18.804 unidades de conteúdo localizáveis**;
+- UI obrigatória: **119/119** nos três idiomas de lançamento;
+- labels mecânicos/lore: **165/165** nos três idiomas;
+- glossário canônico e gates de placeholders/BBCode/terminologia/overflow/iconografia existem;
+- o compilador reprodutível trabalha com **15.334 unidades de delta por idioma**, complementando **3.470 unidades-base** para o contrato de **18.804/18.804**;
+- porém os packs compactos persistidos no HEAD ainda não estão certificados: `en/part_005.b64part` apresenta tamanho anômalo de **59.951 bytes** e `es_419` contém somente `part_000`–`part_002`;
+- o defeito foi registrado como **`LOC-116-001` blocker** em `qa/known_issues.json`;
+- `localization_pack_certification.py` + `build_launch_localization_packs.py --check` em checkout limpo continuam obrigatórios antes de 11.6 ✅.
+
+### 11.7 — QA audiovisual final em contexto real 🟡
+Preflight e integração foram implementados, mas assets finais continuam bloqueando a certificação.
+- `AudioRouter` é autoload e está conectado ao `PresentationBus` real;
+- 5 buses garantidos: Master, Music, Ambience, SFX e UI;
+- contrato: **7 eventos de UI + 7 de combate + 24 camadas music/ambience dos 12 Domínios = 38 referências**;
+- roteamento `location -> world_id -> Domínio` verificado contra o gerador de conteúdo;
+- política `sound_supports_reading`: Music -15 dB, Ambience -18 dB, SFX -9 dB, UI -8 dB, com margem mínima de 4 dB;
+- auditor Python e cena Godot de contexto real são fail-closed;
+- os 38 assets finais de `res://assets/audio/**` ainda não existem no branch, portanto **7.8/7.10 e 11.7 permanecem pendentes**;
+- checkpoint detalhado: `AUDIOVISUAL_11_7_STATUS.md`.
+
+### 11.8 — Triage até zero blocker/critical 🟡
+A infraestrutura de triage foi iniciada sem antecipar PASS.
+- ledger canônico: `qa/known_issues.json`;
+- gate: `tools/qa_triage_gate.py`;
+- workflow: `Veredas QA Triage 11.8`;
+- blocker de produto ativo: **`LOC-116-001`**;
+- dívidas planejadas de arte, áudio e medição física são registradas separadamente como dependências de release, não como bugs artificiais;
+- 11.8 só poderá ser promovida quando o modo `--require-zero` reportar **0 blocker/critical ativos**.
+
+### Infraestrutura GitHub Actions — observação atual
+As execuções recentes dos novos gates estão encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de Godot permanecem sem certificação até uma execução real.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -63,9 +84,9 @@ Em andamento; **não** será certificada antes da tradução integral e QA final
 - 11.3 🟡 Performance/memória/bateria/térmica/loading — aparelho físico obrigatório pendente.
 - 11.4 ✅ UI responsiva/acessibilidade em matriz de dispositivos.
 - 11.5 ✅ Arquitetura de localização e idiomas de lançamento.
-- 11.6 🟡 QA linguístico, overflow, iconografia e consistência terminológica — tradução integral em andamento.
-- 11.7 ⏳ QA audiovisual em contexto real.
-- 11.8 ⏳ Triage até zero blocker/critical.
+- 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — cobertura lógica preparada, persistência/certificação final bloqueada por `LOC-116-001`.
+- 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
+- 11.8 🟡 Triage até zero blocker/critical — ledger/gate implementados; 1 blocker ativo.
 - 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
 - 11.10 ⏳ QA freeze do Release Candidate.
 
@@ -77,7 +98,7 @@ Em andamento; **não** será certificada antes da tradução integral e QA final
 - 7.10 ⏳ QA audiovisual final.
 
 ## Contagem formal
-- **109/130 passos concluídos segundo seus gates.**
+- **109/130 passos concluídos segundo os gates persistidos.**
 
 ## Ponto final
 O roadmap termina apenas em **12.10**, com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
