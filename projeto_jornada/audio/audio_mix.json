@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "principle": "sound_supports_reading",
+  "buses": {
+    "Master": 0.0,
+    "Music": -15.0,
+    "Ambience": -18.0,
+    "SFX": -9.0,
+    "UI": -8.0
+  },
+  "limits": {
+    "music_max_db": -12.0,
+    "ambience_max_db": -15.0,
+    "foreground_min_margin_db": 4.0,
+    "crossfade_seconds": 0.8
+  },
+  "accessibility": {
+    "essential_information_requires_audio": false,
+    "visual_text_feedback_required": true
+  }
+}
