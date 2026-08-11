@@ -12,6 +12,9 @@ on:
       - '.github/workflows/veredas-localization-quality.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: veredas-localization-quality-${{ github.ref }}
   cancel-in-progress: true
