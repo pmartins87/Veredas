@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.5",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "listing_source": "product/store_listing_google_play.json",
+  "gate": "tools/store_listing_gate.py",
+  "launch_store_locales": ["pt-BR", "en-US"],
+  "copy": {
+    "pt-BR": {
+      "title_chars": 16,
+      "short_description_chars": 68,
+      "full_description_chars": 1114
+    },
+    "en-US": {
+      "title_chars": 16,
+      "short_description_chars": 59,
+      "full_description_chars": 1049
+    },
+    "limits": {
+      "title": 30,
+      "short_description": 80,
+      "full_description": 4000
+    },
+    "status": "draft_copy_persisted_within_limits"
+  },
+  "visual_assets": {
+    "icon_512": "pending_final_art",
+    "feature_graphic_1024x500": "pending_final_art",
+    "pt_BR_phone_screenshots_1080x1920": "0/6 final RC captures",
+    "en_phone_screenshots_1080x1920": "0/6 final RC captures",
+    "preview_video": "optional_pending_decision"
+  },
+  "screenshot_plan": [
+    "Hub / journey setup",
+    "narrative choice",
+    "combat",
+    "Domain/location exploration",
+    "codex/progress",
+    "accessibility/settings"
+  ],
+  "quality_contract": {
+    "actual_gameplay_or_ui_only": true,
+    "mockups_presented_as_gameplay_forbidden": true,
+    "rank_price_discount_cta_overlays_forbidden": true,
+    "localized_screenshots_required": true,
+    "alt_text_max_chars": 140,
+    "png_header_and_dimensions_checked_without_external_library": true,
+    "release_requires_11_10_completion": true,
+    "release_requires_12_1_name_certification": true
+  },
+  "dependencies": ["7.3", "7.4", "7.5", "7.10", "11.10", "12.1"],
+  "completion_requirements": [
+    "freeze copy against the release candidate",
+    "produce final original icon and feature graphic",
+    "capture six PT-BR and six en-US screenshots from the certified RC",
+    "pass store_listing_gate.py --release",
+    "human-review all listing claims and imagery for accuracy",
+    "upload and visually inspect the localized listing in Play Console",
+    "record exact RC capture commit and final listing revision"
+  ],
+  "pass_recorded": false
+}
