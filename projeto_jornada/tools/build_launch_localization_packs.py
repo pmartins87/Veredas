@@ -15,7 +15,6 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 LOC = ROOT / "localization"
 PACK_ROOT = LOC / "content_packs"
-TARGETS = ("en", "es_419")
 EXPECTED_SOURCE_UNITS = 18_804
 EXPECTED_DELTA_UNITS = 15_334
 PART_CHARS = 16_000
@@ -42,15 +41,20 @@ def read_object(path: Path) -> dict[str, Any]:
     return value
 
 
-def _inject_known_editorial_overrides(module: Any) -> None:
-    """Patch a legacy material lexicon in memory without mutating translator source.
+def launch_targets() -> tuple[str, ...]:
+    manifest = read_object(LOC / "manifest.json")
+    source_locale = str(manifest.get("source_locale", "pt_BR"))
+    locales = manifest.get("launch_locales", [])
+    if not isinstance(locales, list):
+        raise RuntimeError("launch_locales must be an array")
+    targets = tuple(str(locale) for locale in locales if str(locale) != source_locale)
+    if not targets:
+        raise RuntimeError("launch localization has no non-source target locale")
+    return targets
 
-    The narrative translator predates the explicit luminous-moss entry. Different
-    revisions used either locale->source maps or source->locale maps, so support
-    both shapes. Adding the key only to dictionaries that already look like a
-    bilingual lexicon is harmless and makes the compiler reproducible across the
-    recovery revisions.
-    """
+
+def _inject_known_editorial_overrides(module: Any) -> None:
+    """Patch a legacy material lexicon in memory without mutating translator source."""
     source = "musgo luminoso"
     targets = {"en": "Luminous Moss", "es_419": "Musgo Luminoso"}
     for value in vars(module).values():
@@ -177,6 +181,15 @@ def write_pack(locale_id: str, encoded: str) -> list[str]:
     return names
 
 
+def key_set(delta: dict[str, Any]) -> set[tuple[str, str]]:
+    return {
+        (record_id, path)
+        for record_id, overlay in delta.items()
+        if isinstance(overlay, dict)
+        for path in overlay
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Reproducibly compile complete launch localization into compact delta packs."
@@ -186,8 +199,9 @@ def main() -> int:
     mode.add_argument("--check", action="store_true", help="Recompile in memory and compare semantic pack contents.")
     args = parser.parse_args()
 
+    targets = launch_targets()
     sys.path.insert(0, str(TOOLS))
-    catalog_paths = {locale: LOC / "content" / f"{locale}.json" for locale in TARGETS}
+    catalog_paths = {locale: LOC / "content" / f"{locale}.json" for locale in targets}
     original_text = {locale: path.read_text(encoding="utf-8") for locale, path in catalog_paths.items()}
     base_catalogs = {locale: json.loads(text) for locale, text in original_text.items()}
     if any(not isinstance(value, dict) for value in base_catalogs.values()):
@@ -209,7 +223,7 @@ def main() -> int:
             path.write_text(original_text[locale], encoding="utf-8")
 
     deltas: dict[str, dict[str, Any]] = {}
-    for locale_id in TARGETS:
+    for locale_id in targets:
         full_count = unit_count(full_catalogs[locale_id])
         if full_count != EXPECTED_SOURCE_UNITS:
             raise SystemExit(
@@ -223,16 +237,24 @@ def main() -> int:
             )
         deltas[locale_id] = delta
 
-    en_keys = {(record_id, path) for record_id, overlay in deltas["en"].items() for path in overlay}
-    es_keys = {(record_id, path) for record_id, overlay in deltas["es_419"].items() for path in overlay}
-    if en_keys != es_keys:
-        raise SystemExit(
-            "target delta key sets differ: en_only=%d es_only=%d"
-            % (len(en_keys - es_keys), len(es_keys - en_keys))
-        )
+    if len(targets) > 1:
+        reference_locale = targets[0]
+        reference_keys = key_set(deltas[reference_locale])
+        for locale_id in targets[1:]:
+            candidate_keys = key_set(deltas[locale_id])
+            if reference_keys != candidate_keys:
+                raise SystemExit(
+                    "target delta key sets differ: %s_only=%d %s_only=%d"
+                    % (
+                        reference_locale,
+                        len(reference_keys - candidate_keys),
+                        locale_id,
+                        len(candidate_keys - reference_keys),
+                    )
+                )
 
     if args.check:
-        for locale_id in TARGETS:
+        for locale_id in targets:
             existing_text = current_pack_text(locale_id)
             if existing_text is None:
                 raise SystemExit(f"{locale_id}: compact pack missing")
@@ -240,12 +262,12 @@ def main() -> int:
             if existing != deltas[locale_id]:
                 raise SystemExit(f"{locale_id}: compact pack does not match reproducible compiler output")
         print(
-            "BUILD_LOCALIZATION_PACKS PASS: semantic packs reproducible targets=2 full_each=%d delta_each=%d"
-            % (EXPECTED_SOURCE_UNITS, EXPECTED_DELTA_UNITS)
+            "BUILD_LOCALIZATION_PACKS PASS: semantic packs reproducible targets=%d full_each=%d delta_each=%d"
+            % (len(targets), EXPECTED_SOURCE_UNITS, EXPECTED_DELTA_UNITS)
         )
         return 0
 
-    for locale_id in TARGETS:
+    for locale_id in targets:
         encoded = encode_pack(deltas[locale_id])
         names = write_pack(locale_id, encoded)
         print(
@@ -253,8 +275,8 @@ def main() -> int:
             % (locale_id, EXPECTED_DELTA_UNITS, len(encoded), len(names))
         )
     print(
-        "BUILD_LOCALIZATION_PACKS PASS: targets=2 full_each=%d delta_each=%d"
-        % (EXPECTED_SOURCE_UNITS, EXPECTED_DELTA_UNITS)
+        "BUILD_LOCALIZATION_PACKS PASS: targets=%d full_each=%d delta_each=%d"
+        % (len(targets), EXPECTED_SOURCE_UNITS, EXPECTED_DELTA_UNITS)
     )
     return 0
 
