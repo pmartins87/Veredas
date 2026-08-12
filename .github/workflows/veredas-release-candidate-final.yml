@@ -1,0 +1,49 @@
+name: Veredas Final Release Candidate 12.8
+
+on:
+  workflow_dispatch:
+    inputs:
+      certify_release:
+        description: 'Run the fail-closed final 12.8 release gate (not just preflight)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-release-candidate-final-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-candidate-final:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate 12.8 RC and rollback contract
+        working-directory: projeto_jornada
+        run: python tools/release_candidate_final_gate.py --output /tmp/veredas-12-8-preflight.json
+      - name: Enforce zero blocker or critical defects
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --require-zero
+      - name: Run final 12.8 release certification
+        if: ${{ inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/release_candidate_final_gate.py --release --output /tmp/veredas-12-8-release.json
+      - name: Upload 12.8 reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-12-8-release-candidate
+          path: |
+            /tmp/veredas-12-8-preflight.json
+            /tmp/veredas-12-8-release.json
+          if-no-files-found: ignore
+          retention-days: 14
