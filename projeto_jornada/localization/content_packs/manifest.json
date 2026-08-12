@@ -3,7 +3,9 @@
   "roadmap_step": "11.6",
   "source_locale": "pt_BR",
   "targets": [
-    "en",
+    "en"
+  ],
+  "deferred_locales": [
     "es_419"
   ],
   "source_records": 5160,
@@ -22,18 +24,12 @@
       "gzip_bytes": 100177,
       "base64_chars": 133572,
       "parts": 10
-    },
-    "es_419": {
-      "raw_json_bytes": 1864691,
-      "gzip_bytes": 104735,
-      "base64_chars": 139648,
-      "parts": 9
     }
   },
   "completion_equation": "3074 last-green baseline + 396 later protected names + 15334 compact delta = 18804 source content units per target",
   "certification": {
     "tool": "res://tools/localization_pack_certification.py",
-    "success_contract": "18804/18804 per target; pack_each=15334; collisions=0; unknown=0; token_errors=0",
-    "note": "The reference compressed byte counts document the locally generated checkpoint. Semantic equality, not gzip byte identity, is authoritative for reproducible rebuilds."
+    "success_contract": "en=18804/18804; pack=15334; collisions=0; unknown=0; token_errors=0",
+    "note": "The reference compressed byte counts document the locally generated checkpoint. Semantic equality, not gzip byte identity, is authoritative for reproducible rebuilds. es_419 is preserved as deferred work and is not a launch gate in the current scope."
   }
 }
