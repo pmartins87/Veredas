@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.3",
+  "formal_status": "in_progress",
+  "audited_on": "2026-08-12",
+  "distribution_target": "Google Play / Android mobile",
+  "policy_evidence_scope": "technical and product preflight only; final release requires a fresh Play policy and console review",
+  "android_release_baseline": {
+    "godot_version": "4.7.1-stable",
+    "min_sdk": 24,
+    "compile_sdk": 36,
+    "target_sdk": 36,
+    "android_build_tools": "36.1.0",
+    "target_api_policy_deadline": "2026-08-31",
+    "policy_note": "Google Play requires new Android mobile apps and updates submitted from 2026-08-31 to target Android 16 / API 36 or higher; recheck immediately before public submission."
+  },
+  "store_and_policy_contract": {
+    "privacy_policy_required_in_console": true,
+    "privacy_policy_required_in_app": true,
+    "data_safety_declaration_required_for_closed_open_and_production_tracks": true,
+    "internal_only_test_track_data_safety_exemption_not_treated_as_release_exemption": true,
+    "content_rating_questionnaire_required": true,
+    "unrated_public_release_forbidden": true,
+    "target_audience_declaration_required": true,
+    "ads": false,
+    "account_creation": false,
+    "digital_unlock_uses_google_play_billing": true,
+    "external_payment_cta_in_google_play_purchase_flow": false,
+    "alternative_billing_planned": false,
+    "single_non_consumable_unlock": true,
+    "subscriptions": false,
+    "loot_boxes": false,
+    "paid_power": false
+  },
+  "documentation_contract": {
+    "privacy_policy": "docs/PRIVACY_POLICY_DRAFT.md",
+    "terms_of_use": "docs/TERMS_OF_USE_DRAFT.md",
+    "privacy_data_contract": "product/privacy_data_safety.json",
+    "billing_contract": "mobile/play_billing_contract.json",
+    "release_identity": "mobile/release_identity.json",
+    "store_listing": "product/store_listing_google_play.json",
+    "terms_are_product_launch_contract_not_claimed_as_universal_play_requirement": true
+  },
+  "release_evidence": {
+    "current_play_policy_rechecked": false,
+    "target_api_requirement_rechecked": false,
+    "final_aab_effective_target_sdk_verified_36_or_higher": false,
+    "final_aab_merged_permissions_audited": false,
+    "final_sdk_inventory_audited": false,
+    "privacy_policy_final_and_public": false,
+    "privacy_policy_accessible_in_app": false,
+    "data_safety_form_completed_against_exact_release": false,
+    "content_rating_completed": false,
+    "target_audience_completed": false,
+    "billing_policy_and_product_configuration_verified": false,
+    "terms_placeholders_resolved": false,
+    "terms_privacy_store_billing_consistency_reviewed": false,
+    "play_console_policy_status_clear_for_release": false
+  },
+  "completion_requirements": [
+    "recheck current Google Play developer policies immediately before the public release decision",
+    "verify the exact AAB effective targetSdk and merged manifest rather than relying only on source configuration",
+    "complete final SDK and permission inventory",
+    "publish and expose the final privacy policy",
+    "complete Data Safety, content rating and target-audience declarations for the exact release behavior",
+    "verify Play Billing/product configuration and absence of incompatible external payment routing",
+    "resolve every Terms of Use placeholder and align Terms, Privacy Policy, store listing and Billing behavior",
+    "confirm Play Console policy status has no unresolved release-blocking issue"
+  ],
+  "pass_recorded": false
+}
