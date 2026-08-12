@@ -4,8 +4,7 @@
   "fallback_locale": "pt_BR",
   "launch_locales": [
     "pt_BR",
-    "en",
-    "es_419"
+    "en"
   ],
   "locales": {
     "pt_BR": {
