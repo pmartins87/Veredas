@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.2",
+  "formal_status": "in_progress",
+  "product_name": "Veredas da Trama",
+  "android": {
+    "application_id": "com.pmartins87.veredasdatrama",
+    "current_version_name": "0.1.0-dev",
+    "current_version_code": 1,
+    "target_first_public_version_name": "1.0.0",
+    "versioning_policy": "semantic version name; monotonically increasing integer version code",
+    "play_distribution_format": "AAB",
+    "release_signing": {
+      "repository_contains_release_keystore": false,
+      "repository_contains_release_passwords": false,
+      "secret_transport": "environment variables / protected CI secrets only",
+      "godot_env": {
+        "keystore_path": "GODOT_ANDROID_KEYSTORE_RELEASE_PATH",
+        "keystore_user": "GODOT_ANDROID_KEYSTORE_RELEASE_USER",
+        "keystore_password": "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD"
+      },
+      "ci_secret_contract": {
+        "keystore_base64": "VEREDAS_ANDROID_KEYSTORE_B64",
+        "keystore_alias": "VEREDAS_ANDROID_KEY_ALIAS",
+        "keystore_password": "VEREDAS_ANDROID_KEYSTORE_PASSWORD"
+      },
+      "play_app_signing_expected": true
+    }
+  },
+  "completion_requirements": [
+    "application id accepted by distribution console",
+    "release keystore generated and backed up outside repository",
+    "protected CI secrets configured",
+    "signed release AAB produced and signature verified",
+    "version code/name frozen for RC"
+  ],
+  "note": "The stable application id is persisted early because changing it after store publication creates a different Android application. 12.2 remains in progress until real release signing and console acceptance are proven."
+}
