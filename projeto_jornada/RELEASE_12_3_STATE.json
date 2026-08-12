@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.3",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "contract": "product/privacy_data_safety.json",
+  "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
+  "gate": "tools/privacy_data_safety_gate.py",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "implemented": {
+    "data_minimization_contract": true,
+    "offline_first_behavior_declared": true,
+    "no_ads_analytics_or_social_sdk_baseline": true,
+    "local_save_behavior_declared": true,
+    "billing_data_boundary_preflight": true,
+    "runtime_network_and_sdk_static_scan_gate": true,
+    "android_custom_permission_cross_check": true,
+    "application_id_cross_check": true,
+    "privacy_policy_bilingual_draft": true,
+    "release_placeholder_fail_closed_gate": true
+  },
+  "current_baseline": {
+    "non_billing_gameplay_collection_off_device": false,
+    "non_billing_gameplay_sharing": false,
+    "accounts": false,
+    "advertising": false,
+    "analytics_sdk": false,
+    "developer_crash_reporting_sdk": false,
+    "location_contacts_camera_microphone_health_access": false,
+    "save_storage": "on_device_only",
+    "billing_provider_planned": "Google Play Billing"
+  },
+  "pending": {
+    "12_4_billing_data_flow_frozen": false,
+    "final_release_aab_manifest_and_merged_permissions_audited": false,
+    "final_sdk_inventory_audited": false,
+    "privacy_contact_finalized": false,
+    "privacy_policy_public_https_url_published": false,
+    "privacy_policy_in_app_access_implemented": false,
+    "backend_purchase_data_retention_policy_finalized": false,
+    "store_content_rating_and_target_audience_finalized": false,
+    "play_console_data_safety_form_completed": false,
+    "final_policy_store_artifact_consistency_verified": false
+  },
+  "completion_requirements": [
+    "complete and certify 12.4 billing integration, then repeat the technical data-flow audit",
+    "inspect the exact release AAB Android manifest, merged permissions and every bundled third-party SDK",
+    "replace all PENDING_* privacy-policy fields with production values",
+    "publish the final privacy policy at a stable public HTTPS URL and expose it in-app",
+    "freeze backend purchase-data retention/deletion behavior if a backend is used",
+    "align target-audience/content-rating declarations with the final policy",
+    "complete Google Play Data safety answers from the frozen release artifact and services",
+    "pass privacy_data_safety_gate.py --release on the final release ancestry",
+    "record the final Data Safety answers and policy revision in the repository"
+  ],
+  "pass_recorded": false
+}
