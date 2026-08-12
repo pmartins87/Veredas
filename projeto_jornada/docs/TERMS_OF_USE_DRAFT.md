@@ -29,7 +29,7 @@ A licença não transfere propriedade sobre código, textos, ilustrações, mús
 
 ## 4. Modelo comercial
 
-A versão planejada para lançamento oferece uma parte inicial gratuita e um **único desbloqueio digital não consumível** para liberar o conteúdo integral. Não são planejados anúncios, assinatura, loot boxes, venda de poder ou consumíveis pagos.
+A versão planejada para lançamento oferece uma parte inicial gratuita e um **único desbloqueio digital não consumível** para liberar o conteúdo integral. Também poderá existir um **pacote opcional de apoiador exclusivamente cosmético**, sem efeito sobre combate, progressão, dificuldade, atributos, moedas ou chances de recompensa. Não são planejados anúncios, assinatura, loot boxes, venda de poder ou consumíveis pagos.
 
 Quando distribuído pelo Google Play, qualquer compra digital dentro do aplicativo deverá usar o sistema de faturamento permitido/exigido pela plataforma para aquela distribuição e região. O jogo não deverá direcionar o usuário, dentro do fluxo de compra da versão Google Play, a um meio de pagamento externo incompatível com a política aplicável.
 
@@ -108,7 +108,7 @@ The license does not transfer ownership of the game's code, text, artwork, music
 
 ## 4. Commercial model
 
-The planned launch version offers an initial free portion and a **single non-consumable digital unlock** for the full game. Ads, subscriptions, loot boxes, paid power and paid consumables are not planned.
+The planned launch version offers an initial free portion and a **single non-consumable digital unlock** for the full game. An **optional supporter pack containing cosmetic-only items** may also be offered; it must not affect combat, progression, difficulty, stats, currency or reward odds. Ads, subscriptions, loot boxes, paid power and paid consumables are not planned.
 
 For Google Play distribution, in-app digital purchases must use the billing method allowed or required by the platform for the relevant distribution and region. The Google Play build must not route its purchase flow to an incompatible external payment method.
 
