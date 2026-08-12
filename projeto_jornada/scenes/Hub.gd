@@ -183,6 +183,9 @@ func _render() -> void:
     _button(localization.text("common.echo_archive"), _open_codex, false)
     _button(localization.text("hub.thread_table"), _open_meta_economy, false)
     _button(localization.text("common.accessibility"), _open_accessibility, false)
+    var legal_label := LegalPanel.entry_label(localization.current_locale())
+    if legal_label != "":
+        _button(legal_label, _open_legal, false)
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
     var button := Button.new()
@@ -223,5 +226,10 @@ func _show_route(world_id: String) -> void:
 
 func _open_accessibility() -> void:
     var panel := AccessibilityPanel.new()
+    add_child(panel)
+    panel.open_for("mata_fio_verde")
+
+func _open_legal() -> void:
+    var panel := LegalPanel.new()
     add_child(panel)
     panel.open_for("mata_fio_verde")
