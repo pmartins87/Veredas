@@ -4,8 +4,11 @@
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
   "contract": "product/privacy_data_safety.json",
+  "platform_contract": "product/platform_compliance.json",
   "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
+  "terms_of_use_draft": "docs/TERMS_OF_USE_DRAFT.md",
   "gate": "tools/privacy_data_safety_gate.py",
+  "platform_gate": "tools/platform_compliance_gate.py",
   "application_id": "com.pmartins87.veredasdatrama",
   "implemented": {
     "data_minimization_contract": true,
@@ -17,6 +20,9 @@
     "android_custom_permission_cross_check": true,
     "application_id_cross_check": true,
     "privacy_policy_bilingual_draft": true,
+    "terms_of_use_bilingual_draft": true,
+    "android_36_release_baseline_pinned": true,
+    "commercial_billing_store_terms_consistency_gate": true,
     "release_placeholder_fail_closed_gate": true
   },
   "current_baseline": {
@@ -28,7 +34,11 @@
     "developer_crash_reporting_sdk": false,
     "location_contacts_camera_microphone_health_access": false,
     "save_storage": "on_device_only",
-    "billing_provider_planned": "Google Play Billing"
+    "billing_provider_planned": "Google Play Billing",
+    "android_target_sdk": 36,
+    "android_compile_sdk": 36,
+    "full_game_unlock": "one_time_non_consumable",
+    "optional_supporter_pack": "one_time_non_consumable_cosmetic_only"
   },
   "pending": {
     "12_4_billing_data_flow_frozen": false,
@@ -37,21 +47,26 @@
     "privacy_contact_finalized": false,
     "privacy_policy_public_https_url_published": false,
     "privacy_policy_in_app_access_implemented": false,
+    "terms_placeholders_resolved": false,
+    "terms_legal_review_completed": false,
     "backend_purchase_data_retention_policy_finalized": false,
     "store_content_rating_and_target_audience_finalized": false,
     "play_console_data_safety_form_completed": false,
-    "final_policy_store_artifact_consistency_verified": false
+    "current_play_policy_rechecked_for_release": false,
+    "play_console_policy_status_clear": false,
+    "final_policy_store_billing_terms_artifact_consistency_verified": false
   },
   "completion_requirements": [
-    "complete and certify 12.4 billing integration, then repeat the technical data-flow audit",
+    "complete and certify 12.4 billing integration, then repeat the technical data-flow and commercial-product audit",
+    "recheck current Google Play policies immediately before release and confirm the exact AAB effective targetSdk",
     "inspect the exact release AAB Android manifest, merged permissions and every bundled third-party SDK",
-    "replace all PENDING_* privacy-policy fields with production values",
+    "replace all PENDING_* privacy-policy and Terms fields with production values",
     "publish the final privacy policy at a stable public HTTPS URL and expose it in-app",
     "freeze backend purchase-data retention/deletion behavior if a backend is used",
-    "align target-audience/content-rating declarations with the final policy",
-    "complete Google Play Data safety answers from the frozen release artifact and services",
-    "pass privacy_data_safety_gate.py --release on the final release ancestry",
-    "record the final Data Safety answers and policy revision in the repository"
+    "complete content-rating and target-audience declarations",
+    "complete Google Play Data Safety answers from the frozen release artifact and services",
+    "pass privacy_data_safety_gate.py --release and platform_compliance_gate.py --release on the final release ancestry",
+    "record final Data Safety, platform-policy, Terms and privacy revisions in the repository"
   ],
   "pass_recorded": false
 }
