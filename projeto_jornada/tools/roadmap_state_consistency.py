@@ -12,7 +12,7 @@ PROJECT = ROOT / "PROJECT_STATE.json"
 LOCALE_MANIFEST = ROOT / "localization" / "manifest.json"
 QA_118 = ROOT / "QA_11_8_COMPLETION.json"
 
-STATUS_RE = re.compile(r"^- (11\.\d+) (✅|🟡|⏳) ", re.MULTILINE)
+STATUS_RE = re.compile(r"^- ((?:11|12)\.\d+) (✅|🟡|⏳) ", re.MULTILINE)
 COUNT_RE = re.compile(r"\*\*(\d+)/130 passos concluídos")
 
 
@@ -31,6 +31,33 @@ def status_class(value: str) -> str:
     if value == "pending":
         return "pending"
     return "unknown"
+
+
+def compare_phase(
+    errors: list[str],
+    phase: str,
+    roadmap_status: dict[str, str],
+    project: dict[str, Any],
+) -> None:
+    key = f"phase{phase}"
+    raw = project.get(key, {})
+    if not isinstance(raw, dict):
+        errors.append(f"PROJECT_STATE {key} must be an object")
+        raw = {}
+    for index in range(1, 11):
+        step = f"{phase}.{index}"
+        roadmap_value = roadmap_status.get(step)
+        project_value = status_class(str(raw.get(step, "")))
+        if roadmap_value is None:
+            errors.append(f"ROADMAP_STATE status missing for {step}")
+            continue
+        if project_value == "unknown":
+            errors.append(f"PROJECT_STATE status invalid/missing for {step}")
+            continue
+        if roadmap_value != project_value:
+            errors.append(
+                f"phase{phase} status mismatch {step}: roadmap={roadmap_value} project={project_value}"
+            )
 
 
 def main() -> int:
@@ -54,25 +81,12 @@ def main() -> int:
         step: {"✅": "certified", "🟡": "in_progress", "⏳": "pending"}[symbol]
         for step, symbol in STATUS_RE.findall(roadmap_text)
     }
+    compare_phase(errors, "11", roadmap_status, project)
+    compare_phase(errors, "12", roadmap_status, project)
+
     project_phase11 = project.get("phase11", {})
     if not isinstance(project_phase11, dict):
-        errors.append("PROJECT_STATE phase11 must be an object")
         project_phase11 = {}
-
-    expected_steps = [f"11.{index}" for index in range(1, 11)]
-    for step in expected_steps:
-        roadmap_value = roadmap_status.get(step)
-        project_value = status_class(str(project_phase11.get(step, "")))
-        if roadmap_value is None:
-            errors.append(f"ROADMAP_STATE status missing for {step}")
-            continue
-        if project_value == "unknown":
-            errors.append(f"PROJECT_STATE status invalid/missing for {step}")
-            continue
-        if roadmap_value != project_value:
-            errors.append(
-                f"phase11 status mismatch {step}: roadmap={roadmap_value} project={project_value}"
-            )
 
     manifest_launch = [str(value) for value in locale_manifest.get("launch_locales", [])]
     launch_scope = project.get("launch_scope", {})
@@ -104,6 +118,8 @@ def main() -> int:
 
     if project.get("source_of_truth") != "ROADMAP_STATE.md":
         errors.append("PROJECT_STATE must identify ROADMAP_STATE.md as source_of_truth")
+    if int(project.get("roadmap_total_steps", -1)) != 130:
+        errors.append("PROJECT_STATE roadmap_total_steps must be 130")
 
     if errors:
         print(f"ROADMAP_STATE_CONSISTENCY FAIL: {len(errors)} issue(s)")
@@ -112,7 +128,7 @@ def main() -> int:
         return 1
 
     print(
-        "ROADMAP_STATE_CONSISTENCY PASS: completed=%d/130 phase11=10 launch_locales=%s"
+        "ROADMAP_STATE_CONSISTENCY PASS: completed=%d/130 phase11=10 phase12=10 launch_locales=%s"
         % (int(project["completed_steps"]), ",".join(manifest_launch))
     )
     return 0
