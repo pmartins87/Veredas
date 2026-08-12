@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.9",
+  "formal_status": "in_progress",
+  "scope": "long-session reliability, repeated suspend/resume, autosave recovery and process-style restore",
+  "test_scene": "res://tests/reliability_soak_certification.tscn",
+  "test_script": "res://tests/ReliabilitySoakCertification.gd",
+  "workflow": ".github/workflows/veredas-reliability-soak.yml",
+  "contract": {
+    "lifecycle_cycles": 128,
+    "restart_rounds": 24,
+    "expected_reloads_before_final_roundtrip": 152,
+    "pause_autosave_then_ram_damage_then_reload": true,
+    "exact_pause_resume_counter_deltas": true,
+    "run_integrity_reaudit": true,
+    "profile_integrity_reaudit": true,
+    "profile_progression_fingerprint_stability": true,
+    "seed_and_turn_roundtrip": true
+  },
+  "regression_dependencies": [
+    "MOBILE_CERTIFICATION PASS: 8.1 8.2 8.3 8.4",
+    "SAVE_FUZZ_CERTIFICATION PASS: 11.2",
+    "RUN_STATE_INTEGRITY_CERTIFICATION PASS: 11.2"
+  ],
+  "separation_of_concerns": {
+    "11.3": "physical-device thermal, battery and performance soak remains separate and mandatory",
+    "11.9": "application-state reliability under repeated lifecycle and persistence pressure"
+  },
+  "certification": {
+    "executed_on_current_head": false,
+    "pass_recorded": false,
+    "reason": "gate infrastructure is persisted; runtime execution is still required before roadmap completion"
+  }
+}
