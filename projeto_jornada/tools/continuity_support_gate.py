@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+CONTRACT = ROOT / "product" / "continuity_support_contract.json"
+RUNBOOK = ROOT / "docs" / "CONTINUITY_AND_SUPPORT.md"
+RC_COMPLETION = ROOT / "RELEASE_12_8_COMPLETION.json"
+PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
+
+
+def read_object(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"expected JSON object: {path}")
+    return value
+
+
+def unresolved(value: Any) -> bool:
+    return not isinstance(value, str) or not value.strip() or bool(PLACEHOLDER_RE.match(value.strip()))
+
+
+def git_output(*args: str) -> str:
+    try:
+        return subprocess.check_output(["git", *args], cwd=ROOT, text=True, stderr=subprocess.DEVNULL).strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive and support readiness.")
+    parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+
+    errors: list[str] = []
+    warnings: list[str] = []
+    try:
+        contract = read_object(CONTRACT)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"CONTINUITY_SUPPORT FAIL: {exc}")
+        return 1
+
+    if contract.get("schema_version") != 1 or contract.get("roadmap_step") != "12.9":
+        errors.append("12.9 contract schema/roadmap_step invalid")
+    if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 2000:
+        errors.append("continuity/support runbook is missing or unexpectedly small")
+
+    source = contract.get("source_of_truth", {})
+    if source.get("repository") != "pmartins87/desktop-tutorial":
+        errors.append("source_of_truth.repository changed unexpectedly")
+    if source.get("development_branch") != "projeto-jornada-snapshots":
+        errors.append("source_of_truth.development_branch changed unexpectedly")
+
+    support = contract.get("support_policy", {})
+    targets = support.get("initial_triage_target_hours", {}) if isinstance(support, dict) else {}
+    required_severities = {"blocker", "critical", "major", "minor", "trivial"}
+    if set(targets) != required_severities or any(not isinstance(v, int) or v <= 0 for v in targets.values()):
+        errors.append("support triage targets are incomplete/invalid")
+
+    compatibility = contract.get("compatibility_policy", {})
+    if not isinstance(compatibility, dict) or any(value is not True for value in compatibility.values()):
+        errors.append("compatibility policy must remain explicitly enabled")
+
+    secret_policy = contract.get("secret_and_signing_policy", {})
+    if not isinstance(secret_policy, dict):
+        errors.append("secret/signing policy missing")
+        secret_policy = {}
+    if secret_policy.get("secrets_in_repository_forbidden") is not True:
+        errors.append("secrets must remain forbidden in repository")
+    if secret_policy.get("keystore_in_repository_forbidden") is not True:
+        errors.append("keystore must remain forbidden in repository")
+
+    head_sha = git_output("rev-parse", "HEAD")
+    if args.release:
+        if not RC_COMPLETION.exists():
+            errors.append("12.8 completion record missing")
+        else:
+            try:
+                rc = read_object(RC_COMPLETION)
+                if rc.get("status") != "pass" and rc.get("formal_status") != "complete":
+                    errors.append("12.8 completion record does not report pass")
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                errors.append(f"invalid 12.8 completion record: {exc}")
+
+        for section_name, keys in {
+            "source_of_truth": ("final_release_tag",),
+            "release_archive": (
+                "rc_commit_sha", "aab_sha256", "release_input_fingerprint",
+                "signing_certificate_sha256", "store_version_name", "archive_manifest_path",
+            ),
+            "ownership_and_recovery": (
+                "primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact",
+            ),
+        }.items():
+            section = contract.get(section_name, {})
+            for key in keys:
+                if not isinstance(section, dict) or unresolved(section.get(key)):
+                    errors.append(f"{section_name}.{key} is unresolved")
+
+        archive = contract.get("release_archive", {})
+        if not isinstance(archive.get("store_version_code"), int) or int(archive.get("store_version_code", 0)) <= 0:
+            errors.append("release_archive.store_version_code must be positive")
+        if archive.get("rc_commit_sha") != head_sha:
+            errors.append("release_archive.rc_commit_sha must equal current HEAD")
+
+        tag = source.get("final_release_tag", "")
+        if isinstance(tag, str) and tag and not unresolved(tag):
+            tag_commit = git_output("rev-list", "-n", "1", tag)
+            if not tag_commit or tag_commit != archive.get("rc_commit_sha"):
+                errors.append("final release tag does not resolve to archived RC commit")
+
+        ownership = contract.get("ownership_and_recovery", {})
+        for key in ("play_console_recovery_verified", "repository_recovery_verified", "billing_backend_recovery_verified"):
+            if ownership.get(key) is not True:
+                errors.append(f"ownership_and_recovery.{key} is not verified")
+        for key in (
+            "external_keystore_backup_verified", "external_secret_backup_verified",
+            "backup_restore_drill_recorded", "signing_identity_documented_without_private_material",
+        ):
+            if secret_policy.get(key) is not True:
+                errors.append(f"secret_and_signing_policy.{key} is not verified")
+
+        legal = contract.get("asset_and_legal_archive", {})
+        if not isinstance(legal, dict) or any(value is not True for value in legal.values()):
+            errors.append("asset/legal archive is incomplete")
+        evidence = contract.get("evidence", {})
+        if not isinstance(evidence, dict) or any(value is not True for value in evidence.values()):
+            errors.append("12.9 final evidence is incomplete")
+        if contract.get("pass_recorded") is not True:
+            errors.append("12.9 pass_recorded is not true")
+    else:
+        if not RC_COMPLETION.exists():
+            warnings.append("awaiting RELEASE_12_8_COMPLETION.json")
+        for section_name, keys in {
+            "source_of_truth": ("final_release_tag",),
+            "ownership_and_recovery": ("primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact"),
+        }.items():
+            section = contract.get(section_name, {})
+            for key in keys:
+                if not isinstance(section, dict) or unresolved(section.get(key)):
+                    warnings.append(f"{section_name}.{key} not configured yet")
+
+    report = {
+        "schema_version": 1,
+        "roadmap_step": "12.9",
+        "mode": "release" if args.release else "preflight",
+        "head_sha": head_sha,
+        "errors": errors,
+        "warnings": warnings,
+    }
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if errors:
+        print(f"CONTINUITY_SUPPORT FAIL: {len(errors)} issue(s)")
+        for error in errors:
+            print("ERROR:", error)
+        return 1
+    if args.release:
+        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/support certified")
+    else:
+        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: contract valid warnings={len(warnings)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
