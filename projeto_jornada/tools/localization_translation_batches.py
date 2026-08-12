@@ -8,10 +8,10 @@ from collections import defaultdict
 from pathlib import Path
 
 from export_localization_catalog import build_catalog
+from localization_pack_certification import PACK_ROOT, flatten_overlay, launch_targets, read_compact_pack
 
 ROOT = Path(__file__).resolve().parents[1]
 LOC = ROOT / "localization"
-TARGETS = ("en", "es_419")
 
 
 def read_object(path: Path) -> dict:
@@ -22,15 +22,27 @@ def read_object(path: Path) -> dict:
 
 
 def translated_keys(locale_id: str) -> set[str]:
-    catalog = read_object(LOC / "content" / f"{locale_id}.json")
-    keys: set[str] = set()
-    for record_id, overlay in catalog.items():
-        if not isinstance(overlay, dict):
-            continue
-        for path, value in overlay.items():
-            if isinstance(value, str) and value.strip():
-                keys.add(f"content.{record_id}.{path}")
-    return keys
+    base = flatten_overlay(
+        read_object(LOC / "content" / f"{locale_id}.json"),
+        f"{locale_id}:base",
+    )
+    translated = set(base)
+
+    single_pack = PACK_ROOT / f"{locale_id}.json.gz.b64"
+    multipart_pack = PACK_ROOT / locale_id
+    if single_pack.exists() or multipart_pack.exists():
+        try:
+            pack_catalog, _ = read_compact_pack(locale_id)
+            pack = flatten_overlay(pack_catalog, f"{locale_id}:pack")
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"{locale_id}: compact pack cannot be incorporated into translation batches: {exc}") from exc
+        collisions = translated & set(pack)
+        if collisions:
+            raise SystemExit(
+                f"{locale_id}: base/compact-pack collision prevents reliable remaining-unit calculation: {len(collisions)}"
+            )
+        translated.update(pack)
+    return translated
 
 
 def pack_batches(rows: list[dict], max_units: int, prefix: str) -> list[dict]:
@@ -95,6 +107,7 @@ def memory_candidates(rows: list[dict]) -> list[dict]:
 def build_payload(max_units: int) -> dict:
     if max_units < 50:
         raise SystemExit("max-units must be >= 50")
+    targets = launch_targets()
     catalog = build_catalog()
     content = [row for row in catalog["units"] if str(row.get("key", "")).startswith("content.")]
     content.sort(key=lambda row: (str(row.get("record_id", "")), str(row.get("path", ""))))
@@ -103,7 +116,7 @@ def build_payload(max_units: int) -> dict:
 
     locales: dict[str, dict] = {}
     pending_sets: dict[str, set[str]] = {}
-    for locale_id in TARGETS:
+    for locale_id in targets:
         done = translated_keys(locale_id) & all_keys
         pending_rows = [row for row in content if str(row["key"]) not in done]
         pending_keys = {str(row["key"]) for row in pending_rows}
@@ -125,12 +138,12 @@ def build_payload(max_units: int) -> dict:
             "translation_memory_candidates": candidates,
         }
 
-    common_pending = set.intersection(*(pending_sets[locale_id] for locale_id in TARGETS))
-    any_pending = set.union(*(pending_sets[locale_id] for locale_id in TARGETS))
+    common_pending = set.intersection(*(pending_sets[locale_id] for locale_id in targets))
+    any_pending = set.union(*(pending_sets[locale_id] for locale_id in targets))
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "source_locale": catalog["source_locale"],
-        "target_locales": list(TARGETS),
+        "target_locales": list(targets),
         "content_unit_count": len(content),
         "max_units_per_batch": max_units,
         "source_key_sha256": hashlib.sha256(source_key_stream).hexdigest(),
@@ -141,7 +154,9 @@ def build_payload(max_units: int) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create deterministic remaining-only translation batches with translation-memory candidates.")
+    parser = argparse.ArgumentParser(
+        description="Create deterministic remaining-only translation batches for manifest launch targets, incorporating compact packs."
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-units", type=int, default=400)
     args = parser.parse_args()
@@ -149,7 +164,7 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     summary = []
-    for locale_id in TARGETS:
+    for locale_id in payload["target_locales"]:
         row = payload["locales"][locale_id]
         summary.append(
             "%s=%d_done/%d_remaining/%d_batches/%d_unique_sources/%d_repeat_savings"
@@ -160,10 +175,14 @@ def main() -> int:
             )
         )
     print(
-        "LOCALIZATION_BATCHES PASS: content_units=%d max_units=%d common_remaining=%d %s sha256=%s"
+        "LOCALIZATION_BATCHES PASS: targets=%s content_units=%d max_units=%d common_remaining=%d %s sha256=%s"
         % (
-            payload["content_unit_count"], payload["max_units_per_batch"], payload["common_remaining_units"],
-            " ".join(summary), payload["source_key_sha256"][:12],
+            ",".join(payload["target_locales"]),
+            payload["content_unit_count"],
+            payload["max_units_per_batch"],
+            payload["common_remaining_units"],
+            " ".join(summary),
+            payload["source_key_sha256"][:12],
         )
     )
     return 0
