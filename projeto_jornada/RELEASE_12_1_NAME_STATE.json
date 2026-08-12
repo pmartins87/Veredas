@@ -6,26 +6,33 @@
   "checked_on": "2026-08-12",
   "scope": "commercial name, public discoverability, game-store collision reconnaissance, trademark and domain preflight",
   "public_reconnaissance": {
-    "exact_name_web_search": "no exact game collision found in the searches performed",
-    "game_store_searches": ["Google Play", "Steam", "Apple App Store", "itch.io"],
+    "exact_name_web_search": "no exact game/app collision surfaced in the public indexed searches performed on 2026-08-12",
+    "game_store_searches": ["Google Play indexed web results", "Steam indexed web results", "Apple App Store indexed web results", "general game/app web search"],
     "game_store_exact_collision_found": false,
     "legal_clearance": false,
-    "note": "Search-engine/store reconnaissance is only an early collision screen and is not a legal trademark clearance."
+    "note": "Search-engine/store reconnaissance is only an early collision screen and is not a legal trademark clearance; confusingly similar marks and unindexed records remain possible."
+  },
+  "official_methodology_evidence": {
+    "inpi": "INPI recommends a prior search in the relevant class to identify earlier filed/registered identical or similar marks before filing.",
+    "wipo": "WIPO recommends searching existing/pending marks in target markets using the Global Brand Database and national/regional registers.",
+    "wipo_automation_constraint": "WIPO Global Brand Database terms/FAQ disallow automated/robot querying; no automated result is represented here as an official registry search.",
+    "wipo_scope_note": "Global Brand Database combines international and participating national/regional collections but WIPO still recommends checking national/regional offices directly."
   },
   "authoritative_checks": {
-    "inpi_brazil_exact_mark_search": "pending_interactive_registry_search",
-    "wipo_global_brand_database_exact_search": "pending_interactive_registry_search",
+    "inpi_brazil_exact_and_similar_mark_search": "pending_interactive_registry_search_in_relevant_nice_classes",
+    "wipo_global_brand_database_exact_and_similar_search": "pending_interactive_human_registry_search",
     "domain_veredasdatrama_com": "pending_authoritative_registration_check",
-    "domain_veredasdatrama_com_br": "pending_authoritative_registration_check"
+    "domain_veredasdatrama_com_br": "pending_authoritative_registration_check",
+    "social_handles": "pending_authoritative_platform_checks"
   },
   "identity_dependencies": {
     "android_application_id": "com.pmartins87.veredasdatrama",
     "application_id_is_not_legal_name_clearance": true
   },
   "completion_requirements": [
-    "complete exact and confusingly-similar search in INPI classes relevant to software/games",
-    "complete WIPO/global cross-check",
-    "confirm desired domain/social handles or explicitly accept alternatives",
+    "complete exact and confusingly-similar human search in INPI classes relevant to software/games",
+    "complete WIPO/global human cross-check and record material candidates if any",
+    "confirm desired domains/social handles or explicitly accept alternatives",
     "record final name decision and any trademark filing strategy",
     "verify store listing name can be created without material collision"
   ],
