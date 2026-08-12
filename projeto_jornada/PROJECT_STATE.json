@@ -117,8 +117,8 @@
     "12.1": "in_progress_authoritative_name_checks_pending",
     "12.2": "in_progress_signing_and_console_pending",
     "12.3": "in_progress_post_billing_privacy_freeze_pending",
-    "12.4": "pending",
-    "12.5": "pending",
+    "12.4": "in_progress_plugin_backend_play_testing_pending",
+    "12.5": "in_progress_final_art_rc_captures_console_pending",
     "12.6": "pending",
     "12.7": "pending",
     "12.8": "pending",
@@ -143,6 +143,22 @@
       "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
       "gate": "tools/privacy_data_safety_gate.py",
       "status": "final_data_safety_and_policy_freeze_pending_after_12_4"
+    },
+    "12.4": {
+      "state_file": "RELEASE_12_4_STATE.json",
+      "billing_contract": "mobile/play_billing_contract.json",
+      "coordinator": "core/systems/PlayBillingCoordinator.gd",
+      "store_adapter": "mobile/GooglePlayBillingStoreAdapter.gd",
+      "gate": "tools/play_billing_release_gate.py",
+      "workflow": ".github/workflows/veredas-play-billing-12-4.yml",
+      "status": "architecture_ready_logic_execution_plugin_backend_play_track_pending"
+    },
+    "12.5": {
+      "state_file": "RELEASE_12_5_STATE.json",
+      "listing_source": "product/store_listing_google_play.json",
+      "gate": "tools/store_listing_gate.py",
+      "store_locales": ["pt-BR", "en-US"],
+      "status": "copy_ready_final_visual_assets_and_rc_captures_pending"
     }
   },
   "release_triage": {
