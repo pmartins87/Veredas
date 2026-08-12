@@ -11,7 +11,17 @@
     "target_public_version": "1.0.0",
     "distribution_format": "AAB",
     "debug_emulator_architectures": ["arm64-v8a", "x86_64"],
-    "play_release_architectures": ["arm64-v8a"]
+    "play_release_architectures": ["arm64-v8a"],
+    "toolchain": {
+      "godot": "4.7.1-stable",
+      "min_sdk": 24,
+      "compile_sdk": 36,
+      "target_sdk": 36,
+      "android_build_tools": "36.1.0",
+      "preset_values_explicit": true,
+      "release_workflow_installs_sdk_explicitly": true,
+      "policy_recheck_before_public_release": true
+    }
   },
   "versioning": {
     "name_policy": "semantic versioning",
@@ -34,23 +44,25 @@
   },
   "guards": [
     "tools/validate_android_export.py",
+    "tools/platform_compliance_gate.py",
     "tools/roadmap_state_consistency.py",
     "tools/qa_release_candidate_gate.py",
     "tools/validate_canonical.py"
   ],
   "implemented_commits": {
     "stable_application_id": "dd47261c9a6761e677ffb92ee77d7f3c207f5f0c",
-    "identity_contract": "288cbdc3cf7646e093eb0181aa748733b452691b",
-    "export_validator": "1fb1d583b8496a78b284a5b8867f9d8b4c6dda1c",
-    "debug_ci_migration": "d8a6891d33c34944dd2cc6509ebf42ee55d9ff3c",
-    "signed_aab_pipeline": "343127809362bbf80026c04742ea90bba8a25b6c"
+    "identity_contract": "8a4a8851024bab324d5d54ed8604f1c0313813bc",
+    "android_36_presets": "ffca83a24b45da7da6962fc9818569e78db58278",
+    "export_validator": "051171eeb95e9f5bd12e8b233e8eea7e24aa9878",
+    "signed_aab_pipeline": "625bdd297d1ec818f32e503b9653d9f3ec66943e"
   },
   "completion_requirements": [
+    "recheck target API and Android toolchain policy immediately before public release",
     "create real release/upload keystore and store redundant encrypted backups outside the repository",
     "configure protected release environment secrets",
     "confirm application id acceptance in Play Console",
     "freeze RC version name and version code",
-    "produce signed AAB after 11.10 and verify its signature and SHA-256",
+    "produce signed AAB after 11.10 and verify effective targetSdk, signature and SHA-256",
     "record Play App Signing configuration"
   ],
   "pass_recorded": false
