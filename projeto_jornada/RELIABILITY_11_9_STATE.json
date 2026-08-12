@@ -26,9 +26,18 @@
     "11.3": "physical-device thermal, battery and performance soak remains separate and mandatory",
     "11.9": "application-state reliability under repeated lifecycle and persistence pressure"
   },
+  "latest_ci_attempt": {
+    "run_id": 31576124761,
+    "job_id": 94048524964,
+    "head_sha": "aa85d0e2805815a4afa0fac1554a508757665b5a",
+    "conclusion": "infrastructure_failure",
+    "steps_executed": 0,
+    "runner_id": 0,
+    "note": "job ended before checkout; this is not evidence of test pass or code failure"
+  },
   "certification": {
     "executed_on_current_head": false,
     "pass_recorded": false,
-    "reason": "gate infrastructure is persisted; runtime execution is still required before roadmap completion"
+    "reason": "gate infrastructure is persisted and statically reviewed; runtime execution is still required before roadmap completion"
   }
 }
