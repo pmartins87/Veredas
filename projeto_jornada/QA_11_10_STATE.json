@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.10",
+  "formal_status": "in_progress",
+  "goal": "freeze a single canonical build as the Release Candidate only after all Phase 11 release gates are certified",
+  "gate": "tools/qa_release_candidate_gate.py",
+  "workflow": ".github/workflows/veredas-qa-release-candidate.yml",
+  "required_completion_artifacts": {
+    "11.3": {
+      "file": "PERFORMANCE_11_3_COMPLETION.json",
+      "status": "pending"
+    },
+    "11.6": {
+      "file": "LOCALIZATION_11_6_COMPLETION.json",
+      "status": "pending"
+    },
+    "11.7": {
+      "file": "AUDIOVISUAL_11_7_COMPLETION.json",
+      "status": "pending"
+    },
+    "11.8": {
+      "file": "QA_11_8_COMPLETION.json",
+      "status": "pass"
+    },
+    "11.9": {
+      "file": "RELIABILITY_11_9_COMPLETION.json",
+      "status": "pending"
+    }
+  },
+  "freeze_contract": [
+    "each completion artifact must report status=pass and the correct roadmap_step",
+    "each certified commit must exist in full git history and be an ancestor of the candidate HEAD",
+    "ROADMAP_STATE must mark 11.1 through 11.9 complete",
+    "10.10 balance freeze must remain valid",
+    "11.8 zero blocker/critical gate must still pass",
+    "canonical data validation must pass",
+    "launch localization pack, terminology and linguistic gates must pass",
+    "11.1 regression matrix must pass on the candidate HEAD",
+    "11.6 overflow and iconography gates must pass on the candidate HEAD",
+    "11.7 audiovisual context must pass on the candidate HEAD",
+    "11.9 reliability soak must pass on the candidate HEAD",
+    "the workflow must finish with no repository diff"
+  ],
+  "pass_recorded": false,
+  "note": "This infrastructure is intentionally fail-closed. Preparing 11.10 does not promote the roadmap step before its prerequisites and same-HEAD runtime gates are green."
+}
