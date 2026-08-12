@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "contract": "product/continuity_support_contract.json",
+  "runbook": "docs/CONTINUITY_AND_SUPPORT.md",
+  "gate": "tools/continuity_support_gate.py",
+  "implemented": {
+    "source_of_truth_and_tag_contract": true,
+    "release_archive_contract": true,
+    "signing_and_secret_backup_policy": true,
+    "account_recovery_contract": true,
+    "save_and_entitlement_compatibility_policy": true,
+    "privacy_and_data_safety_continuity": true,
+    "asset_and_license_archive_contract": true,
+    "support_severity_and_triage_policy": true,
+    "incident_hotfix_runbook": true,
+    "handoff_bus_factor_checklist": true,
+    "fail_closed_release_gate": true
+  },
+  "pending": {
+    "12_8_certified": false,
+    "final_release_tag_created": false,
+    "release_archive_manifest_frozen": false,
+    "real_release_owner_assigned": false,
+    "secondary_recovery_contact_assigned": false,
+    "support_channel_configured_and_tested": false,
+    "privacy_contact_configured": false,
+    "play_repository_billing_recovery_verified": false,
+    "external_keystore_and_secret_backups_verified": false,
+    "backup_restore_drill_recorded": false,
+    "asset_provenance_and_licenses_archived": false,
+    "final_policy_store_copy_release_notes_archived": false,
+    "handoff_review_complete": false
+  },
+  "completion_requirements": [
+    "12.8 completion is certified",
+    "release tag and archive identify the exact certified RC",
+    "release artifact/version/signing/input fingerprints are archived",
+    "real ownership, recovery, support and privacy channels are configured",
+    "Play/repository/Billing recovery paths and secret backup restore are verified",
+    "asset provenance/licenses and final public documents are archived",
+    "continuity runbook is reviewed by a second authorized operator or recovery contact",
+    "continuity_support_gate.py --release passes"
+  ],
+  "pass_recorded": false
+}
