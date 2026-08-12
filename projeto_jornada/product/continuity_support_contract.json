@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "source_of_truth": {
+    "repository": "pmartins87/desktop-tutorial",
+    "development_branch": "projeto-jornada-snapshots",
+    "roadmap": "projeto_jornada/ROADMAP_STATE.md",
+    "release_tag_pattern": "veredas-v<semver>",
+    "final_release_tag": "PENDING_12_9_RELEASE_TAG"
+  },
+  "release_archive": {
+    "rc_commit_sha": "PENDING_12_9_RC_COMMIT_SHA",
+    "aab_sha256": "PENDING_12_9_AAB_SHA256",
+    "release_input_fingerprint": "PENDING_12_9_RELEASE_INPUT_FINGERPRINT",
+    "signing_certificate_sha256": "PENDING_12_9_SIGNING_CERT_SHA256",
+    "store_version_name": "PENDING_12_9_VERSION_NAME",
+    "store_version_code": 0,
+    "archive_manifest_path": "PENDING_12_9_ARCHIVE_MANIFEST_PATH"
+  },
+  "ownership_and_recovery": {
+    "primary_release_owner": "PENDING_12_9_PRIMARY_RELEASE_OWNER",
+    "secondary_recovery_contact": "PENDING_12_9_SECONDARY_RECOVERY_CONTACT",
+    "support_channel": "PENDING_12_9_PUBLIC_SUPPORT_CHANNEL",
+    "privacy_contact": "PENDING_12_9_PRIVACY_CONTACT",
+    "play_console_recovery_verified": false,
+    "repository_recovery_verified": false,
+    "billing_backend_recovery_verified": false
+  },
+  "secret_and_signing_policy": {
+    "secrets_in_repository_forbidden": true,
+    "keystore_in_repository_forbidden": true,
+    "external_keystore_backup_verified": false,
+    "external_secret_backup_verified": false,
+    "backup_restore_drill_recorded": false,
+    "signing_identity_documented_without_private_material": false
+  },
+  "support_policy": {
+    "severity_order": ["blocker", "critical", "major", "minor", "trivial"],
+    "blocker_definition": "data loss, widespread inability to launch/play, systemic entitlement failure, or material privacy/security incident",
+    "critical_definition": "major functionality unavailable for a meaningful user segment with no safe workaround",
+    "initial_triage_target_hours": {
+      "blocker": 4,
+      "critical": 12,
+      "major": 48,
+      "minor": 120,
+      "trivial": 240
+    },
+    "required_issue_evidence": [
+      "app version/versionCode",
+      "device and Android version when relevant",
+      "reproduction steps",
+      "expected versus observed behavior",
+      "save/billing/privacy impact classification",
+      "logs or screenshots only when they do not expose secrets or unnecessary personal data"
+    ]
+  },
+  "compatibility_policy": {
+    "save_migrations_are_forward_only_and_tested": true,
+    "published_saves_must_remain_loadable_or_have_explicit_migration": true,
+    "verified_entitlements_must_survive_update_and_reinstall": true,
+    "backend_changes_must_remain_compatible_with_supported_public_clients": true,
+    "deferred_locale_es_419_must_not_be_exposed_before_future_certification": true
+  },
+  "asset_and_legal_archive": {
+    "asset_provenance_manifest_finalized": false,
+    "third_party_licenses_archived": false,
+    "privacy_policy_final_copy_archived": false,
+    "store_listing_final_copy_archived": false,
+    "release_notes_archived": false
+  },
+  "evidence": {
+    "12_8_completion_verified": false,
+    "source_tag_matches_rc_commit": false,
+    "release_archive_verified": false,
+    "continuity_runbook_reviewed": false,
+    "support_channel_tested": false,
+    "account_recovery_drill_recorded": false,
+    "secrets_backup_restore_drill_recorded": false,
+    "final_source_tree_clean_and_rebuildable": false
+  },
+  "completion_requirements": [
+    "12.8 completion record reports pass",
+    "final release tag resolves exactly to the certified RC commit",
+    "AAB SHA-256, version, signing fingerprint and release-input fingerprint are archived",
+    "primary and secondary ownership plus support/privacy channels are real non-placeholder values",
+    "Play Console, repository and Billing backend recovery are verified",
+    "keystore/secrets external backups exist and a restore drill is recorded without committing private material",
+    "asset provenance, third-party licenses, privacy policy, store listing and release notes are archived",
+    "continuity runbook is reviewed and support channel is tested",
+    "continuity_support_gate.py --release passes"
+  ],
+  "pass_recorded": false
+}
