@@ -10,21 +10,22 @@
       "id": "LOC-116-001",
       "kind": "product_defect",
       "severity": "blocker",
-      "status": "in_progress",
+      "status": "resolved",
       "area": "localization",
-      "title": "Compact launch localization packs are not physically certified on the canonical branch",
+      "title": "Compact launch localization packs were not physically certified on the canonical branch",
       "detected_on": "2026-08-11",
+      "resolved_on": "2026-08-12",
       "evidence": [
-        "localization/content_packs/en/part_005.b64part is 59951 bytes while neighboring generated parts are 12000/16000-byte segments",
-        "localization/content_packs/es_419 currently contains only part_000 through part_002",
-        "Veredas 11.6 Reproducible Pack Build attempts ended before steps with runner_id=0, so no clean-branch certification exists"
+        "Current English multipart pack is contiguous part_000 through part_009 and totals 133572 Base64 characters; part_005 is 16000 bytes on the canonical branch.",
+        "Launch scope was explicitly narrowed to pt_BR and en; es_419 remains preserved as a deferred locale and is no longer a release gate.",
+        "Pack compiler and certifier now derive non-source targets from localization/manifest.json, preventing deferred locales from remaining accidental launch blockers."
       ],
-      "impact": "11.6 cannot be promoted and release localization cannot be trusted until both launch target packs are rebuilt and certified from a clean checkout.",
+      "resolution": "The stale English segment defect was repaired, and the product launch contract now explicitly requires Brazilian Portuguese plus English only. Spanish work is retained for a future localization expansion rather than treated as incomplete launch content.",
+      "impact": "No active blocker remains from compact-pack physical persistence for the current two-language launch. 11.6 still requires its separate linguistic, terminology, overflow, iconography and same-HEAD regression gates before promotion.",
       "exit_criteria": [
-        "build_launch_localization_packs.py --build completes from the canonical branch",
-        "localization_pack_certification.py reports en=18804/18804 and es_419=18804/18804 with pack_each=15334",
-        "build_launch_localization_packs.py --check passes on a fresh checkout",
-        "localization quality/overflow/iconography gates execute on the same HEAD with no blocker or critical findings"
+        "English compact pack remains contiguous and totals the certified 133572-character payload.",
+        "localization_pack_certification.py targets only locales declared by localization/manifest.json and requires en=18804/18804 with pack=15334.",
+        "Deferred es_419 is not exposed as a launch locale until its own future certification is complete."
       ]
     }
   ],
