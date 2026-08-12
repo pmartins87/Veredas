@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "purpose": "Canonical immutable-style evidence shape used when a Phase 12 roadmap step is genuinely certified. State/preflight files do not substitute for a completion record.",
+  "filename_pattern": "RELEASE_<phase>_<step>_COMPLETION.json",
+  "roadmap_steps": ["12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9", "12.10"],
+  "required_fields": {
+    "schema_version": 1,
+    "roadmap_step": "12.x",
+    "status": "pass",
+    "certified_against_head": "full Git commit SHA that was actually subjected to the step gate/evidence",
+    "certified_on": "ISO-8601 date/time or UTC timestamp",
+    "gate": "tool/workflow/manual evidence authority that produced the pass",
+    "evidence": "non-empty object or array containing step-specific evidence"
+  },
+  "optional_common_fields": [
+    "artifact_commit_sha",
+    "aab_sha256",
+    "version_name",
+    "version_code",
+    "signing_certificate_sha256",
+    "workflow_run_id",
+    "workflow_job_id",
+    "notes"
+  ],
+  "invariants": [
+    "status is exactly pass",
+    "roadmap_step matches the filename and the gate being certified",
+    "certified_against_head names a real commit and must be an ancestor of later aggregate evidence HEADs",
+    "evidence is non-empty and derives from the real step gate or required external process",
+    "completion record is created only after the step-specific completion requirements are satisfied",
+    "preflight/in_progress state never produces a completion record",
+    "artifact source commit may be older than the evidence commit; do not require a self-referential HEAD equality"
+  ],
+  "example_shape_only_not_a_pass": {
+    "schema_version": 1,
+    "roadmap_step": "12.x",
+    "status": "pass",
+    "certified_against_head": "<FULL_COMMIT_SHA>",
+    "certified_on": "<TIMESTAMP>",
+    "gate": "<STEP_SPECIFIC_GATE>",
+    "evidence": {
+      "example": "<REAL_EVIDENCE_ONLY>"
+    }
+  }
+}
