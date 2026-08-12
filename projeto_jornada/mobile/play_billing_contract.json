@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.4",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "store": {
+    "provider": "Google Play Billing",
+    "godot_plugin": "GodotGooglePlayBilling",
+    "plugin_repository": "godot-sdk-integrations/godot-google-play-billing",
+    "plugin_version": "3.3.0",
+    "plugin_release_commit": "e494f37",
+    "google_play_billing_library": "9.1.0",
+    "minimum_supported_godot": "4.2",
+    "project_godot": "4.7.1",
+    "expected_addon_root": "res://addons/GodotGooglePlayBilling/",
+    "gradle_build_required": true,
+    "product_type": "INAPP"
+  },
+  "products": [
+    {
+      "product_id": "full_game_unlock",
+      "kind": "one_time_non_consumable",
+      "entitlement": "full_game",
+      "consumable": false,
+      "repeatable": false
+    },
+    {
+      "product_id": "supporter_cosmetic_pack",
+      "kind": "one_time_non_consumable",
+      "entitlement": "supporter_cosmetics",
+      "consumable": false,
+      "repeatable": false
+    }
+  ],
+  "purchase_state_policy": {
+    "UNSPECIFIED": "never_grant",
+    "PENDING": "never_grant; retain prior verified offline cache only",
+    "PURCHASED": "verify_on_backend_before_any_new_authoritative_grant"
+  },
+  "verification_boundary": {
+    "mode": "secure_backend_required",
+    "status": "interface_implemented_backend_pending",
+    "request_fields": [
+      "application_id",
+      "product_id",
+      "purchase_token",
+      "purchase_time",
+      "package_name",
+      "client_acknowledged_state"
+    ],
+    "required_response_fields": [
+      "ok",
+      "purchase_token",
+      "product_id",
+      "owned",
+      "purchase_state",
+      "acknowledged",
+      "source"
+    ],
+    "required_success_values": {
+      "ok": true,
+      "owned": true,
+      "purchase_state": "PURCHASED",
+      "acknowledged": true,
+      "source": "play_backend"
+    },
+    "deduplication_key": "purchase_token",
+    "order_id_is_not_deduplication_key": true,
+    "backend_endpoint": "PENDING_12_4_BACKEND_ENDPOINT",
+    "server_authentication": "PENDING_12_4_SERVER_AUTH_MODEL",
+    "server_acknowledges_non_consumables": true,
+    "play_developer_api_verification": "Purchases.products:get",
+    "play_developer_api_acknowledgement": "Purchases.products:acknowledge"
+  },
+  "offline_policy": {
+    "previously_verified_entitlements_may_remain_available": true,
+    "first_time_unverified_purchase_may_grant_offline": false,
+    "failed_restore_may_revoke_cached_entitlement": false,
+    "successful_authoritative_empty_restore_may_revoke_cached_entitlement": true
+  },
+  "restore_policy": {
+    "query_on_store_connection": true,
+    "query_on_app_resume": true,
+    "verify_every_returned_PURCHASED_token": true,
+    "apply_authoritative_snapshot_only_after_all_tokens_verify": true,
+    "partial_verification_failure_preserves_existing_cache": true
+  },
+  "privacy_link": {
+    "manifest": "res://product/privacy_data_safety.json",
+    "post_integration_reaudit_required": true,
+    "purchase_token_off_device": true
+  },
+  "completion_requirements": [
+    "install and pin the exact plugin release in the project",
+    "configure both Play Console non-consumable products",
+    "deploy secure purchase verification backend and freeze endpoint/authentication contract",
+    "verify purchaseToken with Google Play Developer API before grant",
+    "acknowledge verified non-consumables",
+    "pass pending-purchase no-grant tests",
+    "pass purchase, restore, refund/revocation and reinstall/restore tests on Play test track",
+    "prove previously verified offline entitlement cache survives temporary store/backend outage",
+    "repeat 12.3 privacy/Data Safety audit after final billing integration"
+  ],
+  "pass_recorded": false
+}
