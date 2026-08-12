@@ -12,7 +12,7 @@
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
 - Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7, 11.9 e 11.10 em andamento com gates fail-closed**.
-- Fase 12: **12.1, 12.2 e 12.3 em preflight antecipado; nenhum passo da Fase 12 promovido ainda**.
+- Fase 12: **12.1–12.5 em preflight/implementação antecipada; nenhum passo da Fase 12 promovido ainda**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -109,17 +109,36 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - ambos os presets Android e o CI de emulador usam o ID estável;
 - estado: `RELEASE_12_2_STATE.json` + `mobile/release_identity.json`;
 - validador `tools/validate_android_export.py` exige identidade/versionamento coerentes e ausência de credenciais de release no repositório;
-- pipeline `.github/workflows/veredas-release-aab.yml` exige RC certificado, secrets protegidos, AAB assinado, `jarsigner` e SHA-256, destruindo o keystore temporário após o job;
+- pipeline `.github/workflows/veredas-release-aab.yml` exige RC certificado, privacidade/Data Safety 12.3 final, secrets protegidos, AAB assinado, `jarsigner` e SHA-256, destruindo o keystore temporário após o job;
 - faltam keystore real/backup externo, secrets protegidos, aceitação do package ID no Play Console, freeze de versão RC e AAB assinado real.
 
 ### 12.3 — Privacidade, Data Safety e requisitos de plataforma 🟡
 - manifesto técnico: `product/privacy_data_safety.json`;
 - política bilíngue fail-closed: `docs/PRIVACY_POLICY_DRAFT.md`, ainda com placeholders explícitos;
 - o comportamento atual não inclui ads, analytics, conta própria ou permissões Android customizadas e mantém gameplay/save local;
-- Billing de produção ainda não está congelado; 12.4 deverá reabrir a auditoria de fluxo de dados, especialmente para purchase token/validação de titularidade;
-- gate `tools/privacy_data_safety_gate.py` possui modo preflight e modo `--release`;
-- o AAB assinado está bloqueado por `privacy_data_safety_gate.py --release`, portanto não pode ser produzido enquanto contato, URL, SDKs, retenção e respostas finais de Data Safety estiverem pendentes;
+- gate `tools/privacy_data_safety_gate.py` possui modo preflight e modo `--release`, escaneia também `mobile/` e exige 12.4 certificado antes de liberar o release;
+- o AAB assinado permanece bloqueado enquanto contato, URL, SDKs, retenção, Billing e respostas finais de Data Safety estiverem pendentes;
 - faltam auditoria pós-12.4, permissões/SDKs do AAB final, URL pública, acesso in-app, contato de privacidade e submissão coerente do formulário Data Safety.
+
+### 12.4 — Monetização de produção e restauração de entitlements 🟡
+- contrato: `mobile/play_billing_contract.json`; estado: `RELEASE_12_4_STATE.json`;
+- plugin de referência pinado: **GodotGooglePlayBilling 3.3.0**, com fronteira dinâmica para não criar dependência estática antes da instalação do addon;
+- `PlayBillingCoordinator` separa o estado visto pelo cliente da concessão autoritativa: `PENDING` nunca concede; `PURCHASED` só concede após verificação de backend, token/id/pacote consistentes e confirmação de acknowledgement;
+- a restauração só aplica snapshot depois de percorrer toda a lista e concluir todas as verificações; falha parcial preserva cache previamente verificado;
+- teste lógico: `tests/play_billing_coordinator_certification.tscn`, com sete gates de segurança; workflow: `Veredas Play Billing 12.4`;
+- primeira execução do workflow, run `31606610197`, job `94147053674`, encerrou sem steps por indisponibilidade de runner; nenhum PASS de código foi inferido;
+- faltam instalar/vendorizar o plugin exato, configurar produtos no Play Console, backend HTTPS seguro com Google Play Developer API, executar os testes lógicos, e testar compra/pending/restauração/reembolso/revogação/offline em test track;
+- 12.4 permanece 🟡 até evidência real de produção e nova auditoria 12.3.
+
+### 12.5 — Página da loja, screenshots, ícone, feature graphic e ASO 🟡
+- copy PT-BR/en-US persistida em `product/store_listing_google_play.json` e estado em `RELEASE_12_5_STATE.json`;
+- título: 16/30 caracteres; descrição curta: PT 68/80, EN 59/80; descrições completas permanecem abaixo de 4.000 caracteres;
+- plano de captura: seis screenshots reais 1080×1920 por idioma — Hub, escolha narrativa, combate, Domínio/localidade, códice e acessibilidade;
+- ícone final 512×512 e feature graphic 1024×500 permanecem dependentes da arte final;
+- `tools/store_listing_gate.py` valida copy, claims promocionais, locale mapping, alt text e os próprios cabeçalhos PNG: dimensões, bit depth e alpha;
+- modo `--release` exige 12.1 certificado, 11.10 concluído, artes finais e screenshots marcados `final_rc_capture`;
+- preview video permanece opcional e só será incluído se puder mostrar gameplay real sem material enganoso;
+- 12.5 permanece 🟡 até assets finais, capturas do RC e inspeção no Play Console.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -149,8 +168,8 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - 12.1 🟡 Validação do nome comercial, disponibilidade e identidade final — preflight em andamento.
 - 12.2 🟡 Package ID, versionamento, assinatura e cadeia segura — infraestrutura pronta; credenciais/console/build real pendentes.
 - 12.3 🟡 Privacidade, Data Safety, termos e requisitos de plataforma — contrato/gate preparados; congelamento final pós-12.4 pendente.
-- 12.4 ⏳ Integração de produção da monetização e restauração de entitlements.
-- 12.5 ⏳ Página de loja, screenshots, ícone, feature graphic, vídeo e ASO.
+- 12.4 🟡 Integração de produção da monetização e restauração de entitlements — arquitetura segura preparada; plugin/backend/Play test track pendentes.
+- 12.5 🟡 Página de loja, screenshots, ícone, feature graphic, vídeo e ASO — copy/gate preparados; artes e capturas do RC pendentes.
 - 12.6 ⏳ AAB/APK final assinado, otimizado e reproduzível.
 - 12.7 ⏳ Teste interno/fechado e rollout controlado.
 - 12.8 ⏳ Release Candidate final, checklist e rollback.
