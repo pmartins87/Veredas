@@ -12,7 +12,7 @@
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
 - Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7, 11.9 e 11.10 em andamento com gates fail-closed**.
-- Fase 12: **12.1–12.5 em preflight/implementação antecipada; nenhum passo da Fase 12 promovido ainda**.
+- Fase 12: **12.1–12.9 em preflight/implementação ou aguardando evidência real; nenhum passo da Fase 12 foi promovido ainda**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -96,7 +96,7 @@ A infraestrutura de freeze foi antecipada, mas é deliberadamente impossível pr
 ### Infraestrutura GitHub Actions — observação atual
 As execuções recentes dos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
 
-## Fase 12 — Preflight de publicação já iniciado
+## Fase 12 — Publicação e release
 ### 12.1 — Nome comercial e identidade 🟡
 - candidato atual: **Veredas da Trama**;
 - reconhecimento público inicial não encontrou colisão exata relevante nas buscas realizadas em web/lojas, mas isso não constitui liberação jurídica;
@@ -140,6 +140,39 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - preview video permanece opcional e só será incluído se puder mostrar gameplay real sem material enganoso;
 - 12.5 permanece 🟡 até assets finais, capturas do RC e inspeção no Play Console.
 
+### 12.6 — AAB/APK final assinado, otimizado e reproduzível 🟡
+- estado: `RELEASE_12_6_STATE.json`; contrato: `mobile/release_artifact_contract.json`;
+- `tools/release_input_fingerprint.py` congela os inputs relevantes e o workflow `.github/workflows/veredas-release-aab.yml` contém a receita de AAB assinado, verificação de assinatura e SHA-256;
+- a infraestrutura exige 11.10, 12.2, 12.3, 12.4 e 12.5 certificados antes de produzir o artefato de release;
+- faltam AAB real, assinatura/Play acceptance, hash e fingerprint persistidos, reconstrução equivalente e auditoria do payload final;
+- `pass_recorded=false`; 12.6 não está promovido.
+
+### 12.7 — Teste interno/fechado e rollout controlado 🟡
+- plano: `product/play_test_rollout_plan.json`; estado: `RELEASE_12_7_STATE.json`; gate: `tools/play_test_rollout_gate.py`;
+- política do projeto exige track interno e fechado, com baseline conservador de **12 testers continuamente opt-in por 14 dias**;
+- matrizes de lifecycle, Billing, localização, acessibilidade e feedback estão definidas e vinculadas ao SHA-256 do AAB testado;
+- primeira publicação pública não presume staged rollout; atualizações posteriores usam política 10/25/50/100 com observação entre expansões;
+- faltam AAB certificado de 12.6, testes reais, classificação da conta Play, canal de feedback, evidência dos testers/Billing e production access quando aplicável;
+- `pass_recorded=false`; 12.7 não está promovido.
+
+### 12.8 — Release Candidate final, checklist e rollback 🟡
+- contrato: `product/release_candidate_final_contract.json`; estado: `RELEASE_12_8_STATE.json`; gate: `tools/release_candidate_final_gate.py`;
+- workflow manual: `Veredas Final Release Candidate 12.8`;
+- exige completion records de 11.10 e 12.1–12.7, ancestralidade ao RC, identidade exata commit/version/AAB/certificado e zero blocker/critical;
+- checklist final cobre canonical/balance freeze, localização, audiovisual, reliability, privacidade, Billing, store listing, artefato assinado, test track e save migration;
+- rollback diferencia primeira publicação de updates: primeira publicação usa hotfix de `versionCode` maior e mesma identidade; updates podem interromper rollout progressivo e também corrigem por versão crescente, nunca downgrade;
+- stop imediato por blocker/critical, data loss/save, entitlement, crash/ANR ou privacidade/segurança/política;
+- faltam todas as evidências reais upstream, owner/canal de incidente, dry run de hotfix/rollback e decisão final go/no-go;
+- `pass_recorded=false`; 12.8 não está promovido.
+
+### 12.9 — Documentação final, continuidade e suporte 🟡
+- contrato: `product/continuity_support_contract.json`; estado: `RELEASE_12_9_STATE.json`; gate: `tools/continuity_support_gate.py`;
+- runbook: `docs/CONTINUITY_AND_SUPPORT.md`; workflow manual: `Veredas Continuity and Support 12.9`;
+- cobre fonte de verdade/tag, rebuild, archive do release, assinatura sem segredos no Git, recuperação de Play/repo/Billing, save compatibility, entitlements, privacidade, localização adiada, assets/licenças, suporte, incidente/hotfix e handoff;
+- o gate release rejeita placeholders e exige 12.8 certificado, tag apontando ao RC, hashes/fingerprints arquivados, canais reais, backups externos e restore drill;
+- faltam identidade operacional real, tag/artefato final, canais, recovery drills, archive de licenças/políticas/listing/release notes e revisão de passagem de bastão;
+- `pass_recorded=false`; 12.9 não está promovido.
+
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
 - 10.2 ✅ 36 personagens — 1.296 jornadas.
@@ -170,10 +203,10 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - 12.3 🟡 Privacidade, Data Safety, termos e requisitos de plataforma — contrato/gate preparados; congelamento final pós-12.4 pendente.
 - 12.4 🟡 Integração de produção da monetização e restauração de entitlements — arquitetura segura preparada; plugin/backend/Play test track pendentes.
 - 12.5 🟡 Página de loja, screenshots, ícone, feature graphic, vídeo e ASO — copy/gate preparados; artes e capturas do RC pendentes.
-- 12.6 ⏳ AAB/APK final assinado, otimizado e reproduzível.
-- 12.7 ⏳ Teste interno/fechado e rollout controlado.
-- 12.8 ⏳ Release Candidate final, checklist e rollback.
-- 12.9 ⏳ Documentação final, continuidade e suporte.
+- 12.6 🟡 AAB/APK final assinado, otimizado e reproduzível — infraestrutura/gate preparados; artefato real e pré-requisitos pendentes.
+- 12.7 🟡 Teste interno/fechado e rollout controlado — infraestrutura/evidência contratada; execução real em Play pendente.
+- 12.8 🟡 Release Candidate final, checklist e rollback — contrato/gate/workflow preparados; evidências e go/no-go pendentes.
+- 12.9 🟡 Documentação final, continuidade e suporte — contrato/runbook/gate preparados; configuração/evidência final pendente.
 - 12.10 ⏳ FINAL — pronto para jogar, divulgar e publicar.
 
 ## Fase 7 — Assets finais ainda pendentes
