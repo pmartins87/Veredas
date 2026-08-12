@@ -10,19 +10,19 @@
     "pt-BR": {
       "title_chars": 16,
       "short_description_chars": 68,
-      "full_description_chars": 1114
+      "full_description_chars": 1245
     },
     "en-US": {
       "title_chars": 16,
       "short_description_chars": 59,
-      "full_description_chars": 1049
+      "full_description_chars": 1148
     },
     "limits": {
       "title": 30,
       "short_description": 80,
       "full_description": 4000
     },
-    "status": "draft_copy_persisted_within_limits"
+    "status": "draft_copy_persisted_within_limits_and_aligned_with_current_two-product Billing contract"
   },
   "visual_assets": {
     "icon_512": "pending_final_art",
@@ -44,14 +44,16 @@
     "mockups_presented_as_gameplay_forbidden": true,
     "rank_price_discount_cta_overlays_forbidden": true,
     "localized_screenshots_required": true,
+    "commercial_copy_must_match_final_12_4_product_set": true,
     "alt_text_max_chars": 140,
     "png_header_and_dimensions_checked_without_external_library": true,
     "release_requires_11_10_completion": true,
-    "release_requires_12_1_name_certification": true
+    "release_requires_12_1_name_certification": true,
+    "release_requires_12_4_billing_certification": true
   },
-  "dependencies": ["7.3", "7.4", "7.5", "7.10", "11.10", "12.1"],
+  "dependencies": ["7.3", "7.4", "7.5", "7.10", "11.10", "12.1", "12.4"],
   "completion_requirements": [
-    "freeze copy against the release candidate",
+    "freeze copy against the release candidate and final 12.4 Billing product set",
     "produce final original icon and feature graphic",
     "capture six PT-BR and six en-US screenshots from the certified RC",
     "pass store_listing_gate.py --release",
