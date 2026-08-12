@@ -13,21 +13,21 @@
     "pt-BR": {
       "title": "Veredas da Trama",
       "short_description": "Um livro-jogo de fantasia em que cada escolha transforma sua jornada",
-      "full_description": "Entre em uma jornada de fantasia construída como um livro-jogo vivo. Em Veredas da Trama, decisões, riscos e descobertas deixam marcas que mudam o caminho adiante.\n\nExplore 12 Domínios com identidades próprias, atravesse localidades repletas de histórias e conduza diferentes andarilhos por jornadas em que recursos, relações e consequências importam.\n\n• Faça escolhas que alteram eventos, caminhos e desfechos.\n• Enfrente combates táticos com personagens, criaturas e chefes de estilos distintos.\n• Descubra itens, Marcas, Dívidas, ecos e segredos que reaparecem ao longo da trama.\n• Acompanhe seu progresso no códice e revele novas possibilidades entre jornadas.\n• Ajuste tamanho de texto, contraste, movimento, flashes, rótulos de ícones e outros recursos de acessibilidade.\n• Jogue a experiência principal sem depender de conexão constante.\n\nUma parte inicial do jogo pode ser explorada gratuitamente. O desbloqueio completo é planejado como uma compra única e não consumível. Não há anúncios, assinaturas, loot boxes nem venda de poder de combate.\n\nCada jornada termina. A trama que você deixa para trás, não.",
+      "full_description": "Entre em uma jornada de fantasia construída como um livro-jogo vivo. Em Veredas da Trama, decisões, riscos e descobertas deixam marcas que mudam o caminho adiante.\n\nExplore 12 Domínios com identidades próprias, atravesse localidades repletas de histórias e conduza diferentes andarilhos por jornadas em que recursos, relações e consequências importam.\n\n• Faça escolhas que alteram eventos, caminhos e desfechos.\n• Enfrente combates táticos com personagens, criaturas e chefes de estilos distintos.\n• Descubra itens, Marcas, Dívidas, ecos e segredos que reaparecem ao longo da trama.\n• Acompanhe seu progresso no códice e revele novas possibilidades entre jornadas.\n• Ajuste tamanho de texto, contraste, movimento, flashes, rótulos de ícones e outros recursos de acessibilidade.\n• Jogue a experiência principal sem depender de conexão constante.\n\nUma parte inicial do jogo pode ser explorada gratuitamente. O acesso completo é planejado como uma compra única e não consumível. Também poderá ser oferecido um pacote opcional de apoiador com itens exclusivamente cosméticos, sem efeito sobre combate ou progressão. Não há anúncios, assinaturas, loot boxes nem venda de poder de combate.\n\nCada jornada termina. A trama que você deixa para trás, não.",
       "character_counts": {
         "title": 16,
         "short_description": 68,
-        "full_description": 1114
+        "full_description": 1245
       }
     },
     "en-US": {
       "title": "Veredas da Trama",
       "short_description": "A fantasy gamebook where every choice reshapes your journey",
-      "full_description": "Enter a fantasy journey built like a living gamebook. In Veredas da Trama, decisions, risks, and discoveries leave marks that reshape the road ahead.\n\nExplore 12 distinct Domains, cross story-rich locations, and guide different wanderers through journeys where resources, relationships, and consequences matter.\n\n• Make choices that change events, routes, and endings.\n• Face tactical battles with characters, creatures, and bosses built around different styles.\n• Discover items, Marks, Debts, echoes, and secrets that can return later in the story.\n• Follow your progress in the codex and uncover new possibilities between journeys.\n• Adjust text size, contrast, motion, flashes, icon labels, and other accessibility options.\n• Play the core experience without relying on a constant internet connection.\n\nAn opening portion of the game can be explored for free. Full access is planned as a single non-consumable purchase. There are no ads, subscriptions, loot boxes, or paid combat power.\n\nEvery journey ends. The thread you leave behind does not.",
+      "full_description": "Enter a fantasy journey built like a living gamebook. In Veredas da Trama, decisions, risks, and discoveries leave marks that reshape the road ahead.\n\nExplore 12 distinct Domains, cross story-rich locations, and guide different wanderers through journeys where resources, relationships, and consequences matter.\n\n• Make choices that change events, routes, and endings.\n• Face tactical battles with characters, creatures, and bosses built around different styles.\n• Discover items, Marks, Debts, echoes, and secrets that can return later in the story.\n• Follow your progress in the codex and uncover new possibilities between journeys.\n• Adjust text size, contrast, motion, flashes, icon labels, and other accessibility options.\n• Play the core experience without relying on a constant internet connection.\n\nAn opening portion of the game can be explored for free. Full access is planned as a single non-consumable purchase. An optional supporter cosmetic pack may also be offered; it does not affect combat or progression. There are no ads, subscriptions, loot boxes, or paid combat power.\n\nEvery journey ends. The thread you leave behind does not.",
       "character_counts": {
         "title": 16,
         "short_description": 59,
-        "full_description": 1049
+        "full_description": 1148
       }
     }
   },
@@ -152,7 +152,8 @@
     "avoid_price_or_discount_promotions_in_metadata": true,
     "avoid_keyword_spam": true,
     "avoid_misleading_feature_claims": true,
-    "localized_copy_must_match_same_product_behavior": true
+    "localized_copy_must_match_same_product_behavior": true,
+    "commercial_model_must_match_billing_products": true
   },
   "dependencies": [
     "7.3 final Domain/location art",
@@ -160,10 +161,11 @@
     "7.5 final monster/boss art",
     "7.10 final audiovisual QA",
     "11.10 Release Candidate freeze for truthful screenshots",
-    "12.1 final commercial name decision"
+    "12.1 final commercial name decision",
+    "12.4 final Billing product set"
   ],
   "completion_requirements": [
-    "freeze final PT-BR and en-US copy against the release candidate",
+    "freeze final PT-BR and en-US copy against the release candidate and final Billing product set",
     "produce final icon and feature graphic from original Veredas da Trama art",
     "capture all localized screenshots from the certified release candidate",
     "validate dimensions, file formats, alpha policy, file sizes and alt text",
