@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.8",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "contract": "product/release_candidate_final_contract.json",
+  "gate": "tools/release_candidate_final_gate.py",
+  "implemented": {
+    "exact_rc_identity_contract": true,
+    "prerequisite_ancestry_gate": true,
+    "final_regression_checklist": true,
+    "zero_blocker_critical_gate": true,
+    "first_release_hotfix_strategy": true,
+    "subsequent_update_staged_rollout_strategy": true,
+    "rollback_stop_conditions": true,
+    "save_entitlement_backend_compatibility_rules": true,
+    "go_no_go_evidence_contract": true
+  },
+  "pending": {
+    "11_10_certified": false,
+    "12_1_through_12_7_certified": false,
+    "candidate_identity_frozen": false,
+    "all_final_regressions_passed_same_candidate": false,
+    "rollback_decision_owner_assigned": false,
+    "incident_channel_configured": false,
+    "hotfix_recipe_verified": false,
+    "rollback_dry_run_recorded": false,
+    "final_go_no_go_recorded": false
+  },
+  "completion_requirements": [
+    "all 11.10 and 12.1-12.7 completion records report pass and are ancestors of the RC",
+    "RC commit/version/AAB/signing identity matches 12.6 and the artifact tested in 12.7",
+    "full final regression checklist passes on the exact candidate",
+    "zero blocker/critical defects remain active",
+    "real rollback decision owner and incident channel are configured",
+    "first-release hotfix path is verified and rollback dry run recorded",
+    "release_candidate_final_gate.py --release passes",
+    "explicit final go decision is recorded"
+  ],
+  "pass_recorded": false
+}
