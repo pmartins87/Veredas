@@ -38,7 +38,7 @@ def git_output(*args: str) -> str:
 
 
 def completion_commit(row: dict[str, Any]) -> str:
-    for key in ("certified_commit", "commit_sha", "head_sha", "rc_commit_sha"):
+    for key in ("certified_against_head", "certified_commit", "commit_sha", "head_sha", "rc_commit_sha"):
         value = row.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()
@@ -108,7 +108,9 @@ def main() -> int:
                 errors.append(f"{step}: invalid completion record: {exc}")
                 continue
             completion_rows[step] = row
-            if row.get("status") != "pass" and row.get("formal_status") != "complete":
+            if str(row.get("roadmap_step", "")) != step:
+                errors.append(f"{step}: roadmap_step mismatch in completion record")
+            if str(row.get("status", "")).lower() != "pass":
                 errors.append(f"{step}: completion record does not report pass")
             commit_sha = completion_commit(row)
             if not is_ancestor(commit_sha, head_sha):
