@@ -201,9 +201,14 @@ def main() -> int:
 
     targets = launch_targets()
     sys.path.insert(0, str(TOOLS))
-    catalog_paths = {locale: LOC / "content" / f"{locale}.json" for locale in targets}
-    original_text = {locale: path.read_text(encoding="utf-8") for locale, path in catalog_paths.items()}
-    base_catalogs = {locale: json.loads(text) for locale, text in original_text.items()}
+    content_root = LOC / "content"
+    catalog_paths = {locale: content_root / f"{locale}.json" for locale in targets}
+    all_catalog_paths = sorted(content_root.glob("*.json"))
+    all_original_text = {path: path.read_text(encoding="utf-8") for path in all_catalog_paths}
+    base_catalogs = {
+        locale: json.loads(all_original_text[path])
+        for locale, path in catalog_paths.items()
+    }
     if any(not isinstance(value, dict) for value in base_catalogs.values()):
         raise SystemExit("base launch content catalogs must be JSON objects")
 
@@ -218,9 +223,10 @@ def main() -> int:
             run_applier(script_path)
         full_catalogs = {locale: read_object(path) for locale, path in catalog_paths.items()}
     finally:
-        # Canonical/base overlay catalogs are inputs, never compiler outputs.
-        for locale, path in catalog_paths.items():
-            path.write_text(original_text[locale], encoding="utf-8")
+        # Every base/deferred overlay catalog is an input, never compiler output.
+        # Seeders may touch non-launch locale files, so restore the entire content directory.
+        for path, text in all_original_text.items():
+            path.write_text(text, encoding="utf-8")
 
     deltas: dict[str, dict[str, Any]] = {}
     for locale_id in targets:
