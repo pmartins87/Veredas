@@ -56,6 +56,7 @@ jobs:
           python tools/validate_android_export.py
           python tools/privacy_data_safety_gate.py --release
           python tools/platform_compliance_gate.py --release
+          python tools/legal_surface_gate.py --release
           python tools/qa_release_candidate_gate.py
           python tools/validate_canonical.py
 
