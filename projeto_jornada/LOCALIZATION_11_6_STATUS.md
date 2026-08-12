@@ -2,28 +2,59 @@
 
 Status: **EM ANDAMENTO**. Este arquivo não promove 11.6 para concluída.
 
-## Último estado certificado por CI
-- Run: `31458154371`, commit `e8ab835` — PASS.
+## Último estado certificado por CI — histórico
+- Run: `31458154371`, commit `e8ab835` — PASS no escopo vigente naquele commit.
 - Fonte canônica/fallback: `pt_BR`.
-- Alvos de lançamento: `en`, `es_419`.
+- Naquele momento, os alvos ainda incluíam `en` e `es_419`.
 - Registros estáveis: 5.160.
 - Unidades de conteúdo: 18.804.
-- UI: 119/119 por idioma.
-- Labels: 165/165 por idioma.
-- Conteúdo: 3.074/18.804 por idioma (16,35%).
-- Restante: 15.730 unidades por idioma, organizado em 40 lotes determinísticos de até 400 unidades.
-- Restante contém 9.840 strings-fonte únicas e 5.890 ocorrências repetidas elegíveis a memória de tradução.
-- SHA-256 das chaves-fonte: `19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63`.
+- UI: 119/119 por idioma então avaliado.
+- Labels: 165/165 por idioma então avaliado.
+- Conteúdo naquele checkpoint: 3.074/18.804 por alvo (16,35%).
+- Restante histórico: 15.730 unidades por alvo, organizado em 40 lotes determinísticos de até 400 unidades.
+- SHA-256 histórico das chaves-fonte: `19e1807176210a8191cda20db4b89002380f2ff150f9603a2c9a3c28db59ce63`.
 
-## Trabalho persistido após o último PASS
-- `461c492`: +96 nomes de famílias e +300 nomes de monstros traduzidos por idioma.
-- `63085be`: proteção permanente dessas traduções no pipeline.
-- `ddd840c`: `tools/localization_quality_gate.py`, cobrindo paridade de placeholders printf/braces, BBCode, terminologia do glossário, traduções idênticas suspeitas e riscos de expansão de UI.
-- `65e6600`: workflow independente `Veredas Localization Quality 11.6`.
-- `b8d9a1c`: endurecimento do workflow de qualidade com permissão read-only explícita.
+Esse PASS histórico **não define o escopo de lançamento atual** e não certifica o corpus completo atual.
+
+## Escopo de lançamento atual
+- Fonte/fallback: **pt_BR**.
+- Idiomas de lançamento: **pt_BR + en**.
+- `es_419` permanece preservado como idioma **adiado** para expansão futura e não integra os gates do release atual.
+- O manifesto `localization/manifest.json` é a autoridade para seleção de idiomas de lançamento.
+- A redução de escopo não relaxa nenhum requisito de qualidade do inglês: o alvo continua sendo **18.804/18.804** unidades, UI/labels completos, integridade de placeholders/BBCode/glossário, sanity linguístico, overflow e iconografia/acessibilidade.
+
+## Cobertura inglesa atual persistida
+- Base inglesa do último baseline verde: **3.074** unidades.
+- Nomes adicionais de famílias/monstros: **396** unidades.
+- Delta compacto inglês: **15.334** unidades.
+- Equação de cobertura: **3.074 + 396 + 15.334 = 18.804**.
+- UI: **119/119** em `pt_BR` e `en`.
+- Labels: **165/165** em `pt_BR` e `en`.
+- Pack físico inglês: `part_000` a `part_009`, contíguos, total Base64 **133.572 caracteres**.
+
+## Gates atuais
+- `tools/build_launch_localization_packs.py` — deriva alvos do manifesto e preserva catálogos adiados.
+- `tools/localization_pack_certification.py` — certifica apenas alvos atuais e exige cobertura inglesa completa, sem colisões/chaves desconhecidas e com paridade de tokens/BBCode.
+- `tools/localization_quality_gate.py` — incorpora o pack compacto antes de verificar completude, glossário, placeholders e BBCode.
+- `tools/localization_full_linguistic_sanity.py` — deriva alvos do manifesto.
+- `tests/LocalizationOverflowCertification.gd` — `pt_BR + en`.
+- `tests/LocalizationIconographyCertification.gd` — `pt_BR + en`.
+- `tests/LocalizationArchitectureCertification.gd` — exige exatamente `pt_BR + en` como launch locales e verifica que `es_419` continua preservado, porém não selecionável.
+
+## Blocker resolvido
+`LOC-116-001` está **resolvido** no contrato atual: o pack inglês físico está íntegro e o espanhol adiado não pode permanecer acidentalmente como blocker do release.
 
 ## Observação de CI
-A primeira tentativa do workflow novo terminou sem executar nenhum step, com `runner_id=0`. O mesmo ocorreu com Balance Freeze no mesmo HEAD. Isso é tratado como ausência de execução do runner, não como falha funcional do jogo ou do gate. Nenhum número pós-`e8ab835` é promovido a certificado até uma execução real.
+Os workflows recentes continuam terminando antes de executar qualquer step (`runner_id=0`, `steps=[]`). Isso é tratado como ausência de executor, não como falha ou PASS funcional. Nenhum resultado novo é promovido a certificado até uma execução real no HEAD correspondente.
 
 ## Gate para concluir 11.6
-11.6 só poderá virar ✅ quando `en` e `es_419` atingirem 100% de conteúdo, labels e UI; placeholders/markup e glossário estiverem íntegros; overflow/renderização forem validados nos idiomas de lançamento; iconografia/legendas estiverem coerentes; e as regressões relevantes estiverem verdes no mesmo HEAD.
+11.6 só poderá virar ✅ quando, no mesmo HEAD de lançamento:
+1. o inglês for certificado em **18.804/18.804** unidades e o pack compacto em **15.334** unidades, com zero colisões/chaves desconhecidas/erros de tokens;
+2. o QA completo de glossário/placeholders/BBCode passar com o pack incorporado;
+3. o sanity linguístico final do inglês passar;
+4. overflow/renderização passarem em `pt_BR` e `en` na matriz responsiva;
+5. iconografia e rótulos de acessibilidade passarem em `pt_BR` e `en`;
+6. a arquitetura confirmar `pt_BR + en` e rejeitar `es_419` como idioma de lançamento;
+7. as regressões relevantes passarem no mesmo HEAD limpo.
+
+Somente então **11.6 ✅** poderá ser registrado.
