@@ -12,6 +12,7 @@
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
 - Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7, 11.9 e 11.10 em andamento com gates fail-closed**.
+- Fase 12: **12.1, 12.2 e 12.3 em preflight antecipado; nenhum passo da Fase 12 promovido ainda**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -95,6 +96,31 @@ A infraestrutura de freeze foi antecipada, mas é deliberadamente impossível pr
 ### Infraestrutura GitHub Actions — observação atual
 As execuções recentes dos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
 
+## Fase 12 — Preflight de publicação já iniciado
+### 12.1 — Nome comercial e identidade 🟡
+- candidato atual: **Veredas da Trama**;
+- reconhecimento público inicial não encontrou colisão exata relevante nas buscas realizadas em web/lojas, mas isso não constitui liberação jurídica;
+- estado persistido: `RELEASE_12_1_NAME_STATE.json`;
+- faltam busca oficial/interativa no INPI, cross-check WIPO, confirmação autoritativa de domínios/handles e decisão final de estratégia de marca;
+- nenhum resultado provisório será tratado como certificação jurídica.
+
+### 12.2 — Package ID, versionamento e assinatura 🟡
+- Android application ID estável adotado: **`com.pmartins87.veredasdatrama`**;
+- ambos os presets Android e o CI de emulador usam o ID estável;
+- estado: `RELEASE_12_2_STATE.json` + `mobile/release_identity.json`;
+- validador `tools/validate_android_export.py` exige identidade/versionamento coerentes e ausência de credenciais de release no repositório;
+- pipeline `.github/workflows/veredas-release-aab.yml` exige RC certificado, secrets protegidos, AAB assinado, `jarsigner` e SHA-256, destruindo o keystore temporário após o job;
+- faltam keystore real/backup externo, secrets protegidos, aceitação do package ID no Play Console, freeze de versão RC e AAB assinado real.
+
+### 12.3 — Privacidade, Data Safety e requisitos de plataforma 🟡
+- manifesto técnico: `product/privacy_data_safety.json`;
+- política bilíngue fail-closed: `docs/PRIVACY_POLICY_DRAFT.md`, ainda com placeholders explícitos;
+- o comportamento atual não inclui ads, analytics, conta própria ou permissões Android customizadas e mantém gameplay/save local;
+- Billing de produção ainda não está congelado; 12.4 deverá reabrir a auditoria de fluxo de dados, especialmente para purchase token/validação de titularidade;
+- gate `tools/privacy_data_safety_gate.py` possui modo preflight e modo `--release`;
+- o AAB assinado está bloqueado por `privacy_data_safety_gate.py --release`, portanto não pode ser produzido enquanto contato, URL, SDKs, retenção e respostas finais de Data Safety estiverem pendentes;
+- faltam auditoria pós-12.4, permissões/SDKs do AAB final, URL pública, acesso in-app, contato de privacidade e submissão coerente do formulário Data Safety.
+
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
 - 10.2 ✅ 36 personagens — 1.296 jornadas.
@@ -118,6 +144,18 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - 11.8 ✅ Triage até zero blocker/critical — gate `--require-zero` executado com 0 blocker/critical ativo.
 - 11.9 🟡 Soak/sessões longas/suspend-resume/confiabilidade — gate e workflow implementados; execução real pendente.
 - 11.10 🟡 QA freeze do Release Candidate — gate/workflow implementados; pré-requisitos 11.3/11.6/11.7/11.9 pendentes.
+
+## Fase 12 — Publicação e release
+- 12.1 🟡 Validação do nome comercial, disponibilidade e identidade final — preflight em andamento.
+- 12.2 🟡 Package ID, versionamento, assinatura e cadeia segura — infraestrutura pronta; credenciais/console/build real pendentes.
+- 12.3 🟡 Privacidade, Data Safety, termos e requisitos de plataforma — contrato/gate preparados; congelamento final pós-12.4 pendente.
+- 12.4 ⏳ Integração de produção da monetização e restauração de entitlements.
+- 12.5 ⏳ Página de loja, screenshots, ícone, feature graphic, vídeo e ASO.
+- 12.6 ⏳ AAB/APK final assinado, otimizado e reproduzível.
+- 12.7 ⏳ Teste interno/fechado e rollout controlado.
+- 12.8 ⏳ Release Candidate final, checklist e rollback.
+- 12.9 ⏳ Documentação final, continuidade e suporte.
+- 12.10 ⏳ FINAL — pronto para jogar, divulgar e publicar.
 
 ## Fase 7 — Assets finais ainda pendentes
 - 7.3 🟡 12 Domínios + 120 localidades — grandes ilustrações finais.
