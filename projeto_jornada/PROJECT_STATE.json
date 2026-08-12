@@ -119,11 +119,11 @@
     "12.3": "in_progress_post_billing_privacy_freeze_pending",
     "12.4": "in_progress_plugin_backend_play_testing_pending",
     "12.5": "in_progress_final_art_rc_captures_console_pending",
-    "12.6": "pending",
-    "12.7": "pending",
-    "12.8": "pending",
-    "12.9": "pending",
-    "12.10": "pending"
+    "12.6": "in_progress_prerequisites_and_signed_artifact_pending",
+    "12.7": "in_progress_real_play_tracks_and_evidence_pending",
+    "12.8": "in_progress_upstream_evidence_and_go_no_go_pending",
+    "12.9": "in_progress_operational_ownership_archive_and_recovery_pending",
+    "12.10": "in_progress_final_release_evidence_pending"
   },
   "phase12_preflight": {
     "12.1": {
@@ -159,6 +159,43 @@
       "gate": "tools/store_listing_gate.py",
       "store_locales": ["pt-BR", "en-US"],
       "status": "copy_ready_final_visual_assets_and_rc_captures_pending"
+    },
+    "12.6": {
+      "state_file": "RELEASE_12_6_STATE.json",
+      "artifact_contract": "mobile/release_artifact_contract.json",
+      "fingerprint_tool": "tools/release_input_fingerprint.py",
+      "workflow": ".github/workflows/veredas-release-aab.yml",
+      "status": "signed_artifact_and_play_acceptance_pending"
+    },
+    "12.7": {
+      "state_file": "RELEASE_12_7_STATE.json",
+      "plan": "product/play_test_rollout_plan.json",
+      "gate": "tools/play_test_rollout_gate.py",
+      "minimum_closed_testers": 12,
+      "minimum_closed_test_days": 14,
+      "status": "real_internal_closed_testing_and_evidence_pending"
+    },
+    "12.8": {
+      "state_file": "RELEASE_12_8_STATE.json",
+      "contract": "product/release_candidate_final_contract.json",
+      "gate": "tools/release_candidate_final_gate.py",
+      "workflow": ".github/workflows/veredas-release-candidate-final.yml",
+      "status": "upstream_completion_artifact_identity_rollback_dry_run_and_go_no_go_pending"
+    },
+    "12.9": {
+      "state_file": "RELEASE_12_9_STATE.json",
+      "contract": "product/continuity_support_contract.json",
+      "runbook": "docs/CONTINUITY_AND_SUPPORT.md",
+      "gate": "tools/continuity_support_gate.py",
+      "workflow": ".github/workflows/veredas-continuity-support.yml",
+      "status": "final_archive_contacts_recovery_backups_licenses_and_handoff_pending"
+    },
+    "12.10": {
+      "state_file": "RELEASE_12_10_STATE.json",
+      "contract": "product/final_release_contract.json",
+      "gate": "tools/final_release_gate.py",
+      "workflow": ".github/workflows/veredas-final-release.yml",
+      "status": "12_8_12_9_and_final_ready_to_play_promote_publish_evidence_pending"
     }
   },
   "release_triage": {
