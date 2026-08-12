@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.2",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "android": {
+    "application_id": "com.pmartins87.veredasdatrama",
+    "application_id_status": "persisted_in_debug_and_play_presets",
+    "version_name": "0.1.0-dev",
+    "version_code": 1,
+    "target_public_version": "1.0.0",
+    "distribution_format": "AAB",
+    "debug_emulator_architectures": ["arm64-v8a", "x86_64"],
+    "play_release_architectures": ["arm64-v8a"]
+  },
+  "versioning": {
+    "name_policy": "semantic versioning",
+    "code_policy": "strictly monotonically increasing integer",
+    "rc_freeze_pending": true
+  },
+  "signing": {
+    "release_keystore_committed": false,
+    "release_credentials_committed": false,
+    "protected_secret_names": [
+      "VEREDAS_ANDROID_KEYSTORE_B64",
+      "VEREDAS_ANDROID_KEY_ALIAS",
+      "VEREDAS_ANDROID_KEYSTORE_PASSWORD"
+    ],
+    "temporary_keystore_path_in_ci": "/tmp/veredas-release/upload.keystore",
+    "temporary_keystore_destroyed_after_job": true,
+    "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
+    "signature_verification": "jarsigner -verify -verbose -certs",
+    "play_app_signing_expected": true
+  },
+  "guards": [
+    "tools/validate_android_export.py",
+    "tools/roadmap_state_consistency.py",
+    "tools/qa_release_candidate_gate.py",
+    "tools/validate_canonical.py"
+  ],
+  "implemented_commits": {
+    "stable_application_id": "dd47261c9a6761e677ffb92ee77d7f3c207f5f0c",
+    "identity_contract": "288cbdc3cf7646e093eb0181aa748733b452691b",
+    "export_validator": "1fb1d583b8496a78b284a5b8867f9d8b4c6dda1c",
+    "debug_ci_migration": "d8a6891d33c34944dd2cc6509ebf42ee55d9ff3c",
+    "signed_aab_pipeline": "343127809362bbf80026c04742ea90bba8a25b6c"
+  },
+  "completion_requirements": [
+    "create real release/upload keystore and store redundant encrypted backups outside the repository",
+    "configure protected release environment secrets",
+    "confirm application id acceptance in Play Console",
+    "freeze RC version name and version code",
+    "produce signed AAB after 11.10 and verify its signature and SHA-256",
+    "record Play App Signing configuration"
+  ],
+  "pass_recorded": false
+}
