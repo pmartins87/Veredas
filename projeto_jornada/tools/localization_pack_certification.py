@@ -5,7 +5,6 @@ import argparse
 import base64
 import gzip
 import json
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +14,6 @@ from localization_quality_gate import token_signature
 ROOT = Path(__file__).resolve().parents[1]
 LOC = ROOT / "localization"
 PACK_ROOT = LOC / "content_packs"
-TARGETS = ("en", "es_419")
 EXPECTED_SOURCE_UNITS = 18_804
 EXPECTED_PACK_UNITS = 15_334
 
@@ -25,6 +23,18 @@ def read_object(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {path}")
     return value
+
+
+def launch_targets() -> tuple[str, ...]:
+    manifest = read_object(LOC / "manifest.json")
+    source_locale = str(manifest.get("source_locale", "pt_BR"))
+    locales = manifest.get("launch_locales", [])
+    if not isinstance(locales, list):
+        raise ValueError("launch_locales must be an array")
+    targets = tuple(str(locale) for locale in locales if str(locale) != source_locale)
+    if not targets:
+        raise ValueError("launch localization has no non-source target locale")
+    return targets
 
 
 def flatten_overlay(catalog: dict[str, Any], origin: str) -> dict[str, str]:
@@ -93,6 +103,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
+    targets = launch_targets()
     catalog = build_catalog()
     source_rows = [
         row for row in catalog.get("units", [])
@@ -111,7 +122,7 @@ def main() -> int:
 
     reports: dict[str, Any] = {}
     pack_key_sets: dict[str, set[str]] = {}
-    for locale_id in TARGETS:
+    for locale_id in targets:
         try:
             base = flatten_overlay(
                 read_object(LOC / "content" / f"{locale_id}.json"),
@@ -179,19 +190,27 @@ def main() -> int:
             "pack": pack_meta,
         }
 
-    if all(locale_id in pack_key_sets for locale_id in TARGETS):
-        if pack_key_sets["en"] != pack_key_sets["es_419"]:
-            only_en = pack_key_sets["en"] - pack_key_sets["es_419"]
-            only_es = pack_key_sets["es_419"] - pack_key_sets["en"]
-            errors.append(
-                "target pack key sets differ: en_only=%d es_only=%d"
-                % (len(only_en), len(only_es))
-            )
+    if len(targets) > 1 and all(locale_id in pack_key_sets for locale_id in targets):
+        reference_locale = targets[0]
+        reference_keys = pack_key_sets[reference_locale]
+        for locale_id in targets[1:]:
+            candidate_keys = pack_key_sets[locale_id]
+            if reference_keys != candidate_keys:
+                errors.append(
+                    "target pack key sets differ: %s_only=%d %s_only=%d"
+                    % (
+                        reference_locale,
+                        len(reference_keys - candidate_keys),
+                        locale_id,
+                        len(candidate_keys - reference_keys),
+                    )
+                )
 
     report = {
         "schema_version": 1,
         "expected_source_units": EXPECTED_SOURCE_UNITS,
         "expected_pack_units": EXPECTED_PACK_UNITS,
+        "targets": list(targets),
         "locales": reports,
         "errors": errors,
     }
@@ -205,15 +224,17 @@ def main() -> int:
             print("ERROR:", error)
         return 1
 
-    en = reports["en"]
-    es = reports["es_419"]
-    print(
-        "LOCALIZATION_PACK_CERTIFICATION PASS: en=%d/%d es_419=%d/%d pack_each=%d collisions=0 unknown=0 token_errors=0"
-        % (
-            en["covered_units"], en["source_units"],
-            es["covered_units"], es["source_units"],
-            EXPECTED_PACK_UNITS,
+    summary = " ".join(
+        "%s=%d/%d" % (
+            locale_id,
+            reports[locale_id]["covered_units"],
+            reports[locale_id]["source_units"],
         )
+        for locale_id in targets
+    )
+    print(
+        "LOCALIZATION_PACK_CERTIFICATION PASS: %s pack_each=%d collisions=0 unknown=0 token_errors=0"
+        % (summary, EXPECTED_PACK_UNITS)
     )
     return 0
 
