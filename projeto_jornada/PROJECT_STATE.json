@@ -113,6 +113,38 @@
       "required_completion_steps": ["11.3", "11.6", "11.7", "11.8", "11.9"]
     }
   },
+  "phase12": {
+    "12.1": "in_progress_authoritative_name_checks_pending",
+    "12.2": "in_progress_signing_and_console_pending",
+    "12.3": "in_progress_post_billing_privacy_freeze_pending",
+    "12.4": "pending",
+    "12.5": "pending",
+    "12.6": "pending",
+    "12.7": "pending",
+    "12.8": "pending",
+    "12.9": "pending",
+    "12.10": "pending"
+  },
+  "phase12_preflight": {
+    "12.1": {
+      "state_file": "RELEASE_12_1_NAME_STATE.json",
+      "candidate_name": "Veredas da Trama",
+      "status": "provisional_public_clearance_only",
+      "remaining": ["INPI", "WIPO", "domain/handle confirmation", "final mark decision"]
+    },
+    "12.2": {
+      "state_file": "RELEASE_12_2_STATE.json",
+      "application_id": "com.pmartins87.veredasdatrama",
+      "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
+      "status": "real_keystore_secrets_console_and_signed_build_pending"
+    },
+    "12.3": {
+      "state_file": "product/privacy_data_safety.json",
+      "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
+      "gate": "tools/privacy_data_safety_gate.py",
+      "status": "final_data_safety_and_policy_freeze_pending_after_12_4"
+    }
+  },
   "release_triage": {
     "active_blocker_critical_product_defects": 0,
     "non_defect_release_dependencies": [
