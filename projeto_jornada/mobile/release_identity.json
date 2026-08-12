@@ -10,6 +10,16 @@
     "target_first_public_version_name": "1.0.0",
     "versioning_policy": "semantic version name; monotonically increasing integer version code",
     "play_distribution_format": "AAB",
+    "release_toolchain": {
+      "godot_version": "4.7.1-stable",
+      "min_sdk": 24,
+      "compile_sdk": 36,
+      "target_sdk": 36,
+      "android_build_tools": "36.1.0",
+      "java": 17,
+      "policy_baseline_checked_on": "2026-08-12",
+      "policy_recheck_required_before_public_release": true
+    },
     "release_signing": {
       "repository_contains_release_keystore": false,
       "repository_contains_release_passwords": false,
@@ -29,10 +39,11 @@
   },
   "completion_requirements": [
     "application id accepted by distribution console",
+    "release toolchain and target API rechecked against Google Play policy immediately before public release",
     "release keystore generated and backed up outside repository",
     "protected CI secrets configured",
     "signed release AAB produced and signature verified",
     "version code/name frozen for RC"
   ],
-  "note": "The stable application id is persisted early because changing it after store publication creates a different Android application. 12.2 remains in progress until real release signing and console acceptance are proven."
+  "note": "The stable application id and Android toolchain baseline are persisted early because changing package identity after store publication creates a different Android application and relying on implicit SDK defaults creates avoidable release drift. 12.2 remains in progress until real release signing, policy recheck, artifact inspection and console acceptance are proven."
 }
