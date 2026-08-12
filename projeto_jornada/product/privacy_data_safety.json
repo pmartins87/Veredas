@@ -61,8 +61,10 @@
   },
   "privacy_policy": {
     "draft_file": "docs/PRIVACY_POLICY_DRAFT.md",
+    "runtime_document": "product/legal_documents.json",
+    "runtime_surface": "implemented",
     "public_url": "PENDING_PUBLIC_URL",
-    "in_app_access": "pending_final_url_or_embedded_final_text",
+    "in_app_access": "implemented_pending_final_content",
     "privacy_contact": "PENDING_PRIVACY_CONTACT",
     "must_cover": [
       "developer identity and privacy contact",
@@ -79,9 +81,11 @@
     "inspect final Android manifest and merged permissions from the release AAB",
     "inventory every third-party SDK in the final artifact",
     "replace privacy contact placeholder",
-    "publish privacy policy on a stable public URL and expose it in-app",
+    "publish privacy policy on a stable public URL and expose the final version in-app",
+    "finalize product/legal_documents.json from pre_release to final and synchronize its public URLs",
     "complete Play Console Data safety form from the frozen release behavior",
-    "ensure store declaration and privacy policy remain consistent",
+    "ensure store declaration, runtime legal surface and privacy policy remain consistent",
+    "pass legal_surface_gate.py --release in addition to privacy_data_safety_gate.py --release",
     "record final Data Safety answers in this repository"
   ],
   "pass_recorded": false
