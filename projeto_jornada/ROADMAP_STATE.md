@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1, 11.2, 11.4 e 11.5 ✅; 11.3 aguarda medição física; 11.6, 11.7 e 11.8 em andamento com gates fail-closed**.
+- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6 e 11.7 em andamento com gates fail-closed**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -60,15 +60,15 @@ Preflight e integração foram implementados, mas assets finais continuam bloque
 - os 38 assets finais de `res://assets/audio/**` ainda não existem no branch, portanto **7.8/7.10 e 11.7 permanecem pendentes**;
 - checkpoint detalhado: `AUDIOVISUAL_11_7_STATUS.md`.
 
-### 11.8 — Triage até zero blocker/critical 🟡
-A infraestrutura de triage está implementada e o único blocker conhecido foi resolvido no ledger.
+### 11.8 — Triage até zero blocker/critical ✅
+O gate estático foi executado contra o ledger canônico e passou sem blocker/critical ativo.
 - ledger canônico: `qa/known_issues.json`;
-- gate: `tools/qa_triage_gate.py`;
-- workflow: `Veredas QA Triage 11.8`;
+- gate: `tools/qa_triage_gate.py --require-zero`;
 - `LOC-116-001`: **resolved**;
-- atualmente não há blocker/critical de produto marcado `open` ou `in_progress` no ledger;
-- dívidas planejadas de arte, áudio e medição física permanecem dependências de release, não bugs artificiais;
-- 11.8 permanece 🟡 até o modo `--require-zero` ser realmente executado no HEAD atual e reportar **0 blocker/critical ativos**.
+- resultado executado: `QA_TRIAGE FINAL: issues=1 active_blocker_critical=0 dependencies=3`;
+- resultado final: `QA_TRIAGE PASS: zero blocker/critical product defects`;
+- certificação persistida: `QA_11_8_COMPLETION.json`;
+- dívidas planejadas de arte, áudio e medição física permanecem dependências de release, não bugs artificiais.
 
 ### Infraestrutura GitHub Actions — observação atual
 As execuções recentes dos novos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
@@ -93,7 +93,7 @@ As execuções recentes dos novos gates continuam encerrando antes de qualquer s
 - 11.5 ✅ Arquitetura de localização; lançamento atual `pt_BR + en`; `es_419` adiado.
 - 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — blocker de pack resolvido; execução final dos gates do inglês pendente.
 - 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
-- 11.8 🟡 Triage até zero blocker/critical — ledger sem blocker/critical ativo, mas `--require-zero` ainda precisa executar no HEAD atual.
+- 11.8 ✅ Triage até zero blocker/critical — gate `--require-zero` executado com 0 blocker/critical ativo.
 - 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
 - 11.10 ⏳ QA freeze do Release Candidate.
 
@@ -105,7 +105,7 @@ As execuções recentes dos novos gates continuam encerrando antes de qualquer s
 - 7.10 ⏳ QA audiovisual final.
 
 ## Contagem formal
-- **109/130 passos concluídos segundo os gates persistidos.**
+- **110/130 passos concluídos segundo os gates persistidos.**
 
 ## Ponto final
 O roadmap termina apenas em **12.10**, com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
