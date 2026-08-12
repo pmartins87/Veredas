@@ -33,6 +33,18 @@ def git_output(*args: str) -> str:
         return ""
 
 
+def is_ancestor(commit_sha: str, head_sha: str) -> bool:
+    if not commit_sha or not head_sha:
+        return False
+    return subprocess.run(
+        ["git", "merge-base", "--is-ancestor", commit_sha, head_sha],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive and support readiness.")
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
@@ -107,14 +119,15 @@ def main() -> int:
         archive = contract.get("release_archive", {})
         if not isinstance(archive.get("store_version_code"), int) or int(archive.get("store_version_code", 0)) <= 0:
             errors.append("release_archive.store_version_code must be positive")
-        if archive.get("rc_commit_sha") != head_sha:
-            errors.append("release_archive.rc_commit_sha must equal current HEAD")
+        artifact_commit = str(archive.get("rc_commit_sha", ""))
+        if not is_ancestor(artifact_commit, head_sha):
+            errors.append("archived artifact commit must be an ancestor of the evidence HEAD")
 
         tag = source.get("final_release_tag", "")
         if isinstance(tag, str) and tag and not unresolved(tag):
             tag_commit = git_output("rev-list", "-n", "1", tag)
-            if not tag_commit or tag_commit != archive.get("rc_commit_sha"):
-                errors.append("final release tag does not resolve to archived RC commit")
+            if not tag_commit or tag_commit != artifact_commit:
+                errors.append("final release tag does not resolve to archived artifact commit")
 
         ownership = contract.get("ownership_and_recovery", {})
         for key in ("play_console_recovery_verified", "repository_recovery_verified", "billing_backend_recovery_verified"):
