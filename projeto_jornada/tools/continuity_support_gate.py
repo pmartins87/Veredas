@@ -45,6 +45,14 @@ def is_ancestor(commit_sha: str, head_sha: str) -> bool:
     ).returncode == 0
 
 
+def completion_commit(row: dict[str, Any]) -> str:
+    for key in ("certified_against_head", "certified_commit", "commit_sha", "head_sha", "rc_commit_sha"):
+        value = row.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive and support readiness.")
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
@@ -96,8 +104,12 @@ def main() -> int:
         else:
             try:
                 rc = read_object(RC_COMPLETION)
-                if rc.get("status") != "pass" and rc.get("formal_status") != "complete":
+                if str(rc.get("roadmap_step", "")) != "12.8":
+                    errors.append("12.8 completion roadmap_step mismatch")
+                if str(rc.get("status", "")).lower() != "pass":
                     errors.append("12.8 completion record does not report pass")
+                if not is_ancestor(completion_commit(rc), head_sha):
+                    errors.append("12.8 certified commit is not an ancestor of 12.9 evidence HEAD")
             except (OSError, ValueError, json.JSONDecodeError) as exc:
                 errors.append(f"invalid 12.8 completion record: {exc}")
 
