@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = [
     *(sorted((ROOT / "scenes").glob("*.gd"))),
     ROOT / "ui" / "AccessibilityPanel.gd",
+    ROOT / "ui" / "LegalPanel.gd",
 ]
 STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"')
 ALPHA_RE = re.compile(r"[A-Za-zÀ-ÿ]")
