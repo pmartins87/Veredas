@@ -11,9 +11,11 @@ ROOT = Path(__file__).resolve().parents[1]
 PRIVACY = ROOT / "product" / "privacy_data_safety.json"
 COMMERCIAL = ROOT / "product" / "commercial_model.json"
 IDENTITY = ROOT / "mobile" / "release_identity.json"
+BILLING = ROOT / "mobile" / "play_billing_contract.json"
 EXPORT = ROOT / "export_presets.cfg"
 POLICY = ROOT / "docs" / "PRIVACY_POLICY_DRAFT.md"
-RUNTIME_DIRS = [ROOT / "core", ROOT / "ui", ROOT / "scenes"]
+PLUGIN_ROOT = ROOT / "addons" / "GodotGooglePlayBilling"
+RUNTIME_DIRS = [ROOT / "core", ROOT / "ui", ROOT / "scenes", ROOT / "mobile"]
 NETWORK_TOKENS = (
     "HTTPRequest",
     "HTTPClient",
@@ -72,14 +74,14 @@ def main() -> int:
     parser.add_argument(
         "--release",
         action="store_true",
-        help="Fail on every unresolved publication placeholder and require the final Data Safety declaration.",
+        help="Fail on every unresolved publication placeholder and require final privacy and billing data-flow declarations.",
     )
     args = parser.parse_args()
 
     errors: list[str] = []
     warnings: list[str] = []
 
-    for required in (PRIVACY, COMMERCIAL, IDENTITY, EXPORT, POLICY):
+    for required in (PRIVACY, COMMERCIAL, IDENTITY, BILLING, EXPORT, POLICY):
         if not required.exists():
             errors.append(f"required privacy/release file missing: {required.relative_to(ROOT)}")
     if errors:
@@ -90,18 +92,22 @@ def main() -> int:
     privacy = read_json(PRIVACY)
     commercial = read_json(COMMERCIAL)
     identity = read_json(IDENTITY)
+    billing = read_json(BILLING)
     export_text = EXPORT.read_text(encoding="utf-8")
     policy_text = POLICY.read_text(encoding="utf-8")
 
     if privacy.get("roadmap_step") != "12.3":
         errors.append("privacy manifest must identify roadmap_step 12.3")
+    if billing.get("roadmap_step") != "12.4":
+        errors.append("billing contract must identify roadmap_step 12.4")
 
     privacy_app_id = str(privacy.get("application_id", ""))
     identity_android = identity.get("android", {})
     identity_app_id = str(identity_android.get("application_id", "")) if isinstance(identity_android, dict) else ""
-    if not privacy_app_id or privacy_app_id != identity_app_id:
+    billing_app_id = str(billing.get("application_id", ""))
+    if not privacy_app_id or privacy_app_id != identity_app_id or privacy_app_id != billing_app_id:
         errors.append(
-            f"application id mismatch: privacy={privacy_app_id!r} identity={identity_app_id!r}"
+            f"application id mismatch: privacy={privacy_app_id!r} identity={identity_app_id!r} billing={billing_app_id!r}"
         )
     if export_text.count(f'package/unique_name="{identity_app_id}"') != 2:
         errors.append("export presets are not aligned with privacy/release application id")
@@ -150,11 +156,12 @@ def main() -> int:
             errors.append("account creation is enabled without a declared implemented account-deletion path")
 
     privacy_pending = pending_markers(privacy)
+    billing_pending = [f"billing:{path}" for path in pending_markers(billing)]
     policy_pending = [
         f"policy:{marker}"
         for marker in sorted(set(re.findall(r"PENDING_[A-Z0-9_]+", policy_text)))
     ]
-    pending = privacy_pending + policy_pending
+    pending = privacy_pending + billing_pending + policy_pending
 
     data_safety = privacy.get("data_safety_candidate", {})
     production_verification = (
@@ -164,14 +171,21 @@ def main() -> int:
         else {}
     )
     policy = privacy.get("privacy_policy", {})
+    billing_verification = billing.get("verification_boundary", {})
 
     if args.release:
         if pending:
-            errors.append(f"release privacy contract has {len(pending)} unresolved PENDING field(s)")
+            errors.append(f"release privacy/billing contract has {len(pending)} unresolved PENDING field(s)")
         if not isinstance(data_safety, dict) or data_safety.get("finalized") is not True:
             errors.append("final Play Data Safety declaration has not been frozen")
         if not isinstance(production_verification, dict) or production_verification.get("status") != "frozen":
-            errors.append("12.4 purchase-verification data flow is not frozen")
+            errors.append("12.4 purchase-verification data flow is not frozen in privacy manifest")
+        if not isinstance(billing_verification, dict) or billing_verification.get("status") != "frozen":
+            errors.append("12.4 billing verification boundary is not frozen")
+        if billing.get("formal_status") != "certified" or billing.get("pass_recorded") is not True:
+            errors.append("12.4 production billing is not certified")
+        if not PLUGIN_ROOT.exists():
+            errors.append("pinned GodotGooglePlayBilling addon is not installed")
         if not isinstance(policy, dict) or not str(policy.get("public_url", "")).startswith("https://"):
             errors.append("privacy policy public HTTPS URL is not finalized")
         if not isinstance(policy, dict) or policy.get("in_app_access") != "implemented":
@@ -179,7 +193,7 @@ def main() -> int:
         if privacy.get("formal_status") != "certified":
             errors.append("12.3 privacy state is not certified")
     elif pending:
-        warnings.append(f"preflight retains {len(pending)} publication placeholder(s), expected before 12.4/final store setup")
+        warnings.append(f"preflight retains {len(pending)} publication/billing placeholder(s), expected before final 12.3/12.4 freeze")
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
