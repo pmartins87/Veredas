@@ -1,6 +1,6 @@
 extends Node
 
-const LOCALES := ["pt_BR", "en", "es_419"]
+const LOCALES := ["pt_BR", "en"]
 const PRIMARY_SCENES := [
     "res://scenes/Hub.tscn",
     "res://scenes/JourneySetup.tscn",
