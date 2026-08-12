@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.7",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "plan": "product/play_test_rollout_plan.json",
+  "gate": "tools/play_test_rollout_gate.py",
+  "project_policy": {
+    "internal_track": "required",
+    "closed_track": "required",
+    "closed_min_testers": 12,
+    "closed_min_continuous_days": 14,
+    "open_track": "optional",
+    "first_public_release_staged_rollout": "not_available_by_play_policy",
+    "subsequent_update_rollout_percentages": [10, 25, 50, 100]
+  },
+  "implemented": {
+    "test_track_matrix": true,
+    "billing_scenario_matrix": true,
+    "tester_evidence_contract": true,
+    "aab_sha256_traceability": true,
+    "production_access_rule_capture": true,
+    "release_blocker_check": true,
+    "first_release_hotfix_strategy_required": true
+  },
+  "pending": {
+    "play_account_rule_classified": false,
+    "feedback_channel_configured": false,
+    "internal_test_passed": false,
+    "closed_test_12_testers_14_days_passed": false,
+    "billing_test_matrix_passed": false,
+    "tester_feedback_disposition_complete": false,
+    "production_access_granted_if_required": false,
+    "tested_aab_sha256_persisted": false
+  },
+  "completion_requirements": [
+    "complete 12.6 signed artifact",
+    "run internal Play track",
+    "run closed track for at least 14 continuous days with at least 12 opted-in testers",
+    "record device/tester/feedback evidence",
+    "pass purchase/pending/restore/offline/refund-revocation Billing scenarios",
+    "resolve every release-blocking defect",
+    "obtain production access when applicable",
+    "pass play_test_rollout_gate.py --release"
+  ],
+  "pass_recorded": false
+}
