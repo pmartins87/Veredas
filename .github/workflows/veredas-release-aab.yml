@@ -1,0 +1,157 @@
+name: Veredas Signed Release AAB
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-signed-release-aab-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  VEREDAS_ANDROID_PACKAGE_ID: com.pmartins87.veredasdatrama
+
+jobs:
+  signed-release-aab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: release
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Fail closed unless Release Candidate is certified
+        working-directory: projeto_jornada
+        run: |
+          python tools/roadmap_state_consistency.py
+          python tools/validate_android_export.py
+          python tools/qa_release_candidate_gate.py
+          python tools/validate_canonical.py
+
+      - name: Require protected signing secrets
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.VEREDAS_ANDROID_KEYSTORE_B64 }}
+          KEY_ALIAS: ${{ secrets.VEREDAS_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.VEREDAS_ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_B64"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          install -d -m 700 /tmp/veredas-release
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > /tmp/veredas-release/upload.keystore
+          chmod 600 /tmp/veredas-release/upload.keystore
+          test -s /tmp/veredas-release/upload.keystore
+          keytool -list -keystore /tmp/veredas-release/upload.keystore \
+            -storepass "$KEY_PASSWORD" -alias "$KEY_ALIAS" >/dev/null
+
+      - name: Download Godot 4.7.1 stable
+        run: |
+          set -euo pipefail
+          curl -fL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+
+      - name: Install Godot 4.7.1 export templates
+        run: |
+          set -euo pipefail
+          curl -fL 'https://github.com/godotengine/godot-builds/releases/download/4.7.1-stable/Godot_v4.7.1-stable_export_templates.tpz' -o /tmp/templates.tpz
+          rm -rf /tmp/godot-templates
+          mkdir -p /tmp/godot-templates "$HOME/.local/share/godot/export_templates/4.7.1.stable"
+          unzip -q /tmp/templates.tpz -d /tmp/godot-templates
+          if [ -d /tmp/godot-templates/templates ]; then
+            cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.7.1.stable/"
+          else
+            cp -a /tmp/godot-templates/. "$HOME/.local/share/godot/export_templates/4.7.1.stable/"
+          fi
+          test -f "$HOME/.local/share/godot/export_templates/4.7.1.stable/android_release.apk"
+
+      - name: Configure Android SDK paths
+        run: |
+          set -euo pipefail
+          mkdir -p "${HOME}/.config/godot"
+          EDITOR_SETTINGS="${HOME}/.config/godot/editor_settings-4.7.tres"
+          printf '%s\n' \
+            '[gd_resource type="EditorSettings" format=3]' \
+            '' \
+            '[resource]' \
+            "export/android/android_sdk_path = \"${ANDROID_HOME}\"" \
+            "export/android/java_sdk_path = \"${JAVA_HOME}\"" \
+            > "$EDITOR_SETTINGS"
+
+      - name: Import candidate project
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            exit 1
+          fi
+
+      - name: Export signed release AAB
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /tmp/veredas-release/upload.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.VEREDAS_ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.VEREDAS_ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/android-release
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            --headless --verbose --path projeto_jornada \
+            --export-release 'Android Play AAB (Unsigned CI Template)' \
+            "$GITHUB_WORKSPACE/build/android-release/veredas-da-trama.aab" \
+            2>&1 | tee build/android-release/export.log
+          test -s build/android-release/veredas-da-trama.aab
+          if grep -E 'SCRIPT ERROR|Parse Error|Export failed' build/android-release/export.log; then
+            exit 1
+          fi
+
+      - name: Verify signing and fingerprint artifact
+        env:
+          KEY_ALIAS: ${{ secrets.VEREDAS_ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          jarsigner -verify -verbose -certs build/android-release/veredas-da-trama.aab \
+            > build/android-release/signature-verification.txt
+          grep -Eq 'jar verified|verified' build/android-release/signature-verification.txt
+          printf '%s\n' "application_id=$VEREDAS_ANDROID_PACKAGE_ID" > build/android-release/release-metadata.txt
+          printf '%s\n' "git_sha=$GITHUB_SHA" >> build/android-release/release-metadata.txt
+          printf '%s\n' "key_alias=$KEY_ALIAS" >> build/android-release/release-metadata.txt
+          sha256sum build/android-release/veredas-da-trama.aab \
+            | tee build/android-release/veredas-da-trama.aab.sha256
+
+      - name: Destroy temporary keystore
+        if: always()
+        run: rm -rf /tmp/veredas-release
+
+      - name: Upload signed release artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-signed-release-aab-${{ github.sha }}
+          path: |
+            build/android-release/veredas-da-trama.aab
+            build/android-release/veredas-da-trama.aab.sha256
+            build/android-release/signature-verification.txt
+            build/android-release/release-metadata.txt
+          if-no-files-found: error
+          retention-days: 14
