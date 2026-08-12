@@ -42,12 +42,22 @@
   },
   "gate_architecture": {
     "launch_target_source": "localization/manifest.json",
+    "architecture": "tests/LocalizationArchitectureCertification.gd",
     "compiler": "tools/build_launch_localization_packs.py",
     "pack_certification": "tools/localization_pack_certification.py",
     "quality": "tools/localization_quality_gate.py",
     "linguistic": "tools/localization_full_linguistic_sanity.py",
+    "remaining_batch_report": "tools/localization_translation_batches.py",
     "overflow": "tests/LocalizationOverflowCertification.gd",
     "iconography": "tests/LocalizationIconographyCertification.gd"
+  },
+  "scope_hardening": {
+    "architecture_certification_requires_exact_launch_locales": ["pt_BR", "en"],
+    "architecture_certification_preserves_deferred_es_419_without_exposing_it": true,
+    "remaining_batch_report_is_manifest_driven": true,
+    "remaining_batch_report_incorporates_compact_packs": true,
+    "obsolete_three_locale_one_shot_workflow_retired": ".github/workflows/veredas-116-world-location-apply.yml",
+    "historical_status_document_distinguishes_old_es_419_scope_from_current_launch": true
   },
   "blockers": {
     "LOC-116-001": "resolved"
@@ -59,6 +69,7 @@
   "remaining_before_done": [
     "execute en 18804/18804 compact-pack certification on the current two-language launch HEAD",
     "execute full-corpus glossary/placeholder/BBCode QA with compact pack merged",
+    "execute localization architecture certification proving exactly pt_BR + en and deferred es_419 rejection",
     "execute localized Godot overflow/render matrix for pt_BR and en",
     "execute iconography/accessibility-label consistency QA for pt_BR and en",
     "execute final English linguistic sanity review",
