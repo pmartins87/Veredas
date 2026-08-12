@@ -1,0 +1,80 @@
+name: Veredas Play Billing 12.4
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/mobile/play_billing_contract.json'
+      - 'projeto_jornada/mobile/GooglePlayBillingStoreAdapter.gd'
+      - 'projeto_jornada/core/systems/PlayBillingCoordinator.gd'
+      - 'projeto_jornada/core/systems/EntitlementEngine.gd'
+      - 'projeto_jornada/product/commercial_model.json'
+      - 'projeto_jornada/product/privacy_data_safety.json'
+      - 'projeto_jornada/tests/PlayBillingCoordinatorCertification.gd'
+      - 'projeto_jornada/tests/play_billing_coordinator_certification.tscn'
+      - 'projeto_jornada/tests/EntitlementCertification.gd'
+      - 'projeto_jornada/tests/entitlement_certification.tscn'
+      - 'projeto_jornada/tools/play_billing_release_gate.py'
+      - 'projeto_jornada/tools/privacy_data_safety_gate.py'
+      - '.github/workflows/veredas-play-billing-12-4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-play-billing-12-4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  billing-contract-and-coordinator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate pre-production billing and privacy contracts
+        working-directory: projeto_jornada
+        run: |
+          python tools/play_billing_release_gate.py
+          python tools/privacy_data_safety_gate.py
+          python tools/validate_canonical.py
+
+      - name: Download Godot 4.7.1 stable
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            exit 1
+          fi
+
+      - name: Preserve certified local entitlement semantics from 9.8
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/entitlement_certification.tscn \
+            'ENTITLEMENT_CERTIFICATION FAIL' \
+            'ENTITLEMENT_CERTIFICATION PASS: 9.8'
+
+      - name: Certify verified production billing coordinator logic
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/play_billing_coordinator_certification.tscn \
+            'PLAY_BILLING_COORDINATOR_CERTIFICATION FAIL' \
+            'PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4'
+
+      - name: Preserve clean tree
+        run: git diff --exit-code
