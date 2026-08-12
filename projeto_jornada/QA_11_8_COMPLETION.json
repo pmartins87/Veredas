@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.8",
+  "status": "pass",
+  "certified_on": "2026-08-12",
+  "certified_against_head": "d6e5ff9c62fa1536d21e30bbabe7a15fea0ecc1c",
+  "gate": "tools/qa_triage_gate.py --require-zero",
+  "gate_blob_sha": "61bf755018606acf37e2b4b244c2332f2278f7af",
+  "ledger_blob_sha": "2c04087e9d5d71f24c56321cf50db92d46e3b300",
+  "result": {
+    "issues": 1,
+    "active_blocker_critical": 0,
+    "dependencies": 3,
+    "errors": 0,
+    "warnings": 0,
+    "stdout": [
+      "QA_TRIAGE FINAL: issues=1 active_blocker_critical=0 dependencies=3",
+      "QA_TRIAGE PASS: zero blocker/critical product defects"
+    ]
+  },
+  "resolved_issues": [
+    "LOC-116-001"
+  ],
+  "non_defect_release_dependencies_remain": [
+    "DEP-113-PHYSICAL",
+    "DEP-078-AUDIO",
+    "DEP-073-075-ART"
+  ],
+  "certification_note": "11.8 concerns product-defect triage only. Pending physical-device, audio and art dependencies remain release work but are intentionally not reclassified as blocker/critical product defects. The gate is pure Python over the canonical ledger and was executed from the exact gate and ledger contents recorded by the blob SHAs above."
+}
