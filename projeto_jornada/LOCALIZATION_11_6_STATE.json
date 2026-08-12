@@ -6,69 +6,62 @@
   "source_content_units": 18804,
   "launch_locales": [
     "pt_BR",
-    "en",
+    "en"
+  ],
+  "deferred_locales": [
     "es_419"
   ],
   "coverage": {
     "last_green_base_per_target": 3074,
     "post_green_family_monster_names_per_target": 396,
-    "locally_certified_compact_delta_per_target": 15334,
-    "local_semantic_total_per_target": 18804,
+    "compact_delta_per_launch_target": 15334,
+    "semantic_total_per_launch_target": 18804,
     "equation": "3074 + 396 + 15334 = 18804"
   },
   "ui": {
     "required_units": 119,
     "pt_BR": 119,
-    "en": 119,
-    "es_419": 119
+    "en": 119
   },
   "labels": {
     "required_units": 165,
     "pt_BR": 165,
-    "en": 165,
-    "es_419": 165
+    "en": 165
   },
   "compact_packs": {
     "en": {
       "delta_units": 15334,
       "reference_base64_chars": 133572,
-      "expected_parts": 10,
-      "repository_write_status": "parts_000_through_009_written; part_005 explicitly restored after directory audit"
+      "repository_parts": 10,
+      "repository_write_status": "part_000 through part_009 contiguous; combined Base64 length 133572; stale part_005 anomaly repaired"
     },
     "es_419": {
-      "delta_units": 15334,
-      "reference_base64_chars": 139648,
-      "expected_parts": 9,
-      "repository_write_status": "compiler_ready; remote physical persistence not yet certified"
+      "status": "deferred_not_launch_blocking",
+      "note": "Existing Spanish localization work is preserved for a future language expansion and is excluded from current launch gates."
     }
   },
-  "local_pack_certification": {
-    "same_target_key_set": true,
-    "unknown_source_keys": 0,
-    "token_or_bbcode_errors": 0,
-    "expected_postbaseline_protected_difference": 396,
-    "protected_difference_prefixes": [
-      "content.family.",
-      "content.monster."
-    ]
-  },
-  "permanent_gates": {
+  "gate_architecture": {
+    "launch_target_source": "localization/manifest.json",
+    "compiler": "tools/build_launch_localization_packs.py",
+    "pack_certification": "tools/localization_pack_certification.py",
     "quality": "tools/localization_quality_gate.py",
-    "pack": "tools/localization_pack_certification.py",
-    "reproducible_compiler": "tools/build_launch_localization_packs.py",
-    "overflow": "tests/LocalizationOverflowCertification.gd"
+    "linguistic": "tools/localization_full_linguistic_sanity.py",
+    "overflow": "tests/LocalizationOverflowCertification.gd",
+    "iconography": "tests/LocalizationIconographyCertification.gd"
+  },
+  "blockers": {
+    "LOC-116-001": "resolved"
   },
   "ci": {
     "new_results_certified": false,
-    "reason": "recent GitHub Actions jobs across unrelated workflows terminate before steps with no runner assigned"
+    "reason": "GitHub Actions attempts still terminate before steps with runner_id=0; no new same-HEAD runner execution is being treated as PASS"
   },
   "remaining_before_done": [
-    "physically persist and certify es_419 compact pack",
-    "executed 18804/18804 pack certification on same HEAD",
-    "complete glossary/placeholder/BBCode QA",
-    "localized Godot overflow/render matrix",
-    "iconography/accessibility-label consistency QA",
-    "final linguistic review",
-    "same-HEAD regressions"
+    "execute en 18804/18804 compact-pack certification on the current two-language launch HEAD",
+    "execute full-corpus glossary/placeholder/BBCode QA with compact pack merged",
+    "execute localized Godot overflow/render matrix for pt_BR and en",
+    "execute iconography/accessibility-label consistency QA for pt_BR and en",
+    "execute final English linguistic sanity review",
+    "execute same-HEAD localization regressions"
   ]
 }
