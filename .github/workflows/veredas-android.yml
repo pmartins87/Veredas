@@ -11,12 +11,16 @@ on:
       - 'projeto_jornada/.android-build-trigger'
       - 'projeto_jornada/tools/android_emulator_certify.sh'
       - 'projeto_jornada/tools/android_performance_profile.sh'
+      - 'projeto_jornada/tools/validate_android_export.py'
       - '.github/workflows/veredas-android.yml'
   workflow_dispatch:
 
 concurrency:
-  group: veredas-android-v2-${{ github.ref }}
+  group: veredas-android-v3-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  VEREDAS_ANDROID_PACKAGE_ID: com.pmartins87.veredasdatrama
 
 jobs:
   android-debug-apk:
@@ -101,8 +105,8 @@ jobs:
             'export/android/debug_keystore_pass = "android"' \
             > "$EDITOR_SETTINGS"
           cp "$EDITOR_SETTINGS" build/android-diagnostics/editor_settings-4.7.tres
-          env | sort | grep -E '^(ANDROID|JAVA_HOME|HOME)=' > build/android-diagnostics/environment.txt || true
-          find "$HOME/.local/share/godot/export_templates/4.7.1.stable" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > build/android-diagnostics/export-templates.txt
+          env | sort | grep -E '^(ANDROID|JAVA_HOME|HOME|VEREDAS_ANDROID_PACKAGE_ID)=' > build/android-diagnostics/environment.txt || true
+          find "$HOME/.local/share/godot/export_templates/4.7.1.stable" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > build/android-diagnostics/export-templates.txt || true
           "$ANDROID_HOME/platform-tools/adb" version > build/android-diagnostics/adb-version.txt 2>&1
           java -version 2> build/android-diagnostics/java-version.txt
           /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version > build/android-diagnostics/godot-version.txt
@@ -214,7 +218,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu software
-          script: sh projeto_jornada/tools/android_emulator_certify.sh com.veredasdatrama.preview '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}' && sh projeto_jornada/tools/android_performance_profile.sh com.veredasdatrama.preview '${{ matrix.api-level }}' emulator 60
+          script: sh projeto_jornada/tools/android_emulator_certify.sh "$VEREDAS_ANDROID_PACKAGE_ID" '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}' && sh projeto_jornada/tools/android_performance_profile.sh "$VEREDAS_ANDROID_PACKAGE_ID" '${{ matrix.api-level }}' emulator 60
 
       - name: Upload emulator diagnostics
         if: always()
@@ -233,6 +237,7 @@ jobs:
             'api_level=${{ matrix.api-level }}' \
             'label=${{ matrix.label }}' \
             'architecture=x86_64' \
+            'application_id=${{ env.VEREDAS_ANDROID_PACKAGE_ID }}' \
             'install=pass' \
             'launch=pass' \
             'application_readiness=pass' \
