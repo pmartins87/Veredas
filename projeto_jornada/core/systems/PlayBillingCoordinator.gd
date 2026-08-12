@@ -21,6 +21,7 @@ var _configured := false
 var _products_ready := false
 var _pending_verifications: Dictionary = {}
 var _restore_active := false
+var _restore_collecting := false
 var _restore_generation := 0
 var _restore_failed := false
 var _restore_verified: Array[Dictionary] = []
@@ -96,12 +97,14 @@ func restore() -> bool:
         return false
     _restore_generation += 1
     _restore_active = true
+    _restore_collecting = false
     _restore_failed = false
     _restore_verified.clear()
     _discard_pending_restore_verifications()
     var result = _store.call("query_owned_purchases")
     if typeof(result) == TYPE_BOOL and not bool(result):
         _restore_active = false
+        _restore_collecting = false
         restore_completed.emit(false, _summary())
         return false
     return true
@@ -149,6 +152,7 @@ func _on_purchases_received(response: Dictionary) -> void:
         return
     if not bool(response.get("ok", false)):
         _restore_active = false
+        _restore_collecting = false
         restore_completed.emit(false, _summary())
         return
 
@@ -157,7 +161,7 @@ func _on_purchases_received(response: Dictionary) -> void:
     if typeof(raw) == TYPE_ARRAY:
         purchases = raw as Array
 
-    var requested := 0
+    _restore_collecting = true
     for purchase_variant in purchases:
         if typeof(purchase_variant) != TYPE_DICTIONARY:
             _restore_failed = true
@@ -173,13 +177,10 @@ func _on_purchases_received(response: Dictionary) -> void:
             continue
         if state != "PURCHASED":
             continue
-        if _request_verification(purchase, "restore", _restore_generation):
-            requested += 1
-        else:
+        if not _request_verification(purchase, "restore", _restore_generation):
             _restore_failed = true
-
-    if requested == 0:
-        _finish_restore_if_ready()
+    _restore_collecting = false
+    _finish_restore_if_ready()
 
 
 func _on_purchase_updated(response: Dictionary) -> void:
@@ -286,7 +287,7 @@ func _on_verification_completed(result: Dictionary) -> void:
 
 
 func _finish_restore_if_ready() -> void:
-    if not _restore_active:
+    if not _restore_active or _restore_collecting:
         return
     for pending_variant in _pending_verifications.values():
         if typeof(pending_variant) != TYPE_DICTIONARY:
