@@ -1,0 +1,53 @@
+name: Veredas Final Release 12.10
+
+on:
+  workflow_dispatch:
+    inputs:
+      certify_release:
+        description: 'Run the fail-closed final 12.10 release certification'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-final-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  final-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate final 12.10 contract preflight
+        working-directory: projeto_jornada
+        run: python tools/final_release_gate.py --output /tmp/veredas-12-10-preflight.json
+      - name: Reverify zero blocker or critical defects
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --require-zero
+      - name: Certify 12.9 continuity before final release
+        if: ${{ inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/continuity_support_gate.py --release
+      - name: Run final 12.10 release certification
+        if: ${{ inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/final_release_gate.py --release --output /tmp/veredas-12-10-release.json
+      - name: Upload final release reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-12-10-final-release
+          path: |
+            /tmp/veredas-12-10-preflight.json
+            /tmp/veredas-12-10-release.json
+          if-no-files-found: ignore
+          retention-days: 30
