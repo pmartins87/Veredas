@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.3",
+  "formal_status": "in_progress",
+  "audited_on": "2026-08-12",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "policy_basis": "Google Play User Data and Data safety requirements; final declaration must match the exact release artifact and integrated SDKs",
+  "current_application_behavior": {
+    "user_accounts": false,
+    "account_creation": false,
+    "advertising": false,
+    "analytics_sdk": false,
+    "developer_crash_reporting_sdk": false,
+    "social_sdk": false,
+    "location_access": false,
+    "contacts_access": false,
+    "camera_access": false,
+    "microphone_access": false,
+    "health_data_access": false,
+    "photos_or_files_user_import": false,
+    "custom_android_permissions": [],
+    "gameplay_profile_and_save_storage": "on_device_only",
+    "gameplay_profile_transmitted_off_device": false,
+    "canonical_game_content_transmitted_off_device": false
+  },
+  "commercial_behavior": {
+    "model": "free_trial_one_time_unlock",
+    "ads": false,
+    "subscriptions": false,
+    "paid_consumables": false,
+    "planned_billing_provider": "Google Play Billing",
+    "payment_card_or_bank_information_accessed_by_app": false,
+    "payment_card_or_bank_information_stored_by_app": false,
+    "local_entitlement_cache_fields": [
+      "product ownership",
+      "verification timestamp",
+      "provider source",
+      "transaction id/reference when supplied",
+      "revocation timestamp",
+      "last store contact/restore status"
+    ],
+    "production_purchase_verification": {
+      "status": "pending_12_4",
+      "recommended_architecture": "server-side purchase-token verification before authoritative entitlement grant",
+      "possible_off_device_data": [
+        "purchase token",
+        "product id",
+        "purchase/entitlement status",
+        "transaction/order reference if required"
+      ],
+      "data_safety_reaudit_required_after_integration": true
+    }
+  },
+  "data_safety_candidate": {
+    "finalized": false,
+    "reason": "12.4 production billing integration is not yet frozen; the final form must cover the exact release artifact and all SDK/backend behavior",
+    "current_non_billing_gameplay_collection_off_device": false,
+    "current_non_billing_gameplay_sharing": false,
+    "payment_service_financial_data": "Google Play may collect payment information directly under its own terms; the app must not claim developer collection when the app never accesses that payment information",
+    "purchase_history_or_purchase_token": "reassess and declare as applicable after 12.4"
+  },
+  "privacy_policy": {
+    "draft_file": "docs/PRIVACY_POLICY_DRAFT.md",
+    "public_url": "PENDING_PUBLIC_URL",
+    "in_app_access": "pending_final_url_or_embedded_final_text",
+    "privacy_contact": "PENDING_PRIVACY_CONTACT",
+    "must_cover": [
+      "developer identity and privacy contact",
+      "data accessed, collected, used and shared",
+      "third-party services and SDKs",
+      "secure handling",
+      "retention and deletion",
+      "children/age treatment if applicable",
+      "changes and effective date"
+    ]
+  },
+  "release_requirements": [
+    "complete 12.4 billing integration and repeat technical data-flow audit",
+    "inspect final Android manifest and merged permissions from the release AAB",
+    "inventory every third-party SDK in the final artifact",
+    "replace privacy contact placeholder",
+    "publish privacy policy on a stable public URL and expose it in-app",
+    "complete Play Console Data safety form from the frozen release behavior",
+    "ensure store declaration and privacy policy remain consistent",
+    "record final Data Safety answers in this repository"
+  ],
+  "pass_recorded": false
+}
