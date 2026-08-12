@@ -30,18 +30,24 @@ Automação e emuladores verdes. O gate formal continua aguardando aparelho fís
 Commit limpo `c988448`, run `31421360688`: 100 casos de cena, 80 modos dinâmicos, 1.560 checks de touch target, 2.320 tipográficos, 48 de contraste e 5 safe areas — todos PASS. A interface principal tornou-se responsiva e rolável sem reduzir fonte, contraste ou alvo mínimo de toque.
 
 ### 11.5 — Arquitetura de localização e idiomas ✅
-Commit certificado `37878d1`. Arquitetura de IDs estáveis + overlays de apresentação; fonte/fallback `pt_BR`; idiomas de lançamento `pt_BR`, `en`, `es_419`; conteúdo canônico permanece imutável para regras e balanceamento.
+Commit certificado `37878d1`. Arquitetura de IDs estáveis + overlays de apresentação; fonte/fallback `pt_BR`; conteúdo canônico permanece imutável para regras e balanceamento.
+
+**Escopo de lançamento atualizado em 12/08/2026:** os idiomas do lançamento atual são **pt_BR + en**. `es_419` permanece preservado no projeto como idioma adiado para uma expansão futura e não integra os gates do release atual.
 
 ### 11.6 — QA linguístico, overflow, iconografia e terminologia 🟡
-A cobertura lógica foi ampliada, mas a etapa **não está certificada no branch canônico**.
+O blocker físico de packs foi removido do escopo atual, mas a etapa ainda precisa das execuções finais no mesmo HEAD.
 - inventário congelado: **5.160 registros / 18.804 unidades de conteúdo localizáveis**;
-- UI obrigatória: **119/119** nos três idiomas de lançamento;
-- labels mecânicos/lore: **165/165** nos três idiomas;
+- UI obrigatória: **119/119** em `pt_BR` e `en`;
+- labels mecânicos/lore: **165/165** em `pt_BR` e `en`;
 - glossário canônico e gates de placeholders/BBCode/terminologia/overflow/iconografia existem;
-- o compilador reprodutível trabalha com **15.334 unidades de delta por idioma**, complementando **3.470 unidades-base** para o contrato de **18.804/18.804**;
-- porém os packs compactos persistidos no HEAD ainda não estão certificados: `en/part_005.b64part` apresenta tamanho anômalo de **59.951 bytes** e `es_419` contém somente `part_000`–`part_002`;
-- o defeito foi registrado como **`LOC-116-001` blocker** em `qa/known_issues.json`;
-- `localization_pack_certification.py` + `build_launch_localization_packs.py --check` em checkout limpo continuam obrigatórios antes de 11.6 ✅.
+- inglês: **15.334 unidades de delta** + **3.470 unidades-base** = **18.804/18.804**;
+- pack inglês físico no HEAD: `part_000`–`part_009`, contíguos, **133.572 caracteres Base64**; `part_005` atual possui 16.000 bytes;
+- compilador, certifier e sanity linguístico agora derivam os alvos do `localization/manifest.json`;
+- o quality gate foi endurecido para mesclar o pack compacto antes de verificar completude, tokens e glossário;
+- overflow e iconografia/acessibilidade foram alinhados a `pt_BR + en`;
+- `LOC-116-001` foi marcado **resolved** no ledger: o defeito inglês antigo foi corrigido e ES-419 saiu explicitamente do escopo do lançamento;
+- ainda faltam execução do certifier inglês, glossário/token/BBCode sobre corpus completo, render/overflow, iconografia/acessibilidade, sanity linguístico e regressões no mesmo HEAD;
+- nenhum desses gates será considerado PASS enquanto o runner continuar encerrando jobs antes dos steps.
 
 ### 11.7 — QA audiovisual final em contexto real 🟡
 Preflight e integração foram implementados, mas assets finais continuam bloqueando a certificação.
@@ -55,16 +61,17 @@ Preflight e integração foram implementados, mas assets finais continuam bloque
 - checkpoint detalhado: `AUDIOVISUAL_11_7_STATUS.md`.
 
 ### 11.8 — Triage até zero blocker/critical 🟡
-A infraestrutura de triage foi iniciada sem antecipar PASS.
+A infraestrutura de triage está implementada e o único blocker conhecido foi resolvido no ledger.
 - ledger canônico: `qa/known_issues.json`;
 - gate: `tools/qa_triage_gate.py`;
 - workflow: `Veredas QA Triage 11.8`;
-- blocker de produto ativo: **`LOC-116-001`**;
-- dívidas planejadas de arte, áudio e medição física são registradas separadamente como dependências de release, não como bugs artificiais;
-- 11.8 só poderá ser promovida quando o modo `--require-zero` reportar **0 blocker/critical ativos**.
+- `LOC-116-001`: **resolved**;
+- atualmente não há blocker/critical de produto marcado `open` ou `in_progress` no ledger;
+- dívidas planejadas de arte, áudio e medição física permanecem dependências de release, não bugs artificiais;
+- 11.8 permanece 🟡 até o modo `--require-zero` ser realmente executado no HEAD atual e reportar **0 blocker/critical ativos**.
 
 ### Infraestrutura GitHub Actions — observação atual
-As execuções recentes dos novos gates estão encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de Godot permanecem sem certificação até uma execução real.
+As execuções recentes dos novos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -83,10 +90,10 @@ As execuções recentes dos novos gates estão encerrando antes de qualquer step
 - 11.2 ✅ Fuzzing/migração de saves e compatibilidade.
 - 11.3 🟡 Performance/memória/bateria/térmica/loading — aparelho físico obrigatório pendente.
 - 11.4 ✅ UI responsiva/acessibilidade em matriz de dispositivos.
-- 11.5 ✅ Arquitetura de localização e idiomas de lançamento.
-- 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — cobertura lógica preparada, persistência/certificação final bloqueada por `LOC-116-001`.
+- 11.5 ✅ Arquitetura de localização; lançamento atual `pt_BR + en`; `es_419` adiado.
+- 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — blocker de pack resolvido; execução final dos gates do inglês pendente.
 - 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
-- 11.8 🟡 Triage até zero blocker/critical — ledger/gate implementados; 1 blocker ativo.
+- 11.8 🟡 Triage até zero blocker/critical — ledger sem blocker/critical ativo, mas `--require-zero` ainda precisa executar no HEAD atual.
 - 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
 - 11.10 ⏳ QA freeze do Release Candidate.
 
