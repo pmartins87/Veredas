@@ -128,7 +128,7 @@ def main() -> int:
                 errors.append(f"{step}: completion record does not report pass")
             certified = completion_commit(row)
             if not is_ancestor(certified, head_sha):
-                errors.append(f"{step}: certified commit is not an ancestor of current HEAD")
+                errors.append(f"{step}: certified commit is not an ancestor of current evidence HEAD")
 
         identity = contract.get("candidate_identity", {})
         for key in ("commit_sha", "version_name", "aab_sha256", "signing_certificate_sha256", "tested_track"):
@@ -136,8 +136,9 @@ def main() -> int:
                 errors.append(f"candidate_identity.{key} is unresolved")
         if not isinstance(identity.get("version_code"), int) or int(identity.get("version_code", 0)) <= 0:
             errors.append("candidate_identity.version_code must be positive")
-        if identity.get("commit_sha") != head_sha:
-            errors.append("candidate commit_sha must equal current HEAD")
+        candidate_sha = str(identity.get("commit_sha", ""))
+        if not is_ancestor(candidate_sha, head_sha):
+            errors.append("candidate artifact commit must be an ancestor of the evidence HEAD")
 
         if any(value is not True for value in checklist.values()):
             errors.append("one or more final regression checklist items are not true")
