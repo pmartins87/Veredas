@@ -10,12 +10,11 @@ from pathlib import Path
 from typing import Any
 
 from export_localization_catalog import build_catalog
-from localization_pack_certification import flatten_overlay, read_compact_pack, read_object
+from localization_pack_certification import flatten_overlay, launch_targets, read_compact_pack, read_object
 from localization_quality_gate import token_signature
 
 ROOT = Path(__file__).resolve().parents[1]
 LOC = ROOT / "localization"
-TARGETS = ("en", "es_419")
 FORBIDDEN_MARKERS = ("TODO", "TBD", "TRANSLATE_ME", "[MISSING]", "<MISSING>")
 WORD_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+", re.UNICODE)
 
@@ -58,6 +57,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
+    targets = launch_targets()
     catalog = build_catalog()
     source = {
         str(row["key"]): str(row["source"])
@@ -70,7 +70,7 @@ def main() -> int:
     warnings: list[dict[str, Any]] = []
     locale_reports: dict[str, Any] = {}
 
-    for locale_id in TARGETS:
+    for locale_id in targets:
         try:
             target, pack_meta = complete_locale(locale_id)
         except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
@@ -113,11 +113,7 @@ def main() -> int:
                     break
 
             is_name = key.endswith(".name")
-            if (
-                not is_name
-                and len(src_words) >= 6
-                and normalized(src) == normalized(dst)
-            ):
+            if not is_name and len(src_words) >= 6 and normalized(src) == normalized(dst):
                 identical_long += 1
                 errors.append({"locale": locale_id, "kind": "long_source_identical", "key": key})
 
@@ -188,7 +184,7 @@ def main() -> int:
     report = {
         "schema_version": 1,
         "source_units": len(source),
-        "targets": list(TARGETS),
+        "targets": list(targets),
         "locales": locale_reports,
         "errors": errors,
         "warnings": warnings,
@@ -205,7 +201,7 @@ def main() -> int:
 
     print(
         "LOCALIZATION_FULL_LINGUISTIC_SANITY PASS: targets=%d source_units=%d hard_errors=0 warnings=%d"
-        % (len(TARGETS), len(source), len(warnings))
+        % (len(targets), len(source), len(warnings))
     )
     for row in warnings[:50]:
         print("WARNING:", json.dumps(row, ensure_ascii=False, sort_keys=True))
