@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.7",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "project_minimum_policy": {
+    "internal_test_required": true,
+    "closed_test_required": true,
+    "closed_test_min_testers": 12,
+    "closed_test_min_continuous_opt_in_days": 14,
+    "reason": "adopt the stricter current Play requirement as the project baseline even if the developer account would qualify for a less restrictive path",
+    "open_test_required": false
+  },
+  "play_account": {
+    "account_type": "PENDING_PLAY_CONSOLE_ACCOUNT_TYPE",
+    "account_creation_date": "PENDING_PLAY_CONSOLE_ACCOUNT_CREATION_DATE",
+    "new_personal_account_rule_applies": "PENDING_PLAY_CONSOLE_RULE_APPLICABILITY"
+  },
+  "tracks": {
+    "internal": {
+      "status": "pending",
+      "target_testers": "5-10 trusted testers",
+      "maximum_supported_by_track": 100,
+      "minimum_window_hours": 48,
+      "build_source": "same signed AAB candidate family as production",
+      "goals": [
+        "install/update/uninstall/reinstall",
+        "first launch and journey start",
+        "save/resume/force-stop recovery",
+        "PT-BR and English locale selection",
+        "accessibility settings",
+        "purchase flow with license testers",
+        "restore purchases",
+        "basic device compatibility"
+      ],
+      "evidence": {
+        "tester_count": 0,
+        "device_count": 0,
+        "hours_elapsed": 0,
+        "blocker_critical": 0,
+        "result": "pending"
+      }
+    },
+    "closed": {
+      "status": "pending",
+      "minimum_testers": 12,
+      "minimum_continuous_opt_in_days": 14,
+      "target_mix": [
+        "different phone manufacturers",
+        "different screen sizes/aspect ratios",
+        "multiple supported Android versions",
+        "PT-BR and English users",
+        "at least one accessibility-focused pass"
+      ],
+      "required_scenarios": [
+        "complete multiple journeys",
+        "long session plus suspend/resume",
+        "fresh install and save migration/relaunch",
+        "full_game_unlock purchase",
+        "supporter_cosmetic_pack purchase",
+        "PENDING purchase does not unlock",
+        "purchase restore after reinstall",
+        "temporary network/store outage preserves previously verified cache",
+        "refund/revocation behavior",
+        "no paid power regression",
+        "all store copy claims match observed behavior"
+      ],
+      "feedback_channel": "PENDING_TESTER_FEEDBACK_CHANNEL",
+      "evidence": {
+        "continuous_testers": 0,
+        "days_continuous": 0,
+        "feedback_responses": 0,
+        "distinct_devices": 0,
+        "blocker_critical": 0,
+        "major_open": 0,
+        "billing_scenarios_passed": 0,
+        "billing_scenarios_required": 6,
+        "result": "pending"
+      }
+    },
+    "production_first_release": {
+      "status": "blocked_until_12_7_certified",
+      "staged_rollout_available_for_first_release": false,
+      "policy": "first production publication only after closed-test certification and production-access approval; staged rollout percentages are reserved for subsequent updates",
+      "first_release_emergency_strategy": "do not rely on reverting/halt to a previous production build because none exists; prepare a higher-version-code hotfix path before launch"
+    },
+    "subsequent_updates": {
+      "staged_rollout_policy": [10, 25, 50, 100],
+      "minimum_observation_hours_between_increases": 24,
+      "halt_on": [
+        "new blocker or critical defect",
+        "save corruption or migration regression",
+        "billing entitlement regression",
+        "material crash/ANR regression",
+        "privacy or policy discrepancy"
+      ]
+    }
+  },
+  "promotion_gates": {
+    "internal_to_closed": [
+      "0 blocker/critical",
+      "all internal smoke scenarios pass",
+      "signed candidate installs through Play",
+      "billing license-test purchase and restore work"
+    ],
+    "closed_to_production_access": [
+      "at least 12 continuously opted-in testers for 14 days",
+      "0 blocker/critical and no unresolved release-blocking major issue",
+      "all six billing scenarios pass",
+      "store copy remains truthful",
+      "tester feedback reviewed and dispositions recorded"
+    ],
+    "production_go_no_go": [
+      "11.10 certified",
+      "12.1-12.6 certified",
+      "12.7 closed-test evidence certified",
+      "Play production access granted",
+      "first-release hotfix/rollback procedure prepared"
+    ]
+  },
+  "completion_requirements": [
+    "run internal track and record evidence",
+    "run closed track with at least 12 continuously opted-in testers for at least 14 days",
+    "collect and disposition feedback",
+    "execute required billing, lifecycle, localization and accessibility scenarios",
+    "obtain production access when required by Play account policy",
+    "certify zero release-blocking defects",
+    "persist exact tested version code, AAB SHA-256 and tester evidence"
+  ],
+  "pass_recorded": false
+}
