@@ -40,7 +40,7 @@ def current_head() -> str:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
         ).strip()
-    except Exception:  # noqa: BLE001 - release gate fails closed below when needed.
+    except Exception:  # noqa: BLE001
         return ""
 
 
@@ -58,7 +58,7 @@ def is_ancestor(commit_sha: str, head_sha: str) -> bool:
 
 
 def completion_commit(row: dict[str, Any]) -> str:
-    for key in ("certified_commit", "commit_sha", "head_sha", "rc_commit_sha"):
+    for key in ("certified_against_head", "certified_commit", "commit_sha", "head_sha", "rc_commit_sha"):
         value = row.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()
@@ -82,8 +82,7 @@ def main() -> int:
 
     if contract.get("schema_version") != 1 or contract.get("roadmap_step") != "12.8":
         errors.append("12.8 contract schema/roadmap_step invalid")
-    required = contract.get("required_prerequisites", [])
-    if required != list(COMPLETION_FILES):
+    if contract.get("required_prerequisites", []) != list(COMPLETION_FILES):
         errors.append("12.8 prerequisite order/set differs from frozen contract")
 
     checklist = contract.get("final_regression_checklist", {})
@@ -93,18 +92,14 @@ def main() -> int:
     if not isinstance(rollback, dict):
         errors.append("rollback contract missing")
         rollback = {}
-    stop_conditions = rollback.get("immediate_stop_conditions", [])
-    if not isinstance(stop_conditions, list) or len(stop_conditions) < 5:
+    if not isinstance(rollback.get("immediate_stop_conditions", []), list) or len(rollback.get("immediate_stop_conditions", [])) < 5:
         errors.append("rollback immediate stop conditions incomplete")
-    compatibility = rollback.get("required_compatibility", [])
-    if not isinstance(compatibility, list) or len(compatibility) < 4:
+    if not isinstance(rollback.get("required_compatibility", []), list) or len(rollback.get("required_compatibility", [])) < 4:
         errors.append("rollback compatibility rules incomplete")
 
     active = []
     for issue in ledger.get("issues", []):
-        if not isinstance(issue, dict):
-            continue
-        if issue.get("kind") != "product_defect":
+        if not isinstance(issue, dict) or issue.get("kind") != "product_defect":
             continue
         if issue.get("severity") in {"blocker", "critical"} and issue.get("status") in {"open", "in_progress"}:
             active.append(str(issue.get("id", "unknown")))
@@ -124,7 +119,9 @@ def main() -> int:
                 errors.append(f"{step}: invalid completion record: {exc}")
                 continue
             completion_reports[step] = row
-            if row.get("status") != "pass" and row.get("formal_status") != "complete":
+            if str(row.get("roadmap_step", "")) != step:
+                errors.append(f"{step}: roadmap_step mismatch in completion record")
+            if str(row.get("status", "")).lower() != "pass":
                 errors.append(f"{step}: completion record does not report pass")
             certified = completion_commit(row)
             if not is_ancestor(certified, head_sha):
