@@ -38,6 +38,17 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install pinned Android 36 release SDK
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.1.0"
+          test -d "$ANDROID_HOME/platforms/android-36"
+          test -d "$ANDROID_HOME/build-tools/36.1.0"
+
       - name: Fail closed unless Release Candidate and publication contracts are certified
         working-directory: projeto_jornada
         run: |
@@ -136,6 +147,10 @@ jobs:
           grep -Eq 'jar verified|verified' build/android-release/signature-verification.txt
           printf '%s\n' "application_id=$VEREDAS_ANDROID_PACKAGE_ID" > build/android-release/release-metadata.txt
           printf '%s\n' "git_sha=$GITHUB_SHA" >> build/android-release/release-metadata.txt
+          printf '%s\n' "target_sdk=36" >> build/android-release/release-metadata.txt
+          printf '%s\n' "compile_sdk=36" >> build/android-release/release-metadata.txt
+          printf '%s\n' "android_build_tools=36.1.0" >> build/android-release/release-metadata.txt
+          printf '%s\n' "godot_version=4.7.1-stable" >> build/android-release/release-metadata.txt
           printf '%s\n' "key_alias=$KEY_ALIAS" >> build/android-release/release-metadata.txt
           sha256sum build/android-release/veredas-da-trama.aab \
             | tee build/android-release/veredas-da-trama.aab.sha256
