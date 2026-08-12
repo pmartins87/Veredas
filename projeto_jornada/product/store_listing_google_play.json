@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.5",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "default_store_locale": "pt-BR",
+  "launch_locale_mapping": {
+    "pt_BR": "pt-BR",
+    "en": "en-US"
+  },
+  "listings": {
+    "pt-BR": {
+      "title": "Veredas da Trama",
+      "short_description": "Um livro-jogo de fantasia em que cada escolha transforma sua jornada",
+      "full_description": "Entre em uma jornada de fantasia construída como um livro-jogo vivo. Em Veredas da Trama, decisões, riscos e descobertas deixam marcas que mudam o caminho adiante.\n\nExplore 12 Domínios com identidades próprias, atravesse localidades repletas de histórias e conduza diferentes andarilhos por jornadas em que recursos, relações e consequências importam.\n\n• Faça escolhas que alteram eventos, caminhos e desfechos.\n• Enfrente combates táticos com personagens, criaturas e chefes de estilos distintos.\n• Descubra itens, Marcas, Dívidas, ecos e segredos que reaparecem ao longo da trama.\n• Acompanhe seu progresso no códice e revele novas possibilidades entre jornadas.\n• Ajuste tamanho de texto, contraste, movimento, flashes, rótulos de ícones e outros recursos de acessibilidade.\n• Jogue a experiência principal sem depender de conexão constante.\n\nUma parte inicial do jogo pode ser explorada gratuitamente. O desbloqueio completo é planejado como uma compra única e não consumível. Não há anúncios, assinaturas, loot boxes nem venda de poder de combate.\n\nCada jornada termina. A trama que você deixa para trás, não.",
+      "character_counts": {
+        "title": 16,
+        "short_description": 68,
+        "full_description": 1114
+      }
+    },
+    "en-US": {
+      "title": "Veredas da Trama",
+      "short_description": "A fantasy gamebook where every choice reshapes your journey",
+      "full_description": "Enter a fantasy journey built like a living gamebook. In Veredas da Trama, decisions, risks, and discoveries leave marks that reshape the road ahead.\n\nExplore 12 distinct Domains, cross story-rich locations, and guide different wanderers through journeys where resources, relationships, and consequences matter.\n\n• Make choices that change events, routes, and endings.\n• Face tactical battles with characters, creatures, and bosses built around different styles.\n• Discover items, Marks, Debts, echoes, and secrets that can return later in the story.\n• Follow your progress in the codex and uncover new possibilities between journeys.\n• Adjust text size, contrast, motion, flashes, icon labels, and other accessibility options.\n• Play the core experience without relying on a constant internet connection.\n\nAn opening portion of the game can be explored for free. Full access is planned as a single non-consumable purchase. There are no ads, subscriptions, loot boxes, or paid combat power.\n\nEvery journey ends. The thread you leave behind does not.",
+      "character_counts": {
+        "title": 16,
+        "short_description": 59,
+        "full_description": 1049
+      }
+    }
+  },
+  "assets": {
+    "icon": {
+      "path": "store/google_play/icon_512.png",
+      "required": true,
+      "status": "pending_final_art",
+      "width": 512,
+      "height": 512,
+      "format": "PNG",
+      "alpha_required": true,
+      "max_bytes": 1048576
+    },
+    "feature_graphic": {
+      "path": "store/google_play/feature_1024x500.png",
+      "required": true,
+      "status": "pending_final_art",
+      "width": 1024,
+      "height": 500,
+      "format": "PNG",
+      "alpha_allowed": false
+    },
+    "phone_screenshots": {
+      "required_for_release_per_locale": 6,
+      "width": 1080,
+      "height": 1920,
+      "orientation": "portrait_9_16",
+      "format": "PNG",
+      "alpha_allowed": false,
+      "capture_policy": "actual release-candidate gameplay/UI only; no mockups presented as gameplay; no price/rank/CTA overlays",
+      "pt-BR": [
+        {
+          "path": "store/google_play/pt-BR/01_hub.png",
+          "status": "pending_rc_capture",
+          "scene": "Hub / preparação de jornada",
+          "alt_text": "Tela do Hub de Veredas da Trama com opções de jornada, inventário, códice e configurações."
+        },
+        {
+          "path": "store/google_play/pt-BR/02_story_choice.png",
+          "status": "pending_rc_capture",
+          "scene": "escolha narrativa",
+          "alt_text": "Cena narrativa em estilo livro-jogo com texto ilustrado e escolhas que alteram o caminho da jornada."
+        },
+        {
+          "path": "store/google_play/pt-BR/03_combat.png",
+          "status": "pending_rc_capture",
+          "scene": "combate",
+          "alt_text": "Combate de Veredas da Trama mostrando ameaça, recursos do personagem e opções táticas de ação."
+        },
+        {
+          "path": "store/google_play/pt-BR/04_domain.png",
+          "status": "pending_rc_capture",
+          "scene": "Domínio/localidade",
+          "alt_text": "Exploração de uma localidade de um dos Domínios, com ilustração e texto contextual da jornada."
+        },
+        {
+          "path": "store/google_play/pt-BR/05_codex.png",
+          "status": "pending_rc_capture",
+          "scene": "códice/progresso",
+          "alt_text": "Códice do jogo reunindo registros descobertos, progresso, personagens, criaturas, itens e ecos."
+        },
+        {
+          "path": "store/google_play/pt-BR/06_accessibility.png",
+          "status": "pending_rc_capture",
+          "scene": "acessibilidade/configurações",
+          "alt_text": "Configurações de acessibilidade com controles de texto, contraste, movimento, flashes e rótulos de ícones."
+        }
+      ],
+      "en-US": [
+        {
+          "path": "store/google_play/en-US/01_hub.png",
+          "status": "pending_rc_capture",
+          "scene": "Hub / journey setup",
+          "alt_text": "Veredas da Trama Hub showing journey, inventory, codex, and settings options."
+        },
+        {
+          "path": "store/google_play/en-US/02_story_choice.png",
+          "status": "pending_rc_capture",
+          "scene": "narrative choice",
+          "alt_text": "Illustrated gamebook scene with narrative text and choices that reshape the journey."
+        },
+        {
+          "path": "store/google_play/en-US/03_combat.png",
+          "status": "pending_rc_capture",
+          "scene": "combat",
+          "alt_text": "Veredas da Trama combat showing threat, character resources, and tactical action choices."
+        },
+        {
+          "path": "store/google_play/en-US/04_domain.png",
+          "status": "pending_rc_capture",
+          "scene": "Domain/location",
+          "alt_text": "Exploration of a Domain location with hand-drawn illustration and contextual journey text."
+        },
+        {
+          "path": "store/google_play/en-US/05_codex.png",
+          "status": "pending_rc_capture",
+          "scene": "codex/progress",
+          "alt_text": "Game codex collecting discovered records, progress, characters, creatures, items, and echoes."
+        },
+        {
+          "path": "store/google_play/en-US/06_accessibility.png",
+          "status": "pending_rc_capture",
+          "scene": "accessibility/settings",
+          "alt_text": "Accessibility settings for text, contrast, motion, flashes, icon labels, and other reading options."
+        }
+      ]
+    },
+    "preview_video": {
+      "required": false,
+      "recommended_for_game": true,
+      "status": "pending_post_rc_decision",
+      "youtube_url": "PENDING_12_5_OPTIONAL_VIDEO_URL",
+      "policy": "if produced, show actual gameplay prominently and avoid ads, rank/price claims, fake interactions or misleading footage"
+    }
+  },
+  "copy_policy": {
+    "title_max_chars": 30,
+    "short_description_max_chars": 80,
+    "full_description_max_chars": 4000,
+    "avoid_rank_claims": true,
+    "avoid_price_or_discount_promotions_in_metadata": true,
+    "avoid_keyword_spam": true,
+    "avoid_misleading_feature_claims": true,
+    "localized_copy_must_match_same_product_behavior": true
+  },
+  "dependencies": [
+    "7.3 final Domain/location art",
+    "7.4 final character/NPC art",
+    "7.5 final monster/boss art",
+    "7.10 final audiovisual QA",
+    "11.10 Release Candidate freeze for truthful screenshots",
+    "12.1 final commercial name decision"
+  ],
+  "completion_requirements": [
+    "freeze final PT-BR and en-US copy against the release candidate",
+    "produce final icon and feature graphic from original Veredas da Trama art",
+    "capture all localized screenshots from the certified release candidate",
+    "validate dimensions, file formats, alpha policy, file sizes and alt text",
+    "perform human review for misleading/promotional metadata and store policy compliance",
+    "upload listing to Play Console and verify preview on phone form factor",
+    "persist final listing revision and exact RC capture commit"
+  ],
+  "pass_recorded": false
+}
