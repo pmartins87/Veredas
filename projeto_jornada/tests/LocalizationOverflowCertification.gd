@@ -1,6 +1,6 @@
 extends Node
 
-const LOCALES := ["pt_BR", "en", "es_419"]
+const LOCALES := ["pt_BR", "en"]
 const VIEWPORTS := [
     Vector2i(360, 640),
     Vector2i(393, 873),
