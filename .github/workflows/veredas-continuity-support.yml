@@ -1,0 +1,49 @@
+name: Veredas Continuity and Support 12.9
+
+on:
+  workflow_dispatch:
+    inputs:
+      certify_release:
+        description: 'Run the fail-closed final 12.9 continuity gate (not just preflight)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-continuity-support-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  continuity-support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate 12.9 continuity and support contract
+        working-directory: projeto_jornada
+        run: python tools/continuity_support_gate.py --output /tmp/veredas-12-9-preflight.json
+      - name: Preserve zero release-blocking product defects
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --require-zero
+      - name: Run final 12.9 continuity certification
+        if: ${{ inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/continuity_support_gate.py --release --output /tmp/veredas-12-9-release.json
+      - name: Upload 12.9 reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-12-9-continuity-support
+          path: |
+            /tmp/veredas-12-9-preflight.json
+            /tmp/veredas-12-9-release.json
+          if-no-files-found: ignore
+          retention-days: 14
