@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.8",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "product": "Veredas da Trama",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "required_prerequisites": [
+    "11.10",
+    "12.1",
+    "12.2",
+    "12.3",
+    "12.4",
+    "12.5",
+    "12.6",
+    "12.7"
+  ],
+  "candidate_identity": {
+    "commit_sha": "PENDING_12_8_RC_COMMIT_SHA",
+    "version_name": "PENDING_12_8_VERSION_NAME",
+    "version_code": 0,
+    "aab_sha256": "PENDING_12_8_AAB_SHA256",
+    "signing_certificate_sha256": "PENDING_12_8_SIGNING_CERT_SHA256",
+    "tested_track": "PENDING_12_8_TESTED_TRACK"
+  },
+  "final_regression_checklist": {
+    "canonical_validation": false,
+    "balance_freeze_10_10": false,
+    "qa_freeze_11_10": false,
+    "zero_blocker_critical_11_8": false,
+    "localization_11_6": false,
+    "audiovisual_11_7": false,
+    "reliability_11_9": false,
+    "privacy_12_3": false,
+    "billing_12_4": false,
+    "store_listing_12_5": false,
+    "signed_artifact_12_6": false,
+    "controlled_testing_12_7": false,
+    "save_migration_backward_compatibility": false,
+    "release_notes_truthful": false
+  },
+  "rollback": {
+    "decision_owner": "PENDING_12_8_ROLLBACK_DECISION_OWNER",
+    "incident_channel": "PENDING_12_8_RELEASE_INCIDENT_CHANNEL",
+    "first_public_release": {
+      "staged_rollout_assumed_available": false,
+      "strategy": "No previous production build is assumed. Keep a same-signing-identity hotfix path ready, increment versionCode, preserve save/profile and entitlement compatibility, and disable server-side monetization features only when doing so is safe and reversible.",
+      "hotfix_build_recipe_verified": false
+    },
+    "subsequent_updates": {
+      "staged_rollout_percentages": [10, 25, 50, 100],
+      "minimum_observation_hours_between_increases": 24,
+      "strategy": "Halt rollout on release-blocking evidence, keep the last known-good production version serving existing users where platform behavior permits, and publish only a higher-versionCode corrective build. Never require a client downgrade."
+    },
+    "immediate_stop_conditions": [
+      "new blocker or critical product defect",
+      "save corruption, data loss or incompatible migration",
+      "purchase, restore, refund or revocation entitlement failure",
+      "material crash or ANR regression",
+      "privacy, security or platform-policy discrepancy"
+    ],
+    "required_compatibility": [
+      "new hotfix can load all saves accepted by the candidate",
+      "verified entitlements survive hotfix and reinstall",
+      "backend/API changes remain backward compatible with the last public client",
+      "versionCode only increases"
+    ]
+  },
+  "evidence": {
+    "prerequisite_completion_files_verified": false,
+    "exact_commit_ancestry_verified": false,
+    "artifact_identity_matches_12_6": false,
+    "tested_artifact_matches_12_7": false,
+    "zero_release_blocking_defects_verified": false,
+    "rollback_dry_run_recorded": false,
+    "final_go_no_go_recorded": false,
+    "go_no_go_decision": "pending"
+  },
+  "completion_requirements": [
+    "all required prerequisite completion records exist, report pass and belong to the RC ancestry",
+    "candidate commit/version/AAB/signing identity agree with 12.6 and tested 12.7 evidence",
+    "every final regression checklist item is true on the same candidate",
+    "zero blocker/critical defects are active",
+    "rollback owner and incident channel are real non-placeholder values",
+    "first-release hotfix recipe is verified and rollback dry run is recorded",
+    "final go/no-go decision is explicitly go"
+  ],
+  "pass_recorded": false
+}
