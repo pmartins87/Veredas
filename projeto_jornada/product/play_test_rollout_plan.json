@@ -39,6 +39,8 @@
         "device_count": 0,
         "hours_elapsed": 0,
         "blocker_critical": 0,
+        "tested_version_code": 0,
+        "aab_sha256": "PENDING_12_7_INTERNAL_AAB_SHA256",
         "result": "pending"
       }
     },
@@ -76,6 +78,8 @@
         "major_open": 0,
         "billing_scenarios_passed": 0,
         "billing_scenarios_required": 6,
+        "tested_version_code": 0,
+        "aab_sha256": "PENDING_12_7_CLOSED_AAB_SHA256",
         "result": "pending"
       }
     },
@@ -97,6 +101,12 @@
       ]
     }
   },
+  "production_access": {
+    "required_by_account_policy": "PENDING_PLAY_CONSOLE_RULE_APPLICABILITY",
+    "application_submitted": false,
+    "status": "pending",
+    "decision_reference": "PENDING_PLAY_PRODUCTION_ACCESS_REFERENCE"
+  },
   "promotion_gates": {
     "internal_to_closed": [
       "0 blocker/critical",
@@ -115,7 +125,7 @@
       "11.10 certified",
       "12.1-12.6 certified",
       "12.7 closed-test evidence certified",
-      "Play production access granted",
+      "Play production access granted when applicable",
       "first-release hotfix/rollback procedure prepared"
     ]
   },
