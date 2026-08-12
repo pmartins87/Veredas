@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7 e 11.9 em andamento com gates fail-closed**.
+- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7, 11.9 e 11.10 em andamento com gates fail-closed**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -78,7 +78,19 @@ A infraestrutura fail-closed foi implementada sem duplicar o soak físico de 11.
 - total esperado antes do roundtrip final: **152 reloads**, com auditoria repetida de `ProfileMigrationEngine` e `RunStateIntegrityEngine`;
 - o workflow `Veredas Reliability Soak 11.9` preserva primeiro os gates `MOBILE_CERTIFICATION` 8.2, `SAVE_FUZZ_CERTIFICATION` 11.2 e `RUN_STATE_INTEGRITY_CERTIFICATION` 11.2;
 - checkpoint: `RELIABILITY_11_9_STATE.json`;
+- primeira tentativa: run `31576124761`, job `94048524964`, terminou com `steps=[]` e `runner_id=0`; portanto não executou o teste;
 - 11.9 permanece 🟡 até `RELIABILITY_SOAK_CERTIFICATION PASS: 11.9` executar de verdade no HEAD canônico.
+
+### 11.10 — Freeze de QA / Release Candidate 🟡
+A infraestrutura de freeze foi antecipada, mas é deliberadamente impossível promover o RC enquanto faltarem pré-requisitos.
+- gate estático fail-closed: `tools/qa_release_candidate_gate.py`;
+- workflow: `Veredas QA Freeze 11.10`;
+- checkpoint: `QA_11_10_STATE.json`;
+- exige `status=pass` e commit certificado ancestral do HEAD para 11.3, 11.6, 11.7, 11.8 e 11.9;
+- hoje somente `QA_11_8_COMPLETION.json` satisfaz esse contrato; os comprovantes 11.3/11.6/11.7/11.9 permanecem pendentes;
+- o workflow final também reexecuta balance freeze 10.10, zero blocker/critical 11.8, canonical validation, localização completa, regressão 11.1, overflow/iconografia 11.6, audiovisual 11.7 e reliability soak 11.9 no mesmo HEAD;
+- exige `git diff --exit-code` ao final, impedindo um RC que altere silenciosamente a árvore durante os testes;
+- 11.10 permanece 🟡 até todos os pré-requisitos estarem certificados e o workflow completo passar no HEAD candidato.
 
 ### Infraestrutura GitHub Actions — observação atual
 As execuções recentes dos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
@@ -105,7 +117,7 @@ As execuções recentes dos gates continuam encerrando antes de qualquer step, c
 - 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
 - 11.8 ✅ Triage até zero blocker/critical — gate `--require-zero` executado com 0 blocker/critical ativo.
 - 11.9 🟡 Soak/sessões longas/suspend-resume/confiabilidade — gate e workflow implementados; execução real pendente.
-- 11.10 ⏳ QA freeze do Release Candidate.
+- 11.10 🟡 QA freeze do Release Candidate — gate/workflow implementados; pré-requisitos 11.3/11.6/11.7/11.9 pendentes.
 
 ## Fase 7 — Assets finais ainda pendentes
 - 7.3 🟡 12 Domínios + 120 localidades — grandes ilustrações finais.
