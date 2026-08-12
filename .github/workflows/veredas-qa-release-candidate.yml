@@ -1,0 +1,105 @@
+name: Veredas QA Freeze 11.10
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/PERFORMANCE_11_3_COMPLETION.json'
+      - 'projeto_jornada/LOCALIZATION_11_6_COMPLETION.json'
+      - 'projeto_jornada/AUDIOVISUAL_11_7_COMPLETION.json'
+      - 'projeto_jornada/QA_11_8_COMPLETION.json'
+      - 'projeto_jornada/RELIABILITY_11_9_COMPLETION.json'
+      - 'projeto_jornada/ROADMAP_STATE.md'
+      - 'projeto_jornada/qa/**'
+      - 'projeto_jornada/tests/**'
+      - 'projeto_jornada/tools/qa_release_candidate_gate.py'
+      - '.github/workflows/veredas-qa-release-candidate.yml'
+
+concurrency:
+  group: veredas-qa-release-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qa-freeze-11-10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require certified Phase 11 prerequisites
+        working-directory: projeto_jornada
+        run: python tools/qa_release_candidate_gate.py
+      - name: Preserve balance freeze 10.10
+        working-directory: projeto_jornada
+        run: python tools/verify_balance_freeze.py
+      - name: Require zero blocker or critical product defects 11.8
+        working-directory: projeto_jornada
+        run: python tools/qa_triage_gate.py --require-zero
+      - name: Preserve canonical content
+        working-directory: projeto_jornada
+        run: python tools/validate_canonical.py
+      - name: Re-certify launch localization corpus
+        working-directory: projeto_jornada
+        run: |
+          python tools/localization_pack_certification.py
+          python tools/localization_quality_gate.py --require-complete --require-terminology
+          python tools/localization_full_linguistic_sanity.py
+      - name: Download Godot
+        run: |
+          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+      - name: Import project headless
+        run: |
+          set -o pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            printf '%s\n' "$output"
+            exit 1
+          fi
+      - name: Preserve regression matrix 11.1
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/regression_matrix_certification.tscn \
+            'REGRESSION_MATRIX_CERTIFICATION FAIL' \
+            'REGRESSION_MATRIX_CERTIFICATION PASS: 11.1'
+      - name: Re-certify localization overflow 11.6
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/localization_overflow_certification.tscn \
+            'LOCALIZATION_OVERFLOW_CERTIFICATION FAIL' \
+            'LOCALIZATION_OVERFLOW_CERTIFICATION PASS: 11.6'
+      - name: Re-certify localization iconography 11.6
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/localization_iconography_certification.tscn \
+            'LOCALIZATION_ICONOGRAPHY_CERTIFICATION FAIL' \
+            'LOCALIZATION_ICONOGRAPHY_CERTIFICATION PASS: 11.6'
+      - name: Re-certify audiovisual context 11.7
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/audiovisual_context_certification.tscn \
+            'AUDIOVISUAL_CONTEXT_CERTIFICATION FAIL' \
+            'AUDIOVISUAL_CONTEXT_CERTIFICATION PASS: 11.7'
+      - name: Re-certify reliability soak 11.9
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/reliability_soak_certification.tscn \
+            'RELIABILITY_SOAK_CERTIFICATION FAIL' \
+            'RELIABILITY_SOAK_CERTIFICATION PASS: 11.9'
+      - name: Require repository remains clean
+        run: git diff --exit-code
