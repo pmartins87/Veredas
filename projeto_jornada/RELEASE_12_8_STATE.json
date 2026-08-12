@@ -4,6 +4,7 @@
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
   "contract": "product/release_candidate_final_contract.json",
+  "completion_record_schema": "product/release_completion_record_schema.json",
   "gate": "tools/release_candidate_final_gate.py",
   "implemented": {
     "exact_rc_identity_contract": true,
@@ -14,7 +15,8 @@
     "subsequent_update_staged_rollout_strategy": true,
     "rollback_stop_conditions": true,
     "save_entitlement_backend_compatibility_rules": true,
-    "go_no_go_evidence_contract": true
+    "go_no_go_evidence_contract": true,
+    "non_self_referential_artifact_ancestry": true
   },
   "pending": {
     "11_10_certified": false,
@@ -28,9 +30,10 @@
     "final_go_no_go_recorded": false
   },
   "completion_requirements": [
-    "all 11.10 and 12.1-12.7 completion records report pass and are ancestors of the RC",
+    "all 11.10 and 12.1-12.7 completion records report pass and their certified commits are ancestors of the evidence HEAD",
+    "candidate artifact source commit is an ancestor of the evidence HEAD",
     "RC commit/version/AAB/signing identity matches 12.6 and the artifact tested in 12.7",
-    "full final regression checklist passes on the exact candidate",
+    "full final regression checklist passes for the candidate/evidence set",
     "zero blocker/critical defects remain active",
     "real rollback decision owner and incident channel are configured",
     "first-release hotfix path is verified and rollback dry run recorded",
