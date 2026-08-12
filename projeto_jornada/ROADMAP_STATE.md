@@ -1,223 +1,90 @@
 # Veredas da Trama — Estado Canônico do Roadmap
 
-## Identidade
+## Identidade e contrato de estado
 - Título oficial de trabalho: **Veredas da Trama**.
-- O produto não contém referências ao jogo externo usado como inspiração inicial.
-- Direção visual própria: livro-jogo ilustrado à mão, nanquim/grafite, papel orgânico e paletas dos 12 Domínios.
-
-## Progresso formal
-- Fases 0–6: **10/10 ✅ cada**.
-- Fase 7: 7.1, 7.2, 7.6, 7.7 e 7.9 ✅; 7.3–7.5/7.8 em produção; 7.10 pendente.
-- Fase 8: **8.1–8.10 ✅ — concluída**.
-- Fase 9: **9.1–9.10 ✅ — concluída**.
-- Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7, 11.9 e 11.10 em andamento com gates fail-closed**.
-- Fase 12: **12.1–12.9 em preflight/implementação ou aguardando evidência real; nenhum passo da Fase 12 foi promovido ainda**.
-
-## Marcos QA recentes
-### 11.1 — Matriz ampla de regressão e integração ✅
-Commit limpo `0afd8f2`: 288 jornadas completas, 48 pares determinísticos, 0 deadlocks, 0 combat timeouts e 48/48 cenários live de evento/viagem/mercador/combate nos 12 Domínios.
-
-### 11.2 — Fuzzing/migração de saves e compatibilidade ✅
-Core `39a811c`, re-freeze `7aec534`: 192 perfis migráveis normalizados; 16/64 runs recuperáveis aceitos; 48/64 impossíveis rejeitados; 8/8 arquivos corrompidos recusados; rejeição transacional e compatibilidade Hub/RNG legado certificadas.
-
-### 11.3 — Performance, memória, bateria, térmica e loading 🟡
-Automação e emuladores verdes. O gate formal continua aguardando aparelho físico por 30 minutos.
-- 11.3-A: Hub cold 40,75 ms; jornada p95 11,77 ms; save/load p95 0,84/0,88 ms; deriva 0,02 MB; node drift 0.
-- 11.3-B: API 29 cold 1.715 ms / resume p95 649 ms / PSS 200,94 MB; API 34 cold 1.455 ms / resume p95 1.065 ms / PSS 192,50 MB; sem deriva relevante.
-- 11.3-C pendente: `tools/android_performance_profile.sh source=physical`, soak mínimo 1.800 s.
-
-### 11.4 — UI responsiva e acessibilidade ✅
-Commit limpo `c988448`, run `31421360688`: 100 casos de cena, 80 modos dinâmicos, 1.560 checks de touch target, 2.320 tipográficos, 48 de contraste e 5 safe areas — todos PASS. A interface principal tornou-se responsiva e rolável sem reduzir fonte, contraste ou alvo mínimo de toque.
-
-### 11.5 — Arquitetura de localização e idiomas ✅
-Commit certificado `37878d1`. Arquitetura de IDs estáveis + overlays de apresentação; fonte/fallback `pt_BR`; conteúdo canônico permanece imutável para regras e balanceamento.
-
-**Escopo de lançamento atualizado em 12/08/2026:** os idiomas do lançamento atual são **pt_BR + en**. `es_419` permanece preservado no projeto como idioma adiado para uma expansão futura e não integra os gates do release atual.
-
-### 11.6 — QA linguístico, overflow, iconografia e terminologia 🟡
-O blocker físico de packs foi removido do escopo atual, mas a etapa ainda precisa das execuções finais no mesmo HEAD.
-- inventário congelado: **5.160 registros / 18.804 unidades de conteúdo localizáveis**;
-- UI obrigatória: **119/119** em `pt_BR` e `en`;
-- labels mecânicos/lore: **165/165** em `pt_BR` e `en`;
-- glossário canônico e gates de placeholders/BBCode/terminologia/overflow/iconografia existem;
-- inglês: **15.334 unidades de delta** + **3.470 unidades-base** = **18.804/18.804**;
-- pack inglês físico no HEAD: `part_000`–`part_009`, contíguos, **133.572 caracteres Base64**; `part_005` atual possui 16.000 bytes;
-- compilador, certifier e sanity linguístico derivam os alvos do `localization/manifest.json`;
-- o quality gate mescla o pack compacto antes de verificar completude, tokens e glossário;
-- overflow e iconografia/acessibilidade estão alinhados a `pt_BR + en`;
-- `LOC-116-001` está **resolved** no ledger: o defeito inglês antigo foi corrigido e ES-419 saiu explicitamente do escopo do lançamento;
-- ainda faltam execução do certifier inglês, glossário/token/BBCode sobre corpus completo, render/overflow, iconografia/acessibilidade, sanity linguístico e regressões no mesmo HEAD;
-- nenhum desses gates será considerado PASS enquanto o runner continuar encerrando jobs antes dos steps.
-
-### 11.7 — QA audiovisual final em contexto real 🟡
-Preflight e integração foram implementados, mas assets finais continuam bloqueando a certificação.
-- `AudioRouter` é autoload e está conectado ao `PresentationBus` real;
-- 5 buses garantidos: Master, Music, Ambience, SFX e UI;
-- contrato: **7 eventos de UI + 7 de combate + 24 camadas music/ambience dos 12 Domínios = 38 referências**;
-- roteamento `location -> world_id -> Domínio` verificado contra o gerador de conteúdo;
-- política `sound_supports_reading`: Music -15 dB, Ambience -18 dB, SFX -9 dB, UI -8 dB, com margem mínima de 4 dB;
-- auditor Python e cena Godot de contexto real são fail-closed;
-- os 38 assets finais de `res://assets/audio/**` ainda não existem no branch, portanto **7.8/7.10 e 11.7 permanecem pendentes**;
-- checkpoint detalhado: `AUDIOVISUAL_11_7_STATUS.md`.
-
-### 11.8 — Triage até zero blocker/critical ✅
-O gate estático foi executado contra o ledger canônico e passou sem blocker/critical ativo.
-- ledger canônico: `qa/known_issues.json`;
-- gate: `tools/qa_triage_gate.py --require-zero`;
-- `LOC-116-001`: **resolved**;
-- resultado executado: `QA_TRIAGE FINAL: issues=1 active_blocker_critical=0 dependencies=3`;
-- resultado final: `QA_TRIAGE PASS: zero blocker/critical product defects`;
-- certificação persistida: `QA_11_8_COMPLETION.json`;
-- dívidas planejadas de arte, áudio e medição física permanecem dependências de release, não bugs artificiais.
-
-### 11.9 — Soak, sessões longas, suspensão/retomada e confiabilidade 🟡
-A infraestrutura fail-closed foi implementada sem duplicar o soak físico de 11.3.
-- gate dedicado: `tests/ReliabilitySoakCertification.gd` + `tests/reliability_soak_certification.tscn`;
-- contrato: **128 ciclos pause/resume**, cada pause acionando o autosave real; em seguida a RAM é deliberadamente adulterada e o save precisa restaurar sentinel, turno, seed e run ativo;
-- **24 restaurações adicionais tipo process restart**, com wipe de `GameState.profile/run`, reload, fingerprint de progressão e auditoria de integridade;
-- total esperado antes do roundtrip final: **152 reloads**, com auditoria repetida de `ProfileMigrationEngine` e `RunStateIntegrityEngine`;
-- o workflow `Veredas Reliability Soak 11.9` preserva primeiro os gates `MOBILE_CERTIFICATION` 8.2, `SAVE_FUZZ_CERTIFICATION` 11.2 e `RUN_STATE_INTEGRITY_CERTIFICATION` 11.2;
-- checkpoint: `RELIABILITY_11_9_STATE.json`;
-- primeira tentativa: run `31576124761`, job `94048524964`, terminou com `steps=[]` e `runner_id=0`; portanto não executou o teste;
-- 11.9 permanece 🟡 até `RELIABILITY_SOAK_CERTIFICATION PASS: 11.9` executar de verdade no HEAD canônico.
-
-### 11.10 — Freeze de QA / Release Candidate 🟡
-A infraestrutura de freeze foi antecipada, mas é deliberadamente impossível promover o RC enquanto faltarem pré-requisitos.
-- gate estático fail-closed: `tools/qa_release_candidate_gate.py`;
-- workflow: `Veredas QA Freeze 11.10`;
-- checkpoint: `QA_11_10_STATE.json`;
-- exige `status=pass` e commit certificado ancestral do HEAD para 11.3, 11.6, 11.7, 11.8 e 11.9;
-- hoje somente `QA_11_8_COMPLETION.json` satisfaz esse contrato; os comprovantes 11.3/11.6/11.7/11.9 permanecem pendentes;
-- o workflow final também reexecuta balance freeze 10.10, zero blocker/critical 11.8, canonical validation, localização completa, regressão 11.1, overflow/iconografia 11.6, audiovisual 11.7 e reliability soak 11.9 no mesmo HEAD;
-- exige `git diff --exit-code` ao final, impedindo um RC que altere silenciosamente a árvore durante os testes;
-- 11.10 permanece 🟡 até todos os pré-requisitos estarem certificados e o workflow completo passar no HEAD candidato.
-
-### Infraestrutura GitHub Actions — observação atual
-As execuções recentes dos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
-
-## Fase 12 — Publicação e release
-### 12.1 — Nome comercial e identidade 🟡
-- candidato atual: **Veredas da Trama**;
-- reconhecimento público inicial não encontrou colisão exata relevante nas buscas realizadas em web/lojas, mas isso não constitui liberação jurídica;
-- estado persistido: `RELEASE_12_1_NAME_STATE.json`;
-- faltam busca oficial/interativa no INPI, cross-check WIPO, confirmação autoritativa de domínios/handles e decisão final de estratégia de marca;
-- nenhum resultado provisório será tratado como certificação jurídica.
-
-### 12.2 — Package ID, versionamento e assinatura 🟡
-- Android application ID estável adotado: **`com.pmartins87.veredasdatrama`**;
-- ambos os presets Android e o CI de emulador usam o ID estável;
-- estado: `RELEASE_12_2_STATE.json` + `mobile/release_identity.json`;
-- validador `tools/validate_android_export.py` exige identidade/versionamento coerentes e ausência de credenciais de release no repositório;
-- pipeline `.github/workflows/veredas-release-aab.yml` exige RC certificado, privacidade/Data Safety 12.3 final, secrets protegidos, AAB assinado, `jarsigner` e SHA-256, destruindo o keystore temporário após o job;
-- faltam keystore real/backup externo, secrets protegidos, aceitação do package ID no Play Console, freeze de versão RC e AAB assinado real.
-
-### 12.3 — Privacidade, Data Safety e requisitos de plataforma 🟡
-- manifesto técnico: `product/privacy_data_safety.json`;
-- política bilíngue fail-closed: `docs/PRIVACY_POLICY_DRAFT.md`, ainda com placeholders explícitos;
-- o comportamento atual não inclui ads, analytics, conta própria ou permissões Android customizadas e mantém gameplay/save local;
-- gate `tools/privacy_data_safety_gate.py` possui modo preflight e modo `--release`, escaneia também `mobile/` e exige 12.4 certificado antes de liberar o release;
-- o AAB assinado permanece bloqueado enquanto contato, URL, SDKs, retenção, Billing e respostas finais de Data Safety estiverem pendentes;
-- faltam auditoria pós-12.4, permissões/SDKs do AAB final, URL pública, acesso in-app, contato de privacidade e submissão coerente do formulário Data Safety.
-
-### 12.4 — Monetização de produção e restauração de entitlements 🟡
-- contrato: `mobile/play_billing_contract.json`; estado: `RELEASE_12_4_STATE.json`;
-- plugin de referência pinado: **GodotGooglePlayBilling 3.3.0**, com fronteira dinâmica para não criar dependência estática antes da instalação do addon;
-- `PlayBillingCoordinator` separa o estado visto pelo cliente da concessão autoritativa: `PENDING` nunca concede; `PURCHASED` só concede após verificação de backend, token/id/pacote consistentes e confirmação de acknowledgement;
-- a restauração só aplica snapshot depois de percorrer toda a lista e concluir todas as verificações; falha parcial preserva cache previamente verificado;
-- teste lógico: `tests/play_billing_coordinator_certification.tscn`, com sete gates de segurança; workflow: `Veredas Play Billing 12.4`;
-- primeira execução do workflow, run `31606610197`, job `94147053674`, encerrou sem steps por indisponibilidade de runner; nenhum PASS de código foi inferido;
-- faltam instalar/vendorizar o plugin exato, configurar produtos no Play Console, backend HTTPS seguro com Google Play Developer API, executar os testes lógicos, e testar compra/pending/restauração/reembolso/revogação/offline em test track;
-- 12.4 permanece 🟡 até evidência real de produção e nova auditoria 12.3.
-
-### 12.5 — Página da loja, screenshots, ícone, feature graphic e ASO 🟡
-- copy PT-BR/en-US persistida em `product/store_listing_google_play.json` e estado em `RELEASE_12_5_STATE.json`;
-- título: 16/30 caracteres; descrição curta: PT 68/80, EN 59/80; descrições completas permanecem abaixo de 4.000 caracteres;
-- plano de captura: seis screenshots reais 1080×1920 por idioma — Hub, escolha narrativa, combate, Domínio/localidade, códice e acessibilidade;
-- ícone final 512×512 e feature graphic 1024×500 permanecem dependentes da arte final;
-- `tools/store_listing_gate.py` valida copy, claims promocionais, locale mapping, alt text e os próprios cabeçalhos PNG: dimensões, bit depth e alpha;
-- modo `--release` exige 12.1 certificado, 11.10 concluído, artes finais e screenshots marcados `final_rc_capture`;
-- preview video permanece opcional e só será incluído se puder mostrar gameplay real sem material enganoso;
-- 12.5 permanece 🟡 até assets finais, capturas do RC e inspeção no Play Console.
-
-### 12.6 — AAB/APK final assinado, otimizado e reproduzível 🟡
-- estado: `RELEASE_12_6_STATE.json`; contrato: `mobile/release_artifact_contract.json`;
-- `tools/release_input_fingerprint.py` congela os inputs relevantes e o workflow `.github/workflows/veredas-release-aab.yml` contém a receita de AAB assinado, verificação de assinatura e SHA-256;
-- a infraestrutura exige 11.10, 12.2, 12.3, 12.4 e 12.5 certificados antes de produzir o artefato de release;
-- faltam AAB real, assinatura/Play acceptance, hash e fingerprint persistidos, reconstrução equivalente e auditoria do payload final;
-- `pass_recorded=false`; 12.6 não está promovido.
-
-### 12.7 — Teste interno/fechado e rollout controlado 🟡
-- plano: `product/play_test_rollout_plan.json`; estado: `RELEASE_12_7_STATE.json`; gate: `tools/play_test_rollout_gate.py`;
-- política do projeto exige track interno e fechado, com baseline conservador de **12 testers continuamente opt-in por 14 dias**;
-- matrizes de lifecycle, Billing, localização, acessibilidade e feedback estão definidas e vinculadas ao SHA-256 do AAB testado;
-- primeira publicação pública não presume staged rollout; atualizações posteriores usam política 10/25/50/100 com observação entre expansões;
-- faltam AAB certificado de 12.6, testes reais, classificação da conta Play, canal de feedback, evidência dos testers/Billing e production access quando aplicável;
-- `pass_recorded=false`; 12.7 não está promovido.
-
-### 12.8 — Release Candidate final, checklist e rollback 🟡
-- contrato: `product/release_candidate_final_contract.json`; estado: `RELEASE_12_8_STATE.json`; gate: `tools/release_candidate_final_gate.py`;
-- workflow manual: `Veredas Final Release Candidate 12.8`;
-- exige completion records de 11.10 e 12.1–12.7, ancestralidade ao RC, identidade exata commit/version/AAB/certificado e zero blocker/critical;
-- checklist final cobre canonical/balance freeze, localização, audiovisual, reliability, privacidade, Billing, store listing, artefato assinado, test track e save migration;
-- rollback diferencia primeira publicação de updates: primeira publicação usa hotfix de `versionCode` maior e mesma identidade; updates podem interromper rollout progressivo e também corrigem por versão crescente, nunca downgrade;
-- stop imediato por blocker/critical, data loss/save, entitlement, crash/ANR ou privacidade/segurança/política;
-- faltam todas as evidências reais upstream, owner/canal de incidente, dry run de hotfix/rollback e decisão final go/no-go;
-- `pass_recorded=false`; 12.8 não está promovido.
-
-### 12.9 — Documentação final, continuidade e suporte 🟡
-- contrato: `product/continuity_support_contract.json`; estado: `RELEASE_12_9_STATE.json`; gate: `tools/continuity_support_gate.py`;
-- runbook: `docs/CONTINUITY_AND_SUPPORT.md`; workflow manual: `Veredas Continuity and Support 12.9`;
-- cobre fonte de verdade/tag, rebuild, archive do release, assinatura sem segredos no Git, recuperação de Play/repo/Billing, save compatibility, entitlements, privacidade, localização adiada, assets/licenças, suporte, incidente/hotfix e handoff;
-- o gate release rejeita placeholders e exige 12.8 certificado, tag apontando ao RC, hashes/fingerprints arquivados, canais reais, backups externos e restore drill;
-- faltam identidade operacional real, tag/artefato final, canais, recovery drills, archive de licenças/políticas/listing/release notes e revisão de passagem de bastão;
-- `pass_recorded=false`; 12.9 não está promovido.
-
-## Fase 10 — Balanceamento — CONCLUÍDA
-- 10.1 ✅ simulador completo.
-- 10.2 ✅ 36 personagens — 1.296 jornadas.
-- 10.3 ✅ 300 monstros + 60 chefes/subchefes — 2.340 combates.
-- 10.4 ✅ 1.116 itens, afixos, loot e economia.
-- 10.5 ✅ eventos, Marcas, Dívidas, callbacks e 36 arcos.
-- 10.6 ✅ quatro dificuldades — 1.728 jornadas pareadas.
-- 10.7 ✅ ritmo, recursos e attrition — 1.728 jornadas.
-- 10.8 ✅ 17.280 jornadas massivas + 4.608 factíveis em Ruptura.
-- 10.9 ✅ 9 playtests adversariais/manual-style.
-- 10.10 ✅ freeze automático da superfície balanceável.
-
-## Fase 11 — QA, acessibilidade e localização
-- 11.1 ✅ Matriz ampla de regressão automatizada e testes de integração.
-- 11.2 ✅ Fuzzing/migração de saves e compatibilidade.
-- 11.3 🟡 Performance/memória/bateria/térmica/loading — aparelho físico obrigatório pendente.
-- 11.4 ✅ UI responsiva/acessibilidade em matriz de dispositivos.
-- 11.5 ✅ Arquitetura de localização; lançamento atual `pt_BR + en`; `es_419` adiado.
-- 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — blocker de pack resolvido; execução final dos gates do inglês pendente.
-- 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
-- 11.8 ✅ Triage até zero blocker/critical — gate `--require-zero` executado com 0 blocker/critical ativo.
-- 11.9 🟡 Soak/sessões longas/suspend-resume/confiabilidade — gate e workflow implementados; execução real pendente.
-- 11.10 🟡 QA freeze do Release Candidate — gate/workflow implementados; pré-requisitos 11.3/11.6/11.7/11.9 pendentes.
-
-## Fase 12 — Publicação e release
-- 12.1 🟡 Validação do nome comercial, disponibilidade e identidade final — preflight em andamento.
-- 12.2 🟡 Package ID, versionamento, assinatura e cadeia segura — infraestrutura pronta; credenciais/console/build real pendentes.
-- 12.3 🟡 Privacidade, Data Safety, termos e requisitos de plataforma — contrato/gate preparados; congelamento final pós-12.4 pendente.
-- 12.4 🟡 Integração de produção da monetização e restauração de entitlements — arquitetura segura preparada; plugin/backend/Play test track pendentes.
-- 12.5 🟡 Página de loja, screenshots, ícone, feature graphic, vídeo e ASO — copy/gate preparados; artes e capturas do RC pendentes.
-- 12.6 🟡 AAB/APK final assinado, otimizado e reproduzível — infraestrutura/gate preparados; artefato real e pré-requisitos pendentes.
-- 12.7 🟡 Teste interno/fechado e rollout controlado — infraestrutura/evidência contratada; execução real em Play pendente.
-- 12.8 🟡 Release Candidate final, checklist e rollback — contrato/gate/workflow preparados; evidências e go/no-go pendentes.
-- 12.9 🟡 Documentação final, continuidade e suporte — contrato/runbook/gate preparados; configuração/evidência final pendente.
-- 12.10 ⏳ FINAL — pronto para jogar, divulgar e publicar.
-
-## Fase 7 — Assets finais ainda pendentes
-- 7.3 🟡 12 Domínios + 120 localidades — grandes ilustrações finais.
-- 7.4 🟡 36 personagens + NPCs — ilustrações finais.
-- 7.5 🟡 300 monstros + 60 chefes — ilustrações finais.
-- 7.8 🟡 áudio/música finais.
-- 7.10 ⏳ QA audiovisual final.
+- Sem referências no produto ao jogo externo usado como inspiração inicial.
+- Direção visual: livro-jogo ilustrado à mão, nanquim/grafite, papel orgânico e paletas próprias dos 12 Domínios.
+- Roadmap finito detalhado: `ROADMAP_MASTER.md`.
+- Este arquivo é o **índice canônico de status**, não deve duplicar relatórios extensos dos arquivos `*_STATE.json`/`*_COMPLETION.json`.
+- `✅` só é usado quando o gate/evidência exigido foi realmente concluído e persistido.
+- `🟡` significa implementação/preflight em andamento ou gate preparado aguardando evidência real.
+- `⏳` significa ainda não iniciado estruturalmente.
+- Preparar um gate **não aumenta a contagem formal**.
 
 ## Contagem formal
-- **110/130 passos concluídos segundo os gates persistidos.**
+**110/130 passos concluídos.**
 
-## Ponto final
-O roadmap termina apenas em **12.10**, com projeto e build completos, testados, empacotados e prontos para jogar, divulgar e publicar.
+## Escopo de lançamento
+- Idiomas: **pt_BR + en**.
+- `es_419` permanece preservado como idioma adiado e não integra os gates do release atual.
+- Android application ID: **`com.pmartins87.veredasdatrama`**.
+- Ponto final permanece **12.10: projeto/build completos, testados e prontos para jogar, divulgar e publicar**.
+
+## Fases 0–6
+- **0.1–6.10: 10/10 ✅ em cada fase.**
+
+## Fase 7 — Assets finais
+- 7.1 ✅
+- 7.2 ✅
+- 7.3 🟡 — 12 Domínios + 120 localidades, grandes ilustrações finais.
+- 7.4 🟡 — 36 personagens + NPCs, ilustrações finais.
+- 7.5 🟡 — 300 monstros + 60 chefes/subchefes, ilustrações finais.
+- 7.6 ✅
+- 7.7 ✅
+- 7.8 🟡 — áudio/música finais; dependência `DEP-078-AUDIO`.
+- 7.9 ✅
+- 7.10 ⏳ — QA audiovisual final; depende de 7.3–7.5 e 7.8.
+
+## Fase 8
+- **8.1–8.10 ✅ — concluída.**
+
+## Fase 9
+- **9.1–9.10 ✅ — concluída.**
+
+## Fase 10 — Balanceamento e simulação
+- **10.1–10.10 ✅ — concluída e congelada.**
+- Evidência central: `BALANCE_FREEZE.json` + gates estatísticos/canônicos existentes.
+- Marcos já certificados incluem matriz de personagens, inimigos, itens/economia, narrativa, quatro dificuldades, ritmo/attrition, simulações massivas e playtests adversariais.
+
+## Fase 11 — QA, otimização e localização
+- 11.1 ✅ — matriz ampla de regressão/integracão. Referência: commit `0afd8f2`; 288 jornadas completas e cenários live certificados.
+- 11.2 ✅ — fuzzing/migração de saves. Referências `39a811c`/`7aec534`; migrações, rejeição de corrupção e compatibilidade certificadas.
+- 11.3 🟡 — performance/memória/bateria/térmica/loading. Automação/emuladores verdes; falta aparelho físico com soak >= 1.800 s. Dependência `DEP-113-PHYSICAL`.
+- 11.4 ✅ — UI responsiva/acessibilidade. Referência `c988448`; matriz de dispositivos passou.
+- 11.5 ✅ — arquitetura de localização. Fonte/fallback `pt_BR`; launch `pt_BR + en`; IDs estáveis/overlays.
+- 11.6 🟡 — QA linguístico/overflow/iconografia/terminologia. Pack inglês físico está íntegro (`part_000`–`part_009`, 133.572 caracteres Base64); `LOC-116-001` resolvido. Faltam execuções finais no mesmo HEAD. Estados: `LOCALIZATION_11_6_STATE.json`, `LOCALIZATION_11_6_STATUS.md`, `LOCALIZATION_11_6_PACK_CHECKPOINT.md`.
+- 11.7 🟡 — QA audiovisual real. Preflight existe, mas 38 referências de áudio final e assets associados ainda bloqueiam a certificação. Estado: `AUDIOVISUAL_11_7_STATUS.md`.
+- 11.8 ✅ — zero blocker/critical conhecido. `QA_11_8_COMPLETION.json`; resultado persistido: `active_blocker_critical=0`.
+- 11.9 🟡 — soak/long sessions/suspend-resume/confiabilidade. Gate implementa 128 ciclos pause/resume + 24 restaurações tipo restart (152 reloads antes do roundtrip final). Estado: `RELIABILITY_11_9_STATE.json`. Execução real ainda pendente.
+- 11.10 🟡 — freeze de QA/RC. Gate `tools/qa_release_candidate_gate.py`, estado `QA_11_10_STATE.json`; depende de 11.3/11.6/11.7/11.9 certificados.
+
+### Infraestrutura de execução
+GitHub Actions tem apresentado falhas de infraestrutura anteriores ao primeiro step (`runner_id=0`, `steps=[]`). Isso **não** vale como PASS ou FAIL do código. Não repetir runners mortos como substituto de progresso; avançar infraestrutura independente e executar gates reais quando houver executor/aparelho/assets.
+
+## Fase 12 — Publicação e release
+Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 estão 🟡**, com infraestrutura preparada e evidência real progressivamente pendente.
+
+- 12.1 🟡 — nome comercial/identidade. Candidato: **Veredas da Trama**. Estado: `RELEASE_12_1_NAME_STATE.json`. Busca pública inicial sem colisão exata relevante não equivale a clearance jurídico; INPI/WIPO/handles/domínios e decisão de marca permanecem pendentes.
+- 12.2 🟡 — package ID/versionamento/assinatura. Estado: `RELEASE_12_2_STATE.json`; identidade em `mobile/release_identity.json`; validador `tools/validate_android_export.py`. Faltam keystore real/backup seguro, secrets, Play Console, freeze de versão e artefato real.
+- 12.3 🟡 — privacidade/Data Safety/plataforma. Contrato `product/privacy_data_safety.json`, draft `docs/PRIVACY_POLICY_DRAFT.md`, gate `tools/privacy_data_safety_gate.py`. Faltam dados finais pós-Billing/AAB, URL/contato e submissão coerente.
+- 12.4 🟡 — Billing/entitlements de produção. Contrato `mobile/play_billing_contract.json`, estado `RELEASE_12_4_STATE.json`, gate `tools/play_billing_release_gate.py`. Segurança: `PENDING` não concede; entitlement exige verificação. Faltam plugin/backend/Play products e testes reais.
+- 12.5 🟡 — store listing/ASO/assets. Copy PT-BR/en-US e gate `tools/store_listing_gate.py` preparados; faltam arte final, screenshots reais do RC e inspeção no Play Console. Estado `RELEASE_12_5_STATE.json`.
+- 12.6 🟡 — AAB/APK final assinado/reproduzível. Estado `RELEASE_12_6_STATE.json`, contrato `mobile/release_artifact_contract.json`, fingerprint `tools/release_input_fingerprint.py`, workflow de AAB. Faltam pré-requisitos certificados, artefato real, assinatura/hash/fingerprint, rebuild equivalence e Play acceptance.
+- 12.7 🟡 — teste interno/fechado/rollout. Estado `RELEASE_12_7_STATE.json`, plano `product/play_test_rollout_plan.json`, gate `tools/play_test_rollout_gate.py`. Baseline do projeto: track interno + fechado com >=12 testers por >=14 dias contínuos; faltam evidências reais e Billing/tester feedback/production access quando aplicável.
+- 12.8 🟡 — RC final/checklist/rollback. Contrato `product/release_candidate_final_contract.json`, estado `RELEASE_12_8_STATE.json`, gate `tools/release_candidate_final_gate.py`, workflow `Veredas Final Release Candidate 12.8`. Exige 11.10 + 12.1–12.7 certificados, mesma identidade de artefato, zero blockers, dry run e go/no-go. Primeira publicação usa hotfix de versionCode maior; updates podem usar rollout 10/25/50/100; nunca downgrade.
+- 12.9 🟡 — documentação/continuidade/suporte. Contrato `product/continuity_support_contract.json`, estado `RELEASE_12_9_STATE.json`, runbook `docs/CONTINUITY_AND_SUPPORT.md`, gate `tools/continuity_support_gate.py`, workflow `Veredas Continuity and Support 12.9`. Exige tag/archive final, canais/owners reais, recuperação de contas, backups externos/restoration drill, proveniência/licenças e handoff.
+- 12.10 🟡 — **FINAL**. Contrato `product/final_release_contract.json`, estado `RELEASE_12_10_STATE.json`, gate `tools/final_release_gate.py`, workflow `Veredas Final Release 12.10`. Só pode PASS quando 12.8/12.9 passarem, tag/commit/version/AAB/signing/archive coincidirem, final smoke/store/privacy/Billing/support/rollback estiverem prontos e as três afirmações `ready_to_play`, `ready_to_promote`, `ready_to_publish` forem verdadeiras com decisão final `go`.
+
+## Blockers/dependências reais ainda abertas
+1. **Aparelho físico** para 11.3 e evidência operacional associada.
+2. **Execução real dos gates** de 11.6/11.9 e freeze 11.10 quando houver executor funcional.
+3. **Assets finais de arte e áudio**, necessários para 7.3–7.5/7.8/7.10, 11.7 e store assets.
+4. **Contas/infra de publicação reais**: Play Console, assinatura/backup, Billing backend/produtos, canais de suporte/privacidade.
+5. **Test track real** de 12.7 e evidência do AAB exato.
+6. **Due diligence final do nome**, política/loja e documentação pública.
+
+## Próxima regra de avanço
+- Não voltar a diagnosticar blockers já conhecidos a cada interação.
+- Avançar primeiro qualquer trabalho independente ainda executável.
+- Quando só restarem dependências externas, registrar explicitamente qual evidência externa desbloqueia qual gate.
+- Nunca aumentar 110/130 por preflight; só por `PASS` real persistido.
