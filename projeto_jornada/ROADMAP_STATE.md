@@ -11,7 +11,7 @@
 - Fase 8: **8.1–8.10 ✅ — concluída**.
 - Fase 9: **9.1–9.10 ✅ — concluída**.
 - Fase 10: **10.1–10.10 ✅ — concluída e congelada**.
-- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6 e 11.7 em andamento com gates fail-closed**.
+- Fase 11: **11.1, 11.2, 11.4, 11.5 e 11.8 ✅; 11.3 aguarda medição física; 11.6, 11.7 e 11.9 em andamento com gates fail-closed**.
 
 ## Marcos QA recentes
 ### 11.1 — Matriz ampla de regressão e integração ✅
@@ -42,10 +42,10 @@ O blocker físico de packs foi removido do escopo atual, mas a etapa ainda preci
 - glossário canônico e gates de placeholders/BBCode/terminologia/overflow/iconografia existem;
 - inglês: **15.334 unidades de delta** + **3.470 unidades-base** = **18.804/18.804**;
 - pack inglês físico no HEAD: `part_000`–`part_009`, contíguos, **133.572 caracteres Base64**; `part_005` atual possui 16.000 bytes;
-- compilador, certifier e sanity linguístico agora derivam os alvos do `localization/manifest.json`;
-- o quality gate foi endurecido para mesclar o pack compacto antes de verificar completude, tokens e glossário;
-- overflow e iconografia/acessibilidade foram alinhados a `pt_BR + en`;
-- `LOC-116-001` foi marcado **resolved** no ledger: o defeito inglês antigo foi corrigido e ES-419 saiu explicitamente do escopo do lançamento;
+- compilador, certifier e sanity linguístico derivam os alvos do `localization/manifest.json`;
+- o quality gate mescla o pack compacto antes de verificar completude, tokens e glossário;
+- overflow e iconografia/acessibilidade estão alinhados a `pt_BR + en`;
+- `LOC-116-001` está **resolved** no ledger: o defeito inglês antigo foi corrigido e ES-419 saiu explicitamente do escopo do lançamento;
 - ainda faltam execução do certifier inglês, glossário/token/BBCode sobre corpus completo, render/overflow, iconografia/acessibilidade, sanity linguístico e regressões no mesmo HEAD;
 - nenhum desses gates será considerado PASS enquanto o runner continuar encerrando jobs antes dos steps.
 
@@ -70,8 +70,18 @@ O gate estático foi executado contra o ledger canônico e passou sem blocker/cr
 - certificação persistida: `QA_11_8_COMPLETION.json`;
 - dívidas planejadas de arte, áudio e medição física permanecem dependências de release, não bugs artificiais.
 
+### 11.9 — Soak, sessões longas, suspensão/retomada e confiabilidade 🟡
+A infraestrutura fail-closed foi implementada sem duplicar o soak físico de 11.3.
+- gate dedicado: `tests/ReliabilitySoakCertification.gd` + `tests/reliability_soak_certification.tscn`;
+- contrato: **128 ciclos pause/resume**, cada pause acionando o autosave real; em seguida a RAM é deliberadamente adulterada e o save precisa restaurar sentinel, turno, seed e run ativo;
+- **24 restaurações adicionais tipo process restart**, com wipe de `GameState.profile/run`, reload, fingerprint de progressão e auditoria de integridade;
+- total esperado antes do roundtrip final: **152 reloads**, com auditoria repetida de `ProfileMigrationEngine` e `RunStateIntegrityEngine`;
+- o workflow `Veredas Reliability Soak 11.9` preserva primeiro os gates `MOBILE_CERTIFICATION` 8.2, `SAVE_FUZZ_CERTIFICATION` 11.2 e `RUN_STATE_INTEGRITY_CERTIFICATION` 11.2;
+- checkpoint: `RELIABILITY_11_9_STATE.json`;
+- 11.9 permanece 🟡 até `RELIABILITY_SOAK_CERTIFICATION PASS: 11.9` executar de verdade no HEAD canônico.
+
 ### Infraestrutura GitHub Actions — observação atual
-As execuções recentes dos novos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
+As execuções recentes dos gates continuam encerrando antes de qualquer step, com `runner_id=0`. Isso é indisponibilidade de runner e **não** é evidência de PASS nem de falha do código. Gates dependentes de execução permanecem sem certificação até uma execução real.
 
 ## Fase 10 — Balanceamento — CONCLUÍDA
 - 10.1 ✅ simulador completo.
@@ -94,7 +104,7 @@ As execuções recentes dos novos gates continuam encerrando antes de qualquer s
 - 11.6 🟡 QA linguístico/overflow/iconografia/terminologia — blocker de pack resolvido; execução final dos gates do inglês pendente.
 - 11.7 🟡 QA audiovisual em contexto real — preflight implementado; 7.8/7.10 e execução real pendentes.
 - 11.8 ✅ Triage até zero blocker/critical — gate `--require-zero` executado com 0 blocker/critical ativo.
-- 11.9 ⏳ Soak, sessões longas, suspend/resume e confiabilidade.
+- 11.9 🟡 Soak/sessões longas/suspend-resume/confiabilidade — gate e workflow implementados; execução real pendente.
 - 11.10 ⏳ QA freeze do Release Candidate.
 
 ## Fase 7 — Assets finais ainda pendentes
