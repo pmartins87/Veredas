@@ -5,6 +5,7 @@
   "updated_on": "2026-08-12",
   "product": "Veredas da Trama",
   "application_id": "com.pmartins87.veredasdatrama",
+  "completion_record_schema": "product/release_completion_record_schema.json",
   "required_prerequisites": [
     "11.10",
     "12.1",
@@ -77,9 +78,10 @@
     "go_no_go_decision": "pending"
   },
   "completion_requirements": [
-    "all required prerequisite completion records exist, report pass and belong to the RC ancestry",
-    "candidate commit/version/AAB/signing identity agree with 12.6 and tested 12.7 evidence",
-    "every final regression checklist item is true on the same candidate",
+    "all required prerequisite completion records exist, report pass and their certified_against_head commits are ancestors of the current evidence HEAD",
+    "the candidate artifact source commit is an ancestor of the evidence HEAD; evidence persistence must not require self-referential HEAD equality",
+    "candidate commit/version/AAB/signing identity agree with 12.6 and the artifact tested in 12.7",
+    "every final regression checklist item is true for the candidate/evidence set",
     "zero blocker/critical defects are active",
     "rollback owner and incident channel are real non-placeholder values",
     "first-release hotfix recipe is verified and rollback dry run is recorded",
