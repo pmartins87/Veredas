@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import gzip
 import json
 import re
 import unicodedata
@@ -13,6 +15,7 @@ from export_localization_catalog import build_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 LOC = ROOT / "localization"
+PACK_ROOT = LOC / "content_packs"
 
 PRINTF_RE = re.compile(r"%(?:\d+\$)?[-+#0 ]*\d*(?:\.\d+)?[diouxXeEfFgGcrs]")
 BRACE_RE = re.compile(r"(?<!\{)\{(?:[A-Za-z_][A-Za-z0-9_]*|\d+)\}(?!\})")
@@ -57,11 +60,45 @@ def flatten_ui(catalog: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def compact_pack_content(locale_id: str) -> dict[str, str]:
+    single = PACK_ROOT / f"{locale_id}.json.gz.b64"
+    part_dir = PACK_ROOT / locale_id
+    if single.exists() and part_dir.exists():
+        raise SystemExit(f"{locale_id}: both single and multipart compact packs exist")
+    if single.exists():
+        encoded = "".join(single.read_text(encoding="utf-8").split())
+    elif part_dir.exists():
+        parts = sorted(part_dir.glob("*.b64part"))
+        if not parts:
+            return {}
+        expected = [f"part_{index:03d}.b64part" for index in range(len(parts))]
+        actual = [part.name for part in parts]
+        if actual != expected:
+            raise SystemExit(f"{locale_id}: non-contiguous compact pack parts: {actual}")
+        encoded = "".join("".join(part.read_text(encoding="utf-8").split()) for part in parts)
+    else:
+        return {}
+    try:
+        raw = gzip.decompress(base64.b64decode(encoded, validate=True))
+        parsed = json.loads(raw.decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001 - quality gate must fail closed.
+        raise SystemExit(f"{locale_id}: compact pack decode failed: {exc}") from exc
+    if not isinstance(parsed, dict):
+        raise SystemExit(f"{locale_id}: decoded compact pack is not an object")
+    return flatten_content(parsed)
+
+
 def locale_values(locale_id: str) -> dict[str, str]:
     merged: dict[str, str] = {}
     merged.update(flatten_ui(read_object(LOC / "ui" / f"{locale_id}.json")))
     merged.update(flatten_labels(read_object(LOC / "labels" / f"{locale_id}.json")))
-    merged.update(flatten_content(read_object(LOC / "content" / f"{locale_id}.json")))
+    base_content = flatten_content(read_object(LOC / "content" / f"{locale_id}.json"))
+    pack_content = compact_pack_content(locale_id)
+    collisions = set(base_content) & set(pack_content)
+    if collisions:
+        raise SystemExit(f"{locale_id}: {len(collisions)} base/pack content collision(s)")
+    merged.update(base_content)
+    merged.update(pack_content)
     return merged
 
 
