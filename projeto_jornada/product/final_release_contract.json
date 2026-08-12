@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.10",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "product": "Veredas da Trama",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "required_completion_records": [
+    "RELEASE_12_8_COMPLETION.json",
+    "RELEASE_12_9_COMPLETION.json"
+  ],
+  "final_identity": {
+    "release_tag": "PENDING_12_10_RELEASE_TAG",
+    "commit_sha": "PENDING_12_10_COMMIT_SHA",
+    "version_name": "PENDING_12_10_VERSION_NAME",
+    "version_code": 0,
+    "aab_sha256": "PENDING_12_10_AAB_SHA256",
+    "signing_certificate_sha256": "PENDING_12_10_SIGNING_CERT_SHA256"
+  },
+  "readiness": {
+    "final_build_install_smoke_passed": false,
+    "launch_locales_pt_br_en_verified": false,
+    "store_listing_and_assets_final": false,
+    "privacy_policy_and_data_safety_final": false,
+    "billing_products_backend_and_restore_production_ready": false,
+    "support_and_privacy_channels_live": false,
+    "release_archive_and_source_tag_verified": false,
+    "zero_blocker_critical_verified": false,
+    "play_console_submission_ready": false,
+    "rollback_hotfix_path_ready": false
+  },
+  "public_claims": {
+    "ready_to_play": false,
+    "ready_to_promote": false,
+    "ready_to_publish": false
+  },
+  "final_decision": {
+    "decision_owner": "PENDING_12_10_FINAL_DECISION_OWNER",
+    "decision": "pending",
+    "recorded_at": "PENDING_12_10_DECISION_TIMESTAMP"
+  },
+  "completion_requirements": [
+    "12.8 and 12.9 completion records report pass on the final release ancestry",
+    "final tag, commit, version, AAB hash and signing certificate agree with the archived certified release",
+    "all final readiness checks are true",
+    "zero blocker/critical product defects remain active",
+    "the exact final build passes install/launch smoke and its public store/privacy/Billing/support surfaces are coherent",
+    "rollback/hotfix path is ready",
+    "explicit final decision is go",
+    "final_release_gate.py --release passes"
+  ],
+  "pass_recorded": false
+}
