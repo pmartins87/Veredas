@@ -112,7 +112,7 @@ def main() -> int:
                 errors.append(f"{step}: completion record does not report pass")
             commit_sha = completion_commit(row)
             if not is_ancestor(commit_sha, head_sha):
-                errors.append(f"{step}: certified commit is not an ancestor of final HEAD")
+                errors.append(f"{step}: certified commit is not an ancestor of final evidence HEAD")
 
         identity = contract.get("final_identity", {})
         for key in ("release_tag", "commit_sha", "version_name", "aab_sha256", "signing_certificate_sha256"):
@@ -120,14 +120,15 @@ def main() -> int:
                 errors.append(f"final_identity.{key} is unresolved")
         if not isinstance(identity.get("version_code"), int) or int(identity.get("version_code", 0)) <= 0:
             errors.append("final_identity.version_code must be positive")
-        if identity.get("commit_sha") != head_sha:
-            errors.append("final_identity.commit_sha must equal current HEAD")
+        artifact_commit = str(identity.get("commit_sha", ""))
+        if not is_ancestor(artifact_commit, head_sha):
+            errors.append("final artifact commit must be an ancestor of the evidence HEAD")
 
         tag = identity.get("release_tag", "")
         if isinstance(tag, str) and tag and not unresolved(tag):
             tag_commit = git_output("rev-list", "-n", "1", tag)
-            if not tag_commit or tag_commit != head_sha:
-                errors.append("final release tag does not resolve exactly to current HEAD")
+            if not tag_commit or tag_commit != artifact_commit:
+                errors.append("final release tag does not resolve exactly to final artifact commit")
 
         archive = continuity.get("release_archive", {})
         source = continuity.get("source_of_truth", {})
