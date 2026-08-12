@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.10",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "contract": "product/final_release_contract.json",
+  "gate": "tools/final_release_gate.py",
+  "implemented": {
+    "12_8_12_9_completion_dependency": true,
+    "final_tag_commit_version_artifact_identity_gate": true,
+    "release_archive_cross_check": true,
+    "zero_blocker_critical_gate": true,
+    "final_install_store_privacy_billing_support_readiness_checklist": true,
+    "rollback_hotfix_readiness_gate": true,
+    "ready_to_play_promote_publish_claim_gate": true,
+    "explicit_final_go_no_go": true
+  },
+  "pending": {
+    "12_8_certified": false,
+    "12_9_certified": false,
+    "final_identity_frozen": false,
+    "final_build_install_smoke_passed": false,
+    "store_privacy_billing_support_surfaces_final": false,
+    "zero_blocker_critical_reverified": false,
+    "play_console_submission_ready": false,
+    "rollback_hotfix_path_reverified": false,
+    "final_decision_owner_assigned": false,
+    "final_go_decision_recorded": false
+  },
+  "completion_requirements": [
+    "12.8 and 12.9 are certified on the final release ancestry",
+    "final tag/commit/version/AAB/signing identity exactly match the archived release",
+    "all final readiness checks and public readiness claims are true",
+    "zero blocker/critical defects remain active",
+    "exact final build install/launch smoke passes",
+    "Play submission surfaces and rollback/hotfix path are ready",
+    "final_release_gate.py --release passes",
+    "explicit final go decision is recorded"
+  ],
+  "pass_recorded": false
+}
