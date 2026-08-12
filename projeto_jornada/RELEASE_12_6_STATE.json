@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.6",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "contract": "mobile/release_artifact_contract.json",
+  "input_fingerprint_tool": "tools/release_input_fingerprint.py",
+  "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
+  "implemented": {
+    "stable_application_id": true,
+    "signed_aab_recipe": true,
+    "signature_verification_recipe": true,
+    "sha256_recipe": true,
+    "release_input_fingerprint": true,
+    "clean_rc_gate_dependency": true,
+    "privacy_release_gate_dependency": true
+  },
+  "pending": {
+    "11_10_release_candidate_certified": false,
+    "12_2_signing_identity_frozen": false,
+    "12_3_privacy_certified": false,
+    "12_4_billing_certified": false,
+    "12_5_store_listing_certified": false,
+    "real_signed_aab_produced": false,
+    "signature_verified": false,
+    "artifact_sha256_persisted": false,
+    "release_input_manifest_persisted": false,
+    "same_commit_rebuild_equivalence_proven": false,
+    "forbidden_internal_payload_audited": false,
+    "play_console_artifact_accepted": false
+  },
+  "completion_requirements": [
+    "satisfy all 11.10/12.2/12.3/12.4/12.5 prerequisites",
+    "produce signed release AAB from exact RC commit",
+    "verify signature and package/version",
+    "persist AAB SHA-256 and release-input fingerprint",
+    "repeat build from same commit and compare release-input fingerprint and package/content contract",
+    "inspect final bundle for internal-only payload",
+    "obtain Play Console acceptance evidence"
+  ],
+  "pass_recorded": false
+}
