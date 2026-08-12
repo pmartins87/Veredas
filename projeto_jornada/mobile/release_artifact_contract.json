@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.6",
+  "formal_status": "in_progress",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "target_public_version_name": "1.0.0",
+  "artifact": {
+    "primary": "AAB",
+    "expected_path": "build/android-release/veredas-da-trama.aab",
+    "signed": true,
+    "sha256_required": true,
+    "signature_verification_required": true,
+    "play_upload_artifact": true
+  },
+  "build_recipe": {
+    "engine": "Godot 4.7.1 stable",
+    "android_application_id_source": "mobile/release_identity.json",
+    "export_preset": "Android Play AAB (Unsigned CI Template)",
+    "signed_workflow": ".github/workflows/veredas-release-aab.yml",
+    "billing_plugin_contract": "mobile/play_billing_contract.json",
+    "release_input_fingerprint": "tools/release_input_fingerprint.py",
+    "canonical_validation": "tools/validate_canonical.py",
+    "release_candidate_gate": "tools/qa_release_candidate_gate.py",
+    "privacy_release_gate": "tools/privacy_data_safety_gate.py"
+  },
+  "reproducibility_policy": {
+    "exact_source_commit_required": true,
+    "clean_worktree_required": true,
+    "release_input_manifest_sha256_required": true,
+    "same_commit_rebuild_must_match_release_input_manifest": true,
+    "signed_container_byte_identity_required": false,
+    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; source/input fingerprint, package/version, bundle contents and signature validity are authoritative",
+    "canonical_game_data_must_remain_frozen": true
+  },
+  "forbidden_release_payload_roots": [
+    "docs/",
+    "tools/",
+    "tests/",
+    "art/final_source/",
+    ".godot/",
+    "build/"
+  ],
+  "completion_requirements": [
+    "11.10 Release Candidate certified",
+    "12.2 signing identity and version frozen",
+    "12.3 privacy/Data Safety certified",
+    "12.4 production billing certified",
+    "12.5 final store assets/copy certified",
+    "produce signed AAB from exact RC commit",
+    "verify signing, application id, version code/name and SHA-256",
+    "persist release-input fingerprint and artifact evidence",
+    "repeat build from same commit and prove identical release-input fingerprint and equivalent package/version/content contract",
+    "inspect final bundle for forbidden internal payload roots",
+    "record final artifact size and Play Console acceptance"
+  ],
+  "pass_recorded": false
+}
