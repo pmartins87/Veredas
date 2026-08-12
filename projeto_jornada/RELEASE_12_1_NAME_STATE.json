@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.1",
+  "formal_status": "in_progress",
+  "candidate_name": "Veredas da Trama",
+  "checked_on": "2026-08-12",
+  "scope": "commercial name, public discoverability, game-store collision reconnaissance, trademark and domain preflight",
+  "public_reconnaissance": {
+    "exact_name_web_search": "no exact game collision found in the searches performed",
+    "game_store_searches": ["Google Play", "Steam", "Apple App Store", "itch.io"],
+    "game_store_exact_collision_found": false,
+    "legal_clearance": false,
+    "note": "Search-engine/store reconnaissance is only an early collision screen and is not a legal trademark clearance."
+  },
+  "authoritative_checks": {
+    "inpi_brazil_exact_mark_search": "pending_interactive_registry_search",
+    "wipo_global_brand_database_exact_search": "pending_interactive_registry_search",
+    "domain_veredasdatrama_com": "pending_authoritative_registration_check",
+    "domain_veredasdatrama_com_br": "pending_authoritative_registration_check"
+  },
+  "identity_dependencies": {
+    "android_application_id": "com.pmartins87.veredasdatrama",
+    "application_id_is_not_legal_name_clearance": true
+  },
+  "completion_requirements": [
+    "complete exact and confusingly-similar search in INPI classes relevant to software/games",
+    "complete WIPO/global cross-check",
+    "confirm desired domain/social handles or explicitly accept alternatives",
+    "record final name decision and any trademark filing strategy",
+    "verify store listing name can be created without material collision"
+  ],
+  "result": "provisional_public_clearance_only"
+}
