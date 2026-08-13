@@ -12,12 +12,17 @@ COMMERCIAL = ROOT / "product" / "commercial_model.json"
 PRIVACY = ROOT / "product" / "privacy_data_safety.json"
 IDENTITY = ROOT / "mobile" / "release_identity.json"
 EXPORT = ROOT / "export_presets.cfg"
+PROJECT = ROOT / "project.godot"
 COORDINATOR = ROOT / "core" / "systems" / "PlayBillingCoordinator.gd"
 ADAPTER = ROOT / "mobile" / "GooglePlayBillingStoreAdapter.gd"
+VERIFIER_CLIENT = ROOT / "mobile" / "PlayPurchaseVerificationClient.gd"
+BILLING_SERVICE = ROOT / "mobile" / "BillingService.gd"
 CERT = ROOT / "tests" / "PlayBillingCoordinatorCertification.gd"
 CERT_SCENE = ROOT / "tests" / "play_billing_coordinator_certification.tscn"
 CORRELATION_CERT = ROOT / "tests" / "PlayBillingCorrelationCertification.gd"
 CORRELATION_SCENE = ROOT / "tests" / "play_billing_correlation_certification.tscn"
+VERIFIER_CERT = ROOT / "tests" / "PlayPurchaseVerificationClientCertification.gd"
+VERIFIER_SCENE = ROOT / "tests" / "play_purchase_verification_client_certification.tscn"
 PLUGIN_ROOT = ROOT / "addons" / "GodotGooglePlayBilling"
 
 EXPECTED_PRODUCTS = {"full_game_unlock", "supporter_cosmetic_pack"}
@@ -57,6 +62,12 @@ def require_members(container: Any, expected: set[str], label: str, errors: list
         errors.append(f"{label} missing required field(s): {missing}")
 
 
+def require_fragments(text: str, fragments: list[str], label: str, errors: list[str]) -> None:
+    for fragment in fragments:
+        if fragment not in text:
+            errors.append(f"{label} missing fragment: {fragment}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate production Google Play Billing contract for roadmap 12.4.")
     parser.add_argument(
@@ -74,12 +85,17 @@ def main() -> int:
         PRIVACY,
         IDENTITY,
         EXPORT,
+        PROJECT,
         COORDINATOR,
         ADAPTER,
+        VERIFIER_CLIENT,
+        BILLING_SERVICE,
         CERT,
         CERT_SCENE,
         CORRELATION_CERT,
         CORRELATION_SCENE,
+        VERIFIER_CERT,
+        VERIFIER_SCENE,
     ]
     for path in required:
         if not path.exists():
@@ -95,10 +111,14 @@ def main() -> int:
     privacy = read_json(PRIVACY)
     identity = read_json(IDENTITY)
     export_text = EXPORT.read_text(encoding="utf-8")
+    project_text = PROJECT.read_text(encoding="utf-8")
     coordinator_text = COORDINATOR.read_text(encoding="utf-8")
     adapter_text = ADAPTER.read_text(encoding="utf-8")
+    verifier_text = VERIFIER_CLIENT.read_text(encoding="utf-8")
+    service_text = BILLING_SERVICE.read_text(encoding="utf-8")
     cert_text = CERT.read_text(encoding="utf-8")
     correlation_cert_text = CORRELATION_CERT.read_text(encoding="utf-8")
+    verifier_cert_text = VERIFIER_CERT.read_text(encoding="utf-8")
 
     if contract.get("roadmap_step") != "12.4":
         errors.append("billing contract must identify roadmap_step 12.4")
@@ -111,6 +131,10 @@ def main() -> int:
         errors.append("billing application id disagrees with release identity")
     if export_text.count(f'package/unique_name="{application_id}"') != 2:
         errors.append("Android export presets disagree with billing application id")
+    if export_text.count("permissions/internet=true") != 2:
+        errors.append("billing HTTPS verification requires INTERNET=true in both Android export presets")
+    if 'BillingService="*res://mobile/BillingService.gd"' not in project_text:
+        errors.append("BillingService runtime autoload is not registered")
 
     store = contract.get("store", {})
     if not isinstance(store, dict):
@@ -242,51 +266,114 @@ def main() -> int:
         if restore_policy.get(flag) is not True:
             errors.append(f"restore safety contract missing: {flag}")
 
-    for required_fragment in [
-        'PURCHASED_STATE := 1',
-        'PENDING_STATE := 2',
-        '"verification_request_id"',
-        '_next_verification_request_id',
-        'verification_for_unknown_request',
-        '"acknowledged"',
-        '"play_backend"',
-        'apply_authoritative_snapshot',
-        'apply_purchase_result',
-        '_on_store_error',
-    ]:
-        if required_fragment not in coordinator_text:
-            errors.append(f"coordinator security contract missing fragment: {required_fragment}")
-    for required_fragment in [
-        "BILLING_CLIENT_SCRIPT",
-        "PackedStringArray(product_ids)",
-        "query_product_details",
-        "query_purchases",
-        "on_purchase_updated",
-        "get_script_constant_map",
-        "_started = false",
-        "_client = null",
-    ]:
-        if required_fragment not in adapter_text:
-            errors.append(f"billing adapter contract missing fragment: {required_fragment}")
-    for required_fragment in [
-        "pending_no_grant=1",
-        "verify_fail_no_grant=1",
-        "ack_required=1",
-        "authoritative_restore=1",
-        "partial_failure_cache_safe=1",
-        "package_guard=1",
-        "request_id=1",
-    ]:
-        if required_fragment not in cert_text:
-            errors.append(f"billing certification lacks gate marker: {required_fragment}")
-    for required_fragment in [
-        "request_correlation=1",
-        "overlap_safe=1",
-        "stale_response_isolation=1",
-    ]:
-        if required_fragment not in correlation_cert_text:
-            errors.append(f"billing correlation certification lacks gate marker: {required_fragment}")
+    require_fragments(
+        coordinator_text,
+        [
+            'PURCHASED_STATE := 1',
+            'PENDING_STATE := 2',
+            '"verification_request_id"',
+            '_next_verification_request_id',
+            'verification_for_unknown_request',
+            '"acknowledged"',
+            '"play_backend"',
+            'apply_authoritative_snapshot',
+            'apply_purchase_result',
+            '_on_store_error',
+            '_fail_restore',
+        ],
+        "coordinator security contract",
+        errors,
+    )
+    require_fragments(
+        adapter_text,
+        [
+            "BILLING_CLIENT_SCRIPT",
+            "PackedStringArray(product_ids)",
+            "query_product_details",
+            "query_purchases",
+            "on_purchase_updated",
+            "get_script_constant_map",
+            "_started = false",
+            "_client = null",
+        ],
+        "billing adapter contract",
+        errors,
+    )
+    require_fragments(
+        verifier_text,
+        [
+            'normalized.begins_with("https://")',
+            '"Cache-Control: no-store"',
+            "HTTPRequest.RESULT_SUCCESS",
+            '"verification_request_id"',
+            '"response_request_id_mismatch"',
+            '"response_token_mismatch"',
+            '"response_product_mismatch"',
+            "pending_count",
+            "DEFAULT_TIMEOUT_SECONDS",
+        ],
+        "purchase verification HTTPS client",
+        errors,
+    )
+    require_fragments(
+        service_text,
+        [
+            'OS.has_feature("android")',
+            "NOTIFICATION_APPLICATION_RESUMED",
+            "PlayPurchaseVerificationClient.new()",
+            "GooglePlayBillingStoreAdapter.new()",
+            "PlayBillingCoordinator.new()",
+            '"configuration_pending"',
+            "EntitlementEngine.new().ensure_state()",
+        ],
+        "billing runtime service",
+        errors,
+    )
+    require_fragments(
+        cert_text,
+        [
+            "pending_no_grant=1",
+            "verify_fail_no_grant=1",
+            "ack_required=1",
+            "authoritative_restore=1",
+            "partial_failure_cache_safe=1",
+            "package_guard=1",
+            "request_id=1",
+        ],
+        "billing coordinator certification",
+        errors,
+    )
+    require_fragments(
+        correlation_cert_text,
+        [
+            "request_correlation=1",
+            "overlap_safe=1",
+            "stale_response_isolation=1",
+            "store_error_restore_safe=1",
+        ],
+        "billing correlation certification",
+        errors,
+    )
+    require_fragments(
+        verifier_cert_text,
+        [
+            "https_only=1",
+            "concurrent_requests=1",
+            "correlation_fail_closed=1",
+            "http_fail_closed=1",
+            "malformed_json_fail_closed=1",
+            "payload_guard=1",
+        ],
+        "purchase verification client certification",
+        errors,
+    )
 
+    privacy_behavior = privacy.get("current_application_behavior", {})
+    if not isinstance(privacy_behavior, dict):
+        errors.append("privacy current_application_behavior section missing")
+        privacy_behavior = {}
+    if privacy_behavior.get("internet_permission") is not True:
+        errors.append("privacy contract must declare INTERNET permission used by billing verification")
     privacy_commercial = privacy.get("commercial_behavior", {})
     production_verification = (
         privacy_commercial.get("production_purchase_verification", {})
@@ -296,6 +383,8 @@ def main() -> int:
     if not isinstance(production_verification, dict):
         errors.append("privacy purchase-verification section missing")
         production_verification = {}
+    if production_verification.get("runtime_client") != "mobile/PlayPurchaseVerificationClient.gd":
+        errors.append("privacy manifest does not identify the billing HTTPS runtime client")
     if production_verification.get("data_safety_reaudit_required_after_integration") is not True:
         errors.append("post-billing Data Safety re-audit must remain mandatory")
 
@@ -326,7 +415,7 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PLAY_BILLING_RELEASE_GATE %s: products=%d plugin=%s pending=%d errors=%d warnings=%d correlation=exact ProductPurchaseV2=1"
+        "PLAY_BILLING_RELEASE_GATE %s: products=%d plugin=%s pending=%d errors=%d warnings=%d correlation=exact ProductPurchaseV2=1 runtime_service=1 https_client=1"
         % (mode, len(contract_ids), "installed" if plugin_installed else "pending", len(pending), len(errors), len(warnings))
     )
     for warning in warnings:
@@ -336,7 +425,7 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    print("PLAY_BILLING_RELEASE_GATE PASS: billing contract is internally consistent")
+    print("PLAY_BILLING_RELEASE_GATE PASS: billing contract and runtime integration are internally consistent")
     return 0
 
 
