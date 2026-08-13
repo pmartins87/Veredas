@@ -114,12 +114,14 @@ def main() -> int:
             sbom = {}
 
     if evidence_exists and not errors:
-        if sbom.get("schema_version") != 2 or sbom.get("document_type") != "veredas_internal_software_bill_of_materials":
+        if sbom.get("schema_version") != 3 or sbom.get("document_type") != "veredas_internal_software_bill_of_materials":
             errors.append("software SBOM schema/document_type invalid")
         if sbom.get("scope") != "billing_backend_python_runtime":
             errors.append("software SBOM scope must remain billing_backend_python_runtime")
         if sbom.get("generator") != "tools/build_backend_dependency_evidence.py":
             errors.append("software SBOM generator mismatch")
+        if sbom.get("wheel_metadata_parser") != "python_stdlib_zipfile_email":
+            errors.append("software SBOM must use stdlib wheel metadata parser without resolver-tool contamination")
         if sbom.get("all_components_hash_bound_to_wheel") is not True:
             errors.append("software SBOM must assert all components are wheel-hash bound")
 
@@ -135,8 +137,8 @@ def main() -> int:
         resolver = sbom.get("resolver", {})
         if not isinstance(resolver, dict) or resolver.get("tool") != "pip" or not str(resolver.get("version", "")).strip():
             errors.append("software SBOM resolver identity/version missing")
-        if not isinstance(resolver, dict) or not str(resolver.get("packaging_library_version", "")).strip():
-            errors.append("software SBOM packaging parser version missing")
+        if isinstance(resolver, dict) and "packaging_library_version" in resolver:
+            errors.append("runtime resolver evidence must not depend on separately installed packaging tooling")
 
         environment = sbom.get("environment", {})
         if not isinstance(environment, dict):
@@ -182,10 +184,7 @@ def main() -> int:
         if int(sbom.get("direct_requirement_count", -1)) != len(direct):
             errors.append("software SBOM direct_requirement_count mismatch")
         if set(lock) != set(component_map):
-            errors.append(
-                "requirements.lock/SBOM package set mismatch: lock_only=%s sbom_only=%s"
-                % (sorted(set(lock) - set(component_map)), sorted(set(component_map) - set(lock)))
-            )
+            errors.append("requirements.lock/SBOM package set mismatch: lock_only=%s sbom_only=%s" % (sorted(set(lock) - set(component_map)), sorted(set(component_map) - set(lock))))
 
         for name, locked in lock.items():
             component = component_map.get(name)
@@ -234,7 +233,7 @@ def main() -> int:
                 errors.append("release provenance does not mark final backend SBOM archived")
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else ("required_evidence" if args.require_evidence else "preflight"),
         "evidence_present": evidence_exists,
@@ -253,10 +252,7 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     mode = "RELEASE" if args.release else ("REQUIRED" if args.require_evidence else "PREFLIGHT")
-    print(
-        "BACKEND_DEPENDENCY_EVIDENCE_GATE %s PASS: evidence=%d direct=%d locked=%d warnings=%d resolver_bound=1 input_hash_bound=1"
-        % (mode, 1 if evidence_exists else 0, len(direct), len(lock), len(warnings))
-    )
+    print("BACKEND_DEPENDENCY_EVIDENCE_GATE %s PASS: evidence=%d direct=%d locked=%d warnings=%d resolver_bound=1 input_hash_bound=1 tooling_contamination=0" % (mode, 1 if evidence_exists else 0, len(direct), len(lock), len(warnings)))
     for warning in warnings:
         print("WARNING:", warning)
     return 0
