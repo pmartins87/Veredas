@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "asset_provenance": {
+    "policy": "Every versioned visual, audio or font asset that can enter a release must have an explicit provenance row before release certification.",
+    "tracked_extensions": [
+      ".png", ".jpg", ".jpeg", ".webp", ".svg",
+      ".wav", ".ogg", ".mp3", ".flac", ".m4a",
+      ".ttf", ".otf", ".woff", ".woff2"
+    ],
+    "allowed_origin_classes": [
+      "first_party_original",
+      "commissioned_with_release_rights",
+      "licensed_third_party",
+      "public_domain_verified",
+      "generated_from_first_party_source"
+    ],
+    "forbidden_release_sources": [
+      "reference-game screenshots or extracted assets",
+      "unlicensed web images/audio/fonts",
+      "assets with unknown authorship or license",
+      "third-party material whose redistribution terms have not been archived"
+    ],
+    "current_rows": [],
+    "current_binary_asset_count": 0,
+    "finalized": false,
+    "final_archive_path": "PENDING_12_9_ASSET_PROVENANCE_ARCHIVE"
+  },
+  "software_inventory": {
+    "policy": "Direct and transitive software distributed with the app/backend or required to reproduce the release must be identifiable by version/source and have applicable license text/notice archived.",
+    "known_components": [
+      {
+        "id": "godot-engine",
+        "version": "4.7.1",
+        "role": "build_and_runtime_engine",
+        "source": "godotengine/godot",
+        "distribution_scope": "android_export_runtime_and_build_tool",
+        "license_id": "MIT",
+        "license_notice_archive": "PENDING_12_9_GODOT_LICENSE_NOTICE",
+        "reviewed": false
+      },
+      {
+        "id": "GodotGooglePlayBilling",
+        "version": "3.3.0",
+        "role": "android_billing_plugin",
+        "source": "godot-sdk-integrations/godot-google-play-billing",
+        "distribution_scope": "planned_android_plugin_not_yet_installed",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BILLING_PLUGIN_LICENSE_NOTICE",
+        "reviewed": false
+      },
+      {
+        "id": "Flask",
+        "version": "3.1.3",
+        "role": "billing_backend_http_framework",
+        "source": "PyPI:Flask",
+        "distribution_scope": "backend_container",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BACKEND_LICENSE_ARCHIVE",
+        "reviewed": false
+      },
+      {
+        "id": "google-auth",
+        "version": "2.56.3",
+        "role": "billing_backend_google_auth",
+        "source": "PyPI:google-auth",
+        "distribution_scope": "backend_container",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BACKEND_LICENSE_ARCHIVE",
+        "reviewed": false
+      },
+      {
+        "id": "google-cloud-firestore",
+        "version": "2.28.0",
+        "role": "billing_backend_persistence_client",
+        "source": "PyPI:google-cloud-firestore",
+        "distribution_scope": "backend_container",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BACKEND_LICENSE_ARCHIVE",
+        "reviewed": false
+      },
+      {
+        "id": "gunicorn",
+        "version": "26.0.0",
+        "role": "billing_backend_wsgi_server",
+        "source": "PyPI:gunicorn",
+        "distribution_scope": "backend_container",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BACKEND_LICENSE_ARCHIVE",
+        "reviewed": false
+      },
+      {
+        "id": "requests",
+        "version": "2.34.2",
+        "role": "billing_backend_http_client_dependency",
+        "source": "PyPI:requests",
+        "distribution_scope": "backend_container",
+        "license_id": "PENDING_12_9_UPSTREAM_LICENSE_REVIEW",
+        "license_notice_archive": "PENDING_12_9_BACKEND_LICENSE_ARCHIVE",
+        "reviewed": false
+      }
+    ],
+    "backend_direct_requirements_file": "backend/play_purchase_verifier/requirements.txt",
+    "backend_transitive_lock_status": "pending_complete_hash_locked_dependency_set",
+    "backend_transitive_sbom_status": "pending_final_container_sbom",
+    "android_final_dependency_inventory_status": "pending_final_gradle_dependency_report",
+    "finalized": false
+  },
+  "external_services": {
+    "policy": "Hosted services are not represented as redistributable software licenses; their production terms/policies and data role must instead be recorded in the release archive.",
+    "known_services": [
+      {
+        "id": "google-play-billing",
+        "role": "digital_purchase_provider",
+        "production_terms_reviewed": false
+      },
+      {
+        "id": "google-play-android-developer-api",
+        "role": "server_side_purchase_verification",
+        "production_terms_reviewed": false
+      },
+      {
+        "id": "google-cloud-run",
+        "role": "reference_billing_backend_host",
+        "production_terms_reviewed": false
+      },
+      {
+        "id": "google-cloud-firestore",
+        "role": "reference_billing_backend_store",
+        "production_terms_reviewed": false
+      }
+    ],
+    "finalized": false
+  },
+  "completion_requirements": [
+    "every tracked release asset is covered by an explicit provenance row and no forbidden source is present",
+    "final art/audio/font provenance evidence and any assignments/licenses are archived",
+    "Godot, Billing plugin and every redistributed/runtime dependency have reviewed license identifiers and archived notices",
+    "backend direct and transitive dependencies are completely version/hash locked and represented in a final SBOM",
+    "final Android Gradle dependency report is archived and reconciled with this inventory",
+    "production external-service terms/policy/data roles are reviewed and archived",
+    "tools/provenance_license_gate.py --release passes on the exact release ancestry"
+  ],
+  "pass_recorded": false
+}
