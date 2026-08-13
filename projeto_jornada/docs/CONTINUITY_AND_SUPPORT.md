@@ -10,6 +10,7 @@ Este documento é o runbook operacional do passo **12.9**. Ele não contém segr
 - Roadmap finito: `ROADMAP_MASTER.md`.
 - Estado de QA: arquivos `QA_*`, `RELIABILITY_*` e `qa/known_issues.json`.
 - Estado de publicação: arquivos `RELEASE_12_*_STATE.json` e contratos em `product/` e `mobile/`.
+- Proveniência/licenças/dependências: `product/release_provenance.json` + `tools/provenance_license_gate.py`.
 - Um release público somente pode ser identificado por commit imutável + tag final + versionName/versionCode + SHA-256 do AAB + fingerprint de assinatura.
 
 ## 2. Regra de reconstrução
@@ -23,7 +24,8 @@ Uma pessoa que receba acesso autorizado ao projeto deve conseguir reconstruir o 
 5. gerar o fingerprint de inputs de release;
 6. produzir o AAB no commit exato;
 7. validar package ID, versão e assinatura;
-8. registrar SHA-256 do artefato e comparar com a evidência do RC/test track.
+8. registrar SHA-256 do artefato e comparar com a evidência do RC/test track;
+9. reconciliar o artefato com os inventários finais de dependências, licenças e proveniência.
 
 Nenhum keystore, senha, token da Play Console, segredo de backend ou credencial de API deve ser adicionado ao Git.
 
@@ -67,20 +69,55 @@ Logs de suporte devem coletar apenas o necessário para reproduzir o problema. N
 
 O lançamento atual é `pt_BR + en`. `es_419` permanece preservado como trabalho adiado e não deve aparecer como idioma de lançamento até obter uma certificação futura própria de cobertura, qualidade linguística, overflow e iconografia.
 
-## 8. Assets e licenças
+## 8. Proveniência de assets e direitos
 
-Antes do release final devem estar arquivados:
+`product/release_provenance.json` é a fonte de verdade para qualquer arquivo visual, de áudio ou fonte versionado que possa entrar no produto. O gate acompanha extensões de mídia/fontes e exige correspondência arquivo a arquivo.
 
-- proveniência dos assets finais;
-- licenças e atribuições de terceiros aplicáveis;
-- versão final da política de privacidade;
+Classes de origem aceitáveis incluem trabalho original do projeto, encomenda com direitos de release documentados, terceiro licenciado, domínio público verificado ou derivação gerada a partir de fonte própria devidamente registrada. A classe não substitui a evidência: autoria/fonte, base de direitos e, quando aplicável, licença/cessão devem ser arquivadas.
+
+São **proibidos no release**:
+
+- screenshots, imagens, áudio ou outros assets extraídos dos jogos usados apenas como referência conceitual;
+- material encontrado na web sem licença de redistribuição verificável;
+- assets de autoria ou licença desconhecida;
+- material de terceiro cuja obrigação de atribuição/licença não tenha sido preservada no arquivo de release.
+
+Neste estágio estrutural ainda não há arte/áudio/fontes finais binários versionados; isso não é uma dispensa. É justamente o motivo para a catraca existir antes da entrada dos assets finais.
+
+Quando um asset final for adicionado, a mesma mudança deve adicionar/atualizar sua linha de proveniência. `tools/provenance_license_gate.py` deve falhar se a árvore e o manifesto divergirem.
+
+## 9. Software de terceiros, lock e SBOM
+
+Pin de dependência direta não é suficiente para reconstrução ou conformidade de licenças. O release final exige:
+
+- Godot e plugin Android identificados por versão/fonte;
+- dependências diretas do backend reconciliadas com `requirements.txt`;
+- **dependências transitivas do backend totalmente travadas por versão e hashes** em `backend/play_purchase_verifier/requirements.lock`;
+- SBOM da imagem final do backend arquivado em `product/software_sbom.json`;
+- relatório final de dependências Gradle/Android reconciliado e arquivado em `product/android_dependency_inventory.json`;
+- licença/notice aplicável de cada componente redistribuído ou runtime revisado e arquivado;
+- qualquer obrigação de atribuição preservada no produto/arquivo de release quando necessária.
+
+A ausência de lock transitivo é tratada como risco real: um `requirements.txt` com apenas dependências diretas pinadas ainda pode resolver versões transitivas diferentes em datas diferentes.
+
+Serviços hospedados (Google Play, Android Developer API, Cloud Run e Firestore no desenho atual) não são fingidos como “bibliotecas com LICENSE”. Seus termos/políticas aplicáveis, papel no fluxo de dados e configuração de produção precisam de revisão separada e arquivada.
+
+## 10. Arquivo jurídico e público
+
+Além dos manifests técnicos, o arquivo final deve conter:
+
+- proveniência dos assets finais e evidências de direitos;
+- licenças/notices de terceiros aplicáveis;
+- versão final da política de privacidade e termos;
 - textos finais da loja;
 - release notes;
-- hashes/fingerprints do artefato e inputs de release.
+- hashes/fingerprints do artefato e inputs de release;
+- SBOM/backend lock e inventário Android final;
+- registro de revisão dos serviços externos de produção.
 
 O arquivo de continuidade não substitui a prova de licença/proveniência.
 
-## 9. Suporte e triage
+## 11. Suporte e triage
 
 O canal público de suporte deve direcionar cada caso para evidência suficiente: versão/versionCode, dispositivo/Android quando relevante, passos de reprodução, comportamento esperado/observado e classificação de impacto em save, Billing ou privacidade.
 
@@ -92,18 +129,24 @@ Prioridade operacional:
 
 O ledger de QA continua sendo a fonte de verdade para defeitos de produto. Dependências planejadas não devem ser mascaradas como bugs, e bugs release-blocking não devem ser mascarados como dependências.
 
-## 10. Incidente e rollback/hotfix
+## 12. Incidente e rollback/hotfix
 
 A primeira publicação pública não deve pressupor que existe uma versão pública anterior para a qual retornar. O plano é manter um hotfix de maior `versionCode`, mesma identidade de assinatura e compatibilidade com saves/entitlements pronto para ser produzido rapidamente.
 
 Para atualizações subsequentes, usar rollout progressivo quando suportado e interromper a expansão ao detectar blocker/critical, corrupção de save, regressão material de Billing, crash/ANR ou privacidade/política. A correção continua sendo uma nova versão crescente; nunca um downgrade imposto ao usuário.
 
-## 11. Passagem de bastão
+## 13. Passagem de bastão
 
-Uma transferência operacional só é considerada completa quando outra pessoa autorizada consegue localizar as fontes de verdade, verificar a identidade do último release, restaurar os acessos externos previstos, reproduzir a cadeia de build sem receber segredos pelo repositório e entender os procedimentos de save, Billing, privacidade, suporte e hotfix.
+Uma transferência operacional só é considerada completa quando outra pessoa autorizada consegue localizar as fontes de verdade, verificar a identidade do último release, restaurar os acessos externos previstos, reproduzir a cadeia de build sem receber segredos pelo repositório e entender os procedimentos de save, Billing, privacidade, suporte, proveniência/licenças e hotfix.
 
 A identidade das pessoas/canais responsáveis é deliberadamente mantida fora deste documento até ser configurada no contrato final de 12.9.
 
-## 12. Gate final de 12.9
+## 14. Gates finais de 12.9
 
-O passo 12.9 somente pode ser promovido quando `tools/continuity_support_gate.py --release` passar. O preflight estrutural não é evidência de conclusão do release.
+O passo 12.9 somente pode ser promovido quando, no mesmo release ancestry:
+
+1. `tools/provenance_license_gate.py --release` passar;
+2. `tools/continuity_support_gate.py --release` passar;
+3. a evidência externa exigida pelo contrato estiver realmente arquivada.
+
+O preflight estrutural não é evidência de conclusão do release.
