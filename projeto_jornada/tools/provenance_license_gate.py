@@ -9,10 +9,12 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
 CONTRACT = ROOT / "product" / "release_provenance.json"
 BACKEND_REQUIREMENTS = ROOT / "backend" / "play_purchase_verifier" / "requirements.txt"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 RELEASE_ONLY_EVIDENCE = [
     ROOT / "backend" / "play_purchase_verifier" / "requirements.lock",
     ROOT / "product" / "software_sbom.json",
@@ -35,7 +37,7 @@ def tracked_files() -> list[str]:
     try:
         raw = subprocess.check_output(
             ["git", "ls-files", "-z", "--", "projeto_jornada"],
-            cwd=ROOT.parent,
+            cwd=REPO_ROOT,
             stderr=subprocess.DEVNULL,
         )
         paths = [item.decode("utf-8") for item in raw.split(b"\0") if item]
@@ -52,12 +54,55 @@ def git_blob_sha(relative_path: str) -> str:
     try:
         return subprocess.check_output(
             ["git", "hash-object", str(path)],
-            cwd=ROOT.parent,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
     except Exception:  # noqa: BLE001
         return ""
+
+
+def git_commit_exists(commit: str) -> bool:
+    return subprocess.run(
+        ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
+        cwd=REPO_ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
+
+
+def git_is_ancestor(commit: str) -> bool:
+    return subprocess.run(
+        ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+        cwd=REPO_ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
+
+
+def git_parent(commit: str) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", f"{commit}^"],
+            cwd=REPO_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def git_file_exists_at(commit: str, relative_path: str) -> bool:
+    repo_path = f"projeto_jornada/{relative_path}"
+    return subprocess.run(
+        ["git", "cat-file", "-e", f"{commit}:{repo_path}"],
+        cwd=REPO_ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
 
 
 def parse_requirements() -> dict[str, str]:
@@ -87,7 +132,7 @@ def main() -> int:
         print(f"PROVENANCE_LICENSE FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 3 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 4 or contract.get("roadmap_step") != "12.9":
         errors.append("release provenance contract schema/roadmap_step invalid")
 
     assets = contract.get("asset_provenance", {})
@@ -107,6 +152,7 @@ def main() -> int:
     discovered = sorted(path for path in tracked_files() if Path(path).suffix.lower() in normalized_ext)
     declared_paths: list[str] = []
     allowed_origins = {str(value) for value in assets.get("allowed_origin_classes", [])}
+    introduction_proofs = 0
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
             errors.append(f"asset provenance row {index} is not an object")
@@ -125,8 +171,30 @@ def main() -> int:
             errors.append(f"asset source_record unresolved: {path}")
         expected_blob = str(row.get("repository_blob_sha", "")).lower()
         actual_blob = git_blob_sha(path).lower()
-        if not re.fullmatch(r"[0-9a-f]{40}", expected_blob) or expected_blob != actual_blob:
+        if not COMMIT_RE.fullmatch(expected_blob) or expected_blob != actual_blob:
             errors.append(f"asset provenance blob binding mismatch: {path} expected={expected_blob} actual={actual_blob}")
+
+        introduction = str(row.get("introduction_commit", "")).lower()
+        if not COMMIT_RE.fullmatch(introduction) or not git_commit_exists(introduction):
+            errors.append(f"asset introduction commit missing/invalid: {path}:{introduction}")
+        elif not git_is_ancestor(introduction):
+            errors.append(f"asset introduction commit is not in current ancestry: {path}:{introduction}")
+        elif not git_file_exists_at(introduction, path):
+            errors.append(f"asset path absent at claimed introduction commit: {path}:{introduction}")
+        else:
+            parent = git_parent(introduction)
+            if not parent:
+                errors.append(f"asset introduction commit parent cannot be resolved: {path}:{introduction}")
+            elif git_file_exists_at(parent, path):
+                errors.append(f"asset existed before claimed introduction commit: {path}:{introduction}")
+            else:
+                introduction_proofs += 1
+        expected_source_record = f"git_introduction_commit:{introduction}"
+        if str(row.get("source_record", "")) != expected_source_record:
+            errors.append(f"asset source_record must bind exact introduction commit: {path}")
+        if not str(row.get("introduction_commit_message", "")).strip():
+            errors.append(f"asset introduction commit message missing: {path}")
+
         if args.release:
             if row.get("rights_reviewed") is not True:
                 errors.append(f"asset final rights review incomplete: {path}")
@@ -214,9 +282,9 @@ def main() -> int:
             errors.append("final Android dependency inventory is not archived")
         if software.get("finalized") is not True:
             errors.append("software inventory is not finalized")
-        for path in RELEASE_ONLY_EVIDENCE:
-            if not path.exists():
-                errors.append(f"release provenance evidence missing: {path.relative_to(ROOT)}")
+        for evidence_path in RELEASE_ONLY_EVIDENCE:
+            if not evidence_path.exists():
+                errors.append(f"release provenance evidence missing: {evidence_path.relative_to(ROOT)}")
 
     services = contract.get("external_services", {})
     if not isinstance(services, dict):
@@ -247,11 +315,12 @@ def main() -> int:
             warnings.append(f"{pending_rights} asset rights review(s) pending before release eligibility")
 
     report = {
-        "schema_version": 3,
+        "schema_version": 4,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "discovered_asset_count": len(discovered),
         "declared_asset_count": len(declared_paths),
+        "asset_introduction_proofs": introduction_proofs,
         "direct_backend_dependency_count": len(direct_requirements),
         "known_software_component_count": len(component_map),
         "primary_source_license_identifications": sum(
@@ -272,10 +341,11 @@ def main() -> int:
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PROVENANCE_LICENSE %s PASS: assets=%d dependencies=%d primary_licenses=%d services=%d warnings=%d blob_binding=1"
+        "PROVENANCE_LICENSE %s PASS: assets=%d introductions=%d dependencies=%d primary_licenses=%d services=%d warnings=%d blob_binding=1"
         % (
             mode,
             len(discovered),
+            introduction_proofs,
             len(component_map),
             report["primary_source_license_identifications"],
             len(known_services),
