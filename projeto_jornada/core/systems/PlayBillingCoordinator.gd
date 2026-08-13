@@ -265,11 +265,16 @@ func _on_verification_completed(result: Dictionary) -> void:
         if generation != _restore_generation or not _restore_active:
             return
         if verified:
-            _restore_verified.append({
-                "product_id": product_id,
-                "owned": true,
-                "transaction_id": token,
-            })
+            var purchase_reference := PurchaseReference.from_sensitive(token)
+            if purchase_reference.is_empty():
+                _restore_failed = true
+                coordinator_error.emit("purchase_reference_hash_failed")
+            else:
+                _restore_verified.append({
+                    "product_id": product_id,
+                    "owned": true,
+                    "transaction_id": purchase_reference,
+                })
         else:
             _restore_failed = true
         _finish_restore_if_ready()
@@ -279,11 +284,15 @@ func _on_verification_completed(result: Dictionary) -> void:
         if not verified:
             purchase_failed.emit(product_id, "backend_verification_failed")
             return
+        var purchase_reference := PurchaseReference.from_sensitive(token)
+        if purchase_reference.is_empty():
+            purchase_failed.emit(product_id, "purchase_reference_hash_failed")
+            return
         var applied := _entitlement_engine().apply_purchase_result({
             "ok": true,
             "product_id": product_id,
             "source": SOURCE_ID,
-            "transaction_id": token,
+            "transaction_id": purchase_reference,
         })
         if not bool(applied):
             purchase_failed.emit(product_id, "entitlement_apply_failed")
