@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -20,6 +20,11 @@
     "local_save_behavior_declared": true,
     "billing_data_boundary_preflight": true,
     "billing_https_verification_client_preflight": true,
+    "billing_reference_backend_implemented": true,
+    "billing_backend_transient_raw_token_and_hashed_at_rest_model": true,
+    "billing_backend_no_order_id_persistence": true,
+    "billing_backend_no_embedded_service_account_key": true,
+    "billing_backend_sources_excluded_from_android_artifacts": true,
     "billing_only_runtime_network_allowlist": true,
     "runtime_network_and_sdk_static_scan_gate": true,
     "android_internet_permission_declared_and_cross_checked": true,
@@ -50,7 +55,8 @@
     "runtime_network_policy": "deny by default; only declared Billing purchase-verification HTTP client is allowlisted in application runtime",
     "allowlisted_application_network_client": "mobile/PlayPurchaseVerificationClient.gd",
     "billing_verification_transport": "HTTPS POST JSON; no-store; exact verification_request_id correlation",
-    "billing_verification_off_device_fields": [
+    "billing_reference_backend": "backend/play_purchase_verifier",
+    "billing_verification_transient_off_device_fields": [
       "verification request id",
       "application/package id",
       "product id",
@@ -58,6 +64,12 @@
       "purchase time",
       "client acknowledgement state"
     ],
+    "billing_reference_backend_at_rest": {
+      "purchase_token": false,
+      "purchase_token_sha256": true,
+      "order_id": false,
+      "minimal_purchase_entitlement_state": true
+    },
     "billing_verification_excludes": [
       "gameplay profile",
       "save data",
@@ -66,6 +78,7 @@
       "contacts",
       "advertising identifiers"
     ],
+    "billing_backend_google_auth": "attached service account via Application Default Credentials; no key file in repository/container",
     "android_target_sdk": 36,
     "android_compile_sdk": 36,
     "full_game_unlock": "one_time_non_consumable",
@@ -75,11 +88,14 @@
   },
   "pending": {
     "12_4_billing_data_flow_frozen": false,
-    "billing_backend_https_endpoint_and_auth_frozen": false,
+    "billing_backend_deployed": false,
+    "billing_backend_https_endpoint_frozen": false,
+    "billing_backend_service_identity_and_play_api_access_frozen": false,
+    "billing_backend_rate_limit_frozen": false,
     "billing_backend_purchase_data_retention_deletion_frozen": false,
-    "billing_backend_google_play_api_credentials_and_access_audited": false,
+    "billing_backend_production_persistence_audited": false,
     "final_release_aab_manifest_and_merged_permissions_audited": false,
-    "final_sdk_inventory_audited": false,
+    "final_sdk_service_inventory_audited": false,
     "privacy_contact_finalized": false,
     "privacy_policy_public_https_url_published": false,
     "runtime_legal_documents_finalized": false,
@@ -95,11 +111,12 @@
     "final_policy_store_billing_terms_artifact_consistency_verified": false
   },
   "completion_requirements": [
-    "complete and certify 12.4 billing integration, then repeat the technical data-flow and commercial-product audit",
-    "freeze the production Billing HTTPS endpoint/authentication and server-side purchase-data retention/deletion behavior",
+    "deploy and certify 12.4 Billing client/backend integration, then repeat the technical data-flow and commercial-product audit",
+    "freeze production Billing HTTPS endpoint, attached service identity, rate limiting and server-side purchase-data retention/deletion behavior",
+    "prove the production purchase store retains only the declared token hash/minimum state and no raw token or order id",
     "recheck current Google Play policies immediately before release and confirm the exact AAB effective targetSdk",
     "inspect the exact release AAB Android manifest, merged permissions and every bundled third-party SDK",
-    "prove the final application runtime contains no undeclared network/SDK integrations beyond the allowlisted purchase-verification client and the platform Billing plugin",
+    "prove the final application runtime contains no undeclared network/SDK integrations beyond the allowlisted purchase-verification client and platform Billing plugin",
     "replace all PENDING_* privacy-policy and Terms fields with production values",
     "finalize product/legal_documents.json from pre_release to final with the same pt_BR + en launch scope",
     "publish final privacy/terms URLs and expose the final frozen content through the in-app legal surface",
