@@ -13,6 +13,7 @@
   "release_archive": {
     "manifest_path": "product/release_archive_manifest.json",
     "gate": "tools/release_archive_gate.py",
+    "release_input_scope_gate": "tools/release_input_scope_gate.py",
     "rc_commit_sha": "PENDING_12_9_RC_COMMIT_SHA",
     "aab_sha256": "PENDING_12_9_AAB_SHA256",
     "release_input_fingerprint": "PENDING_12_9_RELEASE_INPUT_FINGERPRINT",
@@ -21,6 +22,7 @@
     "store_version_code": 0,
     "identity_cross_check_with_12_6_and_12_8_required": true,
     "required_item_hash_verification": true,
+    "acyclic_runtime_build_fingerprint_required": true,
     "external_evidence_references_separate_from_repository_secrets": true
   },
   "ownership_and_recovery": {
@@ -71,6 +73,7 @@
     "contract": "product/release_provenance.json",
     "gate": "tools/provenance_license_gate.py",
     "asset_file_coverage_required": true,
+    "asset_rows_bound_to_git_blob_sha": true,
     "reference_game_assets_forbidden": true,
     "unknown_or_unlicensed_assets_forbidden": true,
     "known_software_components_recorded": 7,
@@ -79,7 +82,8 @@
     "backend_transitive_hash_lock_required": true,
     "backend_final_sbom_required": true,
     "android_final_gradle_dependency_inventory_required": true,
-    "current_versioned_binary_asset_count": 0,
+    "current_versioned_binary_asset_count": 4,
+    "current_vector_asset_rights_reviews_pending": 4,
     "finalized": false
   },
   "asset_and_legal_archive": {
@@ -100,6 +104,7 @@
     "source_tag_matches_rc_commit": false,
     "release_archive_verified": false,
     "release_archive_gate_passed": false,
+    "release_input_scope_gate_passed": false,
     "continuity_runbook_reviewed": false,
     "support_channel_tested": false,
     "account_recovery_drill_recorded": false,
@@ -111,6 +116,7 @@
     "12.8 completion record reports pass",
     "final release tag resolves exactly to the certified RC commit",
     "canonical release archive manifest matches 12.6/12.8 commit/version/AAB/signing identity/tested track",
+    "release input fingerprint is acyclic, includes every runtime product resource and excludes release-evidence/self-referential files",
     "AAB SHA-256, version, signing fingerprint and release-input fingerprint are archived",
     "every required archive item exists and its SHA-256 is verified",
     "primary and secondary ownership plus support/privacy channels are real non-placeholder values",
@@ -121,7 +127,7 @@
     "final Android Gradle dependency inventory and production external-service terms/data roles are archived",
     "privacy policy, terms, store listing and release notes are archived",
     "continuity runbook is reviewed and support channel is tested",
-    "provenance_license_gate.py --release, release_archive_gate.py --release and continuity_support_gate.py --release pass on the exact release ancestry"
+    "release_input_scope_gate.py, provenance_license_gate.py --release, release_archive_gate.py --release and continuity_support_gate.py --release pass on the exact release ancestry"
   ],
   "pass_recorded": false
 }
