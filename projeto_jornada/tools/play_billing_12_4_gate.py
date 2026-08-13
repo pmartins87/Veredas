@@ -11,11 +11,14 @@ COMPONENT_GATES = [
     (ROOT / "tools" / "play_billing_release_gate.py", True),
     (ROOT / "tools" / "play_billing_backend_gate.py", True),
     (ROOT / "tools" / "play_billing_timeout_budget_gate.py", False),
+    (ROOT / "tools" / "play_billing_local_reference_gate.py", False),
 ]
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run the complete Google Play Billing 12.4 client + backend + timeout-budget gate bundle.")
+    parser = argparse.ArgumentParser(
+        description="Run the complete Google Play Billing 12.4 client + backend + timeout + local-reference gate bundle."
+    )
     parser.add_argument("--release", action="store_true")
     args = parser.parse_args()
 
@@ -29,7 +32,9 @@ def main() -> int:
             return result.returncode
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
-    print(f"PLAY_BILLING_12_4_GATE PASS: mode={mode} client_runtime=1 backend=1 timeout_budget=1")
+    print(
+        f"PLAY_BILLING_12_4_GATE PASS: mode={mode} client_runtime=1 backend=1 timeout_budget=1 local_reference=1"
+    )
     return 0
 
 
