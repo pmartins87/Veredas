@@ -25,6 +25,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
+    OS.set_environment("VEREDAS_BILLING_UI_TEST", "1")
     await get_tree().process_frame
     var localization := get_node_or_null("/root/LocalizationService")
     _expect(localization != null, "LocalizationService autoload missing")
@@ -190,7 +191,7 @@ func _expect(condition: bool, message: String) -> void:
 func _finish() -> void:
     if failures.is_empty():
         print(
-            "LOCALIZATION_OVERFLOW_CERTIFICATION PASS: 11.6 locales=%d viewports=%d scene_cases=%d text_controls=%d" % [
+            "LOCALIZATION_OVERFLOW_CERTIFICATION PASS: 11.6 locales=%d viewports=%d scene_cases=%d text_controls=%d billing_surface=1" % [
                 LOCALES.size(), VIEWPORTS.size(), scene_cases, controls_checked
             ]
         )
