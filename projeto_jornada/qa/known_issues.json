@@ -27,6 +27,31 @@
         "localization_pack_certification.py targets only locales declared by localization/manifest.json and requires en=18804/18804 with pack=15334.",
         "Deferred es_419 is not exposed as a launch locale until its own future certification is complete."
       ]
+    },
+    {
+      "id": "BILL-124-001",
+      "kind": "product_defect",
+      "severity": "critical",
+      "status": "resolved",
+      "area": "billing",
+      "title": "Purchase verification correlation could cross purchase and restore contexts for the same token",
+      "detected_on": "2026-08-12",
+      "resolved_on": "2026-08-12",
+      "evidence": [
+        "The prior coordinator keyed pending backend verification only by purchase_token and treated an already-pending token as satisfying a new verification request.",
+        "A purchase verification pending for token T could therefore make a concurrent restore of T appear to have no restore-context verification pending, allowing an authoritative snapshot to complete prematurely.",
+        "A delayed response from a retired restore generation could also match a new restore of the same token because the response had no independent request correlation identifier.",
+        "PlayBillingCoordinator now assigns a unique verification_request_id per request, stores pending work by that id, requires the backend to echo it exactly, and retires prior restore-generation request ids without reusing them.",
+        "PlayBillingCorrelationCertification reproduces overlapping purchase/restore and stale-response scenarios and requires request_correlation=1, overlap_safe=1 and stale_response_isolation=1."
+      ],
+      "resolution": "Backend verification correlation was separated from purchase-token deduplication. purchase_token remains the server-side idempotency key, while verification_request_id is now the client request/response correlation key. Purchase and restore requests for the same token can coexist safely, and stale restore responses cannot satisfy a later generation.",
+      "impact": "The known destructive/premature restore race has been removed in implementation and covered by an adversarial certification. 12.4 remains in progress until the Godot tests execute and the real plugin/backend/Play track integration is certified.",
+      "exit_criteria": [
+        "Every verifier request includes a non-empty unique verification_request_id and every accepted response echoes the exact id.",
+        "Overlapping purchase and restore for the same purchase_token retain separate pending verification requests.",
+        "A stale response from a retired restore generation cannot consume or complete the current restore request.",
+        "The 12.4 workflow runs both coordinator and correlation certifications on the same candidate HEAD before release certification."
+      ]
     }
   ],
   "non_defect_release_dependencies": [
