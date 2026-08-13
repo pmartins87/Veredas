@@ -92,7 +92,7 @@ func _initialize() -> void:
     add_child(_verifier)
     var verifier_config := _verifier.configure(endpoint)
     if not bool(verifier_config.get("ok", false)):
-        _last_error = ",".join(verifier_config.get("errors", []))
+        _last_error = _error_list_text(verifier_config.get("errors", []))
         _set_status("configuration_pending")
         return
 
@@ -108,7 +108,7 @@ func _initialize() -> void:
 
     var configured := _coordinator.configure(_store, _verifier, EntitlementEngine.new())
     if not bool(configured.get("ok", false)):
-        _last_error = ",".join(configured.get("errors", []))
+        _last_error = _error_list_text(configured.get("errors", []))
         _set_status("configuration_error")
         return
 
@@ -179,6 +179,15 @@ func _load_contract() -> Dictionary:
     var parsed = JSON.parse_string(file.get_as_text())
     file.close()
     return parsed as Dictionary if typeof(parsed) == TYPE_DICTIONARY else {}
+
+
+func _error_list_text(value: Variant) -> String:
+    if typeof(value) != TYPE_ARRAY:
+        return str(value)
+    var parts := PackedStringArray()
+    for item in value as Array:
+        parts.append(str(item))
+    return ",".join(parts)
 
 
 func _fail(code: String) -> void:
