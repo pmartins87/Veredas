@@ -5,6 +5,7 @@ import argparse
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "product" / "continuity_support_contract.json"
 RUNBOOK = ROOT / "docs" / "CONTINUITY_AND_SUPPORT.md"
 RC_COMPLETION = ROOT / "RELEASE_12_8_COMPLETION.json"
+PROVENANCE_CONTRACT = ROOT / "product" / "release_provenance.json"
+PROVENANCE_GATE = ROOT / "tools" / "provenance_license_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 
 
@@ -53,6 +56,15 @@ def completion_commit(row: dict[str, Any]) -> str:
     return ""
 
 
+def run_provenance_gate(release: bool) -> tuple[bool, str]:
+    command = [sys.executable, str(PROVENANCE_GATE)]
+    if release:
+        command.append("--release")
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+    output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
+    return result.returncode == 0, output
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive and support readiness.")
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
@@ -67,10 +79,18 @@ def main() -> int:
         print(f"CONTINUITY_SUPPORT FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 1 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 2 or contract.get("roadmap_step") != "12.9":
         errors.append("12.9 contract schema/roadmap_step invalid")
     if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 2000:
         errors.append("continuity/support runbook is missing or unexpectedly small")
+    if not PROVENANCE_CONTRACT.exists() or not PROVENANCE_GATE.exists():
+        errors.append("12.9 provenance contract/gate missing")
+    else:
+        provenance_ok, provenance_output = run_provenance_gate(args.release)
+        if not provenance_ok:
+            errors.append("provenance/license gate failed in matching mode")
+            if provenance_output:
+                errors.append("provenance detail: " + provenance_output.splitlines()[-1][:500])
 
     source = contract.get("source_of_truth", {})
     if source.get("repository") != "pmartins87/desktop-tutorial":
@@ -96,6 +116,21 @@ def main() -> int:
         errors.append("secrets must remain forbidden in repository")
     if secret_policy.get("keystore_in_repository_forbidden") is not True:
         errors.append("keystore must remain forbidden in repository")
+
+    provenance = contract.get("provenance_and_dependency_evidence", {})
+    if not isinstance(provenance, dict):
+        errors.append("provenance/dependency evidence section missing")
+        provenance = {}
+    for key in (
+        "asset_file_coverage_required",
+        "reference_game_assets_forbidden",
+        "unknown_or_unlicensed_assets_forbidden",
+        "backend_transitive_hash_lock_required",
+        "backend_final_sbom_required",
+        "android_final_gradle_dependency_inventory_required",
+    ):
+        if provenance.get(key) is not True:
+            errors.append(f"provenance_and_dependency_evidence.{key} must remain true")
 
     head_sha = git_output("rev-parse", "HEAD")
     if args.release:
@@ -154,15 +189,19 @@ def main() -> int:
 
         legal = contract.get("asset_and_legal_archive", {})
         if not isinstance(legal, dict) or any(value is not True for value in legal.values()):
-            errors.append("asset/legal archive is incomplete")
+            errors.append("asset/legal/provenance archive is incomplete")
         evidence = contract.get("evidence", {})
         if not isinstance(evidence, dict) or any(value is not True for value in evidence.values()):
             errors.append("12.9 final evidence is incomplete")
+        if provenance.get("finalized") is not True:
+            errors.append("provenance/dependency evidence is not finalized")
         if contract.get("pass_recorded") is not True:
             errors.append("12.9 pass_recorded is not true")
     else:
         if not RC_COMPLETION.exists():
             warnings.append("awaiting RELEASE_12_8_COMPLETION.json")
+        if provenance.get("finalized") is not True:
+            warnings.append("provenance/dependency evidence intentionally remains open until final assets/dependency reports exist")
         for section_name, keys in {
             "source_of_truth": ("final_release_tag",),
             "ownership_and_recovery": ("primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact"),
@@ -173,10 +212,11 @@ def main() -> int:
                     warnings.append(f"{section_name}.{key} not configured yet")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "head_sha": head_sha,
+        "provenance_gate_bound": True,
         "errors": errors,
         "warnings": warnings,
     }
@@ -190,9 +230,9 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     if args.release:
-        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/support certified")
+        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/support/provenance certified")
     else:
-        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: contract valid warnings={len(warnings)}")
+        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: contract valid warnings={len(warnings)} provenance_gate=1")
     return 0
 
 
