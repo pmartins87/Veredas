@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "product" / "continuity_support_contract.json"
 RUNBOOK = ROOT / "docs" / "CONTINUITY_AND_SUPPORT.md"
 RC_COMPLETION = ROOT / "RELEASE_12_8_COMPLETION.json"
-PROVENANCE_CONTRACT = ROOT / "product" / "release_provenance.json"
 PROVENANCE_GATE = ROOT / "tools" / "provenance_license_gate.py"
+ARCHIVE_GATE = ROOT / "tools" / "release_archive_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 
 
@@ -56,8 +56,8 @@ def completion_commit(row: dict[str, Any]) -> str:
     return ""
 
 
-def run_provenance_gate(release: bool) -> tuple[bool, str]:
-    command = [sys.executable, str(PROVENANCE_GATE)]
+def run_component_gate(path: Path, release: bool) -> tuple[bool, str]:
+    command = [sys.executable, str(path)]
     if release:
         command.append("--release")
     result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
@@ -65,8 +65,17 @@ def run_provenance_gate(release: bool) -> tuple[bool, str]:
     return result.returncode == 0, output
 
 
+def require_true_flags(section: Any, keys: tuple[str, ...], label: str, errors: list[str]) -> None:
+    if not isinstance(section, dict):
+        errors.append(f"{label} section missing")
+        return
+    for key in keys:
+        if section.get(key) is not True:
+            errors.append(f"{label}.{key} must remain true")
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive and support readiness.")
+    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive, provenance and support readiness.")
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
@@ -79,23 +88,25 @@ def main() -> int:
         print(f"CONTINUITY_SUPPORT FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 2 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 3 or contract.get("roadmap_step") != "12.9":
         errors.append("12.9 contract schema/roadmap_step invalid")
-    if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 2000:
+    if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 3000:
         errors.append("continuity/support runbook is missing or unexpectedly small")
-    if not PROVENANCE_CONTRACT.exists() or not PROVENANCE_GATE.exists():
-        errors.append("12.9 provenance contract/gate missing")
-    else:
-        provenance_ok, provenance_output = run_provenance_gate(args.release)
-        if not provenance_ok:
-            errors.append("provenance/license gate failed in matching mode")
-            if provenance_output:
-                errors.append("provenance detail: " + provenance_output.splitlines()[-1][:500])
+
+    for gate, label in ((PROVENANCE_GATE, "provenance/license"), (ARCHIVE_GATE, "release archive")):
+        if not gate.exists():
+            errors.append(f"12.9 {label} gate missing")
+            continue
+        ok, output = run_component_gate(gate, args.release)
+        if not ok:
+            errors.append(f"{label} gate failed in matching mode")
+            if output:
+                errors.append(f"{label} detail: {output.splitlines()[-1][:500]}")
 
     source = contract.get("source_of_truth", {})
-    if source.get("repository") != "pmartins87/desktop-tutorial":
+    if not isinstance(source, dict) or source.get("repository") != "pmartins87/desktop-tutorial":
         errors.append("source_of_truth.repository changed unexpectedly")
-    if source.get("development_branch") != "projeto-jornada-snapshots":
+    if not isinstance(source, dict) or source.get("development_branch") != "projeto-jornada-snapshots":
         errors.append("source_of_truth.development_branch changed unexpectedly")
 
     support = contract.get("support_policy", {})
@@ -109,28 +120,43 @@ def main() -> int:
         errors.append("compatibility policy must remain explicitly enabled")
 
     secret_policy = contract.get("secret_and_signing_policy", {})
-    if not isinstance(secret_policy, dict):
-        errors.append("secret/signing policy missing")
-        secret_policy = {}
-    if secret_policy.get("secrets_in_repository_forbidden") is not True:
-        errors.append("secrets must remain forbidden in repository")
-    if secret_policy.get("keystore_in_repository_forbidden") is not True:
-        errors.append("keystore must remain forbidden in repository")
+    require_true_flags(
+        secret_policy,
+        ("secrets_in_repository_forbidden", "keystore_in_repository_forbidden"),
+        "secret_and_signing_policy",
+        errors,
+    )
 
     provenance = contract.get("provenance_and_dependency_evidence", {})
-    if not isinstance(provenance, dict):
-        errors.append("provenance/dependency evidence section missing")
-        provenance = {}
-    for key in (
-        "asset_file_coverage_required",
-        "reference_game_assets_forbidden",
-        "unknown_or_unlicensed_assets_forbidden",
-        "backend_transitive_hash_lock_required",
-        "backend_final_sbom_required",
-        "android_final_gradle_dependency_inventory_required",
-    ):
-        if provenance.get(key) is not True:
-            errors.append(f"provenance_and_dependency_evidence.{key} must remain true")
+    require_true_flags(
+        provenance,
+        (
+            "asset_file_coverage_required",
+            "reference_game_assets_forbidden",
+            "unknown_or_unlicensed_assets_forbidden",
+            "backend_transitive_hash_lock_required",
+            "backend_final_sbom_required",
+            "android_final_gradle_dependency_inventory_required",
+        ),
+        "provenance_and_dependency_evidence",
+        errors,
+    )
+
+    archive = contract.get("release_archive", {})
+    require_true_flags(
+        archive,
+        (
+            "identity_cross_check_with_12_6_and_12_8_required",
+            "required_item_hash_verification",
+            "external_evidence_references_separate_from_repository_secrets",
+        ),
+        "release_archive",
+        errors,
+    )
+    if not isinstance(archive, dict) or archive.get("manifest_path") != "product/release_archive_manifest.json":
+        errors.append("release_archive.manifest_path must remain canonical")
+    if not isinstance(archive, dict) or archive.get("gate") != "tools/release_archive_gate.py":
+        errors.append("release_archive.gate must remain canonical")
 
     head_sha = git_output("rev-parse", "HEAD")
     if args.release:
@@ -152,7 +178,7 @@ def main() -> int:
             "source_of_truth": ("final_release_tag",),
             "release_archive": (
                 "rc_commit_sha", "aab_sha256", "release_input_fingerprint",
-                "signing_certificate_sha256", "store_version_name", "archive_manifest_path",
+                "signing_certificate_sha256", "store_version_name",
             ),
             "ownership_and_recovery": (
                 "primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact",
@@ -163,45 +189,50 @@ def main() -> int:
                 if not isinstance(section, dict) or unresolved(section.get(key)):
                     errors.append(f"{section_name}.{key} is unresolved")
 
-        archive = contract.get("release_archive", {})
         if not isinstance(archive.get("store_version_code"), int) or int(archive.get("store_version_code", 0)) <= 0:
             errors.append("release_archive.store_version_code must be positive")
         artifact_commit = str(archive.get("rc_commit_sha", ""))
         if not is_ancestor(artifact_commit, head_sha):
             errors.append("archived artifact commit must be an ancestor of the evidence HEAD")
 
-        tag = source.get("final_release_tag", "")
+        tag = source.get("final_release_tag", "") if isinstance(source, dict) else ""
         if isinstance(tag, str) and tag and not unresolved(tag):
             tag_commit = git_output("rev-list", "-n", "1", tag)
             if not tag_commit or tag_commit != artifact_commit:
                 errors.append("final release tag does not resolve to archived artifact commit")
 
         ownership = contract.get("ownership_and_recovery", {})
-        for key in ("play_console_recovery_verified", "repository_recovery_verified", "billing_backend_recovery_verified"):
-            if ownership.get(key) is not True:
-                errors.append(f"ownership_and_recovery.{key} is not verified")
-        for key in (
-            "external_keystore_backup_verified", "external_secret_backup_verified",
-            "backup_restore_drill_recorded", "signing_identity_documented_without_private_material",
-        ):
-            if secret_policy.get(key) is not True:
-                errors.append(f"secret_and_signing_policy.{key} is not verified")
+        require_true_flags(
+            ownership,
+            ("play_console_recovery_verified", "repository_recovery_verified", "billing_backend_recovery_verified"),
+            "ownership_and_recovery",
+            errors,
+        )
+        require_true_flags(
+            secret_policy,
+            (
+                "external_keystore_backup_verified", "external_secret_backup_verified",
+                "backup_restore_drill_recorded", "signing_identity_documented_without_private_material",
+            ),
+            "secret_and_signing_policy",
+            errors,
+        )
 
         legal = contract.get("asset_and_legal_archive", {})
         if not isinstance(legal, dict) or any(value is not True for value in legal.values()):
-            errors.append("asset/legal/provenance archive is incomplete")
+            errors.append("asset/legal/provenance/archive evidence is incomplete")
         evidence = contract.get("evidence", {})
         if not isinstance(evidence, dict) or any(value is not True for value in evidence.values()):
             errors.append("12.9 final evidence is incomplete")
-        if provenance.get("finalized") is not True:
+        if not isinstance(provenance, dict) or provenance.get("finalized") is not True:
             errors.append("provenance/dependency evidence is not finalized")
         if contract.get("pass_recorded") is not True:
             errors.append("12.9 pass_recorded is not true")
     else:
         if not RC_COMPLETION.exists():
             warnings.append("awaiting RELEASE_12_8_COMPLETION.json")
-        if provenance.get("finalized") is not True:
-            warnings.append("provenance/dependency evidence intentionally remains open until final assets/dependency reports exist")
+        if not isinstance(provenance, dict) or provenance.get("finalized") is not True:
+            warnings.append("provenance/dependency evidence remains open until final assets/dependency reports exist")
         for section_name, keys in {
             "source_of_truth": ("final_release_tag",),
             "ownership_and_recovery": ("primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact"),
@@ -212,11 +243,12 @@ def main() -> int:
                     warnings.append(f"{section_name}.{key} not configured yet")
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "head_sha": head_sha,
         "provenance_gate_bound": True,
+        "release_archive_gate_bound": True,
         "errors": errors,
         "warnings": warnings,
     }
@@ -230,9 +262,9 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     if args.release:
-        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/support/provenance certified")
+        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/provenance/support certified")
     else:
-        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: contract valid warnings={len(warnings)} provenance_gate=1")
+        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: warnings={len(warnings)} provenance_gate=1 archive_gate=1")
     return 0
 
 
