@@ -1,10 +1,10 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
   "audited_on": "2026-08-12",
   "application_id": "com.pmartins87.veredasdatrama",
-  "policy_basis": "Google Play User Data and Data safety requirements; final declaration must match the exact release artifact and integrated SDKs",
+  "policy_basis": "Google Play User Data and Data safety requirements; final declaration must match the exact release artifact and integrated SDKs/services",
   "current_application_behavior": {
     "user_accounts": false,
     "account_creation": false,
@@ -30,7 +30,14 @@
       "path": "mobile/PlayPurchaseVerificationClient.gd",
       "token": "HTTPRequest",
       "purpose": "HTTPS purchase-token verification for Google Play Billing entitlements",
-      "data_scope": ["verification request id", "application id", "product id", "purchase token", "purchase time", "client acknowledgement state"],
+      "data_scope": [
+        "verification request id",
+        "application/package id",
+        "product id",
+        "purchase token",
+        "purchase time",
+        "client acknowledgement state"
+      ],
       "gameplay_data_allowed": false
     },
     {
@@ -58,11 +65,13 @@
       "last store contact/restore status"
     ],
     "production_purchase_verification": {
-      "status": "pending_12_4",
-      "architecture": "app sends the minimum purchase verification envelope over HTTPS to a developer backend; backend verifies with Google Play before authoritative entitlement grant",
+      "status": "reference_backend_implemented_deployment_pending",
+      "architecture": "app sends the minimum purchase verification envelope over HTTPS to a developer backend; backend verifies ProductPurchaseV2 with Google Play and confirms acknowledgement before authoritative entitlement grant",
       "runtime_client": "mobile/PlayPurchaseVerificationClient.gd",
+      "reference_backend": "backend/play_purchase_verifier",
+      "backend_contract": "backend/play_purchase_verifier/backend_contract.json",
       "transport": "HTTPS POST JSON; no-store; concurrent request isolation; exact verification_request_id correlation",
-      "possible_off_device_data": [
+      "transient_off_device_data": [
         "verification request id",
         "application/package id",
         "purchase token",
@@ -70,6 +79,31 @@
         "purchase time",
         "client acknowledgement state"
       ],
+      "reference_backend_persistence": {
+        "store": "Google Cloud Firestore",
+        "raw_purchase_token_at_rest": false,
+        "purchase_token_hash_at_rest": true,
+        "purchase_token_hash_algorithm": "SHA-256",
+        "order_id_at_rest": false,
+        "minimum_persisted_fields": [
+          "application/package id",
+          "product id",
+          "purchase state",
+          "acknowledgement state",
+          "ownership boolean",
+          "processing stage",
+          "purchase completion time",
+          "test-purchase boolean",
+          "server timestamps"
+        ],
+        "retention_and_deletion": "PENDING_12_3_12_4_RETENTION_POLICY"
+      },
+      "backend_authentication": {
+        "client_to_backend": "public HTTPS without reusable client secret",
+        "reusable_backend_secret_embedded_in_app": false,
+        "backend_to_google": "attached service account via Application Default Credentials",
+        "service_account_key_file_in_repository_or_container": false
+      },
       "explicitly_excluded_from_billing_verification": [
         "gameplay profile",
         "save data",
@@ -78,16 +112,17 @@
         "contacts",
         "advertising identifiers"
       ],
+      "backend_sources_excluded_from_android_artifacts": true,
       "data_safety_reaudit_required_after_integration": true
     }
   },
   "data_safety_candidate": {
     "finalized": false,
-    "reason": "12.4 production billing integration is not yet frozen; the final form must cover the exact release artifact and all SDK/backend behavior",
+    "reason": "12.4 backend is implemented but not deployed/frozen; final Data Safety answers must cover the exact AAB, production endpoint, final retention/deletion policy and Play Console configuration",
     "current_non_billing_gameplay_collection_off_device": false,
     "current_non_billing_gameplay_sharing": false,
     "payment_service_financial_data": "Google Play may collect payment information directly under its own terms; the app must not claim developer collection when the app never accesses that payment information",
-    "purchase_history_or_purchase_token": "reassess and declare as applicable after 12.4"
+    "purchase_history_or_purchase_token": "purchase token is transiently transmitted to the developer verification backend and Google Play; the reference backend persists a SHA-256 token hash and minimal purchase/entitlement state, not the raw token or order id; final Play declaration remains pending production freeze"
   },
   "privacy_policy": {
     "draft_file": "docs/PRIVACY_POLICY_DRAFT.md",
@@ -101,6 +136,7 @@
       "data accessed, collected, used and shared",
       "third-party services and SDKs",
       "Google Play purchase-token verification and backend handling",
+      "raw purchase-token transient processing versus hashed server record",
       "secure handling",
       "retention and deletion",
       "children/age treatment if applicable",
@@ -108,17 +144,18 @@
     ]
   },
   "release_requirements": [
-    "complete 12.4 billing integration and repeat technical data-flow audit",
-    "freeze the production HTTPS verification endpoint, authentication and backend retention/deletion behavior",
+    "deploy and certify 12.4 billing backend, then repeat technical data-flow audit",
+    "freeze production HTTPS verification endpoint, attached service identity, rate limiting and backend retention/deletion behavior",
+    "prove production persistence does not retain raw purchase tokens or order ids outside the declared contract",
     "inspect final Android manifest and merged permissions from the release AAB",
-    "inventory every third-party SDK in the final artifact",
+    "inventory every third-party SDK/service in the final artifact and production architecture",
     "confirm the only application runtime network path beyond Google Play Billing is the allowlisted purchase-verification client",
     "replace privacy contact placeholder",
     "publish privacy policy on a stable public URL and expose the final version in-app",
     "finalize product/legal_documents.json from pre_release to final and synchronize its public URLs",
-    "complete Play Console Data safety form from the frozen release behavior",
-    "ensure store declaration, runtime legal surface and privacy policy remain consistent",
-    "pass legal_surface_gate.py --release in addition to privacy_data_safety_gate.py --release",
+    "complete Play Console Data Safety form from the frozen release behavior",
+    "ensure store declaration, runtime legal surface, backend behavior and privacy policy remain consistent",
+    "pass privacy_data_safety_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
     "record final Data Safety answers in this repository"
   ],
   "pass_recorded": false
