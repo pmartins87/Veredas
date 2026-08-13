@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -12,6 +12,11 @@
     "container_runs_as_root": false,
     "endpoint_path": "/v1/play/verify",
     "health_path": "/healthz",
+    "health_semantics": "process_liveness_only_no_dependency_initialization",
+    "readiness_path": "/readyz",
+    "readiness_semantics": "lazy_verification_service_initialization_without_purchase_request; failure returns 503 and may recover on later probe",
+    "verification_service_initialization": "lazy_thread_safe",
+    "initialization_exception_details_exposed": false,
     "maximum_request_body_bytes": 16384
   },
   "authentication_model": {
@@ -65,6 +70,14 @@
       "timestamps"
     ],
     "token_product_binding_transactional": true,
+    "purchase_state_record_transactional": true,
+    "purchase_state_order": ["PENDING", "PURCHASED", "CANCELLED"],
+    "cancelled_is_terminal_for_persisted_snapshot": true,
+    "late_lower_rank_observation_is_ignored": true,
+    "acknowledged_state_cannot_regress_to_pending": true,
+    "purchased_owned_true_cannot_be_overwritten_by_late_pre_ack_false": true,
+    "durable_final_record_required_before_owned_response": true,
+    "repository_failure_response": "503 repository_unavailable; never owned=true",
     "retention_and_deletion_policy": "PENDING_12_3_12_4_RETENTION_POLICY"
   },
   "abuse_and_data_minimization": {
@@ -89,6 +102,8 @@
     "play_console_service_account_access_configured": false,
     "firestore_access_configured": false,
     "public_https_ingress_configured": false,
+    "liveness_probe_verified": false,
+    "readiness_probe_verified": false,
     "rate_limit_configured": false,
     "deployed": false
   },
@@ -96,7 +111,10 @@
     "deploy the exact reviewed container revision without embedding service-account keys",
     "attach a dedicated service account and grant only the Google Play/Firestore permissions needed by this service",
     "enable Google Play Android Developer API and authorize the service identity for the application",
-    "create/configure Firestore and prove transactional token-to-product binding under concurrent requests",
+    "create/configure Firestore and prove transactional token-to-product binding and monotonic state recording under concurrent requests",
+    "prove a delayed PENDING/pre-ack write cannot regress PURCHASED owned=true and a delayed PURCHASED cannot resurrect CANCELLED",
+    "prove Firestore bind/record outages return 503 and never produce owned=true",
+    "verify /healthz liveness and /readyz dependency-initialization readiness on the deployed revision",
     "freeze a public HTTPS endpoint and production abuse/rate-limit controls",
     "freeze purchase-record retention/deletion with 12.3 privacy policy and Data Safety",
     "preserve the bounded server/mobile timeout budget under the production ingress configuration",
