@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py verifier.py google_play_gateway.py firestore_repository.py purchase_record_merge.py ./
+COPY app.py verifier.py google_play_gateway.py firestore_repository.py purchase_record_merge.py retention_policy.py ./
 
 RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser
