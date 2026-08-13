@@ -1,7 +1,7 @@
 extends RefCounted
 class_name EntitlementEngine
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const PROVIDER_ID := "platform_billing"
 
 func ensure_state() -> Dictionary:
@@ -22,7 +22,7 @@ func ensure_state() -> Dictionary:
             "owned":bool(record.get("owned", false)),
             "verified_at":int(record.get("verified_at", 0)),
             "source":str(record.get("source", "none")),
-            "transaction_id":str(record.get("transaction_id", "")),
+            "transaction_id":PurchaseReference.normalize_persisted(str(record.get("transaction_id", ""))),
             "revoked_at":int(record.get("revoked_at", 0)),
         }
 
@@ -72,11 +72,15 @@ func apply_authoritative_snapshot(purchases: Array, source: String = PROVIDER_ID
             continue
         if not bool(purchase.get("owned", true)):
             continue
+        var raw_reference := str(purchase.get("transaction_id", ""))
+        var safe_reference := PurchaseReference.normalize_persisted(raw_reference)
+        if not raw_reference.is_empty() and safe_reference.is_empty():
+            continue
         owned_snapshot[product_id] = {
             "owned":true,
             "verified_at":now,
             "source":source,
-            "transaction_id":str(purchase.get("transaction_id", "")),
+            "transaction_id":safe_reference,
             "revoked_at":0,
         }
 
@@ -111,6 +115,11 @@ func apply_purchase_result(result: Dictionary) -> bool:
     if CommercialPolicyEngine.new().product(product_id).is_empty():
         _record_store_error("unknown_product")
         return false
+    var raw_reference := str(result.get("transaction_id", ""))
+    var safe_reference := PurchaseReference.normalize_persisted(raw_reference)
+    if not raw_reference.is_empty() and safe_reference.is_empty():
+        _record_store_error("purchase_reference_hash_failed")
+        return false
     var state := ensure_state()
     var grants: Dictionary = (state.get("grants", {}) as Dictionary).duplicate(true)
     var now := int(Time.get_unix_time_from_system())
@@ -118,7 +127,7 @@ func apply_purchase_result(result: Dictionary) -> bool:
         "owned":true,
         "verified_at":now,
         "source":str(result.get("source", PROVIDER_ID)),
-        "transaction_id":str(result.get("transaction_id", "")),
+        "transaction_id":safe_reference,
         "revoked_at":0,
     }
     state.grants = grants
