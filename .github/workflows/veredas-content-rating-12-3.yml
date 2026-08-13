@@ -1,0 +1,35 @@
+name: Veredas Content Rating 12.3
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/product/content_rating_target_audience.json'
+      - 'projeto_jornada/product/platform_compliance.json'
+      - 'projeto_jornada/product/privacy_data_safety.json'
+      - 'projeto_jornada/product/commercial_model.json'
+      - 'projeto_jornada/product/store_listing_google_play.json'
+      - 'projeto_jornada/tools/content_rating_target_audience_gate.py'
+      - '.github/workflows/veredas-content-rating-12-3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rating-audience-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate rating and audience preflight
+        working-directory: projeto_jornada
+        run: |
+          python -m py_compile tools/content_rating_target_audience_gate.py
+          python tools/content_rating_target_audience_gate.py
+      - name: Preserve clean tree
+        run: git diff --exit-code
