@@ -5,6 +5,7 @@ var localization := LocalizationService.new()
 const ANDROID_CI_MARKER := "user://android_ci_autostart"
 const ANDROID_CI_READY := "user://android_ci_ready"
 const ANDROID_CI_SEED := 881001
+const BILLING_UI_TEST_ENV := "VEREDAS_BILLING_UI_TEST"
 
 var page_panel: PanelContainer
 var title: Label
@@ -203,7 +204,7 @@ func _render() -> void:
         _button(legal_label, _open_legal, false)
 
 func _append_billing_summary(lines: Array[String]) -> void:
-    if not OS.has_feature("android"):
+    if not _billing_surface_enabled():
         return
     var billing: Dictionary = BillingService.summary()
     lines.append("")
@@ -213,13 +214,13 @@ func _append_billing_summary(lines: Array[String]) -> void:
     if bool(billing.get("supporter_cosmetics", false)):
         lines.append("✓ %s" % localization.text("hub.billing.supporter_owned"))
     var status := str(billing.get("status", ""))
-    if not bool(billing.get("purchase_available", false)) and status in ["configuration_pending", "plugin_unavailable", "disconnected", "error"]:
+    if not bool(billing.get("purchase_available", false)) and status in ["configuration_pending", "plugin_unavailable", "disconnected", "error", "not_android"]:
         lines.append(localization.text("hub.billing.unavailable"))
     if not _billing_feedback.is_empty():
         lines.append("[i]%s[/i]" % _billing_feedback)
 
 func _append_billing_actions() -> void:
-    if not OS.has_feature("android"):
+    if not _billing_surface_enabled():
         return
     var billing: Dictionary = BillingService.summary()
     var available := bool(billing.get("purchase_available", false))
@@ -231,6 +232,9 @@ func _append_billing_actions() -> void:
         supporter_button.disabled = not available
     var restore_button := _button(localization.text("hub.billing.restore"), _restore_purchases, false)
     restore_button.disabled = str(billing.get("status", "")) in ["configuration_pending", "plugin_unavailable", "not_android"]
+
+func _billing_surface_enabled() -> bool:
+    return OS.has_feature("android") or OS.get_environment(BILLING_UI_TEST_ENV) == "1"
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
     var button := Button.new()
