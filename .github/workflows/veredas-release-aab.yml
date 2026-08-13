@@ -53,12 +53,21 @@ jobs:
         working-directory: projeto_jornada
         run: |
           python tools/roadmap_state_consistency.py
+          python tools/release_input_scope_gate.py
           python tools/validate_android_export.py
           python tools/privacy_data_safety_gate.py --release
           python tools/platform_compliance_gate.py --release
           python tools/legal_surface_gate.py --release
           python tools/qa_release_candidate_gate.py
           python tools/validate_canonical.py
+
+      - name: Fingerprint exact runtime/build inputs
+        working-directory: projeto_jornada
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/build/android-release"
+          python tools/release_input_fingerprint.py \
+            --output "$GITHUB_WORKSPACE/build/android-release/release-input-manifest.json"
 
       - name: Require protected signing secrets
         shell: bash
@@ -157,6 +166,14 @@ jobs:
           sha256sum build/android-release/veredas-da-trama.aab \
             | tee build/android-release/veredas-da-trama.aab.sha256
 
+      - name: Verify fingerprint did not change during import/export
+        working-directory: projeto_jornada
+        run: |
+          set -euo pipefail
+          python tools/release_input_scope_gate.py
+          python tools/release_input_fingerprint.py \
+            --compare "$GITHUB_WORKSPACE/build/android-release/release-input-manifest.json"
+
       - name: Destroy temporary keystore
         if: always()
         run: rm -rf /tmp/veredas-release
@@ -169,6 +186,7 @@ jobs:
           path: |
             build/android-release/veredas-da-trama.aab
             build/android-release/veredas-da-trama.aab.sha256
+            build/android-release/release-input-manifest.json
             build/android-release/signature-verification.txt
             build/android-release/release-metadata.txt
           if-no-files-found: error
