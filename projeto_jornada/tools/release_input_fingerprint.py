@@ -8,7 +8,11 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-SINGLE_FILES = [ROOT / "project.godot", ROOT / "export_presets.cfg"]
+RUNTIME_PRODUCT_FILES = [
+    ROOT / "product" / "commercial_model.json",
+    ROOT / "product" / "legal_documents.json",
+]
+SINGLE_FILES = [ROOT / "project.godot", ROOT / "export_presets.cfg", *RUNTIME_PRODUCT_FILES]
 INPUT_ROOTS = [
     ROOT / "core",
     ROOT / "ui",
@@ -17,7 +21,6 @@ INPUT_ROOTS = [
     ROOT / "data",
     ROOT / "assets",
     ROOT / "mobile",
-    ROOT / "product",
 ]
 IGNORE_NAMES = {".DS_Store", "Thumbs.db"}
 IGNORE_SUFFIXES = {".tmp", ".bak", ".swp"}
@@ -76,7 +79,7 @@ def read_json(path: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create or compare a deterministic fingerprint of Veredas release inputs.")
+    parser = argparse.ArgumentParser(description="Create or compare a deterministic fingerprint of Veredas runtime/release build inputs.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--compare", type=Path, default=None)
     args = parser.parse_args()
@@ -86,7 +89,9 @@ def main() -> int:
         print("RELEASE_INPUT_FINGERPRINT FAIL: no release inputs found")
         return 1
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "scope_policy": "runtime/build inputs only; release evidence and archive metadata are intentionally excluded to avoid self-reference",
+        "runtime_product_files": [path.relative_to(ROOT).as_posix() for path in RUNTIME_PRODUCT_FILES],
         "file_count": len(rows),
         "total_bytes": sum(int(row["bytes"]) for row in rows),
         "aggregate_sha256": aggregate(rows),
@@ -120,8 +125,8 @@ def main() -> int:
         args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(
-        "RELEASE_INPUT_FINGERPRINT PASS: files=%d bytes=%d sha256=%s"
-        % (report["file_count"], report["total_bytes"], report["aggregate_sha256"])
+        "RELEASE_INPUT_FINGERPRINT PASS: files=%d bytes=%d sha256=%s runtime_product_files=%d"
+        % (report["file_count"], report["total_bytes"], report["aggregate_sha256"], len(RUNTIME_PRODUCT_FILES))
     )
     return 0
 
