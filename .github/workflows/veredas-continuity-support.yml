@@ -18,9 +18,12 @@ on:
       - 'projeto_jornada/docs/CONTINUITY_AND_SUPPORT.md'
       - 'projeto_jornada/tools/release_input_fingerprint.py'
       - 'projeto_jornada/tools/release_input_scope_gate.py'
+      - 'projeto_jornada/tools/build_backend_dependency_evidence.py'
+      - 'projeto_jornada/tools/backend_dependency_evidence_gate.py'
       - 'projeto_jornada/tools/provenance_license_gate.py'
       - 'projeto_jornada/tools/release_archive_gate.py'
       - 'projeto_jornada/tools/continuity_support_gate.py'
+      - '.github/workflows/veredas-backend-dependency-evidence.yml'
       - '.github/workflows/veredas-continuity-support.yml'
   workflow_dispatch:
     inputs:
@@ -53,6 +56,9 @@ jobs:
         run: |
           python tools/release_input_scope_gate.py
           python tools/release_input_fingerprint.py --output /tmp/veredas-12-9-release-input-preflight.json
+      - name: Validate backend dependency evidence state
+        working-directory: projeto_jornada
+        run: python tools/backend_dependency_evidence_gate.py --output /tmp/veredas-12-9-backend-dependencies-preflight.json
       - name: Validate asset provenance, third-party software and service inventory
         working-directory: projeto_jornada
         run: python tools/provenance_license_gate.py --output /tmp/veredas-12-9-provenance-preflight.json
@@ -65,6 +71,10 @@ jobs:
       - name: Preserve zero release-blocking product defects
         working-directory: projeto_jornada
         run: python tools/qa_triage_gate.py --require-zero
+      - name: Run final backend dependency evidence certification
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/backend_dependency_evidence_gate.py --release --output /tmp/veredas-12-9-backend-dependencies-release.json
       - name: Run final provenance/license certification
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
@@ -84,9 +94,11 @@ jobs:
           name: veredas-12-9-continuity-support
           path: |
             /tmp/veredas-12-9-release-input-preflight.json
+            /tmp/veredas-12-9-backend-dependencies-preflight.json
             /tmp/veredas-12-9-provenance-preflight.json
             /tmp/veredas-12-9-archive-preflight.json
             /tmp/veredas-12-9-preflight.json
+            /tmp/veredas-12-9-backend-dependencies-release.json
             /tmp/veredas-12-9-provenance-release.json
             /tmp/veredas-12-9-archive-release.json
             /tmp/veredas-12-9-release.json
