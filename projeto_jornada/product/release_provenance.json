@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -27,36 +27,44 @@
       {
         "path": "ui/assets/vector/domain_ornaments_atlas.svg",
         "repository_blob_sha": "97d363c0cd0111b7ee4ce83ffd999cd77365d4d7",
+        "introduction_commit": "c4e1e55bb4bd222fcc62f061b89c026c23ba8154",
+        "introduction_commit_message": "Add original ornament atlas for all twelve domains",
         "origin_class": "first_party_original",
-        "source_record": "repository_history:ui/assets/vector/domain_ornaments_atlas.svg",
-        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "source_record": "git_introduction_commit:c4e1e55bb4bd222fcc62f061b89c026c23ba8154",
+        "rights_basis": "project repository history introduces this custom vector atlas as original project work; final rights review remains required before release",
         "rights_reviewed": false,
         "release_eligible": false
       },
       {
         "path": "ui/assets/vector/item_archetypes_atlas.svg",
         "repository_blob_sha": "e88703a206c2ff6dc18ac09292cc166eac6796e2",
+        "introduction_commit": "86b0ba0533ffd55f7c02e2111beba6c0bbf2be1f",
+        "introduction_commit_message": "Add hand-drawn item archetype atlas for scalable equipment art",
         "origin_class": "first_party_original",
-        "source_record": "repository_history:ui/assets/vector/item_archetypes_atlas.svg",
-        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "source_record": "git_introduction_commit:86b0ba0533ffd55f7c02e2111beba6c0bbf2be1f",
+        "rights_basis": "project repository history introduces this custom hand-drawn vector atlas as project work; final rights review remains required before release",
         "rights_reviewed": false,
         "release_eligible": false
       },
       {
         "path": "ui/assets/vector/mark_glyphs_atlas.svg",
         "repository_blob_sha": "823eacc63243f046abdb619df6aa263c779c9872",
+        "introduction_commit": "2dfe1bcba4367ce1c539f1702ff3d400cf7dbf60",
+        "introduction_commit_message": "Add final mark glyph atlas with six semantic families",
         "origin_class": "first_party_original",
-        "source_record": "repository_history:ui/assets/vector/mark_glyphs_atlas.svg",
-        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "source_record": "git_introduction_commit:2dfe1bcba4367ce1c539f1702ff3d400cf7dbf60",
+        "rights_basis": "project repository history introduces this custom semantic glyph atlas as project work; final rights review remains required before release",
         "rights_reviewed": false,
         "release_eligible": false
       },
       {
         "path": "ui/assets/vector/system_icons_atlas.svg",
         "repository_blob_sha": "2fa842bfc7466da4af01664b2e5dd1b184456fa6",
+        "introduction_commit": "09a6578cd560f57e742e69f93c45ad8ca95e6141",
+        "introduction_commit_message": "Add final hand-drawn system icon atlas",
         "origin_class": "first_party_original",
-        "source_record": "repository_history:ui/assets/vector/system_icons_atlas.svg",
-        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "source_record": "git_introduction_commit:09a6578cd560f57e742e69f93c45ad8ca95e6141",
+        "rights_basis": "project repository history introduces this custom hand-drawn system icon atlas as project work; final rights review remains required before release",
         "rights_reviewed": false,
         "release_eligible": false
       }
@@ -177,6 +185,7 @@
   },
   "completion_requirements": [
     "every tracked release asset is covered by an explicit provenance row and no forbidden source is present",
+    "every asset row is bound to the exact current Git blob plus a verifiable introduction commit whose parent did not contain that path",
     "every asset row has final rights_reviewed=true and release_eligible=true before release certification",
     "final art/audio/font provenance evidence and any assignments/licenses are archived",
     "every known software component retains a primary-source license identification and then receives final reviewed=true plus archived notice evidence",
