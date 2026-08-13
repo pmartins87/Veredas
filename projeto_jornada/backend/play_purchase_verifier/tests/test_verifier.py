@@ -7,6 +7,7 @@ from verifier import (
     ACK_PENDING,
     APPLICATION_ID,
     GatewayError,
+    RepositoryError,
     VerificationService,
 )
 
@@ -47,6 +48,25 @@ class MemoryRepository:
 
     def record(self, token_hash: str, values: dict) -> None:
         self.records.setdefault(token_hash, []).append(dict(values))
+
+
+class FailingRepository(MemoryRepository):
+    def __init__(self, *, fail_bind: bool = False, fail_record_number: int = 0):
+        super().__init__()
+        self.fail_bind = fail_bind
+        self.fail_record_number = fail_record_number
+        self.record_attempts = 0
+
+    def bind(self, token_hash: str, package_name: str, product_id: str) -> bool:
+        if self.fail_bind:
+            raise RepositoryError("synthetic_bind_outage")
+        return super().bind(token_hash, package_name, product_id)
+
+    def record(self, token_hash: str, values: dict) -> None:
+        self.record_attempts += 1
+        if self.fail_record_number == self.record_attempts:
+            raise RepositoryError("synthetic_record_outage")
+        super().record(token_hash, values)
 
 
 class VerificationServiceTests(unittest.TestCase):
@@ -182,6 +202,39 @@ class VerificationServiceTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"], "purchase_token_bound_to_different_product")
         self.assertEqual(gateway.ack_calls, [])
+
+    def test_repository_bind_outage_never_grants_or_acknowledges(self):
+        gateway = FakeGateway([self.play_purchase(acknowledgement=ACKNOWLEDGED)])
+        result, status = VerificationService(gateway, FailingRepository(fail_bind=True)).verify(self.request())
+        self.assertEqual(status, 503)
+        self.assertFalse(result["ok"])
+        self.assertFalse(result["owned"])
+        self.assertEqual(result["error"], "repository_unavailable")
+        self.assertEqual(gateway.ack_calls, [])
+
+    def test_repository_pre_ack_record_outage_stops_before_acknowledgement(self):
+        gateway = FakeGateway([self.play_purchase()])
+        repository = FailingRepository(fail_record_number=1)
+        result, status = VerificationService(gateway, repository).verify(self.request())
+        self.assertEqual(status, 503)
+        self.assertFalse(result["ok"])
+        self.assertFalse(result["owned"])
+        self.assertEqual(result["error"], "repository_unavailable")
+        self.assertEqual(gateway.ack_calls, [])
+
+    def test_repository_final_record_outage_never_returns_owned_true(self):
+        gateway = FakeGateway([
+            self.play_purchase(),
+            self.play_purchase(acknowledgement=ACKNOWLEDGED),
+        ])
+        repository = FailingRepository(fail_record_number=2)
+        result, status = VerificationService(gateway, repository).verify(self.request())
+        self.assertEqual(status, 503)
+        self.assertFalse(result["ok"])
+        self.assertFalse(result["owned"])
+        self.assertEqual(result["error"], "repository_unavailable")
+        self.assertEqual(len(gateway.ack_calls), 1)
+        self.assertEqual(repository.record_attempts, 2)
 
     def test_concurrent_ack_error_is_safe_if_refetch_confirms_acknowledged(self):
         gateway = FakeGateway(
