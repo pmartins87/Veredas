@@ -14,6 +14,7 @@ CONTRACT = ROOT / "product" / "continuity_support_contract.json"
 RUNBOOK = ROOT / "docs" / "CONTINUITY_AND_SUPPORT.md"
 RC_COMPLETION = ROOT / "RELEASE_12_8_COMPLETION.json"
 PROVENANCE_GATE = ROOT / "tools" / "provenance_license_gate.py"
+DEPENDENCY_GATE = ROOT / "tools" / "backend_dependency_evidence_gate.py"
 ARCHIVE_GATE = ROOT / "tools" / "release_archive_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 
@@ -75,7 +76,7 @@ def require_true_flags(section: Any, keys: tuple[str, ...], label: str, errors: 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive, provenance and support readiness.")
+    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive, dependency evidence, provenance and support readiness.")
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
@@ -93,7 +94,12 @@ def main() -> int:
     if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 3000:
         errors.append("continuity/support runbook is missing or unexpectedly small")
 
-    for gate, label in ((PROVENANCE_GATE, "provenance/license"), (ARCHIVE_GATE, "release archive")):
+    component_gates = (
+        (PROVENANCE_GATE, "provenance/license"),
+        (DEPENDENCY_GATE, "backend dependency evidence"),
+        (ARCHIVE_GATE, "release archive"),
+    )
+    for gate, label in component_gates:
         if not gate.exists():
             errors.append(f"12.9 {label} gate missing")
             continue
@@ -243,18 +249,19 @@ def main() -> int:
                     warnings.append(f"{section_name}.{key} not configured yet")
 
     report = {
-        "schema_version": 3,
+        "schema_version": 4,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "head_sha": head_sha,
         "provenance_gate_bound": True,
+        "backend_dependency_evidence_gate_bound": True,
         "release_archive_gate_bound": True,
         "errors": errors,
         "warnings": warnings,
     }
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if errors:
         print(f"CONTINUITY_SUPPORT FAIL: {len(errors)} issue(s)")
@@ -262,9 +269,12 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     if args.release:
-        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/provenance/support certified")
+        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/dependencies/provenance/support certified")
     else:
-        print(f"CONTINUITY_SUPPORT PREFLIGHT PASS: warnings={len(warnings)} provenance_gate=1 archive_gate=1")
+        print(
+            "CONTINUITY_SUPPORT PREFLIGHT PASS: warnings=%d provenance_gate=1 dependency_gate=1 archive_gate=1"
+            % len(warnings)
+        )
     return 0
 
 
