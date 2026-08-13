@@ -3,6 +3,7 @@ class_name CommercialPolicyEngine
 
 const POLICY_PATH := "res://product/commercial_model.json"
 const REQUIRED_PRODUCTS := ["full_game_unlock", "supporter_cosmetic_pack"]
+const REQUIRED_SUPPORTER_COSMETICS := ["supporter_badge"]
 const FORBIDDEN_EFFECT_KEYS := ["grants_power", "grants_currency", "grants_stats", "grants_drop_rate"]
 
 var _policy: Dictionary = {}
@@ -60,10 +61,23 @@ func validate_policy() -> Dictionary:
             if bool(product.get(key, true)):
                 errors.append("paid_power_effect:%s:%s" % [product_id, key])
         var effect_kind := str(product.get("effect_kind", ""))
-        if product_id == "full_game_unlock" and effect_kind != "content_license":
-            errors.append("full_unlock_not_content_license")
-        if product_id == "supporter_cosmetic_pack" and effect_kind != "cosmetic_only":
-            errors.append("supporter_pack_not_cosmetic")
+        if product_id == "full_game_unlock":
+            if effect_kind != "content_license":
+                errors.append("full_unlock_not_content_license")
+            if str(product.get("content_scope", "")) != "all_game_content":
+                errors.append("full_unlock_scope_invalid")
+        if product_id == "supporter_cosmetic_pack":
+            if effect_kind != "cosmetic_only":
+                errors.append("supporter_pack_not_cosmetic")
+            if str(product.get("content_scope", "")) != "cosmetics_only":
+                errors.append("supporter_pack_scope_invalid")
+            var raw_cosmetics = product.get("cosmetic_ids", [])
+            if typeof(raw_cosmetics) != TYPE_ARRAY:
+                errors.append("supporter_cosmetic_ids_invalid")
+            else:
+                var cosmetics: Array = raw_cosmetics as Array
+                if cosmetics != REQUIRED_SUPPORTER_COSMETICS:
+                    errors.append("supporter_cosmetic_ids_mismatch")
 
     for required_product in REQUIRED_PRODUCTS:
         if not seen.has(required_product):
@@ -114,6 +128,18 @@ func full_unlock_product_id() -> String:
 
 func supporter_product_id() -> String:
     return "supporter_cosmetic_pack"
+
+func supporter_cosmetic_ids() -> Array[String]:
+    var product_row := product(supporter_product_id())
+    var result: Array[String] = []
+    var raw = product_row.get("cosmetic_ids", [])
+    if typeof(raw) != TYPE_ARRAY:
+        return result
+    for value in raw as Array:
+        var cosmetic_id := str(value)
+        if not cosmetic_id.is_empty():
+            result.append(cosmetic_id)
+    return result
 
 func _load_policy() -> Dictionary:
     var file := FileAccess.open(POLICY_PATH, FileAccess.READ)
