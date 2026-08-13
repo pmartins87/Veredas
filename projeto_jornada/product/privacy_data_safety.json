@@ -1,8 +1,8 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
-  "audited_on": "2026-08-12",
+  "audited_on": "2026-08-13",
   "application_id": "com.pmartins87.veredasdatrama",
   "policy_basis": "Google Play User Data and Data safety requirements; final declaration must match the exact release artifact and integrated SDKs/services",
   "current_application_behavior": {
@@ -30,14 +30,7 @@
       "path": "mobile/PlayPurchaseVerificationClient.gd",
       "token": "HTTPRequest",
       "purpose": "HTTPS purchase-token verification for Google Play Billing entitlements",
-      "data_scope": [
-        "verification request id",
-        "application/package id",
-        "product id",
-        "purchase token",
-        "purchase time",
-        "client acknowledgement state"
-      ],
+      "data_scope": ["verification request id", "application/package id", "product id", "purchase token", "purchase time", "client acknowledgement state"],
       "gameplay_data_allowed": false
     },
     {
@@ -63,14 +56,7 @@
       "purchase_token_sha256_reference_at_rest": true,
       "reference_format": "sha256:<64 lowercase hexadecimal characters>",
       "legacy_raw_reference_migration": "hash on EntitlementEngine normalization before the profile is stored again",
-      "fields": [
-        "product ownership",
-        "verification timestamp",
-        "provider source",
-        "SHA-256 purchase reference",
-        "revocation timestamp",
-        "last store contact/restore status"
-      ]
+      "fields": ["product ownership", "verification timestamp", "provider source", "SHA-256 purchase reference", "revocation timestamp", "last store contact/restore status"]
     },
     "production_purchase_verification": {
       "status": "reference_backend_implemented_deployment_pending",
@@ -79,34 +65,30 @@
       "reference_backend": "backend/play_purchase_verifier",
       "backend_contract": "backend/play_purchase_verifier/backend_contract.json",
       "transport": "HTTPS POST JSON; no-store; concurrent request isolation; exact verification_request_id correlation",
-      "transient_off_device_data": [
-        "verification request id",
-        "application/package id",
-        "purchase token",
-        "product id",
-        "purchase time",
-        "client acknowledgement state"
-      ],
+      "transient_off_device_data": ["verification request id", "application/package id", "purchase token", "product id", "purchase time", "client acknowledgement state"],
       "reference_backend_persistence": {
         "store": "Google Cloud Firestore",
         "raw_purchase_token_at_rest": false,
         "purchase_token_hash_at_rest": true,
         "purchase_token_hash_algorithm": "SHA-256",
         "order_id_at_rest": false,
-        "minimum_persisted_fields": [
-          "application/package id",
-          "product id",
-          "purchase state",
-          "acknowledgement state",
-          "ownership boolean",
-          "processing stage",
-          "purchase completion time",
-          "test-purchase boolean",
-          "server timestamps"
-        ],
+        "minimum_persisted_fields": ["application/package id", "product id", "purchase state", "acknowledgement state", "ownership boolean", "processing stage", "purchase completion time", "test-purchase boolean", "server timestamps", "expires_at"],
         "state_write_semantics": "transactional and monotonic PENDING -> PURCHASED -> CANCELLED; delayed lower-rank/pre-ack writes cannot regress a newer owned/acknowledged record",
         "durable_record_required_before_owned_response": true,
-        "retention_and_deletion": "PENDING_12_3_12_4_RETENTION_POLICY"
+        "retention_and_deletion": {
+          "status": "implementation_frozen_pre_deployment",
+          "ttl_provider": "Google Cloud Firestore TTL",
+          "ttl_field": "expires_at",
+          "active_verified_nonconsumable_days_since_last_activity": 730,
+          "non_owned_pending_bound_cancelled_days_since_last_activity": 30,
+          "test_purchase_days_since_last_activity": 7,
+          "refresh_on_backend_activity": true,
+          "all_records_have_finite_expiry": true,
+          "expired_record_recreation_requires_authoritative_google_verification": true,
+          "provider_deletion_is_asynchronous": true,
+          "provider_typical_deletion_after_expiry": "within approximately 24 hours according to Firestore TTL documentation",
+          "production_ttl_enablement_and_verification": "pending"
+        }
       },
       "backend_authentication": {
         "client_to_backend": "public HTTPS without reusable client secret",
@@ -114,25 +96,18 @@
         "backend_to_google": "attached service account via Application Default Credentials",
         "service_account_key_file_in_repository_or_container": false
       },
-      "explicitly_excluded_from_billing_verification": [
-        "gameplay profile",
-        "save data",
-        "combat data",
-        "location",
-        "contacts",
-        "advertising identifiers"
-      ],
+      "explicitly_excluded_from_billing_verification": ["gameplay profile", "save data", "combat data", "location", "contacts", "advertising identifiers"],
       "backend_sources_excluded_from_android_artifacts": true,
       "data_safety_reaudit_required_after_integration": true
     }
   },
   "data_safety_candidate": {
     "finalized": false,
-    "reason": "12.4 backend is implemented but not deployed/frozen; final Data Safety answers must cover the exact AAB, production endpoint, final retention/deletion policy and Play Console configuration",
+    "reason": "12.4 backend implementation and finite retention policy are frozen in code, but deployment, final Firestore TTL activation, endpoint and exact release artifact remain pending",
     "current_non_billing_gameplay_collection_off_device": false,
     "current_non_billing_gameplay_sharing": false,
     "payment_service_financial_data": "Google Play may collect payment information directly under its own terms; the app must not claim developer collection when the app never accesses that payment information",
-    "purchase_history_or_purchase_token": "purchase token exists transiently in Billing memory and is transmitted over HTTPS to the developer verification backend and Google Play; neither the local entitlement cache nor the reference backend persists the raw token. Both persist only a SHA-256 reference/hash plus minimum entitlement/purchase state; final Play declaration remains pending production freeze"
+    "purchase_history_or_purchase_token": "purchase token exists transiently in Billing memory and is transmitted over HTTPS to the developer verification backend and Google Play; neither the local entitlement cache nor the reference backend persists the raw token. Both persist only a SHA-256 reference/hash plus minimum entitlement/purchase state; backend records have finite activity-based TTL and final Play declaration remains pending production freeze"
   },
   "privacy_policy": {
     "draft_file": "docs/PRIVACY_POLICY_DRAFT.md",
@@ -141,22 +116,14 @@
     "public_url": "PENDING_PUBLIC_URL",
     "in_app_access": "implemented_pending_final_content",
     "privacy_contact": "PENDING_PRIVACY_CONTACT",
-    "must_cover": [
-      "developer identity and privacy contact",
-      "data accessed, collected, used and shared",
-      "third-party services and SDKs",
-      "Google Play purchase-token verification and backend handling",
-      "raw purchase-token transient processing versus hashed local/server records",
-      "secure handling",
-      "retention and deletion",
-      "children/age treatment if applicable",
-      "changes and effective date"
-    ]
+    "must_cover": ["developer identity and privacy contact", "data accessed, collected, used and shared", "third-party services and SDKs", "Google Play purchase-token verification and backend handling", "raw purchase-token transient processing versus hashed local/server records", "secure handling", "finite activity-based backend retention and Firestore TTL deletion", "children/age treatment if applicable", "changes and effective date"]
   },
   "release_requirements": [
     "deploy and certify 12.4 billing backend, then repeat technical data-flow audit",
-    "freeze production HTTPS verification endpoint, attached service identity, rate limiting and backend retention/deletion behavior",
+    "freeze production HTTPS verification endpoint, attached service identity and rate limiting",
+    "enable and verify Firestore TTL on expires_at and prove production records receive the frozen 730/30/7-day activity-based horizons",
     "prove production persistence does not retain raw purchase tokens or order ids outside the declared contract",
+    "prove an expired/missing backend cache record cannot grant entitlement without fresh authoritative Google Play verification",
     "prove the exact release profile/save and Android backup path retain only canonical SHA-256 purchase references, including migration from any legacy raw development reference",
     "inspect final Android manifest and merged permissions from the release AAB",
     "inventory every third-party SDK/service in the final artifact and production architecture",
@@ -166,7 +133,7 @@
     "finalize product/legal_documents.json from pre_release to final and synchronize its public URLs",
     "complete Play Console Data Safety form from the frozen release behavior",
     "ensure store declaration, runtime legal surface, backend behavior and privacy policy remain consistent",
-    "pass privacy_data_safety_gate.py --release, play_billing_local_reference_gate.py and legal_surface_gate.py --release on the final release ancestry",
+    "pass privacy_data_safety_gate.py --release, play_billing_local_reference_gate.py, play_billing_retention_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
     "record final Data Safety answers in this repository"
   ],
   "pass_recorded": false
