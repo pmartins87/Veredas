@@ -28,11 +28,13 @@ O modelo comercial planejado usa compras digitais não consumíveis processadas 
 
 Para confirmar uma compra ou restaurar uma titularidade, o aplicativo envia ao backend de verificação um envelope técnico limitado contendo identificador da requisição de verificação, identificador do aplicativo/pacote, identificador do produto, token de compra, horário informado da compra e estado de acknowledgement conhecido pelo cliente. O fluxo não inclui perfil de gameplay, save, histórico de combate, localização, contatos ou identificadores publicitários.
 
-O token de compra é necessário de forma transitória para que o backend consulte a compra correspondente na Google Play Android Developer API. Na implementação de referência preparada para produção, **o token de compra bruto não é persistido pelo backend**. A chave persistente de deduplicação é um hash SHA-256 do token. Também não é necessário persistir `orderId` para conceder titularidade.
+O token de compra bruto existe apenas de forma transitória durante o fluxo de faturamento/verificação. Depois da confirmação, o cache local de titularidade **não grava o token bruto**: mantém somente uma referência `sha256:<digest>` derivada do token, além do estado mínimo da titularidade. Referências antigas de desenvolvimento que eventualmente estejam em formato bruto são convertidas para essa referência SHA-256 quando o perfil é normalizado antes de ser armazenado novamente.
 
-O registro de backend é limitado ao hash do token e a estado técnico mínimo da compra/titularidade, como pacote, produto, estado da compra, estado de acknowledgement, indicador de titularidade, estágio de processamento, horário de conclusão informado pelo Google quando disponível, indicador de compra de teste e timestamps do servidor.
+O token de compra também é necessário de forma transitória para que o backend consulte a compra correspondente na Google Play Android Developer API. Na implementação de referência preparada para produção, **o token de compra bruto não é persistido pelo backend**. A chave persistente de deduplicação é um hash SHA-256 do token. Também não é necessário persistir `orderId` para conceder titularidade.
 
-A titularidade nova só deve ser concedida depois que o backend confirmar a compra com o Google Play e, quando necessário, realizar e confirmar o acknowledgement. Uma compra pendente, cancelada, incompatível ou não verificável não deve conceder uma nova titularidade.
+O registro de backend é limitado ao hash do token e a estado técnico mínimo da compra/titularidade, como pacote, produto, estado da compra, estado de acknowledgement, indicador de titularidade, estágio de processamento, horário de conclusão informado pelo Google quando disponível, indicador de compra de teste e timestamps do servidor. As gravações de estado são transacionais e monotônicas para impedir que uma resposta atrasada rebaixe um estado mais novo.
+
+A titularidade nova só deve ser concedida depois que o backend confirmar a compra com o Google Play, quando necessário realizar e confirmar o acknowledgement e persistir com sucesso o estado final. Uma compra pendente, cancelada, incompatível, não verificável ou cuja persistência final falhe não deve conceder uma nova titularidade.
 
 ## 4. Finalidades
 
@@ -63,6 +65,8 @@ Nenhum SDK ou serviço adicional deve ser incluído na versão final sem revisã
 
 O jogo mantém localmente dados necessários à experiência, como perfil, saves, progresso, configurações e cache de titularidades. A remoção do aplicativo ou a limpeza dos dados do aplicativo pelo sistema operacional pode remover esses dados locais, ressalvadas eventuais funções de backup/restauração fornecidas pelo sistema ou pela plataforma.
 
+O cache de titularidade usa schema interno 2 e armazena produto, estado de titularidade, timestamps técnicos, origem, revogação e uma referência SHA-256 da compra. **O token de compra bruto não é mantido nesse cache**, inclusive no conteúdo do perfil que possa ser abrangido por mecanismos de backup da plataforma. A auditoria final do AAB, save real e caminho de backup ainda é requisito de release para confirmar que o artefato publicado corresponde a esse desenho.
+
 Uma titularidade previamente verificada pode permanecer disponível por meio do cache local durante falhas temporárias de loja/backend, de acordo com a implementação final. Uma falha temporária de comunicação não deve transformar uma compra nova não verificada em titularidade.
 
 ## 7. Retenção e exclusão
@@ -77,7 +81,7 @@ O backend de referência evita persistir o token de compra bruto e o `orderId`; 
 
 O projeto adota minimização de dados e separa credenciais de assinatura e identidades/segredos de produção do código do aplicativo. O fluxo de verificação usa HTTPS. O aplicativo não incorpora uma credencial reutilizável capaz de autorizar titularidades; a decisão depende da verificação autoritativa da compra no servidor.
 
-O backend de referência usa associação transacional entre o hash do token e o produto e só retorna titularidade positiva depois de confirmar estado `PURCHASED` e acknowledgement. Antes da publicação ainda deverão ser congelados controles de abuso/rate limit e permissões mínimas da identidade de serviço.
+O backend de referência usa associação transacional entre o hash do token e o produto, gravação transacional/monotônica do estado da compra e só retorna titularidade positiva depois de confirmar estado `PURCHASED`, acknowledgement e persistência final. O serviço separa liveness de readiness para que indisponibilidade temporária de identidade/Firestore resulte em 503 controlado, nunca em titularidade positiva. Antes da publicação ainda deverão ser congelados controles de abuso/rate limit e permissões mínimas da identidade de serviço.
 
 ## 9. Crianças e público-alvo
 
@@ -127,11 +131,13 @@ The planned commercial model uses non-consumable digital purchases processed thr
 
 To verify a purchase or restore an entitlement, the app sends a limited technical envelope to the verification backend containing a verification request ID, app/package ID, product ID, purchase token, client-reported purchase time, and client-known acknowledgement state. The verification flow does not include the gameplay profile, save data, combat history, location, contacts, or advertising identifiers.
 
-The raw purchase token is transiently needed so that the backend can query the matching purchase through the Google Play Android Developer API. In the production reference implementation, **the backend does not persist the raw purchase token**. Its durable deduplication key is a SHA-256 hash of that token. An `orderId` is not required to grant the entitlement and is not part of the reference persistent record.
+The raw purchase token exists only transiently during the billing/verification flow. After verification, the local entitlement cache **does not store the raw token**: it keeps only a `sha256:<digest>` reference derived from the token together with minimum entitlement state. Legacy development references that may exist in raw form are converted to the SHA-256 reference when the profile is normalized before being stored again.
 
-The reference backend stores only the token hash and minimum purchase/entitlement state: package, product, purchase state, acknowledgement state, ownership flag, processing stage, Google-reported completion time when available, test-purchase flag, and server timestamps.
+The raw purchase token is also transiently needed so that the backend can query the matching purchase through the Google Play Android Developer API. In the production reference implementation, **the backend does not persist the raw purchase token**. Its durable deduplication key is a SHA-256 hash of that token. An `orderId` is not required to grant the entitlement and is not part of the reference persistent record.
 
-A new entitlement must only be granted after the backend verifies the purchase with Google Play and, where required, performs and confirms acknowledgement. A pending, cancelled, mismatched, or unverifiable purchase must not grant a new entitlement.
+The reference backend stores only the token hash and minimum purchase/entitlement state: package, product, purchase state, acknowledgement state, ownership flag, processing stage, Google-reported completion time when available, test-purchase flag, and server timestamps. State writes are transactional and monotonic so that a delayed response cannot regress a newer state.
+
+A new entitlement must only be granted after the backend verifies the purchase with Google Play, where required performs and confirms acknowledgement, and successfully persists the final state. A pending, cancelled, mismatched, unverifiable purchase, or one whose final persistence fails, must not grant a new entitlement.
 
 ## 4. Purposes
 
@@ -162,6 +168,8 @@ No additional SDK or service may be added to the final build without reviewing t
 
 The game locally stores data needed for the experience, including profile, saves, progress, settings, and the entitlement cache. Uninstalling the app or clearing its app data may remove local data, subject to any backup/restore behavior actually provided by the operating system or platform.
 
+The entitlement cache uses internal schema 2 and stores the product, ownership state, technical timestamps, source, revocation state, and a SHA-256 purchase reference. **The raw purchase token is not retained in that cache**, including profile data that may fall within platform backup mechanisms. A final release audit of the AAB, real save, and backup path is still required to prove that the published artifact matches this design.
+
 A previously verified entitlement may remain available from the local cache during a temporary store/backend outage, according to the final implementation. Temporary loss of connectivity must not turn a new unverified purchase into an entitlement.
 
 ## 7. Retention and deletion
@@ -176,7 +184,7 @@ The reference backend avoids persisting the raw purchase token and `orderId`; it
 
 The project applies data minimization and keeps signing credentials and production identities/secrets out of the application code. Purchase verification uses HTTPS. The app does not embed a reusable credential capable of authorizing an entitlement; entitlement decisions depend on authoritative server-side purchase verification.
 
-The reference backend transactionally binds the token hash to a product and only returns positive ownership after confirming `PURCHASED` state and acknowledgement. Production abuse/rate-limit controls and least-privilege service permissions must still be frozen before launch.
+The reference backend transactionally binds the token hash to a product, transactionally/monotonically records purchase state, and returns positive ownership only after confirming `PURCHASED` state, acknowledgement, and final durable persistence. The service separates liveness from readiness so that temporary identity/Firestore unavailability produces a controlled 503 rather than positive ownership. Production abuse/rate-limit controls and least-privilege service permissions must still be frozen before launch.
 
 ## 9. Children and target audience
 
