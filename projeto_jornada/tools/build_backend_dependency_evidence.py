@@ -3,16 +3,20 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.metadata
 import json
-import platform
 import re
+import subprocess
+import zipfile
+from email.parser import BytesParser
+from email.policy import compat32
 from pathlib import Path
 from typing import Any
 
-from packaging.utils import canonicalize_name, parse_wheel_filename
-
 PIN_RE = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s;]+)$")
+
+
+def canonicalize_name(name: str) -> str:
+    return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def sha256_file(path: Path) -> str:
@@ -42,47 +46,70 @@ def parse_pin_file(path: Path) -> dict[str, tuple[str, str]]:
     return result
 
 
-def wheel_index(directory: Path) -> dict[tuple[str, str], list[Path]]:
-    result: dict[tuple[str, str], list[Path]] = {}
+def wheel_metadata(path: Path) -> dict[str, Any]:
+    try:
+        with zipfile.ZipFile(path, "r") as archive:
+            candidates = sorted(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
+            if len(candidates) != 1:
+                raise ValueError(f"expected exactly one .dist-info/METADATA in {path.name}, found {len(candidates)}")
+            message = BytesParser(policy=compat32).parsebytes(archive.read(candidates[0]))
+    except (OSError, zipfile.BadZipFile, KeyError) as exc:
+        raise ValueError(f"cannot read wheel metadata from {path.name}: {exc}") from exc
+
+    name = str(message.get("Name", "")).strip()
+    version = str(message.get("Version", "")).strip()
+    if not name or not version:
+        raise ValueError(f"wheel metadata lacks Name/Version: {path.name}")
+    return {
+        "name": name,
+        "normalized_name": canonicalize_name(name),
+        "version": version,
+        "license_expression": str(message.get("License-Expression", "")).strip(),
+        "license": str(message.get("License", "")).strip(),
+        "license_files": sorted({str(value).strip() for value in message.get_all("License-File", []) if str(value).strip()}),
+        "home_page": str(message.get("Home-Page", "")).strip(),
+        "requires_dist": sorted(str(value).strip() for value in message.get_all("Requires-Dist", []) if str(value).strip()),
+    }
+
+
+def wheel_index(directory: Path) -> dict[tuple[str, str], list[tuple[Path, dict[str, Any]]]]:
+    result: dict[tuple[str, str], list[tuple[Path, dict[str, Any]]]] = {}
     for path in sorted(directory.glob("*.whl")):
-        try:
-            name, version, _build, _tags = parse_wheel_filename(path.name)
-        except Exception as exc:  # noqa: BLE001
-            raise ValueError(f"cannot parse wheel filename {path.name}: {exc}") from exc
-        key = (canonicalize_name(str(name)), str(version))
-        result.setdefault(key, []).append(path)
+        metadata = wheel_metadata(path)
+        key = (str(metadata["normalized_name"]), str(metadata["version"]))
+        result.setdefault(key, []).append((path, metadata))
     return result
 
 
-def metadata_value(metadata: Any, *keys: str) -> str:
-    for key in keys:
-        value = metadata.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-    return ""
-
-
-def component_row(
-    normalized_name: str,
-    display_name: str,
-    version: str,
-    wheel: Path,
-    direct_names: set[str],
-) -> dict[str, Any]:
+def resolver_details(resolver_python: Path) -> dict[str, str]:
+    if not resolver_python.is_file():
+        raise ValueError(f"resolver Python executable missing: {resolver_python}")
+    script = r'''
+import importlib.metadata, json, platform
+print(json.dumps({
+    "python": platform.python_version(),
+    "implementation": platform.python_implementation(),
+    "system": platform.system(),
+    "machine": platform.machine(),
+    "pip_version": importlib.metadata.version("pip"),
+}))
+'''
     try:
-        dist = importlib.metadata.distribution(display_name)
-    except importlib.metadata.PackageNotFoundError as exc:
-        raise ValueError(f"resolved package is not installed in evidence environment: {display_name}=={version}") from exc
-    installed_version = dist.version
-    if installed_version != version:
-        raise ValueError(
-            f"installed/resolved version mismatch for {display_name}: installed={installed_version} resolved={version}"
-        )
-    metadata = dist.metadata
-    license_expression = metadata_value(metadata, "License-Expression")
-    license_field = metadata_value(metadata, "License")
-    license_files = sorted({value.strip() for value in metadata.get_all("License-File", []) if value.strip()})
-    requires = sorted(dist.requires or [])
+        raw = subprocess.check_output([str(resolver_python), "-c", script], text=True, stderr=subprocess.STDOUT).strip()
+        value = json.loads(raw)
+    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot inspect resolver environment: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError("resolver environment report is not an object")
+    required = ("python", "implementation", "system", "machine", "pip_version")
+    if any(not str(value.get(key, "")).strip() for key in required):
+        raise ValueError(f"resolver environment report incomplete: {value}")
+    return {key: str(value.get(key, "")) for key in required}
+
+
+def component_row(normalized_name: str, display_name: str, version: str, wheel: Path, metadata: dict[str, Any], direct_names: set[str]) -> dict[str, Any]:
+    if canonicalize_name(str(metadata.get("name", ""))) != normalized_name or str(metadata.get("version", "")) != version:
+        raise ValueError(f"wheel metadata identity mismatch for {display_name}=={version}: {wheel.name}")
     return {
         "name": display_name,
         "normalized_name": normalized_name,
@@ -92,22 +119,21 @@ def component_row(
         "wheel_filename": wheel.name,
         "wheel_sha256": sha256_file(wheel),
         "metadata": {
-            "license_expression": license_expression,
-            "license": license_field,
-            "license_files": license_files,
-            "home_page": metadata_value(metadata, "Home-Page"),
-            "requires_dist": requires,
+            "license_expression": str(metadata.get("license_expression", "")),
+            "license": str(metadata.get("license", "")),
+            "license_files": list(metadata.get("license_files", [])),
+            "home_page": str(metadata.get("home_page", "")),
+            "requires_dist": list(metadata.get("requires_dist", [])),
         },
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Build a hash-locked Python dependency set and internal SBOM from an already-resolved backend environment."
-    )
-    parser.add_argument("--direct", type=Path, required=True, help="Direct requirements.txt with exact pins.")
-    parser.add_argument("--resolved", type=Path, required=True, help="pip freeze output for the resolved environment.")
-    parser.add_argument("--wheel-dir", type=Path, required=True, help="Directory containing one compatible wheel per resolved package.")
+    parser = argparse.ArgumentParser(description="Build a hash-locked Python dependency set and internal SBOM from an already-resolved backend environment.")
+    parser.add_argument("--direct", type=Path, required=True)
+    parser.add_argument("--resolved", type=Path, required=True)
+    parser.add_argument("--wheel-dir", type=Path, required=True)
+    parser.add_argument("--resolver-python", type=Path, required=True)
     parser.add_argument("--lock-output", type=Path, required=True)
     parser.add_argument("--sbom-output", type=Path, required=True)
     args = parser.parse_args()
@@ -116,10 +142,13 @@ def main() -> int:
         direct = parse_pin_file(args.direct)
         resolved = parse_pin_file(args.resolved)
         wheels = wheel_index(args.wheel_dir)
-        pip_version = importlib.metadata.version("pip")
-        packaging_version = importlib.metadata.version("packaging")
-    except (OSError, ValueError, importlib.metadata.PackageNotFoundError) as exc:
+        resolver = resolver_details(args.resolver_python)
+    except (OSError, ValueError) as exc:
         print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: {exc}")
+        return 1
+
+    if not resolver["python"].startswith("3.12.") or resolver["system"] != "Linux":
+        print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: resolver must be Python 3.12/Linux, got {resolver}")
         return 1
 
     missing_direct = sorted(set(direct) - set(resolved))
@@ -127,12 +156,8 @@ def main() -> int:
         print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: direct package(s) absent from resolved set: {missing_direct}")
         return 1
     for name, (_display, direct_version) in direct.items():
-        resolved_version = resolved[name][1]
-        if resolved_version != direct_version:
-            print(
-                "BACKEND_DEPENDENCY_EVIDENCE FAIL: direct pin drift %s direct=%s resolved=%s"
-                % (name, direct_version, resolved_version)
-            )
+        if resolved[name][1] != direct_version:
+            print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: direct pin drift {name} direct={direct_version} resolved={resolved[name][1]}")
             return 1
 
     components: list[dict[str, Any]] = []
@@ -144,22 +169,19 @@ def main() -> int:
         display_name, version = resolved[normalized_name]
         matches = wheels.get((normalized_name, version), [])
         if len(matches) != 1:
-            errors.append(
-                f"expected exactly one compatible wheel for {display_name}=={version}, found {len(matches)}"
-            )
+            errors.append(f"expected exactly one compatible wheel for {display_name}=={version}, found {len(matches)}")
             continue
-        wheel = matches[0]
+        wheel, metadata = matches[0]
         digest = sha256_file(wheel)
         lock_rows.append(f"{display_name}=={version} --hash=sha256:{digest}")
         try:
-            components.append(component_row(normalized_name, display_name, version, wheel, direct_names))
+            components.append(component_row(normalized_name, display_name, version, wheel, metadata, direct_names))
         except ValueError as exc:
             errors.append(str(exc))
 
-    extra_wheels = sorted(path.name for key, paths in wheels.items() if key not in resolved_keys for path in paths)
+    extra_wheels = sorted(path.name for key, rows in wheels.items() if key not in resolved_keys for path, _metadata in rows)
     if extra_wheels:
         errors.append(f"wheel directory contains package(s) outside resolved set: {extra_wheels}")
-
     if errors:
         print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: {len(errors)} issue(s)")
         for error in errors:
@@ -169,33 +191,21 @@ def main() -> int:
     args.lock_output.parent.mkdir(parents=True, exist_ok=True)
     args.lock_output.write_text(
         "# Veredas da Trama Billing backend dependency lock\n"
-        "# Generated from the exact Python 3.12/Linux evidence environment.\n"
+        "# Generated from the exact Python 3.12/Linux runtime resolver environment.\n"
         "# Install with: python -m pip install --require-hashes -r requirements.lock\n"
-        + "\n".join(lock_rows)
-        + "\n",
+        + "\n".join(lock_rows) + "\n",
         encoding="utf-8",
     )
 
     sbom = {
-        "schema_version": 2,
+        "schema_version": 3,
         "document_type": "veredas_internal_software_bill_of_materials",
         "scope": "billing_backend_python_runtime",
         "generator": "tools/build_backend_dependency_evidence.py",
-        "input": {
-            "direct_requirements_path": "backend/play_purchase_verifier/requirements.txt",
-            "direct_requirements_sha256": sha256_file(args.direct),
-        },
-        "resolver": {
-            "tool": "pip",
-            "version": pip_version,
-            "packaging_library_version": packaging_version,
-        },
-        "environment": {
-            "python": platform.python_version(),
-            "implementation": platform.python_implementation(),
-            "system": platform.system(),
-            "machine": platform.machine(),
-        },
+        "wheel_metadata_parser": "python_stdlib_zipfile_email",
+        "input": {"direct_requirements_path": "backend/play_purchase_verifier/requirements.txt", "direct_requirements_sha256": sha256_file(args.direct)},
+        "resolver": {"tool": "pip", "version": resolver["pip_version"]},
+        "environment": {"python": resolver["python"], "implementation": resolver["implementation"], "system": resolver["system"], "machine": resolver["machine"]},
         "direct_requirement_count": len(direct),
         "component_count": len(components),
         "all_components_hash_bound_to_wheel": True,
@@ -205,8 +215,8 @@ def main() -> int:
     args.sbom_output.write_text(json.dumps(sbom, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(
-        "BACKEND_DEPENDENCY_EVIDENCE PASS: direct=%d resolved=%d wheels=%d hash_locked=1 sbom_components=%d pip=%s"
-        % (len(direct), len(resolved), sum(len(paths) for paths in wheels.values()), len(components), pip_version)
+        "BACKEND_DEPENDENCY_EVIDENCE PASS: direct=%d resolved=%d wheels=%d hash_locked=1 sbom_components=%d pip=%s tooling_contamination=0"
+        % (len(direct), len(resolved), sum(len(rows) for rows in wheels.values()), len(components), resolver["pip_version"])
     )
     return 0
 
