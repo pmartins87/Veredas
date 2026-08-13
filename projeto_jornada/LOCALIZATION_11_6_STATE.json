@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "11.6",
   "formal_status": "in_progress",
   "source_records": 5160,
@@ -19,9 +19,12 @@
     "equation": "3074 + 396 + 15334 = 18804"
   },
   "ui": {
-    "required_units": 119,
-    "pt_BR": 119,
-    "en": 119
+    "required_units": 131,
+    "pt_BR": 131,
+    "en": 131,
+    "previous_required_units": 119,
+    "added_on_2026_08_12": 12,
+    "reason": "Production Billing runtime adds localized purchase, restore, availability, supporter and commercial-route guidance; both launch catalogs were expanded in the same change set."
   },
   "labels": {
     "required_units": 165,
@@ -57,7 +60,8 @@
     "remaining_batch_report_is_manifest_driven": true,
     "remaining_batch_report_incorporates_compact_packs": true,
     "obsolete_three_locale_one_shot_workflow_retired": ".github/workflows/veredas-116-world-location-apply.yml",
-    "historical_status_document_distinguishes_old_es_419_scope_from_current_launch": true
+    "historical_status_document_distinguishes_old_es_419_scope_from_current_launch": true,
+    "billing_runtime_ui_is_required_in_both_launch_locales": true
   },
   "blockers": {
     "LOC-116-001": "resolved"
@@ -69,9 +73,10 @@
   "remaining_before_done": [
     "execute en 18804/18804 compact-pack certification on the current two-language launch HEAD",
     "execute full-corpus glossary/placeholder/BBCode QA with compact pack merged",
+    "execute UI completeness against the expanded 131-key pt_BR/en launch surface",
     "execute localization architecture certification proving exactly pt_BR + en and deferred es_419 rejection",
-    "execute localized Godot overflow/render matrix for pt_BR and en",
-    "execute iconography/accessibility-label consistency QA for pt_BR and en",
+    "execute localized Godot overflow/render matrix for pt_BR and en including Hub billing controls",
+    "execute iconography/accessibility-label consistency QA for pt_BR and en including Supporter Seal tooltip and billing controls",
     "execute final English linguistic sanity review",
     "execute same-HEAD localization regressions"
   ]
