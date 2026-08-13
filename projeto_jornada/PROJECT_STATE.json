@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "source_of_truth": "ROADMAP_STATE.md",
   "roadmap_total_steps": 130,
   "completed_steps": 110,
@@ -13,167 +13,160 @@
     "deferred_locales": ["es_419"]
   },
   "phase10": {
-    "10.1": "certified", "10.2": "certified", "10.3": "certified", "10.4": "certified", "10.5": "certified",
-    "10.6": "certified", "10.7": "certified", "10.8": "certified", "10.9": "certified", "10.10": "certified"
+    "10.1":"certified","10.2":"certified","10.3":"certified","10.4":"certified","10.5":"certified",
+    "10.6":"certified","10.7":"certified","10.8":"certified","10.9":"certified","10.10":"certified"
   },
   "phase11": {
-    "11.1": "certified",
-    "11.2": "certified",
-    "11.3": "in_progress_physical_device_required",
-    "11.4": "certified",
-    "11.5": "certified",
-    "11.6": "in_progress_execution_pending",
-    "11.7": "in_progress_assets_and_execution_pending",
-    "11.8": "certified",
-    "11.9": "in_progress_execution_pending",
-    "11.10": "in_progress_prerequisites_pending"
+    "11.1":"certified",
+    "11.2":"certified",
+    "11.3":"in_progress_physical_device_required",
+    "11.4":"certified",
+    "11.5":"certified",
+    "11.6":"in_progress_execution_pending",
+    "11.7":"in_progress_assets_and_execution_pending",
+    "11.8":"certified",
+    "11.9":"in_progress_execution_pending",
+    "11.10":"in_progress_prerequisites_pending_completion_artifact_pipeline_ready"
   },
   "phase11_certified_evidence": {
-    "11.1": {"commit": "0afd8f2ae374985e233b2662e066eeef91e62824", "complete_journeys": 288},
-    "11.2": {"commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254", "profile_fuzz_cases": 192, "run_fuzz_cases": 64, "corrupted_save_files_rejected": 8},
-    "11.4": {"commit": "c988448e2546b0b684a3f048fd8b28fe0f3ed11e", "run_id": 31421360688},
-    "11.5": {"commit": "37878d119d429544bc83e12986acd09e720d47e0", "source_locale": "pt_BR", "launch_scope_current": ["pt_BR", "en"]},
-    "11.8": {"completion_file": "QA_11_8_COMPLETION.json", "status": "pass", "active_blocker_critical": 0}
+    "11.1":{"commit":"0afd8f2ae374985e233b2662e066eeef91e62824","complete_journeys":288},
+    "11.2":{"commit":"39a811cab7418fcfdb3d53ebf49076fc87dc2254","profile_fuzz_cases":192,"run_fuzz_cases":64,"corrupted_save_files_rejected":8},
+    "11.4":{"commit":"c988448e2546b0b684a3f048fd8b28fe0f3ed11e","run_id":31421360688},
+    "11.5":{"commit":"37878d119d429544bc83e12986acd09e720d47e0","source_locale":"pt_BR","launch_scope_current":["pt_BR","en"]},
+    "11.8":{"completion_file":"QA_11_8_COMPLETION.json","status":"pass","active_blocker_critical":0}
   },
   "phase11_in_progress": {
-    "11.3": {"physical_device": "required_pending", "minimum_soak_seconds": 1800},
-    "11.6": {
-      "source_records": 5160,
-      "source_content_units": 18804,
-      "launch_target": "en",
-      "english_pack_base64_chars": 133572,
-      "required_ui_units": 131,
-      "pt_BR_ui_units": 131,
-      "en_ui_units": 131,
-      "status": "same_head_execution_pending"
-    },
-    "11.7": {"required_final_audio_references": 38, "status": "final_assets_and_runtime_execution_pending"},
-    "11.9": {"lifecycle_cycles": 128, "restart_rounds": 24, "expected_reloads_before_final_roundtrip": 152, "status": "runtime_execution_pending"},
-    "11.10": {"status": "prerequisites_pending", "required_completion_steps": ["11.3", "11.6", "11.7", "11.8", "11.9"]}
+    "11.3":{"physical_device":"required_pending","minimum_soak_seconds":1800},
+    "11.6":{"source_records":5160,"source_content_units":18804,"launch_target":"en","english_pack_base64_chars":133572,"required_ui_units":131,"pt_BR_ui_units":131,"en_ui_units":131,"status":"same_head_execution_pending"},
+    "11.7":{"required_final_audio_references":38,"status":"final_assets_and_runtime_execution_pending"},
+    "11.9":{"lifecycle_cycles":128,"restart_rounds":24,"expected_reloads_before_final_roundtrip":152,"status":"runtime_execution_pending"},
+    "11.10":{
+      "status":"prerequisites_pending",
+      "required_completion_steps":["11.3","11.6","11.7","11.8","11.9"],
+      "completion_writer":"tools/write_qa_release_candidate_completion.py",
+      "completion_artifact":"QA_11_10_COMPLETION.json",
+      "completion_emitted_only_after_full_green_workflow_and_clean_tree":true,
+      "runnerless_job_cannot_emit_completion":true
+    }
   },
   "phase12": {
-    "12.1": "in_progress_authoritative_name_checks_pending",
-    "12.2": "in_progress_signing_and_console_pending",
-    "12.3": "in_progress_retention_frozen_deployment_legal_data_safety_console_evidence_pending",
-    "12.4": "in_progress_client_backend_retention_implemented_execution_deployment_plugin_play_testing_pending",
-    "12.5": "in_progress_final_art_rc_captures_console_pending",
-    "12.6": "in_progress_acyclic_fingerprint_android_inventory_ready_signed_artifact_pending",
-    "12.7": "in_progress_real_play_tracks_and_evidence_pending",
-    "12.8": "in_progress_upstream_evidence_and_go_no_go_pending",
-    "12.9": "in_progress_provenance_dependency_notices_archive_recovery_ownership_handoff_pending",
-    "12.10": "in_progress_final_release_evidence_pending"
+    "12.1":"in_progress_authoritative_name_checks_pending",
+    "12.2":"in_progress_signing_and_console_pending",
+    "12.3":"in_progress_retention_frozen_deployment_legal_data_safety_console_evidence_pending",
+    "12.4":"in_progress_client_backend_retention_implemented_execution_deployment_plugin_play_testing_pending",
+    "12.5":"in_progress_copy_and_rc_capture_provenance_ready_final_art_rc_captures_console_pending",
+    "12.6":"in_progress_acyclic_fingerprint_android_inventory_ready_signed_artifact_pending",
+    "12.7":"in_progress_real_play_tracks_and_evidence_pending",
+    "12.8":"in_progress_upstream_evidence_and_go_no_go_pending",
+    "12.9":"in_progress_provenance_dependency_notices_archive_recovery_ownership_handoff_pending",
+    "12.10":"in_progress_final_release_evidence_pending"
   },
   "phase12_preflight": {
     "12.1": {
-      "state_file": "RELEASE_12_1_NAME_STATE.json",
-      "candidate_name": "Veredas da Trama",
-      "status": "provisional_public_clearance_only"
+      "state_file":"RELEASE_12_1_NAME_STATE.json",
+      "candidate_name":"Veredas da Trama",
+      "public_reconnaissance_rounds":2,
+      "exact_indexed_collision_found":false,
+      "legal_clearance":false,
+      "status":"provisional_public_clearance_only"
     },
     "12.2": {
-      "state_file": "RELEASE_12_2_STATE.json",
-      "application_id": "com.pmartins87.veredasdatrama",
-      "android_toolchain": "Godot 4.7.1; minSdk 24; compile/target 36; Build Tools 36.1.0",
-      "status": "real_keystore_secrets_console_and_signed_build_pending"
+      "state_file":"RELEASE_12_2_STATE.json",
+      "application_id":"com.pmartins87.veredasdatrama",
+      "android_toolchain":"Godot 4.7.1; minSdk 24; compile/target 36; Build Tools 36.1.0",
+      "status":"real_keystore_secrets_console_and_signed_build_pending"
     },
     "12.3": {
-      "state_file": "RELEASE_12_3_STATE.json",
-      "privacy_contract": "product/privacy_data_safety.json",
-      "runtime_legal_resource": "product/legal_documents.json",
-      "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
-      "retention_gate": "tools/play_billing_retention_gate.py",
-      "retention_consistency_gate": "tools/privacy_retention_consistency_gate.py",
-      "billing_backend_retention": {
-        "ttl_field": "expires_at",
-        "active_verified_days": 730,
-        "non_owned_days": 30,
-        "test_purchase_days": 7,
-        "refresh_on_activity": true,
-        "expired_record_requires_authoritative_reverification": true,
-        "production_firestore_ttl_enabled_verified": false
-      },
-      "status": "finite_retention_implemented_production_ttl_deploy_legal_urls_rating_data_safety_console_pending"
+      "state_file":"RELEASE_12_3_STATE.json",
+      "privacy_contract":"product/privacy_data_safety.json",
+      "runtime_legal_resource":"product/legal_documents.json",
+      "privacy_policy_draft":"docs/PRIVACY_POLICY_DRAFT.md",
+      "retention_gate":"tools/play_billing_retention_gate.py",
+      "retention_consistency_gate":"tools/privacy_retention_consistency_gate.py",
+      "billing_backend_retention":{"ttl_field":"expires_at","active_verified_days":730,"non_owned_days":30,"test_purchase_days":7,"refresh_on_activity":true,"expired_record_requires_authoritative_reverification":true,"production_firestore_ttl_enabled_verified":false},
+      "status":"finite_retention_implemented_production_ttl_deploy_legal_urls_rating_data_safety_console_pending"
     },
     "12.4": {
-      "state_file": "RELEASE_12_4_STATE.json",
-      "billing_contract": "mobile/play_billing_contract.json",
-      "backend_root": "backend/play_purchase_verifier",
-      "retention_policy": "backend/play_purchase_verifier/retention_policy.py",
-      "combined_gate": "tools/play_billing_12_4_gate.py",
-      "backend_purchase_data_retention_deletion_frozen": true,
-      "backend_firestore_ttl_enabled_verified": false,
-      "status": "client_reference_backend_and_retention_implemented_unexecuted_deployment_plugin_play_track_pending"
+      "state_file":"RELEASE_12_4_STATE.json",
+      "billing_contract":"mobile/play_billing_contract.json",
+      "backend_root":"backend/play_purchase_verifier",
+      "retention_policy":"backend/play_purchase_verifier/retention_policy.py",
+      "combined_gate":"tools/play_billing_12_4_gate.py",
+      "backend_purchase_data_retention_deletion_frozen":true,
+      "backend_firestore_ttl_enabled_verified":false,
+      "status":"client_reference_backend_and_retention_implemented_unexecuted_deployment_plugin_play_track_pending"
     },
     "12.5": {
-      "state_file": "RELEASE_12_5_STATE.json",
-      "listing_source": "product/store_listing_google_play.json",
-      "store_locales": ["pt-BR", "en-US"],
-      "status": "copy_ready_final_visual_assets_and_rc_captures_pending"
+      "state_file":"RELEASE_12_5_STATE.json",
+      "listing_source":"product/store_listing_google_play.json",
+      "capture_manifest":"product/store_capture_manifest.json",
+      "listing_gate":"tools/store_listing_gate.py",
+      "capture_provenance_gate":"tools/store_capture_provenance_gate.py",
+      "capture_finalizer":"tools/finalize_store_capture_manifest.py",
+      "workflow":".github/workflows/veredas-store-listing-12-5.yml",
+      "store_locales":["pt-BR","en-US"],
+      "pt_BR_full_description_chars":1319,
+      "en_US_full_description_chars":1207,
+      "required_screenshots_per_locale":6,
+      "required_total_screenshots":12,
+      "screenshot_dimensions":"1080x1920 portrait",
+      "all_screenshots_must_match_one_certified_11_10_rc":true,
+      "screenshot_sha256_required":true,
+      "release_input_fingerprint_binding_required":true,
+      "actual_android_runtime_capture_only":true,
+      "final_capture_count":0,
+      "status":"copy_and_capture_provenance_pipeline_ready_final_art_rc_capture_execution_and_console_pending"
     },
     "12.6": {
-      "state_file": "RELEASE_12_6_STATE.json",
-      "fingerprint_tool": "tools/release_input_fingerprint.py",
-      "input_scope_gate": "tools/release_input_scope_gate.py",
-      "runtime_product_files": ["product/commercial_model.json", "product/legal_documents.json"],
-      "release_archive_self_reference_prevented": true,
-      "pre_post_export_fingerprint_equivalence_required": true,
-      "android_dependency_inventory_generator": "tools/gradle_dependency_inventory.init.gradle",
-      "android_dependency_inventory_gate": "tools/android_dependency_inventory_gate.py",
-      "android_dependency_inventory_scope": "releaseRuntimeClasspath",
-      "status": "acyclic_input_and_android_inventory_pipelines_implemented_real_signed_artifact_pending"
+      "state_file":"RELEASE_12_6_STATE.json",
+      "fingerprint_tool":"tools/release_input_fingerprint.py",
+      "input_scope_gate":"tools/release_input_scope_gate.py",
+      "runtime_product_files":["product/commercial_model.json","product/legal_documents.json"],
+      "release_archive_self_reference_prevented":true,
+      "pre_post_export_fingerprint_equivalence_required":true,
+      "android_dependency_inventory_generator":"tools/gradle_dependency_inventory.init.gradle",
+      "android_dependency_inventory_gate":"tools/android_dependency_inventory_gate.py",
+      "android_dependency_inventory_scope":"releaseRuntimeClasspath",
+      "status":"acyclic_input_and_android_inventory_pipelines_implemented_real_signed_artifact_pending"
     },
-    "12.7": {
-      "state_file": "RELEASE_12_7_STATE.json",
-      "minimum_closed_testers": 12,
-      "minimum_closed_test_days": 14,
-      "status": "real_internal_closed_testing_and_evidence_pending"
-    },
-    "12.8": {
-      "state_file": "RELEASE_12_8_STATE.json",
-      "status": "upstream_completion_artifact_identity_rollback_dry_run_and_go_no_go_pending"
-    },
+    "12.7":{"state_file":"RELEASE_12_7_STATE.json","minimum_closed_testers":12,"minimum_closed_test_days":14,"status":"real_internal_closed_testing_and_evidence_pending"},
+    "12.8":{"state_file":"RELEASE_12_8_STATE.json","status":"upstream_completion_artifact_identity_rollback_dry_run_and_go_no_go_pending"},
     "12.9": {
-      "state_file": "RELEASE_12_9_STATE.json",
-      "contract": "product/continuity_support_contract.json",
-      "provenance_contract": "product/release_provenance.json",
-      "third_party_notices_manifest": "product/third_party_notices.json",
-      "release_archive_manifest": "product/release_archive_manifest.json",
-      "backend_dependency_evidence_builder": "tools/build_backend_dependency_evidence.py",
-      "backend_dependency_evidence_gate": "tools/backend_dependency_evidence_gate.py",
-      "backend_runtime_resolver_tooling_contamination": false,
-      "backend_wheel_metadata_parser": "python_stdlib_zipfile_email",
-      "android_dependency_inventory_generator": "tools/gradle_dependency_inventory.init.gradle",
-      "android_dependency_inventory_gate": "tools/android_dependency_inventory_gate.py",
-      "third_party_notices_gate": "tools/third_party_notices_gate.py",
-      "current_versioned_assets": 4,
-      "current_asset_rights_reviews_pending": 4,
-      "known_software_components": 7,
-      "primary_source_license_ids_identified": 7,
-      "backend_direct_dependencies_pinned_and_inventoried": 5,
-      "backend_transitive_hash_lock": "pending_runner_execution",
-      "backend_final_sbom": "pending_runner_execution",
-      "android_final_dependency_inventory": "pending_final_gradle_plugin_build_execution",
-      "canonical_archive_required_items": 12,
-      "status": "provenance_dependency_android_notice_archive_controls_implemented_final_evidence_recovery_ownership_handoff_pending"
+      "state_file":"RELEASE_12_9_STATE.json",
+      "contract":"product/continuity_support_contract.json",
+      "provenance_contract":"product/release_provenance.json",
+      "third_party_notices_manifest":"product/third_party_notices.json",
+      "release_archive_manifest":"product/release_archive_manifest.json",
+      "backend_dependency_evidence_builder":"tools/build_backend_dependency_evidence.py",
+      "backend_dependency_evidence_gate":"tools/backend_dependency_evidence_gate.py",
+      "backend_runtime_resolver_tooling_contamination":false,
+      "backend_wheel_metadata_parser":"python_stdlib_zipfile_email",
+      "android_dependency_inventory_generator":"tools/gradle_dependency_inventory.init.gradle",
+      "android_dependency_inventory_gate":"tools/android_dependency_inventory_gate.py",
+      "third_party_notices_gate":"tools/third_party_notices_gate.py",
+      "current_versioned_assets":4,
+      "current_asset_rights_reviews_pending":4,
+      "known_software_components":7,
+      "primary_source_license_ids_identified":7,
+      "backend_direct_dependencies_pinned_and_inventoried":5,
+      "backend_transitive_hash_lock":"pending_runner_execution",
+      "backend_final_sbom":"pending_runner_execution",
+      "android_final_dependency_inventory":"pending_final_gradle_plugin_build_execution",
+      "canonical_archive_required_items":12,
+      "status":"provenance_dependency_android_notice_archive_controls_implemented_final_evidence_recovery_ownership_handoff_pending"
     },
-    "12.10": {
-      "state_file": "RELEASE_12_10_STATE.json",
-      "status": "12_8_12_9_and_final_ready_to_play_promote_publish_evidence_pending"
-    }
+    "12.10":{"state_file":"RELEASE_12_10_STATE.json","status":"12_8_12_9_and_final_ready_to_play_promote_publish_evidence_pending"}
   },
   "execution_infrastructure": {
-    "github_actions_status": "no_executor",
-    "last_observed_signature": {"steps": [], "runner_id": 0, "runner_name": "", "runner_group_id": 0},
-    "policy": "no PASS or FAIL is inferred from a job that never receives a runner"
+    "github_actions_status":"no_executor",
+    "last_observed_signature":{"steps":[],"runner_id":0,"runner_name":"","runner_group_id":0},
+    "policy":"no PASS or FAIL is inferred from a job that never receives a runner"
   },
   "release_triage": {
-    "active_blocker_critical_product_defects": 0,
-    "resolved_post_11_8_critical_defects": ["BILL-124-001"],
-    "non_defect_release_dependencies": ["DEP-113-PHYSICAL", "DEP-078-AUDIO", "DEP-073-075-ART"]
+    "active_blocker_critical_product_defects":0,
+    "resolved_post_11_8_critical_defects":["BILL-124-001"],
+    "non_defect_release_dependencies":["DEP-113-PHYSICAL","DEP-078-AUDIO","DEP-073-075-ART"]
   },
-  "balance_freeze": {
-    "status": "certified",
-    "manifest": "BALANCE_FREEZE.json",
-    "verification_tool": "tools/verify_balance_freeze.py"
-  },
-  "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
+  "balance_freeze":{"status":"certified","manifest":"BALANCE_FREEZE.json","verification_tool":"tools/verify_balance_freeze.py"},
+  "completion_definition":"12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
 }
