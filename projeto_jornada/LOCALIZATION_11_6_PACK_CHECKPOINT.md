@@ -11,7 +11,7 @@
 - `es_419` is preserved as a **deferred locale** for a future language expansion and is not a launch gate in the current scope.
 - This is an explicit product-scope decision, not a relaxation of English quality requirements.
 
-## Frozen coverage contract
+## Frozen content coverage contract
 
 - Canonical stable records: **5,160**.
 - Canonical translatable content units: **18,804**.
@@ -19,8 +19,17 @@
 - Additional family/monster names persisted after that baseline: **396**.
 - Compact English delta: **15,334** units.
 - Exact English coverage equation: **3,074 + 396 + 15,334 = 18,804**.
-- Required UI: **119/119** in both launch locales.
 - Mechanical/lore labels: **165/165** in both launch locales.
+
+The narrative/content counts above remain frozen. The runtime UI surface is tracked independently from the compact narrative pack.
+
+## Current UI surface
+
+- Required UI before production Billing surface: **119** keys.
+- Required UI now: **131/131** in both `pt_BR` and `en`.
+- The 12 added keys cover Billing purchase/restore state, supporter-license state and the full-game route-lock explanation.
+- This UI expansion does **not** alter the 18,804 content-unit contract or the 15,334-unit compact English pack.
+- Overflow/iconography certification must exercise the Android Billing controls through a test-only surface mode that does not initialize store/network activity on Linux CI.
 
 ## English compact pack
 
@@ -32,12 +41,12 @@ The parts are sorted and concatenated, Base64-decoded, gzip-decompressed and par
 
 ## Gate architecture after scope change
 
-- `localization/manifest.json` is now the authoritative launch-locale list.
+- `localization/manifest.json` is now the authoritative launch-locale and required-UI list.
 - `tools/build_launch_localization_packs.py` derives its non-source targets from that manifest.
-- `tools/localization_pack_certification.py` certifies only current launch targets and still requires **18,804/18,804** English coverage, exactly **15,334** pack units, zero collisions, zero unknown keys and token/BBCode parity.
-- `tools/localization_quality_gate.py` now merges the compact pack before glossary/token/completeness checks, so the quality gate covers the complete translated corpus rather than only the base overlay.
+- `tools/localization_pack_certification.py` certifies only current launch targets and still requires **18,804/18,804** English content coverage, exactly **15,334** pack units, zero collisions, zero unknown keys and token/BBCode parity.
+- `tools/localization_quality_gate.py` merges the compact pack before glossary/token/completeness checks.
 - `tools/localization_full_linguistic_sanity.py` derives its targets from the launch manifest.
-- Godot overflow and iconography/accessibility certification now exercise **pt_BR + en**.
+- Godot overflow and iconography/accessibility certification exercise **pt_BR + en** and must include the Billing surface.
 
 ## Resolved blocker
 
@@ -45,7 +54,7 @@ The parts are sorted and concatenated, Base64-decoded, gzip-decompressed and par
 
 1. the English physical pack is contiguous and has the certified total Base64 length;
 2. Spanish is no longer a launch locale;
-3. compiler/certifier target selection is manifest-driven, preventing a deferred locale from remaining an accidental release blocker.
+3. compiler/certifier target selection is manifest-driven, preventing a deferred locale from remaining an accidental launch blocker.
 
 Spanish localization artifacts are intentionally retained for future work.
 
@@ -56,9 +65,10 @@ Recent GitHub Actions jobs continue to terminate before any step with `runner_id
 ## Remaining 11.6 gates
 
 1. Execute compact-pack certification proving **en=18,804/18,804**, pack **15,334**, collisions/unknown/token errors = 0 on the current HEAD.
-2. Execute full-corpus glossary/placeholder/BBCode QA with the compact pack merged.
-3. Run localized Godot overflow/render QA for `pt_BR` and `en` across the responsive device matrix.
-4. Run iconography/accessibility-label consistency QA for `pt_BR` and `en`.
-5. Run final English linguistic sanity review.
-6. Run localization regressions on the same clean HEAD.
-7. Only then mark **11.6 ✅**.
+2. Execute UI completeness proving **131/131** in `pt_BR` and `en`.
+3. Execute full-corpus glossary/placeholder/BBCode QA with the compact pack merged.
+4. Run localized Godot overflow/render QA for `pt_BR` and `en` across the responsive device matrix, including Billing controls.
+5. Run iconography/accessibility-label consistency QA for `pt_BR` and `en`, including the Supporter Seal.
+6. Run final English linguistic sanity review.
+7. Run localization regressions on the same clean HEAD.
+8. Only then mark **11.6 ✅**.
