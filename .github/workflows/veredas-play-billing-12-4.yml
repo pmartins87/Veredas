@@ -38,6 +38,7 @@ on:
       - 'projeto_jornada/tools/play_billing_release_gate.py'
       - 'projeto_jornada/tools/play_billing_backend_gate.py'
       - 'projeto_jornada/tools/play_billing_timeout_budget_gate.py'
+      - 'projeto_jornada/tools/play_billing_local_reference_gate.py'
       - 'projeto_jornada/tools/play_billing_12_4_gate.py'
       - 'projeto_jornada/tools/privacy_data_safety_gate.py'
       - 'projeto_jornada/tools/validate_android_export.py'
