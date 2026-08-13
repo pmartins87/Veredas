@@ -1,5 +1,5 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "source_of_truth": "ROADMAP_STATE.md",
   "roadmap_total_steps": 130,
   "completed_steps": 110,
@@ -52,7 +52,7 @@
   "phase12": {
     "12.1":"in_progress_authoritative_name_checks_pending",
     "12.2":"in_progress_signing_and_console_pending",
-    "12.3":"in_progress_retention_frozen_deployment_legal_data_safety_console_evidence_pending",
+    "12.3":"in_progress_retention_rating_audience_ready_deployment_legal_data_safety_console_evidence_pending",
     "12.4":"in_progress_client_backend_retention_implemented_execution_deployment_plugin_play_testing_pending",
     "12.5":"in_progress_copy_commercial_truth_and_rc_capture_provenance_ready_final_art_rc_captures_console_pending",
     "12.6":"in_progress_acyclic_fingerprint_android_inventory_ready_signed_artifact_pending",
@@ -84,7 +84,20 @@
       "retention_gate":"tools/play_billing_retention_gate.py",
       "retention_consistency_gate":"tools/privacy_retention_consistency_gate.py",
       "billing_backend_retention":{"ttl_field":"expires_at","active_verified_days":730,"non_owned_days":30,"test_purchase_days":7,"refresh_on_activity":true,"expired_record_requires_authoritative_reverification":true,"production_firestore_ttl_enabled_verified":false},
-      "status":"finite_retention_implemented_production_ttl_deploy_legal_urls_rating_data_safety_console_pending"
+      "content_rating_state":"CONTENT_RATING_12_3_STATE.json",
+      "content_rating_contract":"product/content_rating_target_audience.json",
+      "content_rating_gate":"tools/content_rating_target_audience_gate.py",
+      "content_rating_workflow":".github/workflows/veredas-content-rating-12-3.yml",
+      "content_rating_final_review_categories":13,
+      "content_rating_internal_prediction_allowed":false,
+      "target_audience_final_age_groups":"pending_human_product_and_legal_decision",
+      "under_13_selection_requires_families_review":true,
+      "age_13_17_selection_requires_child_status_privacy_purchase_marketing_review":true,
+      "iarc_questionnaire":"pending_play_console_exact_rc",
+      "iarc_certificate":"pending_play_console",
+      "canonical_rating_text_sources":"14 data datasets via tools/export_localization_catalog.py plus launch pt_BR/en overlays",
+      "zero_keyword_hit_proves_category_absent":false,
+      "status":"finite_retention_and_fail_closed_rating_audience_preflight_implemented_production_ttl_deploy_final_content_review_iarc_legal_urls_data_safety_console_pending"
     },
     "12.4": {
       "state_file":"RELEASE_12_4_STATE.json",
@@ -119,6 +132,7 @@
       "full_unlock_content_only":true,
       "supporter_seal_visual_only":true,
       "listing_terms_billing_model_consistency_required":true,
+      "feature_graphic_localized_alt_contract":true,
       "final_capture_count":0,
       "status":"copy_commercial_truth_and_capture_provenance_pipelines_ready_final_art_rc_capture_execution_and_console_pending"
     },
