@@ -40,7 +40,7 @@
 - 11.7 🟡 — QA audiovisual real; faltam assets finais, incluindo 38 referências de áudio.
 - 11.8 ✅ — zero blocker/critical ativo; `BILL-124-001` descoberto depois foi corrigido e permanece resolved.
 - 11.9 🟡 — 128 pause/resume + 24 restart rounds preparados; execução real pendente.
-- 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9.
+- 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9. O workflow agora só emite `QA_11_10_COMPLETION.json` **depois** de todos os gates passarem e a árvore estar limpa; o completion nasce como artifact da execução, com `status=pass` e `certified_against_head` exato, portanto job runnerless não consegue fabricar evidência.
 
 ### Infraestrutura de execução
 GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. O último probe de Billing 12.4 nesta ancestry repetiu exatamente esse padrão. Não gastar interações rerodando executor inexistente; usar o runner apenas quando houver indício de recuperação.
@@ -49,7 +49,7 @@ GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id
 Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 seguem 🟡**.
 
 ### 12.1 🟡 — nome/identidade
-Candidato **Veredas da Trama**. Busca pública inicial não é clearance jurídico. INPI/WIPO, domínios/handles e decisão final de marca seguem pendentes.
+Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não encontraram colisão exata indexada relevante, mas isso não é clearance jurídico. INPI/WIPO interativos, domínios/handles e decisão final de marca seguem pendentes.
 
 ### 12.2 🟡 — package/versionamento/assinatura/toolchain
 - Godot 4.7.1; minSdk 24; compile/target API 36; Build Tools 36.1.0.
@@ -60,7 +60,7 @@ Candidato **Veredas da Trama**. Busca pública inicial não é clearance jurídi
 - Runtime legal PT-BR/en e drafts bilíngues implementados.
 - Gameplay/save permanecem offline-first; caminho HTTP de aplicação allowlisted apenas para verificação de Billing.
 - Token bruto de compra é transitório; local/backend persistem referência/hash SHA-256 + estado mínimo; `orderId` não é persistido.
-- **Política de retenção do backend agora está congelada em código e contratos:** `expires_at` + Firestore TTL; 730 dias para compra real PURCHASED/owned, 30 dias para bound/PENDING/CANCELLED/non-owned e 7 dias para compra de teste, sempre desde a última atividade legítima.
+- **Política de retenção do backend congelada em código e contratos:** `expires_at` + Firestore TTL; 730 dias para compra real PURCHASED/owned, 30 dias para bound/PENDING/CANCELLED/non-owned e 7 dias para compra de teste, sempre desde a última atividade legítima.
 - Expiração do cache não é prova de entitlement; recriação exige nova verificação autoritativa Google Play.
 - `tools/play_billing_retention_gate.py` valida código/contrato; `tools/privacy_retention_consistency_gate.py` cruza backend ↔ privacy manifest ↔ política PT/EN ↔ texto legal in-app.
 - Permanecem pendentes: deploy real, habilitar/verificar TTL no Firestore, auditoria da persistência real/AAB, contato/URLs, revisão legal final, rating/público-alvo, Data Safety, políticas e Play Console.
@@ -72,7 +72,12 @@ Candidato **Veredas da Trama**. Busca pública inicial não é clearance jurídi
 - Permanecem: addon 3.3.0 real, produtos Play, backend HTTPS, identidade/Play API, Firestore+TTL, rate limit, execução de testes/gates e cenários reais PURCHASED/PENDING/restore/reinstall/refund/revogação/offline.
 
 ### 12.5 🟡 — store listing/ASO/assets
-Copy PT-BR/en-US pronta e coerente com desbloqueio integral + Selo de Apoiador visual-only. Faltam arte final, screenshots reais do RC e Play Console.
+- Copy PT-BR/en-US pronta e coerente com desbloqueio integral + Selo de Apoiador visual-only; contagens atuais: **1319 PT-BR / 1207 en-US** na descrição completa.
+- Baseline oficial Google Play rechecado em 2026-08-13. Mantemos 6 screenshots retrato 1080×1920 por idioma, excedendo a recomendação de jogos de pelo menos 3 imagens 9:16 nessa resolução mínima.
+- `product/store_capture_manifest.json` define **12 capturas reais do Android RC**, todas obrigatoriamente do mesmo `QA_11_10_COMPLETION`/commit/versão/fingerprint; cada PNG recebe SHA-256, timestamp UTC e identidade do device/emulador.
+- `tools/finalize_store_capture_manifest.py` somente vincula metadados/hashes a PNGs já capturados e não edita pixels. `tools/store_capture_provenance_gate.py` valida o caminho inverso e rejeita mockup, RC divergente, hash divergente ou completion 11.10 sem `status=pass`/SHA completo.
+- `tools/store_listing_gate.py` também deixou de aceitar mera existência de `QA_11_10_COMPLETION.json`: no release valida o conteúdo do certificado.
+- Workflow estrutural `.github/workflows/veredas-store-listing-12-5.yml` está preparado. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
 
 ### 12.6 🟡 — AAB/APK final assinado/reproduzível
 - Fingerprint de inputs é acíclico: só recursos runtime reais entram; evidência de release fica fora.
@@ -105,8 +110,9 @@ Somente PASS quando 12.8/12.9 e toda identidade tag/commit/version/AAB/signing/a
 4. Play Console, assinatura, addon Billing e AAB real.
 5. Backend de produção: endpoint HTTPS, identidade/Play API, Firestore, **TTL `expires_at` habilitado/verificado**, rate limit e auditoria real.
 6. Test track real 12.7.
-7. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
-8. Due diligence final do nome e documentação pública/legal.
+7. Store 12.5: completion real de 11.10 + 12 screenshots Android do mesmo RC + icon/feature graphic finais.
+8. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
+9. Due diligence final do nome e documentação pública/legal.
 
 ## Regra de avanço
 - Não repetir diagnóstico de blocker conhecido sem nova evidência.
