@@ -5,6 +5,7 @@ from typing import Any
 from urllib.parse import quote
 
 import google.auth
+from google.auth import exceptions as google_auth_exceptions
 from google.auth.transport.requests import AuthorizedSession
 import requests
 
@@ -55,12 +56,12 @@ class GooglePlayPublisherGateway:
                     timeout=(3.05, 10.0),
                     headers={"Accept": "application/json", "Cache-Control": "no-store"},
                 )
-            except requests.RequestException as exc:
+            except (requests.RequestException, google_auth_exceptions.GoogleAuthError) as exc:
                 last_error = exc
                 if attempt < 2:
                     time.sleep(0.25 * (2**attempt))
                     continue
-                raise GatewayError("play_transport_error") from exc
+                raise GatewayError("play_transport_or_auth_error") from exc
 
             if 200 <= response.status_code < 300:
                 return response
@@ -69,4 +70,4 @@ class GooglePlayPublisherGateway:
                 continue
             raise GatewayError("play_http_error", response.status_code)
 
-        raise GatewayError("play_transport_error") from last_error
+        raise GatewayError("play_transport_or_auth_error") from last_error
