@@ -152,6 +152,10 @@ def main() -> int:
         "hashlib.sha256",
         "len(line_items) != 1",
         "quantity != 1",
+        'purchase_option_id = str(offer_details.get("purchaseOptionId", "")).strip()',
+        'if "offerId" in offer_details:',
+        'if "rentOfferDetails" in offer_details:',
+        'if "preorderOfferDetails" in offer_details:',
         "purchase.purchase_state != PURCHASED",
         "play_offer_not_allowed_at_launch",
         "play_rent_not_allowed_at_launch",
@@ -161,6 +165,10 @@ def main() -> int:
         "ACKNOWLEDGED",
     ]:
         require_fragment(verifier, fragment, "verifier", errors)
+    if 'offer_details.get("rentOfferDetails") not in (None, {})' in verifier:
+        errors.append("rentOfferDetails must be rejected by key presence; empty object is a real rental marker")
+    if 'offer_details.get("preorderOfferDetails") not in (None, {})' in verifier:
+        errors.append("preorderOfferDetails must be rejected by key presence")
     parse_index = verifier.find("self._parse_authoritative(raw, request.product_id)")
     bind_index = verifier.find("self._repository.bind(request.token_hash")
     if parse_index < 0 or bind_index < 0 or bind_index < parse_index:
@@ -195,6 +203,9 @@ def main() -> int:
         "test_unacknowledged_purchase_is_acknowledged_refetched_and_granted",
         "test_pending_authoritative_state_never_grants",
         "test_claimed_product_must_equal_authoritative_line_item_before_binding",
+        "test_purchase_option_id_is_required",
+        "test_launch_offer_rent_and_preorder_presence_are_rejected",
+        "rent_marker=True",
         "test_existing_token_binding_cannot_switch_product",
         "test_concurrent_ack_error_is_safe_if_refetch_confirms_acknowledged",
         "test_failed_ack_never_grants_if_refetch_stays_pending",
@@ -246,7 +257,7 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0"
+        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0 option_presence_guard=1"
         % (mode, len(REQUIRED_FILES), len(pending), len(errors), len(warnings))
     )
     for warning in warnings:
