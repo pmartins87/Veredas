@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -15,7 +15,8 @@
     "project_godot": "4.7.1",
     "expected_addon_root": "res://addons/GodotGooglePlayBilling/",
     "gradle_build_required": true,
-    "product_type": "INAPP"
+    "product_type": "INAPP",
+    "query_product_details_argument_type": "PackedStringArray"
   },
   "products": [
     {
@@ -23,16 +24,29 @@
       "kind": "one_time_non_consumable",
       "entitlement": "full_game",
       "consumable": false,
-      "repeatable": false
+      "repeatable": false,
+      "purchase_option_policy": "single_buy_legacy_compatible",
+      "offers_allowed_at_launch": false,
+      "rent_allowed": false,
+      "preorder_allowed": false
     },
     {
       "product_id": "supporter_cosmetic_pack",
       "kind": "one_time_non_consumable",
       "entitlement": "supporter_cosmetics",
       "consumable": false,
-      "repeatable": false
+      "repeatable": false,
+      "purchase_option_policy": "single_buy_legacy_compatible",
+      "offers_allowed_at_launch": false,
+      "rent_allowed": false,
+      "preorder_allowed": false
     }
   ],
+  "launch_product_configuration": {
+    "multi_product_bundle_allowed": false,
+    "personalized_price_used": false,
+    "reason": "Launch keeps one deterministic buy option per non-consumable so the client can use the plugin's default purchase option path without offer-selection ambiguity."
+  },
   "purchase_state_policy": {
     "UNSPECIFIED": "never_grant",
     "PENDING": "never_grant; retain prior verified offline cache only",
@@ -42,6 +56,7 @@
     "mode": "secure_backend_required",
     "status": "interface_implemented_backend_pending",
     "request_fields": [
+      "verification_request_id",
       "application_id",
       "product_id",
       "purchase_token",
@@ -50,6 +65,7 @@
       "client_acknowledged_state"
     ],
     "required_response_fields": [
+      "verification_request_id",
       "ok",
       "purchase_token",
       "product_id",
@@ -65,13 +81,31 @@
       "acknowledged": true,
       "source": "play_backend"
     },
+    "client_response_correlation": "verification_request_id_must_echo_exactly",
     "deduplication_key": "purchase_token",
     "order_id_is_not_deduplication_key": true,
     "backend_endpoint": "PENDING_12_4_BACKEND_ENDPOINT",
     "server_authentication": "PENDING_12_4_SERVER_AUTH_MODEL",
     "server_acknowledges_non_consumables": true,
-    "play_developer_api_verification": "Purchases.products:get",
-    "play_developer_api_acknowledgement": "Purchases.products:acknowledge"
+    "play_developer_api_verification": "purchases.productsv2.getproductpurchasev2",
+    "play_developer_api_acknowledgement": "purchases.products.acknowledge",
+    "backend_validation_requirements": [
+      "packageName equals com.pmartins87.veredasdatrama",
+      "purchaseStateContext.purchaseState is PURCHASED",
+      "exactly one expected launch product line item is present",
+      "returned productId equals the claimed configured product_id",
+      "quantity is exactly 1",
+      "purchase token has not granted a different product",
+      "acknowledgement state is checked before acknowledgement"
+    ],
+    "backend_processing_order": [
+      "fetch authoritative ProductPurchaseV2 by packageName and purchaseToken",
+      "validate purchase state and expected product line item",
+      "persist entitlement/deduplication record idempotently by purchase_token",
+      "acknowledge the non-consumable server-side when acknowledgement is pending",
+      "confirm acknowledged state",
+      "return the exact verification_request_id only after the authoritative record is safe"
+    ]
   },
   "offline_policy": {
     "previously_verified_entitlements_may_remain_available": true,
@@ -84,7 +118,9 @@
     "query_on_app_resume": true,
     "verify_every_returned_PURCHASED_token": true,
     "apply_authoritative_snapshot_only_after_all_tokens_verify": true,
-    "partial_verification_failure_preserves_existing_cache": true
+    "partial_verification_failure_preserves_existing_cache": true,
+    "overlapping_purchase_and_restore_for_same_token_require_distinct_verification_requests": true,
+    "stale_restore_response_must_not_satisfy_new_restore_generation": true
   },
   "privacy_link": {
     "manifest": "res://product/privacy_data_safety.json",
@@ -93,11 +129,13 @@
   },
   "completion_requirements": [
     "install and pin the exact plugin release in the project",
-    "configure both Play Console non-consumable products",
+    "configure both Play Console non-consumable products with one launch buy option each and no launch offers/rent/preorder/bundles",
     "deploy secure purchase verification backend and freeze endpoint/authentication contract",
-    "verify purchaseToken with Google Play Developer API before grant",
-    "acknowledge verified non-consumables",
-    "pass pending-purchase no-grant tests",
+    "verify purchaseToken with purchases.productsv2.getproductpurchasev2 before grant",
+    "validate the authoritative product line item against the claimed configured product",
+    "acknowledge verified non-consumables server-side and return only after acknowledgement is confirmed",
+    "preserve exact verification_request_id correlation across asynchronous responses",
+    "pass pending-purchase no-grant, overlap and stale-response isolation tests",
     "pass purchase, restore, refund/revocation and reinstall/restore tests on Play test track",
     "prove previously verified offline entitlement cache survives temporary store/backend outage",
     "repeat 12.3 privacy/Data Safety audit after final billing integration"
