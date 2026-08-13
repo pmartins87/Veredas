@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -23,8 +23,45 @@
       "assets with unknown authorship or license",
       "third-party material whose redistribution terms have not been archived"
     ],
-    "current_rows": [],
-    "current_binary_asset_count": 0,
+    "current_rows": [
+      {
+        "path": "ui/assets/vector/domain_ornaments_atlas.svg",
+        "repository_blob_sha": "97d363c0cd0111b7ee4ce83ffd999cd77365d4d7",
+        "origin_class": "first_party_original",
+        "source_record": "repository_history:ui/assets/vector/domain_ornaments_atlas.svg",
+        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "rights_reviewed": false,
+        "release_eligible": false
+      },
+      {
+        "path": "ui/assets/vector/item_archetypes_atlas.svg",
+        "repository_blob_sha": "e88703a206c2ff6dc18ac09292cc166eac6796e2",
+        "origin_class": "first_party_original",
+        "source_record": "repository_history:ui/assets/vector/item_archetypes_atlas.svg",
+        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "rights_reviewed": false,
+        "release_eligible": false
+      },
+      {
+        "path": "ui/assets/vector/mark_glyphs_atlas.svg",
+        "repository_blob_sha": "823eacc63243f046abdb619df6aa263c779c9872",
+        "origin_class": "first_party_original",
+        "source_record": "repository_history:ui/assets/vector/mark_glyphs_atlas.svg",
+        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "rights_reviewed": false,
+        "release_eligible": false
+      },
+      {
+        "path": "ui/assets/vector/system_icons_atlas.svg",
+        "repository_blob_sha": "2fa842bfc7466da4af01664b2e5dd1b184456fa6",
+        "origin_class": "first_party_original",
+        "source_record": "repository_history:ui/assets/vector/system_icons_atlas.svg",
+        "rights_basis": "project record classifies this custom vector atlas as first-party original; final rights review still required before release",
+        "rights_reviewed": false,
+        "release_eligible": false
+      }
+    ],
+    "current_binary_asset_count": 4,
     "finalized": false,
     "final_archive_path": "PENDING_12_9_ASSET_PROVENANCE_ARCHIVE"
   },
@@ -111,31 +148,16 @@
   "external_services": {
     "policy": "Hosted services are not represented as redistributable software licenses; their production terms/policies and data role must instead be recorded in the release archive.",
     "known_services": [
-      {
-        "id": "google-play-billing",
-        "role": "digital_purchase_provider",
-        "production_terms_reviewed": false
-      },
-      {
-        "id": "google-play-android-developer-api",
-        "role": "server_side_purchase_verification",
-        "production_terms_reviewed": false
-      },
-      {
-        "id": "google-cloud-run",
-        "role": "reference_billing_backend_host",
-        "production_terms_reviewed": false
-      },
-      {
-        "id": "google-cloud-firestore",
-        "role": "reference_billing_backend_store",
-        "production_terms_reviewed": false
-      }
+      {"id": "google-play-billing", "role": "digital_purchase_provider", "production_terms_reviewed": false},
+      {"id": "google-play-android-developer-api", "role": "server_side_purchase_verification", "production_terms_reviewed": false},
+      {"id": "google-cloud-run", "role": "reference_billing_backend_host", "production_terms_reviewed": false},
+      {"id": "google-cloud-firestore", "role": "reference_billing_backend_store", "production_terms_reviewed": false}
     ],
     "finalized": false
   },
   "completion_requirements": [
     "every tracked release asset is covered by an explicit provenance row and no forbidden source is present",
+    "every asset row has final rights_reviewed=true and release_eligible=true before release certification",
     "final art/audio/font provenance evidence and any assignments/licenses are archived",
     "Godot, Billing plugin and every redistributed/runtime dependency have reviewed license identifiers and archived notices",
     "backend direct and transitive dependencies are completely version/hash locked and represented in a final SBOM",
