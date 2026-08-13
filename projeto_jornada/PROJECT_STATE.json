@@ -54,7 +54,7 @@
     "12.2":"in_progress_signing_and_console_pending",
     "12.3":"in_progress_retention_frozen_deployment_legal_data_safety_console_evidence_pending",
     "12.4":"in_progress_client_backend_retention_implemented_execution_deployment_plugin_play_testing_pending",
-    "12.5":"in_progress_copy_and_rc_capture_provenance_ready_final_art_rc_captures_console_pending",
+    "12.5":"in_progress_copy_commercial_truth_and_rc_capture_provenance_ready_final_art_rc_captures_console_pending",
     "12.6":"in_progress_acyclic_fingerprint_android_inventory_ready_signed_artifact_pending",
     "12.7":"in_progress_real_play_tracks_and_evidence_pending",
     "12.8":"in_progress_upstream_evidence_and_go_no_go_pending",
@@ -101,6 +101,7 @@
       "listing_source":"product/store_listing_google_play.json",
       "capture_manifest":"product/store_capture_manifest.json",
       "listing_gate":"tools/store_listing_gate.py",
+      "commercial_consistency_gate":"tools/store_commercial_consistency_gate.py",
       "capture_provenance_gate":"tools/store_capture_provenance_gate.py",
       "capture_finalizer":"tools/finalize_store_capture_manifest.py",
       "workflow":".github/workflows/veredas-store-listing-12-5.yml",
@@ -114,8 +115,12 @@
       "screenshot_sha256_required":true,
       "release_input_fingerprint_binding_required":true,
       "actual_android_runtime_capture_only":true,
+      "commercial_product_sets_cross_checked":true,
+      "full_unlock_content_only":true,
+      "supporter_seal_visual_only":true,
+      "listing_terms_billing_model_consistency_required":true,
       "final_capture_count":0,
-      "status":"copy_and_capture_provenance_pipeline_ready_final_art_rc_capture_execution_and_console_pending"
+      "status":"copy_commercial_truth_and_capture_provenance_pipelines_ready_final_art_rc_capture_execution_and_console_pending"
     },
     "12.6": {
       "state_file":"RELEASE_12_6_STATE.json",
