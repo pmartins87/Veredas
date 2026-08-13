@@ -1,0 +1,131 @@
+name: Veredas Backend Dependency Evidence 12.9
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/backend/play_purchase_verifier/requirements.txt'
+      - 'projeto_jornada/product/release_provenance.json'
+      - 'projeto_jornada/tools/build_backend_dependency_evidence.py'
+      - 'projeto_jornada/tools/backend_dependency_evidence_gate.py'
+      - '.github/workflows/veredas-backend-dependency-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-backend-dependency-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve-lock-sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Resolve exact backend runtime environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv /tmp/veredas-resolve
+          source /tmp/veredas-resolve/bin/activate
+          python -m pip install --disable-pip-version-check -r projeto_jornada/backend/play_purchase_verifier/requirements.txt
+          python -m pip check
+          python - <<'PY'
+          import packaging
+          import platform
+          import sys
+          assert sys.version_info[:2] == (3, 12), sys.version
+          assert platform.system() == 'Linux', platform.system()
+          print('resolver-python=', sys.version.split()[0])
+          print('packaging=', packaging.__version__)
+          PY
+          python -m pip freeze --local | LC_ALL=C sort > /tmp/veredas-resolved.txt
+          test -s /tmp/veredas-resolved.txt
+
+      - name: Download exactly one compatible wheel for every resolved package
+        shell: bash
+        run: |
+          set -euo pipefail
+          source /tmp/veredas-resolve/bin/activate
+          rm -rf /tmp/veredas-wheels
+          mkdir -p /tmp/veredas-wheels
+          python -m pip download \
+            --disable-pip-version-check \
+            --only-binary=:all: \
+            --no-deps \
+            --dest /tmp/veredas-wheels \
+            -r /tmp/veredas-resolved.txt
+          test -n "$(find /tmp/veredas-wheels -maxdepth 1 -type f -name '*.whl' -print -quit)"
+
+      - name: Generate hash lock and internal SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          source /tmp/veredas-resolve/bin/activate
+          python projeto_jornada/tools/build_backend_dependency_evidence.py \
+            --direct projeto_jornada/backend/play_purchase_verifier/requirements.txt \
+            --resolved /tmp/veredas-resolved.txt \
+            --wheel-dir /tmp/veredas-wheels \
+            --lock-output /tmp/requirements.lock \
+            --sbom-output /tmp/software_sbom.json
+          python projeto_jornada/tools/backend_dependency_evidence_gate.py \
+            --lock /tmp/requirements.lock \
+            --sbom /tmp/software_sbom.json \
+            --require-evidence \
+            --output /tmp/backend-dependency-evidence-validation.json
+
+      - name: Prove clean offline install from generated hash lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv /tmp/veredas-lock-verify
+          source /tmp/veredas-lock-verify/bin/activate
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-index \
+            --find-links=/tmp/veredas-wheels \
+            --require-hashes \
+            -r /tmp/requirements.lock
+          python -m pip check
+          python -m pip freeze --local | LC_ALL=C sort > /tmp/veredas-verified.txt
+          diff -u /tmp/veredas-resolved.txt /tmp/veredas-verified.txt
+
+      - name: Prove application imports from hash-locked environment
+        shell: bash
+        working-directory: projeto_jornada/backend/play_purchase_verifier
+        run: |
+          set -euo pipefail
+          source /tmp/veredas-lock-verify/bin/activate
+          python -m py_compile verifier.py google_play_gateway.py firestore_repository.py purchase_record_merge.py app.py
+          python - <<'PY'
+          import flask
+          import google.auth
+          import google.cloud.firestore
+          import gunicorn
+          import requests
+          print('BACKEND_HASH_LOCK_IMPORT PASS')
+          PY
+
+      - name: Preserve source tree
+        run: git diff --exit-code
+
+      - name: Upload dependency evidence for review and persistence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-backend-dependency-evidence-${{ github.sha }}
+          path: |
+            /tmp/veredas-resolved.txt
+            /tmp/requirements.lock
+            /tmp/software_sbom.json
+            /tmp/backend-dependency-evidence-validation.json
+          if-no-files-found: error
+          retention-days: 14
