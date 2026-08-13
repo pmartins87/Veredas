@@ -13,6 +13,8 @@ on:
       - 'projeto_jornada/product/privacy_data_safety.json'
       - 'projeto_jornada/tests/PlayBillingCoordinatorCertification.gd'
       - 'projeto_jornada/tests/play_billing_coordinator_certification.tscn'
+      - 'projeto_jornada/tests/PlayBillingCorrelationCertification.gd'
+      - 'projeto_jornada/tests/play_billing_correlation_certification.tscn'
       - 'projeto_jornada/tests/EntitlementCertification.gd'
       - 'projeto_jornada/tests/entitlement_certification.tscn'
       - 'projeto_jornada/tools/play_billing_release_gate.py'
@@ -75,6 +77,14 @@ jobs:
             res://tests/play_billing_coordinator_certification.tscn \
             'PLAY_BILLING_COORDINATOR_CERTIFICATION FAIL' \
             'PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4'
+
+      - name: Certify async verification request correlation races
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/play_billing_correlation_certification.tscn \
+            'PLAY_BILLING_CORRELATION_CERTIFICATION FAIL' \
+            'PLAY_BILLING_CORRELATION_CERTIFICATION PASS: 12.4'
 
       - name: Preserve clean tree
         run: git diff --exit-code
