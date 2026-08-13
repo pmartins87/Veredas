@@ -1,0 +1,42 @@
+name: Veredas Play Billing Backend 12.4
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/backend/play_purchase_verifier/**'
+      - 'projeto_jornada/mobile/play_billing_contract.json'
+      - 'projeto_jornada/RELEASE_12_4_STATE.json'
+      - 'projeto_jornada/export_presets.cfg'
+      - 'projeto_jornada/tools/play_billing_backend_gate.py'
+      - '.github/workflows/veredas-play-billing-backend-12-4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-play-billing-backend-12-4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Static backend contract gate
+        working-directory: projeto_jornada
+        run: python tools/play_billing_backend_gate.py
+      - name: Compile backend sources
+        working-directory: projeto_jornada/backend/play_purchase_verifier
+        run: python -m py_compile verifier.py google_play_gateway.py firestore_repository.py app.py tests/test_verifier.py
+      - name: Unit-test fail-closed purchase semantics
+        working-directory: projeto_jornada/backend/play_purchase_verifier
+        run: python -m unittest discover -s tests -v
+      - name: Preserve clean tree
+        run: git diff --exit-code
