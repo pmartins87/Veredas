@@ -15,6 +15,7 @@ on:
       - 'projeto_jornada/qa/**'
       - 'projeto_jornada/tests/**'
       - 'projeto_jornada/tools/qa_release_candidate_gate.py'
+      - 'projeto_jornada/tools/write_qa_release_candidate_completion.py'
       - '.github/workflows/veredas-qa-release-candidate.yml'
 
 concurrency:
@@ -103,3 +104,15 @@ jobs:
             'RELIABILITY_SOAK_CERTIFICATION PASS: 11.9'
       - name: Require repository remains clean
         run: git diff --exit-code
+      - name: Write 11.10 completion evidence after all gates pass
+        run: |
+          python projeto_jornada/tools/write_qa_release_candidate_completion.py \
+            --output /tmp/QA_11_10_COMPLETION.json \
+            --workflow-run-id '${{ github.run_id }}'
+      - name: Upload 11.10 completion evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-qa-11-10-completion-${{ github.sha }}
+          path: /tmp/QA_11_10_COMPLETION.json
+          if-no-files-found: error
+          retention-days: 30
