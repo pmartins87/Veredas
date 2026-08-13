@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -85,6 +85,13 @@
     "deduplication_key": "purchase_token",
     "persistence_key": "sha256(purchase_token)",
     "order_id_is_not_deduplication_key": true,
+    "timeout_budget": {
+      "mobile_http_timeout_seconds": 30.0,
+      "backend_google_io_upper_bound_seconds": 24.75,
+      "minimum_nominal_margin_seconds": 5.25,
+      "backend_contract": "backend/play_purchase_verifier/backend_contract.json",
+      "failure_policy": "timeout or unavailable backend never grants a new entitlement; verified local cache is preserved"
+    },
     "backend_implementation": {
       "root": "backend/play_purchase_verifier",
       "contract": "backend/play_purchase_verifier/backend_contract.json",
@@ -108,13 +115,14 @@
     "play_developer_api_acknowledgement": "purchases.products.acknowledge",
     "backend_validation_requirements": [
       "packageName equals com.pmartins87.veredasdatrama",
-      "purchaseStateContext.purchaseState is PURCHASED",
+      "purchaseStateContext.purchaseState is PURCHASED before grant",
       "exactly one expected launch product line item is present",
       "returned productId equals the claimed configured product_id",
       "quantity is exactly 1",
-      "launch offerId is absent",
-      "rentOfferDetails is absent",
-      "preorderOfferDetails is absent",
+      "purchaseOptionId is present",
+      "offerId key is absent",
+      "rentOfferDetails key is absent, including empty-object presence",
+      "preorderOfferDetails key is absent",
       "purchase token has not granted a different product",
       "acknowledgement state is checked before acknowledgement"
     ],
@@ -158,7 +166,8 @@
     "enable and authorize the Google Play Android Developer API for the dedicated backend service identity without committing a service-account key",
     "configure Firestore transactional token-product binding and freeze purchase-record retention/deletion with 12.3",
     "verify purchaseToken with purchases.productsv2.getproductpurchasev2 before grant",
-    "validate the authoritative product line item against the claimed configured product",
+    "validate the authoritative product line item against the claimed configured product and launch purchase-option contract",
+    "preserve the bounded backend/client timeout budget under production ingress",
     "acknowledge verified non-consumables server-side and return only after acknowledgement is confirmed by refetch",
     "preserve exact verification_request_id correlation across asynchronous responses",
     "pass pending-purchase no-grant, overlap and stale-response isolation tests",
