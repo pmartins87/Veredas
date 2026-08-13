@@ -96,9 +96,11 @@ class FakeVerifier:
 
     func verify_purchase(payload: Dictionary) -> bool:
         requests.append(payload.duplicate(true))
+        var request_id := str(payload.get("verification_request_id", ""))
         var token := str(payload.get("purchase_token", ""))
         var product_id := str(payload.get("product_id", ""))
         verification_completed.emit({
+            "verification_request_id": request_id,
             "ok": not bool(reject_tokens.get(token, false)),
             "purchase_token": token,
             "product_id": product_id,
@@ -181,6 +183,10 @@ func _verified_purchase_grants_gate() -> void:
     expect("full_game_unlock" in granted_products, "12.4 verified purchase did not emit grant event")
     expect(verifier.requests.back().application_id == "com.pmartins87.veredasdatrama", "12.4 verifier request application id mismatch")
     expect(verifier.requests.back().purchase_token == "verified-1", "12.4 verifier request token mismatch")
+    expect(
+        not str(verifier.requests.back().get("verification_request_id", "")).is_empty(),
+        "12.4 verifier request correlation id missing"
+    )
 
 
 func _authoritative_restore_gate() -> void:
@@ -235,7 +241,7 @@ func _has_failure(product_id: String, reason: String) -> bool:
 func _finish() -> void:
     if failures.is_empty():
         print(
-            "PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4 pending_no_grant=1 verify_fail_no_grant=1 ack_required=1 verified_grant=1 authoritative_restore=1 partial_failure_cache_safe=1 package_guard=1"
+            "PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4 pending_no_grant=1 verify_fail_no_grant=1 ack_required=1 verified_grant=1 authoritative_restore=1 partial_failure_cache_safe=1 package_guard=1 request_id=1"
         )
         get_tree().quit(0)
         return
