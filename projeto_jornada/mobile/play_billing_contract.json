@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -54,7 +54,7 @@
   },
   "verification_boundary": {
     "mode": "secure_backend_required",
-    "status": "interface_implemented_backend_pending",
+    "status": "client_and_reference_backend_implemented_deployment_pending",
     "request_fields": [
       "verification_request_id",
       "application_id",
@@ -83,9 +83,26 @@
     },
     "client_response_correlation": "verification_request_id_must_echo_exactly",
     "deduplication_key": "purchase_token",
+    "persistence_key": "sha256(purchase_token)",
     "order_id_is_not_deduplication_key": true,
+    "backend_implementation": {
+      "root": "backend/play_purchase_verifier",
+      "contract": "backend/play_purchase_verifier/backend_contract.json",
+      "static_gate": "tools/play_billing_backend_gate.py",
+      "workflow": ".github/workflows/veredas-play-billing-backend-12-4.yml",
+      "reference_deployment": "Google Cloud Run",
+      "reference_persistence": "Google Cloud Firestore",
+      "raw_purchase_token_persisted": false,
+      "container_contains_service_account_key": false
+    },
     "backend_endpoint": "PENDING_12_4_BACKEND_ENDPOINT",
-    "server_authentication": "PENDING_12_4_SERVER_AUTH_MODEL",
+    "server_authentication": {
+      "client_to_backend": "public_https_no_reusable_client_secret",
+      "client_secret_embedded_in_app": false,
+      "backend_to_google": "attached_service_account_via_application_default_credentials",
+      "google_oauth_scope": "https://www.googleapis.com/auth/androidpublisher",
+      "service_account_key_file_committed": false
+    },
     "server_acknowledges_non_consumables": true,
     "play_developer_api_verification": "purchases.productsv2.getproductpurchasev2",
     "play_developer_api_acknowledgement": "purchases.products.acknowledge",
@@ -95,16 +112,20 @@
       "exactly one expected launch product line item is present",
       "returned productId equals the claimed configured product_id",
       "quantity is exactly 1",
+      "launch offerId is absent",
+      "rentOfferDetails is absent",
+      "preorderOfferDetails is absent",
       "purchase token has not granted a different product",
       "acknowledgement state is checked before acknowledgement"
     ],
     "backend_processing_order": [
       "fetch authoritative ProductPurchaseV2 by packageName and purchaseToken",
-      "validate purchase state and expected product line item",
-      "persist entitlement/deduplication record idempotently by purchase_token",
+      "validate purchase state and exact expected product line item before any token binding",
+      "bind sha256(purchase_token) to the authoritative package/product transactionally",
+      "record the minimum non-secret processing state without persisting the raw purchase token or order id",
       "acknowledge the non-consumable server-side when acknowledgement is pending",
-      "confirm acknowledged state",
-      "return the exact verification_request_id only after the authoritative record is safe"
+      "refetch ProductPurchaseV2 and confirm PURCHASED plus ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED",
+      "return owned=true with the exact verification_request_id only after the authoritative record is safe"
     ]
   },
   "offline_policy": {
@@ -125,15 +146,20 @@
   "privacy_link": {
     "manifest": "res://product/privacy_data_safety.json",
     "post_integration_reaudit_required": true,
-    "purchase_token_off_device": true
+    "purchase_token_off_device": true,
+    "reference_backend_raw_purchase_token_at_rest": false,
+    "reference_backend_token_hash_at_rest": true
   },
   "completion_requirements": [
     "install and pin the exact plugin release in the project",
     "configure both Play Console non-consumable products with one launch buy option each and no launch offers/rent/preorder/bundles",
-    "deploy secure purchase verification backend and freeze endpoint/authentication contract",
+    "execute the reference backend static/unit gates on a functioning runner",
+    "deploy the reviewed purchase verification backend and freeze its public HTTPS endpoint, attached service identity and abuse/rate-limit controls",
+    "enable and authorize the Google Play Android Developer API for the dedicated backend service identity without committing a service-account key",
+    "configure Firestore transactional token-product binding and freeze purchase-record retention/deletion with 12.3",
     "verify purchaseToken with purchases.productsv2.getproductpurchasev2 before grant",
     "validate the authoritative product line item against the claimed configured product",
-    "acknowledge verified non-consumables server-side and return only after acknowledgement is confirmed",
+    "acknowledge verified non-consumables server-side and return only after acknowledgement is confirmed by refetch",
     "preserve exact verification_request_id correlation across asynchronous responses",
     "pass pending-purchase no-grant, overlap and stale-response isolation tests",
     "pass purchase, restore, refund/revocation and reinstall/restore tests on Play test track",
