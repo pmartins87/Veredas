@@ -14,6 +14,7 @@ EXPORT = ROOT / "export_presets.cfg"
 RELEASE_STATE = ROOT / "RELEASE_12_4_STATE.json"
 MERGE = BACKEND / "purchase_record_merge.py"
 MERGE_TEST = BACKEND / "tests" / "test_purchase_record_merge.py"
+APP_TEST = BACKEND / "tests" / "test_app.py"
 
 REQUIRED_FILES = [
     CONTRACT,
@@ -26,6 +27,7 @@ REQUIRED_FILES = [
     BACKEND / "Dockerfile",
     BACKEND / "tests" / "test_verifier.py",
     MERGE_TEST,
+    APP_TEST,
     BILLING,
     EXPORT,
     RELEASE_STATE,
@@ -101,6 +103,7 @@ def main() -> int:
     dockerfile = (BACKEND / "Dockerfile").read_text(encoding="utf-8")
     tests = (BACKEND / "tests" / "test_verifier.py").read_text(encoding="utf-8")
     merge_tests = MERGE_TEST.read_text(encoding="utf-8")
+    app_tests = APP_TEST.read_text(encoding="utf-8")
     export_text = EXPORT.read_text(encoding="utf-8")
     requirements = {
         line.strip()
@@ -230,10 +233,25 @@ def main() -> int:
     ]:
         require_fragment(merge_text, fragment, "monotonic purchase-record merge", errors)
 
-    for fragment in ["MAX_BODY_BYTES = 16 * 1024", '"Cache-Control"] = "no-store"', '"/v1/play/verify"']:
+    for fragment in [
+        "class VerificationServiceProvider",
+        "Lock()",
+        'app.get("/healthz")',
+        'app.get("/readyz")',
+        '"kind": "liveness"',
+        '"kind": "readiness"',
+        "repository_initialization_unavailable",
+        "google_identity_unavailable",
+        "verification_service_initialization_failed",
+        "MAX_BODY_BYTES = 16 * 1024",
+        '"Cache-Control"] = "no-store"',
+        '"/v1/play/verify"',
+    ]:
         require_fragment(app, fragment, "HTTP service", errors)
     if "CORS" in app or "Access-Control-Allow-Origin" in app:
         errors.append("browser CORS surface is not part of the native billing backend contract")
+    if "except Exception as exc" in app:
+        errors.append("HTTP initialization fallback must not expose or retain exception objects/messages")
 
     if "USER appuser" not in dockerfile:
         errors.append("backend container must run as non-root appuser")
@@ -270,6 +288,16 @@ def main() -> int:
         "test_unknown_acknowledgement_state_fails_closed",
     ]:
         require_fragment(merge_tests, fragment, "purchase-record merge tests", errors)
+
+    for fragment in [
+        "test_liveness_does_not_initialize_dependencies",
+        "test_ready_service_reports_readiness_without_external_call",
+        "test_failed_readiness_can_recover_on_next_probe",
+        "test_initialization_exception_message_is_not_exposed",
+        "test_unavailable_service_never_returns_owned_true",
+        "test_ready_service_forwards_verification_result",
+    ]:
+        require_fragment(app_tests, fragment, "backend HTTP tests", errors)
 
     backend_text = "\n".join(
         path.read_text(encoding="utf-8", errors="ignore")
@@ -315,7 +343,7 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0 option_presence_guard=1 monotonic_persistence=1 durable_before_grant=1"
+        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0 option_presence_guard=1 monotonic_persistence=1 durable_before_grant=1 readiness=1"
         % (mode, len(REQUIRED_FILES), len(pending), len(errors), len(warnings))
     )
     for warning in warnings:
