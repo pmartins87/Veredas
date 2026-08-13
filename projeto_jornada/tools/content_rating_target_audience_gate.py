@@ -16,6 +16,7 @@ FILES = {
 }
 ALLOWED_GROUPS = {"5_and_under", "6_8", "9_12", "13_15", "16_17", "18_plus"}
 UNDER_13 = {"5_and_under", "6_8", "9_12"}
+TEEN_GROUPS = {"13_15", "16_17"}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -64,6 +65,7 @@ def main() -> int:
         "target_audience_declaration_separate_from_iarc_rating",
         "selecting_any_child_age_group_triggers_google_play_families_requirements",
         "age_groups_must_reflect_who_the_app_was_designed_for_not_maximize_availability",
+        "ages_13_15_or_16_17_may_still_be_children_in_some_locales",
     ):
         if not isinstance(baseline, dict) or baseline.get(key) is not True:
             errors.append(f"policy invariant missing: {key}")
@@ -115,10 +117,16 @@ def main() -> int:
             errors.append("final target age groups missing/invalid")
         if groups & UNDER_13 and target.get("families_policy_final_review_complete") is not True:
             errors.append("under-13 audience selected without Families review")
+        if groups & TEEN_GROUPS and target.get("local_child_status_privacy_review_complete") is not True:
+            errors.append("13-17 audience selected without local child-status/privacy review")
+        if groups & TEEN_GROUPS and target.get("purchase_and_marketing_suitability_review_complete") is not True:
+            errors.append("13-17 audience selected without purchase/marketing suitability review")
         if not isinstance(iarc, dict) or iarc.get("questionnaire_completed_in_play_console") is not True:
             errors.append("IARC questionnaire incomplete")
         if not isinstance(iarc, dict) or iarc.get("certificate_received") is not True:
             errors.append("IARC certificate missing")
+        if not isinstance(iarc, dict) or not str(iarc.get("certificate_reference", "")).strip():
+            errors.append("IARC certificate reference missing")
         if not isinstance(iarc, dict) or not iarc.get("final_regional_ratings"):
             errors.append("IARC regional ratings missing")
         if rating.get("formal_status") != "certified" or rating.get("pass_recorded") is not True:
