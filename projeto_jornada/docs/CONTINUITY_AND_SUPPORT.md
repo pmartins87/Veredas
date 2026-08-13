@@ -1,152 +1,126 @@
 # Veredas da Trama — Continuidade, Release e Suporte
 
-Este documento é o runbook operacional do passo **12.9**. Ele não contém segredos, chaves privadas, senhas ou material de assinatura. Os valores pessoais/operacionais que ainda dependem de configuração real permanecem no contrato `product/continuity_support_contract.json` como placeholders fail-closed.
+Este é o runbook operacional do passo **12.9**. Ele não contém segredos e não equivale a evidência de conclusão. O release só é certificado quando os artefatos reais, hashes, owners, recuperação e gates correspondentes existem na mesma ancestry.
 
 ## 1. Fontes de verdade
-
 - Repositório: `pmartins87/desktop-tutorial`.
-- Branch de desenvolvimento canônico: `projeto-jornada-snapshots`.
-- Estado formal: `ROADMAP_STATE.md`.
-- Roadmap finito: `ROADMAP_MASTER.md`.
-- Estado de QA: arquivos `QA_*`, `RELIABILITY_*` e `qa/known_issues.json`.
-- Estado de publicação: arquivos `RELEASE_12_*_STATE.json` e contratos em `product/` e `mobile/`.
-- Proveniência/licenças/dependências: `product/release_provenance.json` + `tools/provenance_license_gate.py`.
-- Um release público somente pode ser identificado por commit imutável + tag final + versionName/versionCode + SHA-256 do AAB + fingerprint de assinatura.
+- Branch de desenvolvimento: `projeto-jornada-snapshots`.
+- Estado formal: `ROADMAP_STATE.md` e `PROJECT_STATE.json`.
+- Contrato 12.9: `product/continuity_support_contract.json`.
+- Proveniência: `product/release_provenance.json`.
+- Notices: `product/third_party_notices.json`.
+- Arquivo final: `product/release_archive_manifest.json`.
 
-## 2. Regra de reconstrução
+Um release público é identificado por **tag + commit + versionName/versionCode + SHA-256 do AAB + fingerprint de assinatura + fingerprint dos inputs**.
 
-Uma pessoa que receba acesso autorizado ao projeto deve conseguir reconstruir o produto sem depender de arquivos de trabalho não documentados. O procedimento mínimo é:
+## 2. Fingerprint e reprodutibilidade
+`tools/release_input_fingerprint.py` cobre inputs reais de build/runtime. `tools/release_input_scope_gate.py` impede que evidências de release entrem no próprio fingerprint e verifica referências runtime `res://product/...`.
 
-1. obter o commit/tag certificado;
-2. conferir `REBUILD_AND_VERIFY.md` e `export_presets.cfg`;
-3. executar os gates canônicos e o freeze do RC;
-4. usar apenas secrets protegidos do ambiente de release para assinatura/serviços externos;
-5. gerar o fingerprint de inputs de release;
-6. produzir o AAB no commit exato;
-7. validar package ID, versão e assinatura;
-8. registrar SHA-256 do artefato e comparar com a evidência do RC/test track;
-9. reconciliar o artefato com os inventários finais de dependências, licenças e proveniência.
+Os recursos `product/` atualmente consumidos pelo jogo são `commercial_model.json` e `legal_documents.json`. Manifestos de evidência ficam fora do fingerprint para evitar auto-referência.
 
-Nenhum keystore, senha, token da Play Console, segredo de backend ou credencial de API deve ser adicionado ao Git.
+O workflow assinado gera o manifesto de inputs antes do export e exige equivalência depois do import/export.
 
-## 3. Cadeia de assinatura e recuperação
+## 3. Arquivo canônico — 12 itens
+`product/release_archive_manifest.json` exige **12 itens obrigatórios**, todos hashados:
 
-A identidade de assinatura é um ativo crítico. A release final exige:
+1. manifesto de inputs do release;
+2. proveniência dos assets/software;
+3. lock de dependências do backend;
+4. SBOM do backend;
+5. manifesto de notices/licenças de terceiros;
+6. inventário de dependências Android;
+7. Política de Privacidade final;
+8. Termos finais;
+9. store listing final;
+10. release notes;
+11. registro público da identidade de assinatura;
+12. registro de recovery/backup drill.
 
-- backup externo do keystore/material autorizado de assinatura;
-- confirmação de que esse backup pode ser restaurado;
-- registro apenas do fingerprint público do certificado no arquivo de continuidade;
-- recuperação da conta Play Console verificada;
-- recuperação do repositório verificada;
-- recuperação do backend de Billing verificada quando este entrar em produção.
+O AAB não precisa ser cometido ao Git; sua identidade/hash e evidência externa permanecem referenciados sem material secreto.
 
-Uma troca de máquina não pode ser tratada como troca de identidade de assinatura.
+## 4. Proveniência de assets
+Cada imagem/vetor/áudio/fonte versionado para release deve ter caminho, blob Git atual, origem, base de direitos, evidência e elegibilidade explícita.
 
-## 4. Saves, perfil e compatibilidade
+Os quatro SVGs atuais já estão ligados ao blob atual e ao commit de introdução. A revisão final de direitos permanece pendente; histórico Git não substitui clearance jurídico.
 
-- Saves publicados são contratos de compatibilidade.
-- Atualizações devem manter leitura dos saves públicos ou fornecer migração explícita e testada.
-- Não se publica hotfix que exija downgrade de `versionCode`.
-- Rollback de software é feito por nova versão corretiva, não por exigir que usuários voltem para um APK/AAB de versão inferior.
-- Migrações continuam fail-closed para estados impossíveis/corrompidos.
-- Antes de qualquer alteração de schema pós-release, os testes de migração, integridade e suspend/resume devem ser reexecutados.
+São proibidos assets extraídos dos jogos usados como referência, material web sem licença verificável e qualquer arquivo de origem/direitos desconhecidos.
 
-## 5. Billing e entitlements
+## 5. Dependências Python: lock e SBOM
+Pin direto não basta. O release exige todo o conjunto transitivo travado por versão + SHA-256.
 
-- `PENDING` nunca concede entitlement.
-- Compra somente concede após verificação autoritativa conforme o contrato de Billing.
-- Restore deve preservar o último cache validado diante de falha parcial.
-- Hotfixes e mudanças de backend não podem invalidar compras previamente verificadas.
-- Reembolso/revogação devem continuar sendo tratados de acordo com o fluxo certificado no test track.
+A cadeia é:
+- `tools/build_backend_dependency_evidence.py`;
+- `tools/backend_dependency_evidence_gate.py`;
+- `.github/workflows/veredas-backend-dependency-evidence.yml`.
 
-## 6. Privacidade e Data Safety
+A resolução ocorre em **Python 3.12/Linux**. O venv congelado recebe apenas dependências runtime reais; ferramentas de evidência não são instaladas nele.
 
-Qualquer novo SDK, permissão, telemetria, conta, serviço de nuvem, publicidade ou fluxo de dados exige nova auditoria de 12.3 antes da publicação. A declaração da Play Store e a política pública devem descrever o comportamento do AAB realmente publicado, não um estado anterior do projeto.
+O gerador lê `Name`, `Version`, licença e `Requires-Dist` diretamente do `.dist-info/METADATA` de cada wheel usando apenas `zipfile`/`email` da biblioteca padrão. O SBOM registra hash do `requirements.txt`, versão do pip, ambiente, pacote direto/transitivo, PURL, wheel e SHA-256.
 
-Logs de suporte devem coletar apenas o necessário para reproduzir o problema. Não solicitar segredos, credenciais ou dados pessoais desnecessários.
+A prova final precisa:
+1. resolver o ambiente;
+2. `pip check`;
+3. congelar o conjunto;
+4. baixar exatamente um wheel por distribuição;
+5. gerar `requirements.lock` com hashes;
+6. gerar SBOM;
+7. validar contra requisitos/proveniência;
+8. reinstalar **offline** em venv limpo com `--require-hashes`;
+9. executar `pip check` novamente;
+10. provar freeze reconstruído idêntico;
+11. compilar/importar o backend.
 
-## 7. Localização
+Não criar lock/SBOM manualmente para preencher evidência.
 
-O lançamento atual é `pt_BR + en`. `es_419` permanece preservado como trabalho adiado e não deve aparecer como idioma de lançamento até obter uma certificação futura própria de cobertura, qualidade linguística, overflow e iconografia.
+## 6. Dependências Android do AAB exato
+`tools/gradle_dependency_inventory.init.gradle` resolve `releaseRuntimeClasspath` no mesmo projeto Gradle que produz o AAB. O inventário guarda coordenadas Maven ou identidade local fail-closed, arquivo AAR/JAR, tamanho, SHA-256 e ambiente.
 
-## 8. Proveniência de assets e direitos
+`tools/android_dependency_inventory_gate.py` exige que todas as entradas `com.android.billingclient` usem exatamente a versão congelada em 12.4 e que todo artefato runtime possua identidade/hash verificável.
 
-`product/release_provenance.json` é a fonte de verdade para qualquer arquivo visual, de áudio ou fonte versionado que possa entrar no produto. O gate acompanha extensões de mídia/fontes e exige correspondência arquivo a arquivo.
+O resultado final é arquivado em `product/android_dependency_inventory.json`.
 
-Classes de origem aceitáveis incluem trabalho original do projeto, encomenda com direitos de release documentados, terceiro licenciado, domínio público verificado ou derivação gerada a partir de fonte própria devidamente registrada. A classe não substitui a evidência: autoria/fonte, base de direitos e, quando aplicável, licença/cessão devem ser arquivadas.
+## 7. Notices/licenças
+SBOM/inventário respondem **o que entrou**; `third_party_notices.json` responde **qual licença/obrigação acompanha cada componente**.
 
-São **proibidos no release**:
+`tools/third_party_notices_gate.py` exige cobertura dos componentes conhecidos, de todo SBOM backend e de toda dependência Android third-party, com review final e arquivos LICENSE/NOTICE/copyright/attribution hashados quando aplicável.
 
-- screenshots, imagens, áudio ou outros assets extraídos dos jogos usados apenas como referência conceitual;
-- material encontrado na web sem licença de redistribuição verificável;
-- assets de autoria ou licença desconhecida;
-- material de terceiro cuja obrigação de atribuição/licença não tenha sido preservada no arquivo de release.
+Licença identificada em fonte primária não equivale a revisão final.
 
-Neste estágio estrutural ainda não há arte/áudio/fontes finais binários versionados; isso não é uma dispensa. É justamente o motivo para a catraca existir antes da entrada dos assets finais.
+## 8. Billing e retenção
+O backend persiste apenas SHA-256 do token + estado mínimo. A política de retenção é finita:
+- PURCHASED/owned real: 730 dias desde a última atividade;
+- bound/PENDING/CANCELLED/non-owned: 30 dias;
+- compra de teste: 7 dias.
 
-Quando um asset final for adicionado, a mesma mudança deve adicionar/atualizar sua linha de proveniência. `tools/provenance_license_gate.py` deve falhar se a árvore e o manifesto divergirem.
+`expires_at` é o campo TTL. Atividade legítima renova a janela sem regredir estado monotônico. Expiração nunca é prova de entitlement; um registro ausente/expirado só pode ser recriado após nova verificação autoritativa no Google Play.
 
-## 9. Software de terceiros, lock e SBOM
+Produção ainda precisa habilitar e verificar TTL no Firestore antes do release.
 
-Pin de dependência direta não é suficiente para reconstrução ou conformidade de licenças. O release final exige:
+## 9. Assinatura, segredos e recuperação
+Nunca versionar keystore privada, senha, chave JSON de service account, token ou credencial de recuperação.
 
-- Godot e plugin Android identificados por versão/fonte;
-- dependências diretas do backend reconciliadas com `requirements.txt`;
-- **dependências transitivas do backend totalmente travadas por versão e hashes** em `backend/play_purchase_verifier/requirements.lock`;
-- SBOM da imagem final do backend arquivado em `product/software_sbom.json`;
-- relatório final de dependências Gradle/Android reconciliado e arquivado em `product/android_dependency_inventory.json`;
-- licença/notice aplicável de cada componente redistribuído ou runtime revisado e arquivado;
-- qualquer obrigação de atribuição preservada no produto/arquivo de release quando necessária.
+12.9 exige backup externo de assinatura/segredos, restore drill, recuperação do Play Console, repositório e backend de Billing, registrando apenas identificadores/fingerprints não secretos no Git.
 
-A ausência de lock transitivo é tratada como risco real: um `requirements.txt` com apenas dependências diretas pinadas ainda pode resolver versões transitivas diferentes em datas diferentes.
+## 10. Owners, suporte e privacidade
+Antes de PASS precisam existir valores reais para owner de release, contato secundário de recuperação, suporte público e contato de privacidade; o canal de suporte deve ser testado.
 
-Serviços hospedados (Google Play, Android Developer API, Cloud Run e Firestore no desenho atual) não são fingidos como “bibliotecas com LICENSE”. Seus termos/políticas aplicáveis, papel no fluxo de dados e configuração de produção precisam de revisão separada e arquivada.
+Blocker inclui perda de dados, impossibilidade ampla de jogar, falha sistêmica de entitlement ou incidente material de privacidade/segurança.
 
-## 10. Arquivo jurídico e público
+## 11. Hotfix/rollback
+Toda correção publicada usa `versionCode` maior. Nunca exigir downgrade. Primeira publicação não finge rollback para versão pública inexistente; updates posteriores podem usar rollout progressivo conforme 12.8.
 
-Além dos manifests técnicos, o arquivo final deve conter:
+## 12. Handoff
+Uma segunda pessoa autorizada deve conseguir localizar tag/commit/AAB/fingerprints, backups, Play Console, backend, documentos legais, proveniência, notices, procedimento de rebuild, suporte e hotfix sem depender de conhecimento oral exclusivo.
 
-- proveniência dos assets finais e evidências de direitos;
-- licenças/notices de terceiros aplicáveis;
-- versão final da política de privacidade e termos;
-- textos finais da loja;
-- release notes;
-- hashes/fingerprints do artefato e inputs de release;
-- SBOM/backend lock e inventário Android final;
-- registro de revisão dos serviços externos de produção.
+## 13. Ordem final de certificação
+Na ancestry exata do release:
+1. 12.8 certificado;
+2. `release_input_scope_gate.py`;
+3. `backend_dependency_evidence_gate.py --release`;
+4. `android_dependency_inventory_gate.py --release`;
+5. `third_party_notices_gate.py --release`;
+6. `provenance_license_gate.py --release`;
+7. `release_archive_gate.py --release`;
+8. `continuity_support_gate.py --release`.
 
-O arquivo de continuidade não substitui a prova de licença/proveniência.
-
-## 11. Suporte e triage
-
-O canal público de suporte deve direcionar cada caso para evidência suficiente: versão/versionCode, dispositivo/Android quando relevante, passos de reprodução, comportamento esperado/observado e classificação de impacto em save, Billing ou privacidade.
-
-Prioridade operacional:
-
-- **blocker**: perda de dados, impossibilidade ampla de abrir/jogar, falha sistêmica de entitlement ou incidente material de privacidade/segurança;
-- **critical**: funcionalidade central indisponível para parcela relevante dos usuários sem workaround seguro;
-- **major/minor/trivial**: severidades decrescentes conforme impacto e disponibilidade de workaround.
-
-O ledger de QA continua sendo a fonte de verdade para defeitos de produto. Dependências planejadas não devem ser mascaradas como bugs, e bugs release-blocking não devem ser mascarados como dependências.
-
-## 12. Incidente e rollback/hotfix
-
-A primeira publicação pública não deve pressupor que existe uma versão pública anterior para a qual retornar. O plano é manter um hotfix de maior `versionCode`, mesma identidade de assinatura e compatibilidade com saves/entitlements pronto para ser produzido rapidamente.
-
-Para atualizações subsequentes, usar rollout progressivo quando suportado e interromper a expansão ao detectar blocker/critical, corrupção de save, regressão material de Billing, crash/ANR ou privacidade/política. A correção continua sendo uma nova versão crescente; nunca um downgrade imposto ao usuário.
-
-## 13. Passagem de bastão
-
-Uma transferência operacional só é considerada completa quando outra pessoa autorizada consegue localizar as fontes de verdade, verificar a identidade do último release, restaurar os acessos externos previstos, reproduzir a cadeia de build sem receber segredos pelo repositório e entender os procedimentos de save, Billing, privacidade, suporte, proveniência/licenças e hotfix.
-
-A identidade das pessoas/canais responsáveis é deliberadamente mantida fora deste documento até ser configurada no contrato final de 12.9.
-
-## 14. Gates finais de 12.9
-
-O passo 12.9 somente pode ser promovido quando, no mesmo release ancestry:
-
-1. `tools/provenance_license_gate.py --release` passar;
-2. `tools/continuity_support_gate.py --release` passar;
-3. a evidência externa exigida pelo contrato estiver realmente arquivada.
-
-O preflight estrutural não é evidência de conclusão do release.
+Enquanto runner, assets finais, addon/Gradle, AAB real, owners, recuperação e documentação final não existirem, **12.9 permanece em progresso**.
