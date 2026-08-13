@@ -1,11 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
   "contract": "product/continuity_support_contract.json",
   "runbook": "docs/CONTINUITY_AND_SUPPORT.md",
+  "provenance_contract": "product/release_provenance.json",
   "gate": "tools/continuity_support_gate.py",
+  "provenance_gate": "tools/provenance_license_gate.py",
   "implemented": {
     "source_of_truth_and_tag_contract": true,
     "release_archive_contract": true,
@@ -13,11 +15,29 @@
     "account_recovery_contract": true,
     "save_and_entitlement_compatibility_policy": true,
     "privacy_and_data_safety_continuity": true,
-    "asset_and_license_archive_contract": true,
+    "asset_provenance_contract": true,
+    "asset_extension_coverage_gate": true,
+    "reference_game_and_unlicensed_asset_fail_closed_policy": true,
+    "third_party_software_inventory": true,
+    "backend_direct_dependency_inventory_cross_check": true,
+    "backend_transitive_hash_lock_release_requirement": true,
+    "backend_final_sbom_release_requirement": true,
+    "android_final_gradle_dependency_inventory_requirement": true,
+    "external_service_terms_inventory": true,
     "support_severity_and_triage_policy": true,
     "incident_hotfix_runbook": true,
     "handoff_bus_factor_checklist": true,
     "fail_closed_release_gate": true
+  },
+  "current_preflight": {
+    "versioned_binary_art_audio_font_assets": 0,
+    "known_software_components": 7,
+    "backend_direct_dependencies_pinned_and_inventoried": 5,
+    "known_external_services": 4,
+    "backend_transitive_dependency_lock": "pending",
+    "backend_final_sbom": "pending",
+    "android_final_gradle_dependency_inventory": "pending",
+    "license_notice_archive": "pending_final_review"
   },
   "pending": {
     "12_8_certified": false,
@@ -30,7 +50,12 @@
     "play_repository_billing_recovery_verified": false,
     "external_keystore_and_secret_backups_verified": false,
     "backup_restore_drill_recorded": false,
-    "asset_provenance_and_licenses_archived": false,
+    "final_asset_provenance_archived": false,
+    "third_party_license_notices_archived": false,
+    "backend_transitive_hash_lock_generated": false,
+    "backend_final_sbom_archived": false,
+    "android_final_gradle_dependency_inventory_archived": false,
+    "external_service_terms_review_archived": false,
     "final_policy_store_copy_release_notes_archived": false,
     "handoff_review_complete": false
   },
@@ -40,9 +65,13 @@
     "release artifact/version/signing/input fingerprints are archived",
     "real ownership, recovery, support and privacy channels are configured",
     "Play/repository/Billing recovery paths and secret backup restore are verified",
-    "asset provenance/licenses and final public documents are archived",
+    "every versioned final art/audio/font asset has explicit provenance/rights evidence and no prohibited source is present",
+    "all redistributed/runtime software has reviewed license/source evidence and archived notices",
+    "backend direct and transitive dependency set is completely version/hash locked and final container SBOM is archived",
+    "final Android Gradle dependency report and production external-service terms/data-role review are archived",
+    "final public policy/store copy/release notes are archived",
     "continuity runbook is reviewed by a second authorized operator or recovery contact",
-    "continuity_support_gate.py --release passes"
+    "provenance_license_gate.py --release and continuity_support_gate.py --release pass on the exact release ancestry"
   ],
   "pass_recorded": false
 }
