@@ -67,17 +67,18 @@ class VerificationServiceTests(unittest.TestCase):
         state="PURCHASED",
         acknowledgement=ACK_PENDING,
         quantity=1,
-        offer_id="",
-        rent=None,
-        preorder=None,
+        offer_id_marker=False,
+        rent_marker=False,
+        preorder_marker=False,
+        purchase_option_id="buy",
     ):
-        offer = {"quantity": quantity, "purchaseOptionId": "buy"}
-        if offer_id:
-            offer["offerId"] = offer_id
-        if rent is not None:
-            offer["rentOfferDetails"] = rent
-        if preorder is not None:
-            offer["preorderOfferDetails"] = preorder
+        offer = {"quantity": quantity, "purchaseOptionId": purchase_option_id}
+        if offer_id_marker:
+            offer["offerId"] = "promo"
+        if rent_marker:
+            offer["rentOfferDetails"] = {}
+        if preorder_marker:
+            offer["preorderOfferDetails"] = {"preorderReleaseTime": "2027-01-01T00:00:00Z"}
         return {
             "productLineItem": [{"productId": product_id, "productOfferDetails": offer}],
             "purchaseStateContext": {"purchaseState": state},
@@ -148,18 +149,27 @@ class VerificationServiceTests(unittest.TestCase):
         self.assertEqual(result["error"], "play_product_quantity_invalid")
         self.assertEqual(repository.bindings, {})
 
-    def test_launch_offer_rent_and_preorder_are_rejected(self):
+    def test_purchase_option_id_is_required(self):
+        gateway = FakeGateway([self.play_purchase(purchase_option_id="")])
+        repository = MemoryRepository()
+        result, status = VerificationService(gateway, repository).verify(self.request())
+        self.assertEqual(status, 200)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "play_purchase_option_id_missing")
+        self.assertEqual(repository.bindings, {})
+
+    def test_launch_offer_rent_and_preorder_presence_are_rejected(self):
         for purchase, error in [
-            (self.play_purchase(offer_id="promo"), "play_offer_not_allowed_at_launch"),
-            (self.play_purchase(rent={}), None),
-            (self.play_purchase(rent={"rentalPeriod": "P1D"}), "play_rent_not_allowed_at_launch"),
-            (self.play_purchase(preorder={"preorderReleaseTime": "2027-01-01T00:00:00Z"}), "play_preorder_not_allowed_at_launch"),
+            (self.play_purchase(offer_id_marker=True), "play_offer_not_allowed_at_launch"),
+            (self.play_purchase(rent_marker=True), "play_rent_not_allowed_at_launch"),
+            (self.play_purchase(preorder_marker=True), "play_preorder_not_allowed_at_launch"),
         ]:
-            if error is None:
-                continue
-            result, _ = VerificationService(FakeGateway([purchase]), MemoryRepository()).verify(self.request())
+            repository = MemoryRepository()
+            result, status = VerificationService(FakeGateway([purchase]), repository).verify(self.request())
+            self.assertEqual(status, 200)
             self.assertFalse(result["ok"])
             self.assertEqual(result["error"], error)
+            self.assertEqual(repository.bindings, {})
 
     def test_existing_token_binding_cannot_switch_product(self):
         gateway = FakeGateway([self.play_purchase()])
