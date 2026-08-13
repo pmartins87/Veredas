@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "model_id": "free_trial_one_time_unlock",
   "principles": {
     "no_ads": true,
@@ -39,8 +39,9 @@
       "store_type": "one_time_non_consumable",
       "billing_channel": "platform_billing",
       "effect_kind": "cosmetic_only",
-      "description": "Pacote opcional de apoiador com ornamentos puramente visuais do Nó de Vigília.",
+      "description": "Desbloqueia o Selo de Apoiador, ornamento exclusivamente visual exibido no Nó de Vigília.",
       "content_scope": "cosmetics_only",
+      "cosmetic_ids": ["supporter_badge"],
       "consumable": false,
       "repeatable": false,
       "grants_power": false,
@@ -60,5 +61,5 @@
     "random_rewards",
     "difficulty_reduction"
   ],
-  "notes": "Prices and localized store metadata are release configuration, not gameplay data. Store integration, purchase acknowledgement, restoration and offline entitlement caching belong to Phase 9.8."
+  "notes": "Prices and localized store metadata are release configuration, not gameplay data. The supporter SKU grants only supporter_badge; it never grants Vigil Threads or gameplay effects. Store integration, purchase acknowledgement, restoration and offline entitlement caching belong to the release billing path."
 }
