@@ -39,13 +39,11 @@ jobs:
           python -m pip install --disable-pip-version-check -r projeto_jornada/backend/play_purchase_verifier/requirements.txt
           python -m pip check
           python - <<'PY'
-          import packaging
           import platform
           import sys
           assert sys.version_info[:2] == (3, 12), sys.version
           assert platform.system() == 'Linux', platform.system()
           print('resolver-python=', sys.version.split()[0])
-          print('packaging=', packaging.__version__)
           PY
           python -m pip freeze --local | LC_ALL=C sort > /tmp/veredas-resolved.txt
           test -s /tmp/veredas-resolved.txt
@@ -65,15 +63,15 @@ jobs:
             -r /tmp/veredas-resolved.txt
           test -n "$(find /tmp/veredas-wheels -maxdepth 1 -type f -name '*.whl' -print -quit)"
 
-      - name: Generate hash lock and internal SBOM
+      - name: Generate hash lock and internal SBOM without contaminating resolver
         shell: bash
         run: |
           set -euo pipefail
-          source /tmp/veredas-resolve/bin/activate
           python projeto_jornada/tools/build_backend_dependency_evidence.py \
             --direct projeto_jornada/backend/play_purchase_verifier/requirements.txt \
             --resolved /tmp/veredas-resolved.txt \
             --wheel-dir /tmp/veredas-wheels \
+            --resolver-python /tmp/veredas-resolve/bin/python \
             --lock-output /tmp/requirements.lock \
             --sbom-output /tmp/software_sbom.json
           python projeto_jornada/tools/backend_dependency_evidence_gate.py \
