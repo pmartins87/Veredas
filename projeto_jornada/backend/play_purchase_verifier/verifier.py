@@ -23,6 +23,12 @@ class GatewayError(RuntimeError):
         self.status_code = status_code
 
 
+class RepositoryError(RuntimeError):
+    def __init__(self, code: str):
+        super().__init__(code)
+        self.code = code
+
+
 class PlayGateway(Protocol):
     def fetch_purchase(self, package_name: str, purchase_token: str) -> dict[str, Any]: ...
     def acknowledge(self, package_name: str, product_id: str, purchase_token: str) -> None: ...
@@ -77,11 +83,16 @@ class VerificationService:
         except ValueError as exc:
             return self._failure(request, str(exc)), 200
 
-        if not self._repository.bind(request.token_hash, APPLICATION_ID, purchase.product_id):
+        try:
+            bound = self._repository.bind(request.token_hash, APPLICATION_ID, purchase.product_id)
+        except RepositoryError:
+            return self._failure(request, "repository_unavailable"), 503
+        if not bound:
             return self._failure(request, "purchase_token_bound_to_different_product"), 200
 
         if purchase.purchase_state != PURCHASED:
-            self._record(request, purchase, owned=False, stage="not_purchased")
+            if not self._record(request, purchase, owned=False, stage="not_purchased"):
+                return self._failure(request, "repository_unavailable"), 503
             return self._failure(
                 request,
                 "authoritative_purchase_state_not_purchased",
@@ -90,7 +101,8 @@ class VerificationService:
             ), 200
 
         if purchase.acknowledgement_state == ACK_PENDING:
-            self._record(request, purchase, owned=False, stage="verified_pending_ack")
+            if not self._record(request, purchase, owned=False, stage="verified_pending_ack"):
+                return self._failure(request, "repository_unavailable"), 503
             try:
                 self._gateway.acknowledge(APPLICATION_ID, purchase.product_id, request.purchase_token)
             except GatewayError:
@@ -107,7 +119,8 @@ class VerificationService:
                 return self._failure(request, str(exc)), 200
 
         if purchase.purchase_state != PURCHASED:
-            self._record(request, purchase, owned=False, stage="state_changed_after_ack")
+            if not self._record(request, purchase, owned=False, stage="state_changed_after_ack"):
+                return self._failure(request, "repository_unavailable"), 503
             return self._failure(
                 request,
                 "purchase_state_changed_before_grant",
@@ -115,10 +128,12 @@ class VerificationService:
                 acknowledged=purchase.acknowledgement_state == ACKNOWLEDGED,
             ), 200
         if purchase.acknowledgement_state != ACKNOWLEDGED:
-            self._record(request, purchase, owned=False, stage="ack_not_confirmed")
+            if not self._record(request, purchase, owned=False, stage="ack_not_confirmed"):
+                return self._failure(request, "repository_unavailable"), 503
             return self._failure(request, "acknowledgement_not_confirmed"), 503
 
-        self._record(request, purchase, owned=True, stage="owned_acknowledged")
+        if not self._record(request, purchase, owned=True, stage="owned_acknowledged"):
+            return self._failure(request, "repository_unavailable"), 503
         return {
             "verification_request_id": request.verification_request_id,
             "ok": True,
@@ -214,20 +229,24 @@ class VerificationService:
         *,
         owned: bool,
         stage: str,
-    ) -> None:
-        self._repository.record(
-            request.token_hash,
-            {
-                "package_name": APPLICATION_ID,
-                "product_id": purchase.product_id,
-                "purchase_state": purchase.purchase_state,
-                "acknowledgement_state": purchase.acknowledgement_state,
-                "owned": owned,
-                "processing_stage": stage,
-                "purchase_completion_time": purchase.purchase_completion_time,
-                "test_purchase": purchase.test_purchase,
-            },
-        )
+    ) -> bool:
+        try:
+            self._repository.record(
+                request.token_hash,
+                {
+                    "package_name": APPLICATION_ID,
+                    "product_id": purchase.product_id,
+                    "purchase_state": purchase.purchase_state,
+                    "acknowledgement_state": purchase.acknowledgement_state,
+                    "owned": owned,
+                    "processing_stage": stage,
+                    "purchase_completion_time": purchase.purchase_completion_time,
+                    "test_purchase": purchase.test_purchase,
+                },
+            )
+        except RepositoryError:
+            return False
+        return True
 
     def _failure(
         self,
