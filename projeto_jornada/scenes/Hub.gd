@@ -10,7 +10,9 @@ var page_panel: PanelContainer
 var title: Label
 var summary: RichTextLabel
 var actions: VBoxContainer
+var supporter_seal: SupporterSeal
 var loaded_active_run := false
+var _billing_feedback := ""
 
 func _ready() -> void:
     if _consume_android_ci_marker():
@@ -26,6 +28,7 @@ func _ready() -> void:
     MetaEconomyEngine.new().sync_rewards()
     if not loaded_active_run:
         HubEngine.enter()
+    _connect_billing_signals()
     _build_ui()
     _render()
 
@@ -112,6 +115,10 @@ func _build_ui() -> void:
     title.set_meta("base_font_size", 34)
     BookCardStyle.apply_heading(title, "mata_fio_verde", DomainThemeService, 1)
     top.add_child(title)
+    supporter_seal = SupporterSeal.new()
+    supporter_seal.tooltip_text = localization.text("hub.billing.supporter_badge")
+    supporter_seal.visible = false
+    top.add_child(supporter_seal)
     column.add_child(top)
 
     summary = RichTextLabel.new()
@@ -128,6 +135,8 @@ func _build_ui() -> void:
     AccessibilityService.apply_font_scale(self)
 
 func _render() -> void:
+    if actions == null or summary == null:
+        return
     for child in actions.get_children():
         child.queue_free()
     MetaUnlockEngine.evaluate_progression()
@@ -145,6 +154,7 @@ func _render() -> void:
     lines.append(localization.text("hub.stats.unlocks") % [unlocks.characters, unlocks.routes, unlocks.modes, unlocks.codex])
     lines.append(localization.text("hub.stats.echoes") % [codex.unlocked_achievement_count(), CodexProgressEngine.ACHIEVEMENTS.size(), echoes.echo_marks, echoes.consequences])
     lines.append(localization.text("hub.stats.threads") % [economy_summary.balance, economy_summary.lifetime_spent, economy_summary.purchases])
+    _append_billing_summary(lines)
     lines.append("")
     lines.append(localization.text("hub.facilities"))
     for facility_variant in hub.facilities:
@@ -170,6 +180,10 @@ func _render() -> void:
             lines.append("• %s" % npc_view.get("name", npc_id))
     summary.text = "\n".join(lines)
 
+    if supporter_seal != null:
+        supporter_seal.visible = EntitlementEngine.new().has_supporter_cosmetics()
+        supporter_seal.tooltip_text = localization.text("hub.billing.supporter_badge")
+
     if loaded_active_run:
         _button(localization.text("hub.continue"), _continue_run, true)
         _button(localization.text("hub.abandon"), _abandon_run, false)
@@ -182,10 +196,41 @@ func _render() -> void:
             _button(localization.text("hub.examine_route") % world_view.get("name", world_id), func(): _show_route(world_id), false)
     _button(localization.text("common.echo_archive"), _open_codex, false)
     _button(localization.text("hub.thread_table"), _open_meta_economy, false)
+    _append_billing_actions()
     _button(localization.text("common.accessibility"), _open_accessibility, false)
     var legal_label := LegalPanel.entry_label(localization.current_locale())
     if legal_label != "":
         _button(legal_label, _open_legal, false)
+
+func _append_billing_summary(lines: Array[String]) -> void:
+    if not OS.has_feature("android"):
+        return
+    var billing: Dictionary = BillingService.summary()
+    lines.append("")
+    lines.append(localization.text("hub.billing.section"))
+    if bool(billing.get("full_game", false)):
+        lines.append("✓ %s" % localization.text("hub.billing.full_owned"))
+    if bool(billing.get("supporter_cosmetics", false)):
+        lines.append("✓ %s" % localization.text("hub.billing.supporter_owned"))
+    var status := str(billing.get("status", ""))
+    if not bool(billing.get("purchase_available", false)) and status in ["configuration_pending", "plugin_unavailable", "disconnected", "error"]:
+        lines.append(localization.text("hub.billing.unavailable"))
+    if not _billing_feedback.is_empty():
+        lines.append("[i]%s[/i]" % _billing_feedback)
+
+func _append_billing_actions() -> void:
+    if not OS.has_feature("android"):
+        return
+    var billing: Dictionary = BillingService.summary()
+    var available := bool(billing.get("purchase_available", false))
+    if not bool(billing.get("full_game", false)):
+        var full_button := _button(localization.text("hub.billing.unlock_full"), _purchase_real_money.bind(BillingService.FULL_GAME_PRODUCT), false)
+        full_button.disabled = not available
+    if not bool(billing.get("supporter_cosmetics", false)):
+        var supporter_button := _button(localization.text("hub.billing.buy_supporter"), _purchase_real_money.bind(BillingService.SUPPORTER_PRODUCT), false)
+        supporter_button.disabled = not available
+    var restore_button := _button(localization.text("hub.billing.restore"), _restore_purchases, false)
+    restore_button.disabled = str(billing.get("status", "")) in ["configuration_pending", "plugin_unavailable", "not_android"]
 
 func _button(text_value: String, callback: Callable, primary: bool) -> Button:
     var button := Button.new()
@@ -197,6 +242,45 @@ func _button(text_value: String, callback: Callable, primary: bool) -> Button:
     button.pressed.connect(callback)
     actions.add_child(button)
     return button
+
+func _purchase_real_money(product_id: String) -> void:
+    var result: Dictionary = BillingService.purchase(product_id)
+    if not bool(result.get("ok", false)):
+        _billing_feedback = localization.text("hub.billing.unavailable") if str(result.get("error", "")) == "billing_unavailable" else localization.text("hub.billing.failed")
+        _render()
+
+func _restore_purchases() -> void:
+    if not BillingService.restore():
+        _billing_feedback = localization.text("hub.billing.unavailable")
+        _render()
+
+func _connect_billing_signals() -> void:
+    if not OS.has_feature("android"):
+        return
+    _connect_once(BillingService, "status_changed", Callable(self, "_on_billing_status_changed"))
+    _connect_once(BillingService, "purchase_pending", Callable(self, "_on_billing_purchase_pending"))
+    _connect_once(BillingService, "purchase_failed", Callable(self, "_on_billing_purchase_failed"))
+    _connect_once(BillingService, "entitlement_changed", Callable(self, "_on_billing_entitlement_changed"))
+    _connect_once(BillingService, "restore_finished", Callable(self, "_on_billing_restore_finished"))
+
+func _on_billing_status_changed(_status: String) -> void:
+    _render()
+
+func _on_billing_purchase_pending(_product_id: String) -> void:
+    _billing_feedback = localization.text("hub.billing.pending")
+    _render()
+
+func _on_billing_purchase_failed(_product_id: String, _reason: String) -> void:
+    _billing_feedback = localization.text("hub.billing.failed")
+    _render()
+
+func _on_billing_entitlement_changed(_product_id: String) -> void:
+    _billing_feedback = ""
+    _render()
+
+func _on_billing_restore_finished(ok: bool, _restored_summary: Dictionary) -> void:
+    _billing_feedback = localization.text("hub.billing.restored") if ok else localization.text("hub.billing.unavailable")
+    _render()
 
 func _continue_run() -> void:
     get_tree().change_scene_to_file("res://scenes/Main.tscn")
@@ -233,3 +317,7 @@ func _open_legal() -> void:
     var panel := LegalPanel.new()
     add_child(panel)
     panel.open_for("mata_fio_verde")
+
+func _connect_once(emitter: Object, signal_name: String, callable: Callable) -> void:
+    if not emitter.is_connected(signal_name, callable):
+        emitter.connect(signal_name, callable)
