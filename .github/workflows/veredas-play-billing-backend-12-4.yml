@@ -12,6 +12,8 @@ on:
       - 'projeto_jornada/export_presets.cfg'
       - 'projeto_jornada/tools/play_billing_backend_gate.py'
       - 'projeto_jornada/tools/play_billing_timeout_budget_gate.py'
+      - 'projeto_jornada/tools/play_billing_local_reference_gate.py'
+      - 'projeto_jornada/tools/play_billing_retention_gate.py'
       - 'projeto_jornada/tools/play_billing_12_4_gate.py'
       - '.github/workflows/veredas-play-billing-backend-12-4.yml'
   workflow_dispatch:
@@ -32,10 +34,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Static backend and cross-layer timeout gates
+      - name: Static backend, retention and cross-layer timeout gates
         working-directory: projeto_jornada
         run: |
           python tools/play_billing_backend_gate.py
+          python tools/play_billing_retention_gate.py
           python tools/play_billing_timeout_budget_gate.py
       - name: Compile backend sources
         working-directory: projeto_jornada/backend/play_purchase_verifier
