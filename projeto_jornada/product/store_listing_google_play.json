@@ -1,13 +1,31 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.5",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-13",
   "application_id": "com.pmartins87.veredasdatrama",
   "default_store_locale": "pt-BR",
   "launch_locale_mapping": {
     "pt_BR": "pt-BR",
     "en": "en-US"
+  },
+  "google_play_policy_baseline": {
+    "checked_on": "2026-08-13",
+    "official_help_scope": "Play Console store listing and preview asset requirements",
+    "title_max_chars": 30,
+    "short_description_max_chars": 80,
+    "full_description_max_chars": 4000,
+    "icon_requirement": "512x512 32-bit PNG with alpha, maximum 1024KB",
+    "feature_graphic_requirement": "1024x500 JPEG or 24-bit PNG without alpha",
+    "screenshot_requirement": "JPEG or 24-bit PNG without alpha, each dimension 320..3840 and max dimension no more than 2x min dimension",
+    "game_promotion_recommendation": "at least three 9:16 portrait screenshots at minimum 1080x1920 or three 16:9 landscape screenshots at minimum 1920x1080",
+    "project_choice": "six 1080x1920 portrait screenshots per launch locale"
+  },
+  "capture_evidence": {
+    "manifest": "product/store_capture_manifest.json",
+    "gate": "tools/store_capture_provenance_gate.py",
+    "finalizer": "tools/finalize_store_capture_manifest.py",
+    "all_final_screenshots_must_share_one_certified_11_10_rc": true
   },
   "listings": {
     "pt-BR": {
@@ -49,7 +67,8 @@
       "width": 1024,
       "height": 500,
       "format": "PNG",
-      "alpha_allowed": false
+      "alpha_allowed": false,
+      "alt_text": "Arte de capa de Veredas da Trama com atmosfera de livro-jogo de fantasia e caminhos que se entrelaçam."
     },
     "phone_screenshots": {
       "required_for_release_per_locale": 6,
@@ -58,82 +77,22 @@
       "orientation": "portrait_9_16",
       "format": "PNG",
       "alpha_allowed": false,
-      "capture_policy": "actual release-candidate gameplay/UI only; no mockups presented as gameplay; no price/rank/CTA overlays",
+      "capture_policy": "actual certified Android release-candidate gameplay/UI only; no mockups presented as gameplay; no price/rank/CTA overlays; every image hash-bound through product/store_capture_manifest.json",
       "pt-BR": [
-        {
-          "path": "store/google_play/pt-BR/01_hub.png",
-          "status": "pending_rc_capture",
-          "scene": "Hub / preparação de jornada",
-          "alt_text": "Tela do Hub de Veredas da Trama com opções de jornada, inventário, códice e configurações."
-        },
-        {
-          "path": "store/google_play/pt-BR/02_story_choice.png",
-          "status": "pending_rc_capture",
-          "scene": "escolha narrativa",
-          "alt_text": "Cena narrativa em estilo livro-jogo com texto ilustrado e escolhas que alteram o caminho da jornada."
-        },
-        {
-          "path": "store/google_play/pt-BR/03_combat.png",
-          "status": "pending_rc_capture",
-          "scene": "combate",
-          "alt_text": "Combate de Veredas da Trama mostrando ameaça, recursos do personagem e opções táticas de ação."
-        },
-        {
-          "path": "store/google_play/pt-BR/04_domain.png",
-          "status": "pending_rc_capture",
-          "scene": "Domínio/localidade",
-          "alt_text": "Exploração de uma localidade de um dos Domínios, com ilustração e texto contextual da jornada."
-        },
-        {
-          "path": "store/google_play/pt-BR/05_codex.png",
-          "status": "pending_rc_capture",
-          "scene": "códice/progresso",
-          "alt_text": "Códice do jogo reunindo registros descobertos, progresso, personagens, criaturas, itens e ecos."
-        },
-        {
-          "path": "store/google_play/pt-BR/06_accessibility.png",
-          "status": "pending_rc_capture",
-          "scene": "acessibilidade/configurações",
-          "alt_text": "Configurações de acessibilidade com controles de texto, contraste, movimento, flashes e rótulos de ícones."
-        }
+        {"path":"store/google_play/pt-BR/01_hub.png","status":"pending_rc_capture","scene":"Hub / preparação de jornada","alt_text":"Tela do Hub de Veredas da Trama com opções de jornada, inventário, códice e configurações."},
+        {"path":"store/google_play/pt-BR/02_story_choice.png","status":"pending_rc_capture","scene":"escolha narrativa","alt_text":"Cena narrativa em estilo livro-jogo com texto ilustrado e escolhas que alteram o caminho da jornada."},
+        {"path":"store/google_play/pt-BR/03_combat.png","status":"pending_rc_capture","scene":"combate","alt_text":"Combate de Veredas da Trama mostrando ameaça, recursos do personagem e opções táticas de ação."},
+        {"path":"store/google_play/pt-BR/04_domain.png","status":"pending_rc_capture","scene":"Domínio/localidade","alt_text":"Exploração de uma localidade de um dos Domínios, com ilustração e texto contextual da jornada."},
+        {"path":"store/google_play/pt-BR/05_codex.png","status":"pending_rc_capture","scene":"códice/progresso","alt_text":"Códice do jogo reunindo registros descobertos, progresso, personagens, criaturas, itens e ecos."},
+        {"path":"store/google_play/pt-BR/06_accessibility.png","status":"pending_rc_capture","scene":"acessibilidade/configurações","alt_text":"Configurações de acessibilidade com controles de texto, contraste, movimento, flashes e rótulos de ícones."}
       ],
       "en-US": [
-        {
-          "path": "store/google_play/en-US/01_hub.png",
-          "status": "pending_rc_capture",
-          "scene": "Hub / journey setup",
-          "alt_text": "Veredas da Trama Hub showing journey, inventory, codex, and settings options."
-        },
-        {
-          "path": "store/google_play/en-US/02_story_choice.png",
-          "status": "pending_rc_capture",
-          "scene": "narrative choice",
-          "alt_text": "Illustrated gamebook scene with narrative text and choices that reshape the journey."
-        },
-        {
-          "path": "store/google_play/en-US/03_combat.png",
-          "status": "pending_rc_capture",
-          "scene": "combat",
-          "alt_text": "Veredas da Trama combat showing threat, character resources, and tactical action choices."
-        },
-        {
-          "path": "store/google_play/en-US/04_domain.png",
-          "status": "pending_rc_capture",
-          "scene": "Domain/location",
-          "alt_text": "Exploration of a Domain location with hand-drawn illustration and contextual journey text."
-        },
-        {
-          "path": "store/google_play/en-US/05_codex.png",
-          "status": "pending_rc_capture",
-          "scene": "codex/progress",
-          "alt_text": "Game codex collecting discovered records, progress, characters, creatures, items, and echoes."
-        },
-        {
-          "path": "store/google_play/en-US/06_accessibility.png",
-          "status": "pending_rc_capture",
-          "scene": "accessibility/settings",
-          "alt_text": "Accessibility settings for text, contrast, motion, flashes, icon labels, and other reading options."
-        }
+        {"path":"store/google_play/en-US/01_hub.png","status":"pending_rc_capture","scene":"Hub / journey setup","alt_text":"Veredas da Trama Hub showing journey, inventory, codex, and settings options."},
+        {"path":"store/google_play/en-US/02_story_choice.png","status":"pending_rc_capture","scene":"narrative choice","alt_text":"Illustrated gamebook scene with narrative text and choices that reshape the journey."},
+        {"path":"store/google_play/en-US/03_combat.png","status":"pending_rc_capture","scene":"combat","alt_text":"Veredas da Trama combat showing threat, character resources, and tactical action choices."},
+        {"path":"store/google_play/en-US/04_domain.png","status":"pending_rc_capture","scene":"Domain/location","alt_text":"Exploration of a Domain location with hand-drawn illustration and contextual journey text."},
+        {"path":"store/google_play/en-US/05_codex.png","status":"pending_rc_capture","scene":"codex/progress","alt_text":"Game codex collecting discovered records, progress, characters, creatures, items, and echoes."},
+        {"path":"store/google_play/en-US/06_accessibility.png","status":"pending_rc_capture","scene":"accessibility/settings","alt_text":"Accessibility settings for text, contrast, motion, flashes, icon labels, and other reading options."}
       ]
     },
     "preview_video": {
@@ -153,7 +112,8 @@
     "avoid_keyword_spam": true,
     "avoid_misleading_feature_claims": true,
     "localized_copy_must_match_same_product_behavior": true,
-    "commercial_model_must_match_billing_products": true
+    "commercial_model_must_match_billing_products": true,
+    "graphic_alt_text_max_chars": 140
   },
   "dependencies": [
     "7.3 final Domain/location art",
@@ -167,7 +127,8 @@
   "completion_requirements": [
     "freeze final PT-BR and en-US copy against the release candidate and final Billing product set",
     "produce final icon and feature graphic from original Veredas da Trama art",
-    "capture all localized screenshots from the certified release candidate",
+    "capture all localized screenshots from the certified Android release candidate",
+    "bind every screenshot to the exact certified 11.10 RC commit, version and release-input fingerprint with SHA-256 evidence",
     "validate dimensions, file formats, alpha policy, file sizes and alt text",
     "perform human review for misleading/promotional metadata and store policy compliance",
     "upload listing to Play Console and verify preview on phone form factor",
