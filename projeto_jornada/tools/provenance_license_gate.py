@@ -44,6 +44,21 @@ def tracked_files() -> list[str]:
         return [str(path.relative_to(ROOT)).replace("\\", "/") for path in ROOT.rglob("*") if path.is_file()]
 
 
+def git_blob_sha(relative_path: str) -> str:
+    path = ROOT / relative_path
+    if not path.is_file():
+        return ""
+    try:
+        return subprocess.check_output(
+            ["git", "hash-object", str(path)],
+            cwd=ROOT.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def parse_requirements() -> dict[str, str]:
     result: dict[str, str] = {}
     for raw_line in BACKEND_REQUIREMENTS.read_text(encoding="utf-8").splitlines():
@@ -71,7 +86,7 @@ def main() -> int:
         print(f"PROVENANCE_LICENSE FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 1 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 2 or contract.get("roadmap_step") != "12.9":
         errors.append("release provenance contract schema/roadmap_step invalid")
 
     assets = contract.get("asset_provenance", {})
@@ -88,11 +103,9 @@ def main() -> int:
         errors.append("asset provenance rows must be an array")
         rows = []
 
-    discovered = sorted(
-        path for path in tracked_files()
-        if Path(path).suffix.lower() in normalized_ext
-    )
+    discovered = sorted(path for path in tracked_files() if Path(path).suffix.lower() in normalized_ext)
     declared_paths: list[str] = []
+    allowed_origins = {str(value) for value in assets.get("allowed_origin_classes", [])}
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
             errors.append(f"asset provenance row {index} is not an object")
@@ -102,6 +115,26 @@ def main() -> int:
             errors.append(f"asset provenance row {index} path missing")
             continue
         declared_paths.append(path)
+        origin = str(row.get("origin_class", ""))
+        if origin not in allowed_origins:
+            errors.append(f"asset origin class invalid: {path}:{origin}")
+        if not str(row.get("rights_basis", "")).strip():
+            errors.append(f"asset rights_basis missing: {path}")
+        if unresolved(row.get("source_record")):
+            errors.append(f"asset source_record unresolved: {path}")
+        expected_blob = str(row.get("repository_blob_sha", "")).lower()
+        actual_blob = git_blob_sha(path).lower()
+        if not re.fullmatch(r"[0-9a-f]{40}", expected_blob) or expected_blob != actual_blob:
+            errors.append(f"asset provenance blob binding mismatch: {path} expected={expected_blob} actual={actual_blob}")
+        if args.release:
+            if row.get("rights_reviewed") is not True:
+                errors.append(f"asset final rights review incomplete: {path}")
+            if row.get("release_eligible") is not True:
+                errors.append(f"asset is not explicitly release eligible: {path}")
+            if origin in {"commissioned_with_release_rights", "licensed_third_party", "public_domain_verified"}:
+                if unresolved(row.get("rights_evidence_archive")):
+                    errors.append(f"asset rights evidence is not archived: {path}")
+
     if len(set(declared_paths)) != len(declared_paths):
         errors.append("asset provenance contains duplicate paths")
     if set(discovered) != set(declared_paths):
@@ -113,25 +146,6 @@ def main() -> int:
             errors.append(f"provenance row(s) point to missing asset(s): {stale[:25]}")
     if int(assets.get("current_binary_asset_count", -1)) != len(discovered):
         errors.append("asset_provenance.current_binary_asset_count does not match repository scan")
-
-    allowed_origins = {str(value) for value in assets.get("allowed_origin_classes", [])}
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        path = str(row.get("path", ""))
-        origin = str(row.get("origin_class", ""))
-        if origin not in allowed_origins:
-            errors.append(f"asset origin class invalid: {path}:{origin}")
-        if not str(row.get("rights_basis", "")).strip():
-            errors.append(f"asset rights_basis missing: {path}")
-        if unresolved(row.get("source_record")):
-            errors.append(f"asset source_record unresolved: {path}")
-        if args.release:
-            if row.get("release_eligible") is not True:
-                errors.append(f"asset is not explicitly release eligible: {path}")
-            if origin in {"commissioned_with_release_rights", "licensed_third_party", "public_domain_verified"}:
-                if unresolved(row.get("rights_evidence_archive")):
-                    errors.append(f"asset rights evidence is not archived: {path}")
 
     software = contract.get("software_inventory", {})
     if not isinstance(software, dict):
@@ -147,10 +161,11 @@ def main() -> int:
             errors.append("software component row is not an object")
             continue
         component_id = str(row.get("id", "")).strip()
-        if not component_id or component_id in component_map:
+        key = component_id.lower()
+        if not component_id or key in component_map:
             errors.append(f"software component id missing/duplicate: {component_id!r}")
             continue
-        component_map[component_id.lower()] = row
+        component_map[key] = row
 
     try:
         direct_requirements = parse_requirements()
@@ -222,9 +237,12 @@ def main() -> int:
             warnings.append("backend transitive hash lock is still pending")
         if software.get("android_final_dependency_inventory_status") != "final_gradle_dependency_report_archived":
             warnings.append("final Android Gradle dependency inventory is still pending")
+        pending_rights = sum(1 for row in rows if isinstance(row, dict) and row.get("rights_reviewed") is not True)
+        if pending_rights:
+            warnings.append(f"{pending_rights} asset rights review(s) pending before release eligibility")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "discovered_asset_count": len(discovered),
@@ -246,7 +264,7 @@ def main() -> int:
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PROVENANCE_LICENSE %s PASS: assets=%d dependencies=%d services=%d warnings=%d"
+        "PROVENANCE_LICENSE %s PASS: assets=%d dependencies=%d services=%d warnings=%d blob_binding=1"
         % (mode, len(discovered), len(component_map), len(known_services), len(warnings))
     )
     for warning in warnings:
