@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -11,13 +11,17 @@
     "final_release_tag": "PENDING_12_9_RELEASE_TAG"
   },
   "release_archive": {
+    "manifest_path": "product/release_archive_manifest.json",
+    "gate": "tools/release_archive_gate.py",
     "rc_commit_sha": "PENDING_12_9_RC_COMMIT_SHA",
     "aab_sha256": "PENDING_12_9_AAB_SHA256",
     "release_input_fingerprint": "PENDING_12_9_RELEASE_INPUT_FINGERPRINT",
     "signing_certificate_sha256": "PENDING_12_9_SIGNING_CERT_SHA256",
     "store_version_name": "PENDING_12_9_VERSION_NAME",
     "store_version_code": 0,
-    "archive_manifest_path": "PENDING_12_9_ARCHIVE_MANIFEST_PATH"
+    "identity_cross_check_with_12_6_and_12_8_required": true,
+    "required_item_hash_verification": true,
+    "external_evidence_references_separate_from_repository_secrets": true
   },
   "ownership_and_recovery": {
     "primary_release_owner": "PENDING_12_9_PRIMARY_RELEASE_OWNER",
@@ -79,6 +83,7 @@
     "finalized": false
   },
   "asset_and_legal_archive": {
+    "release_archive_manifest_frozen": false,
     "release_provenance_contract_frozen": false,
     "asset_provenance_manifest_finalized": false,
     "third_party_licenses_archived": false,
@@ -86,6 +91,7 @@
     "android_dependency_inventory_archived": false,
     "external_service_terms_archived": false,
     "privacy_policy_final_copy_archived": false,
+    "terms_final_copy_archived": false,
     "store_listing_final_copy_archived": false,
     "release_notes_archived": false
   },
@@ -93,6 +99,7 @@
     "12_8_completion_verified": false,
     "source_tag_matches_rc_commit": false,
     "release_archive_verified": false,
+    "release_archive_gate_passed": false,
     "continuity_runbook_reviewed": false,
     "support_channel_tested": false,
     "account_recovery_drill_recorded": false,
@@ -103,17 +110,18 @@
   "completion_requirements": [
     "12.8 completion record reports pass",
     "final release tag resolves exactly to the certified RC commit",
+    "canonical release archive manifest matches 12.6/12.8 commit/version/AAB/signing identity/tested track",
     "AAB SHA-256, version, signing fingerprint and release-input fingerprint are archived",
+    "every required archive item exists and its SHA-256 is verified",
     "primary and secondary ownership plus support/privacy channels are real non-placeholder values",
     "Play Console, repository and Billing backend recovery are verified",
     "keystore/secrets external backups exist and a restore drill is recorded without committing private material",
     "every versioned release art/audio/font asset has provenance and rights evidence and no reference-game/unlicensed asset is present",
     "Godot/plugin/backend dependencies have reviewed license notices; backend transitives are hash locked with final SBOM",
     "final Android Gradle dependency inventory and production external-service terms/data roles are archived",
-    "privacy policy, store listing and release notes are archived",
+    "privacy policy, terms, store listing and release notes are archived",
     "continuity runbook is reviewed and support channel is tested",
-    "provenance_license_gate.py --release passes on the exact release ancestry",
-    "continuity_support_gate.py --release passes"
+    "provenance_license_gate.py --release, release_archive_gate.py --release and continuity_support_gate.py --release pass on the exact release ancestry"
   ],
   "pass_recorded": false
 }
