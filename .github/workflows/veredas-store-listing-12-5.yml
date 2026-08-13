@@ -11,9 +11,13 @@ on:
       - 'projeto_jornada/QA_11_10_COMPLETION.json'
       - 'projeto_jornada/product/store_listing_google_play.json'
       - 'projeto_jornada/product/store_capture_manifest.json'
+      - 'projeto_jornada/product/commercial_model.json'
+      - 'projeto_jornada/mobile/play_billing_contract.json'
+      - 'projeto_jornada/docs/TERMS_OF_USE_DRAFT.md'
       - 'projeto_jornada/store/google_play/**'
       - 'projeto_jornada/tools/store_listing_gate.py'
       - 'projeto_jornada/tools/store_capture_provenance_gate.py'
+      - 'projeto_jornada/tools/store_commercial_consistency_gate.py'
       - 'projeto_jornada/tools/finalize_store_capture_manifest.py'
       - '.github/workflows/veredas-store-listing-12-5.yml'
 
@@ -31,11 +35,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate store listing and screenshot provenance
+      - name: Validate store listing, commercial model and screenshot provenance
         working-directory: projeto_jornada
         run: |
-          python -m py_compile tools/store_listing_gate.py tools/store_capture_provenance_gate.py tools/finalize_store_capture_manifest.py
+          python -m py_compile tools/store_listing_gate.py tools/store_capture_provenance_gate.py tools/store_commercial_consistency_gate.py tools/finalize_store_capture_manifest.py
           python tools/store_listing_gate.py
+          python tools/store_commercial_consistency_gate.py
           python tools/store_capture_provenance_gate.py
       - name: Preserve clean source tree
         run: git diff --exit-code
