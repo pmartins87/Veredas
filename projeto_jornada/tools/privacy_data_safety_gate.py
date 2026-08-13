@@ -14,6 +14,7 @@ IDENTITY = ROOT / "mobile" / "release_identity.json"
 BILLING = ROOT / "mobile" / "play_billing_contract.json"
 EXPORT = ROOT / "export_presets.cfg"
 POLICY = ROOT / "docs" / "PRIVACY_POLICY_DRAFT.md"
+VERIFIER_CLIENT = ROOT / "mobile" / "PlayPurchaseVerificationClient.gd"
 PLUGIN_ROOT = ROOT / "addons" / "GodotGooglePlayBilling"
 RUNTIME_DIRS = [ROOT / "core", ROOT / "ui", ROOT / "scenes", ROOT / "mobile"]
 NETWORK_TOKENS = (
@@ -33,6 +34,10 @@ SDK_TOKENS = (
     "Amplitude",
     "Sentry",
 )
+EXPECTED_NETWORK_ALLOWLIST = {
+    ("mobile/PlayPurchaseVerificationClient.gd", "HTTPRequest"),
+    ("mobile/PlayPurchaseVerificationClient.gd", "HTTPClient"),
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -81,7 +86,7 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
 
-    for required in (PRIVACY, COMMERCIAL, IDENTITY, BILLING, EXPORT, POLICY):
+    for required in (PRIVACY, COMMERCIAL, IDENTITY, BILLING, EXPORT, POLICY, VERIFIER_CLIENT):
         if not required.exists():
             errors.append(f"required privacy/release file missing: {required.relative_to(ROOT)}")
     if errors:
@@ -95,9 +100,12 @@ def main() -> int:
     billing = read_json(BILLING)
     export_text = EXPORT.read_text(encoding="utf-8")
     policy_text = POLICY.read_text(encoding="utf-8")
+    verifier_text = VERIFIER_CLIENT.read_text(encoding="utf-8")
 
     if privacy.get("roadmap_step") != "12.3":
         errors.append("privacy manifest must identify roadmap_step 12.3")
+    if int(privacy.get("schema_version", 0)) < 2:
+        errors.append("privacy manifest schema must include the runtime billing network boundary")
     if billing.get("roadmap_step") != "12.4":
         errors.append("billing contract must identify roadmap_step 12.4")
 
@@ -117,9 +125,17 @@ def main() -> int:
     if isinstance(principles, dict) and isinstance(behavior, dict):
         if bool(principles.get("no_ads", False)) != (not bool(behavior.get("advertising", True))):
             errors.append("commercial no-ads policy disagrees with privacy behavior")
+        if behavior.get("internet_permission") is not True:
+            errors.append("privacy manifest must explicitly declare INTERNET permission")
+        if behavior.get("gameplay_profile_transmitted_off_device") is not False:
+            errors.append("current privacy baseline forbids gameplay profile transmission")
+        if behavior.get("canonical_game_content_transmitted_off_device") is not False:
+            errors.append("current privacy baseline forbids canonical content transmission")
     else:
         errors.append("commercial/privacy behavior objects missing")
 
+    if export_text.count("permissions/internet=true") != 2:
+        errors.append("INTERNET permission must be explicit in both Android presets for billing verification")
     custom_permission_matches = re.findall(
         r"permissions/custom_permissions=PackedStringArray\((.*?)\)", export_text
     )
@@ -139,6 +155,23 @@ def main() -> int:
         for row in allowlisted
         if isinstance(row, dict)
     }
+    if allowlisted_pairs != EXPECTED_NETWORK_ALLOWLIST:
+        errors.append(
+            "runtime network allowlist drift: expected=%s got=%s"
+            % (sorted(EXPECTED_NETWORK_ALLOWLIST), sorted(allowlisted_pairs))
+        )
+    for row in allowlisted:
+        if not isinstance(row, dict):
+            errors.append("runtime data integration allowlist row is not an object")
+            continue
+        if row.get("gameplay_data_allowed") is not False:
+            errors.append(
+                f"allowlisted network integration must forbid gameplay data: {row.get('path')}:{row.get('token')}"
+            )
+        if not str(row.get("purpose", "")).strip():
+            errors.append("allowlisted network integration purpose missing")
+
+    observed_network_pairs = {(hit["path"], hit["token"]) for hit in network_hits}
     undeclared_hits = [
         hit for hit in network_hits + sdk_hits
         if (hit["path"], hit["token"]) not in allowlisted_pairs
@@ -148,6 +181,24 @@ def main() -> int:
             "undeclared runtime network/SDK integration(s): "
             + ", ".join(f"{hit['path']}:{hit['token']}" for hit in undeclared_hits[:20])
         )
+    missing_observed_allowlist = EXPECTED_NETWORK_ALLOWLIST - observed_network_pairs
+    if missing_observed_allowlist:
+        errors.append(f"declared billing network implementation missing from runtime scan: {sorted(missing_observed_allowlist)}")
+    if sdk_hits:
+        errors.append(
+            "unexpected analytics/advertising/crash SDK token(s) in runtime: "
+            + ", ".join(f"{hit['path']}:{hit['token']}" for hit in sdk_hits[:20])
+        )
+
+    for fragment in [
+        'normalized.begins_with("https://")',
+        '"Cache-Control: no-store"',
+        '"verification_request_id"',
+        '"purchase_token"',
+        '"product_id"',
+    ]:
+        if fragment not in verifier_text:
+            errors.append(f"billing network privacy boundary missing client fragment: {fragment}")
 
     account_creation = bool(behavior.get("account_creation", False)) if isinstance(behavior, dict) else False
     if account_creation:
@@ -173,12 +224,23 @@ def main() -> int:
     policy = privacy.get("privacy_policy", {})
     billing_verification = billing.get("verification_boundary", {})
 
+    if not isinstance(production_verification, dict):
+        errors.append("production purchase-verification privacy section missing")
+        production_verification = {}
+    if production_verification.get("runtime_client") != "mobile/PlayPurchaseVerificationClient.gd":
+        errors.append("privacy manifest runtime verification client mismatch")
+    if production_verification.get("data_safety_reaudit_required_after_integration") is not True:
+        errors.append("post-billing Data Safety re-audit must remain mandatory")
+    excluded = production_verification.get("explicitly_excluded_from_billing_verification", [])
+    if not isinstance(excluded, list) or "gameplay profile" not in excluded or "save data" not in excluded:
+        errors.append("billing verification privacy boundary must explicitly exclude gameplay profile and save data")
+
     if args.release:
         if pending:
             errors.append(f"release privacy/billing contract has {len(pending)} unresolved PENDING field(s)")
         if not isinstance(data_safety, dict) or data_safety.get("finalized") is not True:
             errors.append("final Play Data Safety declaration has not been frozen")
-        if not isinstance(production_verification, dict) or production_verification.get("status") != "frozen":
+        if production_verification.get("status") != "frozen":
             errors.append("12.4 purchase-verification data flow is not frozen in privacy manifest")
         if not isinstance(billing_verification, dict) or billing_verification.get("status") != "frozen":
             errors.append("12.4 billing verification boundary is not frozen")
@@ -197,8 +259,16 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PRIVACY_DATA_SAFETY %s: network_hits=%d sdk_hits=%d pending=%d errors=%d warnings=%d"
-        % (mode, len(network_hits), len(sdk_hits), len(pending), len(errors), len(warnings))
+        "PRIVACY_DATA_SAFETY %s: network_hits=%d allowlisted=%d sdk_hits=%d pending=%d errors=%d warnings=%d billing_network_only=1"
+        % (
+            mode,
+            len(network_hits),
+            len(allowlisted_pairs),
+            len(sdk_hits),
+            len(pending),
+            len(errors),
+            len(warnings),
+        )
     )
     for warning in warnings:
         print("WARNING:", warning)
@@ -207,7 +277,7 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    print("PRIVACY_DATA_SAFETY PASS: declared app behavior is internally consistent")
+    print("PRIVACY_DATA_SAFETY PASS: declared app behavior and billing-only network boundary are internally consistent")
     return 0
 
 
