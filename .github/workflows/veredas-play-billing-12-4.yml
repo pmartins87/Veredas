@@ -11,6 +11,7 @@ on:
       - 'projeto_jornada/mobile/BillingService.gd'
       - 'projeto_jornada/core/systems/PlayBillingCoordinator.gd'
       - 'projeto_jornada/core/systems/EntitlementEngine.gd'
+      - 'projeto_jornada/core/systems/PurchaseReference.gd'
       - 'projeto_jornada/core/systems/CommercialPolicyEngine.gd'
       - 'projeto_jornada/product/commercial_model.json'
       - 'projeto_jornada/product/privacy_data_safety.json'
@@ -28,11 +29,16 @@ on:
       - 'projeto_jornada/tests/play_billing_correlation_certification.tscn'
       - 'projeto_jornada/tests/PlayPurchaseVerificationClientCertification.gd'
       - 'projeto_jornada/tests/play_purchase_verification_client_certification.tscn'
+      - 'projeto_jornada/tests/PurchaseReferenceCertification.gd'
+      - 'projeto_jornada/tests/purchase_reference_certification.tscn'
       - 'projeto_jornada/tests/EntitlementCertification.gd'
       - 'projeto_jornada/tests/entitlement_certification.tscn'
       - 'projeto_jornada/tests/LocalizationOverflowCertification.gd'
       - 'projeto_jornada/tests/LocalizationIconographyCertification.gd'
       - 'projeto_jornada/tools/play_billing_release_gate.py'
+      - 'projeto_jornada/tools/play_billing_backend_gate.py'
+      - 'projeto_jornada/tools/play_billing_timeout_budget_gate.py'
+      - 'projeto_jornada/tools/play_billing_12_4_gate.py'
       - 'projeto_jornada/tools/privacy_data_safety_gate.py'
       - 'projeto_jornada/tools/validate_android_export.py'
       - '.github/workflows/veredas-play-billing-12-4.yml'
@@ -56,10 +62,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate pre-production billing privacy and Android contracts
+      - name: Validate complete pre-production Billing privacy and Android contracts
         working-directory: projeto_jornada
         run: |
-          python tools/play_billing_release_gate.py
+          python tools/play_billing_12_4_gate.py
           python tools/privacy_data_safety_gate.py
           python tools/validate_android_export.py
           python tools/validate_canonical.py
@@ -79,13 +85,21 @@ jobs:
             exit 1
           fi
 
-      - name: Preserve certified local entitlement semantics from 9.8
+      - name: Preserve and harden certified local entitlement semantics from 9.8
         run: |
           bash projeto_jornada/tools/run_godot_gate.sh \
             /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
             res://tests/entitlement_certification.tscn \
             'ENTITLEMENT_CERTIFICATION FAIL' \
             'ENTITLEMENT_CERTIFICATION PASS: 9.8'
+
+      - name: Certify SHA-256 local purchase references and legacy migration
+        run: |
+          bash projeto_jornada/tools/run_godot_gate.sh \
+            /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 \
+            res://tests/purchase_reference_certification.tscn \
+            'PURCHASE_REFERENCE_CERTIFICATION FAIL' \
+            'PURCHASE_REFERENCE_CERTIFICATION PASS: 12.4'
 
       - name: Certify verified production billing coordinator logic
         run: |
