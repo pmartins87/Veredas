@@ -77,7 +77,8 @@ Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não enc
 - `product/store_capture_manifest.json` define **12 capturas reais do Android RC**, todas obrigatoriamente do mesmo `QA_11_10_COMPLETION`/commit/versão/fingerprint; cada PNG recebe SHA-256, timestamp UTC e identidade do device/emulador.
 - `tools/finalize_store_capture_manifest.py` somente vincula metadados/hashes a PNGs já capturados e não edita pixels. `tools/store_capture_provenance_gate.py` valida o caminho inverso e rejeita mockup, RC divergente, hash divergente ou completion 11.10 sem `status=pass`/SHA completo.
 - `tools/store_listing_gate.py` também deixou de aceitar mera existência de `QA_11_10_COMPLETION.json`: no release valida o conteúdo do certificado.
-- Workflow estrutural `.github/workflows/veredas-store-listing-12-5.yml` está preparado. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
+- `tools/store_commercial_consistency_gate.py` agora prova que **listing ↔ `commercial_model.json` ↔ Billing ↔ Termos** descrevem exatamente os mesmos dois produtos não consumíveis: desbloqueio integral content-only e Selo de Apoiador `supporter_badge` visual-only, sem anúncios, assinaturas, loot boxes ou poder pago.
+- Workflow estrutural `.github/workflows/veredas-store-listing-12-5.yml` executa os três gates quando houver runner. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
 
 ### 12.6 🟡 — AAB/APK final assinado/reproduzível
 - Fingerprint de inputs é acíclico: só recursos runtime reais entram; evidência de release fica fora.
