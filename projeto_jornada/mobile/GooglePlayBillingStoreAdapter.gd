@@ -46,7 +46,8 @@ func query_products(product_ids: Array[String]) -> bool:
     if not _is_ready_for_calls():
         store_error.emit("billing_not_ready", "query_products")
         return false
-    _client.call("query_product_details", product_ids, _enum_value("ProductType", "INAPP", 0))
+    var packed_ids := PackedStringArray(product_ids)
+    _client.call("query_product_details", packed_ids, _enum_value("ProductType", "INAPP", 0))
     return true
 
 
@@ -124,10 +125,14 @@ func _on_connected() -> void:
 
 
 func _on_disconnected() -> void:
+    _started = false
+    _client = null
     store_error.emit("billing_disconnected", "")
 
 
 func _on_connect_error(response_code: int, debug_message: String) -> void:
+    _started = false
+    _client = null
     store_error.emit("billing_connect_error:%d" % response_code, debug_message)
 
 
@@ -191,7 +196,9 @@ func _normalize_purchases(raw: Variant) -> Array[Dictionary]:
         var product_raw = row.get("product_ids", [])
         if typeof(product_raw) == TYPE_ARRAY or typeof(product_raw) == TYPE_PACKED_STRING_ARRAY:
             for value in product_raw:
-                products.append(str(value))
+                var product_id := str(value)
+                if product_id != "" and product_id not in products:
+                    products.append(product_id)
         result.append({
             "order_id": str(row.get("order_id", "")),
             "purchase_token": str(row.get("purchase_token", "")),
