@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -63,9 +63,28 @@
     "backend_changes_must_remain_compatible_with_supported_public_clients": true,
     "deferred_locale_es_419_must_not_be_exposed_before_future_certification": true
   },
+  "provenance_and_dependency_evidence": {
+    "contract": "product/release_provenance.json",
+    "gate": "tools/provenance_license_gate.py",
+    "asset_file_coverage_required": true,
+    "reference_game_assets_forbidden": true,
+    "unknown_or_unlicensed_assets_forbidden": true,
+    "known_software_components_recorded": 7,
+    "known_external_services_recorded": 4,
+    "backend_direct_requirements_pinned": 5,
+    "backend_transitive_hash_lock_required": true,
+    "backend_final_sbom_required": true,
+    "android_final_gradle_dependency_inventory_required": true,
+    "current_versioned_binary_asset_count": 0,
+    "finalized": false
+  },
   "asset_and_legal_archive": {
+    "release_provenance_contract_frozen": false,
     "asset_provenance_manifest_finalized": false,
     "third_party_licenses_archived": false,
+    "backend_dependency_lock_and_sbom_archived": false,
+    "android_dependency_inventory_archived": false,
+    "external_service_terms_archived": false,
     "privacy_policy_final_copy_archived": false,
     "store_listing_final_copy_archived": false,
     "release_notes_archived": false
@@ -78,6 +97,7 @@
     "support_channel_tested": false,
     "account_recovery_drill_recorded": false,
     "secrets_backup_restore_drill_recorded": false,
+    "provenance_license_gate_passed": false,
     "final_source_tree_clean_and_rebuildable": false
   },
   "completion_requirements": [
@@ -87,8 +107,12 @@
     "primary and secondary ownership plus support/privacy channels are real non-placeholder values",
     "Play Console, repository and Billing backend recovery are verified",
     "keystore/secrets external backups exist and a restore drill is recorded without committing private material",
-    "asset provenance, third-party licenses, privacy policy, store listing and release notes are archived",
+    "every versioned release art/audio/font asset has provenance and rights evidence and no reference-game/unlicensed asset is present",
+    "Godot/plugin/backend dependencies have reviewed license notices; backend transitives are hash locked with final SBOM",
+    "final Android Gradle dependency inventory and production external-service terms/data roles are archived",
+    "privacy policy, store listing and release notes are archived",
     "continuity runbook is reviewed and support channel is tested",
+    "provenance_license_gate.py --release passes on the exact release ancestry",
     "continuity_support_gate.py --release passes"
   ],
   "pass_recorded": false
