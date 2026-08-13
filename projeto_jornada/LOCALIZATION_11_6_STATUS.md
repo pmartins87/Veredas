@@ -28,17 +28,19 @@ Esse PASS histórico **não define o escopo de lançamento atual** e não certif
 - Nomes adicionais de famílias/monstros: **396** unidades.
 - Delta compacto inglês: **15.334** unidades.
 - Equação de cobertura: **3.074 + 396 + 15.334 = 18.804**.
-- UI: **119/119** em `pt_BR` e `en`.
-- Labels: **165/165** em `pt_BR` e `en`.
+- UI obrigatória atual: **131/131** em `pt_BR` e `en`.
+- O aumento de 119 para 131 chaves ocorreu em 12/08/2026 para cobrir a superfície runtime de Billing: compra, restauração, disponibilidade, estado pendente/falha, Selo de Apoiador e orientação para rotas do jogo completo.
+- Labels mecânicos/lore: **165/165** em `pt_BR` e `en`.
 - Pack físico inglês: `part_000` a `part_009`, contíguos, total Base64 **133.572 caracteres**.
+- O aumento de UI não altera a contagem narrativa de 18.804 unidades nem o delta compacto de 15.334.
 
 ## Gates atuais
 - `tools/build_launch_localization_packs.py` — deriva alvos do manifesto e preserva catálogos adiados.
 - `tools/localization_pack_certification.py` — certifica apenas alvos atuais e exige cobertura inglesa completa, sem colisões/chaves desconhecidas e com paridade de tokens/BBCode.
 - `tools/localization_quality_gate.py` — incorpora o pack compacto antes de verificar completude, glossário, placeholders e BBCode.
 - `tools/localization_full_linguistic_sanity.py` — deriva alvos do manifesto.
-- `tests/LocalizationOverflowCertification.gd` — `pt_BR + en`.
-- `tests/LocalizationIconographyCertification.gd` — `pt_BR + en`.
+- `tests/LocalizationOverflowCertification.gd` — `pt_BR + en`, incluindo a superfície Billing do Hub em modo de certificação sem rede.
+- `tests/LocalizationIconographyCertification.gd` — `pt_BR + en`, incluindo controles Billing e rótulo do Selo de Apoiador em modo de certificação.
 - `tests/LocalizationArchitectureCertification.gd` — exige exatamente `pt_BR + en` como launch locales e verifica que `es_419` continua preservado, porém não selecionável.
 
 ## Blocker resolvido
@@ -50,11 +52,12 @@ Os workflows recentes continuam terminando antes de executar qualquer step (`run
 ## Gate para concluir 11.6
 11.6 só poderá virar ✅ quando, no mesmo HEAD de lançamento:
 1. o inglês for certificado em **18.804/18.804** unidades e o pack compacto em **15.334** unidades, com zero colisões/chaves desconhecidas/erros de tokens;
-2. o QA completo de glossário/placeholders/BBCode passar com o pack incorporado;
-3. o sanity linguístico final do inglês passar;
-4. overflow/renderização passarem em `pt_BR` e `en` na matriz responsiva;
-5. iconografia e rótulos de acessibilidade passarem em `pt_BR` e `en`;
-6. a arquitetura confirmar `pt_BR + en` e rejeitar `es_419` como idioma de lançamento;
-7. as regressões relevantes passarem no mesmo HEAD limpo.
+2. a UI obrigatória for certificada em **131/131** para `pt_BR` e `en`;
+3. o QA completo de glossário/placeholders/BBCode passar com o pack incorporado;
+4. o sanity linguístico final do inglês passar;
+5. overflow/renderização passarem em `pt_BR` e `en` na matriz responsiva, incluindo a superfície de Billing;
+6. iconografia e rótulos de acessibilidade passarem em `pt_BR` e `en`, incluindo o Selo de Apoiador;
+7. a arquitetura confirmar `pt_BR + en` e rejeitar `es_419` como idioma de lançamento;
+8. as regressões relevantes passarem no mesmo HEAD limpo.
 
 Somente então **11.6 ✅** poderá ser registrado.
