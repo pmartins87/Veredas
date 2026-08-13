@@ -94,8 +94,8 @@ class VerificationService:
             try:
                 self._gateway.acknowledge(APPLICATION_ID, purchase.product_id, request.purchase_token)
             except GatewayError:
-                # A concurrent verifier may have acknowledged the same globally unique token.
-                # Refetch authoritatively before deciding the operation failed.
+                # Another concurrent request may have acknowledged this globally unique token.
+                # Refetch before deciding whether the acknowledgement actually failed.
                 pass
             try:
                 raw_after_ack = self._gateway.fetch_purchase(APPLICATION_ID, request.purchase_token)
@@ -175,17 +175,22 @@ class VerificationService:
         if authoritative_product_id != claimed_product_id:
             raise ValueError("play_product_claim_mismatch")
 
-        offer_details = line_item.get("productOfferDetails", {})
+        offer_details = line_item.get("productOfferDetails")
         if not isinstance(offer_details, dict):
             raise ValueError("play_product_offer_details_missing")
         quantity = offer_details.get("quantity", 0)
         if type(quantity) is not int or quantity != 1:
             raise ValueError("play_product_quantity_invalid")
-        if str(offer_details.get("offerId", "")).strip():
+        purchase_option_id = str(offer_details.get("purchaseOptionId", "")).strip()
+        if not purchase_option_id:
+            raise ValueError("play_purchase_option_id_missing")
+        if "offerId" in offer_details:
             raise ValueError("play_offer_not_allowed_at_launch")
-        if offer_details.get("rentOfferDetails") not in (None, {}):
+        # RentOfferDetails intentionally has no fields in ProductPurchaseV2, therefore
+        # rentOfferDetails: {} is meaningful presence and must not be treated as absent.
+        if "rentOfferDetails" in offer_details:
             raise ValueError("play_rent_not_allowed_at_launch")
-        if offer_details.get("preorderOfferDetails") not in (None, {}):
+        if "preorderOfferDetails" in offer_details:
             raise ValueError("play_preorder_not_allowed_at_launch")
 
         acknowledgement_state = str(raw.get("acknowledgementState", ""))
