@@ -29,7 +29,7 @@ A licença não transfere propriedade sobre código, textos, ilustrações, mús
 
 ## 4. Modelo comercial
 
-A versão planejada para lançamento oferece uma parte inicial gratuita e um **único desbloqueio digital não consumível** para liberar o conteúdo integral. Também poderá existir um **pacote opcional de apoiador exclusivamente cosmético**, sem efeito sobre combate, progressão, dificuldade, atributos, moedas ou chances de recompensa. Não são planejados anúncios, assinatura, loot boxes, venda de poder ou consumíveis pagos.
+A versão planejada para lançamento oferece uma parte inicial gratuita e um **único desbloqueio digital não consumível** para liberar o conteúdo integral. Também poderá existir uma compra opcional e não consumível chamada **Selo de Apoiador**, que adiciona somente um ornamento visual ao Nó de Vigília. O Selo de Apoiador não concede ou altera combate, progressão, dificuldade, atributos, Fios de Vigília, outras moedas, itens, chances ou quantidade de recompensas. Não são planejados anúncios, assinatura, loot boxes, venda de poder ou consumíveis pagos.
 
 Quando distribuído pelo Google Play, qualquer compra digital dentro do aplicativo deverá usar o sistema de faturamento permitido/exigido pela plataforma para aquela distribuição e região. O jogo não deverá direcionar o usuário, dentro do fluxo de compra da versão Google Play, a um meio de pagamento externo incompatível com a política aplicável.
 
@@ -39,9 +39,9 @@ A implementação comercial final depende da certificação do passo 12.4 e este
 
 ## 5. Titularidade e restauração de compra
 
-O desbloqueio integral somente deve ser concedido após confirmação válida da titularidade pela infraestrutura de produção. O aplicativo poderá manter localmente um cache da titularidade e dados técnicos estritamente necessários para restauração, verificação, revogação e prevenção de uso indevido, conforme descrito na Política de Privacidade final.
+O desbloqueio integral e o Selo de Apoiador somente devem ser concedidos após confirmação válida da respectiva titularidade pela infraestrutura de produção. O aplicativo poderá manter localmente um cache da titularidade e dados técnicos estritamente necessários para restauração, verificação, revogação e prevenção de uso indevido, conforme descrito na Política de Privacidade final.
 
-Falhas temporárias de comunicação com a loja não devem transformar uma compra pendente, cancelada, reembolsada ou não verificada em titularidade permanente.
+Falhas temporárias de comunicação com a loja não devem transformar uma compra pendente, cancelada, reembolsada ou não verificada em titularidade permanente. Uma restauração autoritativa também poderá remover do cache uma licença que a plataforma confirme como não mais pertencente ao usuário.
 
 ## 6. Saves e dados locais
 
@@ -108,7 +108,7 @@ The license does not transfer ownership of the game's code, text, artwork, music
 
 ## 4. Commercial model
 
-The planned launch version offers an initial free portion and a **single non-consumable digital unlock** for the full game. An **optional supporter pack containing cosmetic-only items** may also be offered; it must not affect combat, progression, difficulty, stats, currency or reward odds. Ads, subscriptions, loot boxes, paid power and paid consumables are not planned.
+The planned launch version offers an initial free portion and a **single non-consumable digital unlock** for the full game. An optional non-consumable purchase called the **Supporter Seal** may also be offered; it adds only a visual ornament to the Vigil Knot. The Supporter Seal does not grant or alter combat, progression, difficulty, stats, Vigil Threads, other currency, items, reward odds or reward quantity. Ads, subscriptions, loot boxes, paid power and paid consumables are not planned.
 
 For Google Play distribution, in-app digital purchases must use the billing method allowed or required by the platform for the relevant distribution and region. The Google Play build must not route its purchase flow to an incompatible external payment method.
 
@@ -116,9 +116,9 @@ Final commercial behavior remains subject to 12.4 certification and these Terms 
 
 ## 5. Entitlement and restore
 
-Full entitlement must only be granted after valid production verification. The app may keep a local entitlement cache and the minimum technical data needed for verification, restore, revocation and abuse prevention, as described in the final Privacy Policy.
+The full-game unlock and Supporter Seal must only be granted after valid production verification of the corresponding entitlement. The app may keep a local entitlement cache and the minimum technical data needed for verification, restore, revocation and abuse prevention, as described in the final Privacy Policy.
 
-A pending, cancelled, refunded or unverified transaction must not become a permanent entitlement merely because the store is temporarily unavailable.
+A pending, cancelled, refunded or unverified transaction must not become a permanent entitlement merely because the store is temporarily unavailable. An authoritative restore may also remove a cached license when the platform confirms that the user no longer owns it.
 
 ## 6. Local saves
 
