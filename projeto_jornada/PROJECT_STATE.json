@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "source_of_truth": "ROADMAP_STATE.md",
   "roadmap_total_steps": 130,
   "completed_steps": 110,
@@ -124,8 +124,8 @@
   "phase12": {
     "12.1": "in_progress_authoritative_name_checks_pending",
     "12.2": "in_progress_signing_and_console_pending",
-    "12.3": "in_progress_final_legal_platform_data_safety_and_console_evidence_pending",
-    "12.4": "in_progress_client_runtime_ready_execution_plugin_backend_play_testing_pending",
+    "12.3": "in_progress_final_legal_platform_data_safety_backend_retention_and_console_evidence_pending",
+    "12.4": "in_progress_client_backend_implemented_execution_deployment_plugin_play_testing_pending",
     "12.5": "in_progress_final_art_rc_captures_console_pending",
     "12.6": "in_progress_prerequisites_and_signed_artifact_pending",
     "12.7": "in_progress_real_play_tracks_and_evidence_pending",
@@ -144,6 +144,7 @@
       "state_file": "RELEASE_12_2_STATE.json",
       "application_id": "com.pmartins87.veredasdatrama",
       "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
+      "android_backend_exclusion": "backend/* and backend/**/* excluded from both Android presets",
       "status": "real_keystore_secrets_console_and_signed_build_pending"
     },
     "12.3": {
@@ -158,7 +159,8 @@
       "legal_surface_gate": "tools/legal_surface_gate.py",
       "in_app_legal_surface": "implemented_pre_release_pt_BR_en",
       "runtime_network_boundary": "INTERNET permission enabled; runtime HTTP allowlist restricted to mobile/PlayPurchaseVerificationClient.gd for purchase verification",
-      "status": "final_billing_backend_retention_aab_policy_terms_urls_data_safety_rating_and_console_evidence_pending"
+      "billing_backend_privacy_boundary": "raw purchase token transient only; SHA-256 token hash plus minimum purchase state persisted by reference backend; order id not persisted",
+      "status": "backend_implemented_deployment_retention_aab_policy_terms_urls_data_safety_rating_and_console_evidence_pending"
     },
     "12.4": {
       "state_file": "RELEASE_12_4_STATE.json",
@@ -172,9 +174,18 @@
       "supporter_cosmetic": "supporter_badge via ui/SupporterSeal.gd",
       "android_internet_permission": true,
       "verification_api": "purchases.productsv2.getproductpurchasev2",
-      "gate": "tools/play_billing_release_gate.py",
-      "workflow": ".github/workflows/veredas-play-billing-12-4.yml",
-      "status": "client_runtime_surface_ready_unexecuted_plugin_backend_play_track_pending"
+      "backend_root": "backend/play_purchase_verifier",
+      "backend_contract": "backend/play_purchase_verifier/backend_contract.json",
+      "backend_reference_deployment": "Google Cloud Run + Firestore + attached service account/ADC",
+      "backend_raw_purchase_token_at_rest": false,
+      "backend_token_hash_at_rest": "SHA-256",
+      "backend_order_id_at_rest": false,
+      "client_gate": "tools/play_billing_release_gate.py",
+      "backend_gate": "tools/play_billing_backend_gate.py",
+      "combined_gate": "tools/play_billing_12_4_gate.py",
+      "client_workflow": ".github/workflows/veredas-play-billing-12-4.yml",
+      "backend_workflow": ".github/workflows/veredas-play-billing-backend-12-4.yml",
+      "status": "client_and_reference_backend_implemented_unexecuted_deployment_plugin_play_track_pending"
     },
     "12.5": {
       "state_file": "RELEASE_12_5_STATE.json",
