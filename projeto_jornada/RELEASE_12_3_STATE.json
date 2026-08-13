@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -9,6 +9,7 @@
   "privacy_policy_draft": "docs/PRIVACY_POLICY_DRAFT.md",
   "terms_of_use_draft": "docs/TERMS_OF_USE_DRAFT.md",
   "gate": "tools/privacy_data_safety_gate.py",
+  "local_purchase_reference_gate": "tools/play_billing_local_reference_gate.py",
   "platform_gate": "tools/platform_compliance_gate.py",
   "legal_surface_gate": "tools/legal_surface_gate.py",
   "legal_surface_certification": "tests/legal_surface_certification.tscn",
@@ -20,8 +21,15 @@
     "local_save_behavior_declared": true,
     "billing_data_boundary_preflight": true,
     "billing_https_verification_client_preflight": true,
+    "billing_local_entitlement_sha256_reference": true,
+    "billing_local_entitlement_raw_purchase_token_at_rest": false,
+    "billing_local_entitlement_legacy_reference_migration": true,
+    "billing_local_reference_static_gate": true,
     "billing_reference_backend_implemented": true,
     "billing_backend_transient_raw_token_and_hashed_at_rest_model": true,
+    "billing_backend_monotonic_transactional_persistence": true,
+    "billing_backend_durable_record_required_before_owned_response": true,
+    "billing_backend_liveness_readiness_split": true,
     "billing_backend_no_order_id_persistence": true,
     "billing_backend_no_embedded_service_account_key": true,
     "billing_backend_sources_excluded_from_android_artifacts": true,
@@ -55,6 +63,14 @@
     "runtime_network_policy": "deny by default; only declared Billing purchase-verification HTTP client is allowlisted in application runtime",
     "allowlisted_application_network_client": "mobile/PlayPurchaseVerificationClient.gd",
     "billing_verification_transport": "HTTPS POST JSON; no-store; exact verification_request_id correlation",
+    "billing_local_entitlement_at_rest": {
+      "schema_version": 2,
+      "raw_purchase_token": false,
+      "purchase_token_sha256_reference": true,
+      "reference_format": "sha256:<64 lowercase hexadecimal characters>",
+      "legacy_raw_reference_migration": true,
+      "platform_backup_contains_only_hashed_reference": "implementation_preflight_true_final_artifact_backup_audit_pending"
+    },
     "billing_reference_backend": "backend/play_purchase_verifier",
     "billing_verification_transient_off_device_fields": [
       "verification request id",
@@ -68,7 +84,9 @@
       "purchase_token": false,
       "purchase_token_sha256": true,
       "order_id": false,
-      "minimal_purchase_entitlement_state": true
+      "minimal_purchase_entitlement_state": true,
+      "state_write_semantics": "transactional monotonic PENDING -> PURCHASED -> CANCELLED",
+      "durable_final_record_required_before_owned_response": true
     },
     "billing_verification_excludes": [
       "gameplay profile",
@@ -79,6 +97,7 @@
       "advertising identifiers"
     ],
     "billing_backend_google_auth": "attached service account via Application Default Credentials; no key file in repository/container",
+    "billing_backend_health": "liveness /healthz without dependency initialization; readiness /readyz validates service initialization and may recover after temporary failure",
     "android_target_sdk": 36,
     "android_compile_sdk": 36,
     "full_game_unlock": "one_time_non_consumable",
@@ -94,6 +113,8 @@
     "billing_backend_rate_limit_frozen": false,
     "billing_backend_purchase_data_retention_deletion_frozen": false,
     "billing_backend_production_persistence_audited": false,
+    "billing_backend_deployed_liveness_readiness_verified": false,
+    "final_release_local_profile_save_backup_hashed_reference_audited": false,
     "final_release_aab_manifest_and_merged_permissions_audited": false,
     "final_sdk_service_inventory_audited": false,
     "privacy_contact_finalized": false,
@@ -113,7 +134,9 @@
   "completion_requirements": [
     "deploy and certify 12.4 Billing client/backend integration, then repeat the technical data-flow and commercial-product audit",
     "freeze production Billing HTTPS endpoint, attached service identity, rate limiting and server-side purchase-data retention/deletion behavior",
-    "prove the production purchase store retains only the declared token hash/minimum state and no raw token or order id",
+    "prove the production purchase store retains only the declared token hash/minimum state and no raw token or order id, including monotonic transactional writes",
+    "prove deployed /healthz and /readyz behavior on the exact backend revision",
+    "prove the exact release local profile/save and Android backup path retain only canonical SHA-256 purchase references, including migration from legacy raw development references",
     "recheck current Google Play policies immediately before release and confirm the exact AAB effective targetSdk",
     "inspect the exact release AAB Android manifest, merged permissions and every bundled third-party SDK",
     "prove the final application runtime contains no undeclared network/SDK integrations beyond the allowlisted purchase-verification client and platform Billing plugin",
@@ -123,7 +146,7 @@
     "execute LegalSurfaceCertification.gd on the final release ancestry",
     "complete content-rating and target-audience declarations",
     "complete Google Play Data Safety answers from the frozen release artifact and services",
-    "pass privacy_data_safety_gate.py --release, platform_compliance_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
+    "pass privacy_data_safety_gate.py --release, play_billing_local_reference_gate.py, platform_compliance_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
     "record final Data Safety, platform-policy, Terms and privacy revisions in the repository"
   ],
   "pass_recorded": false
