@@ -22,6 +22,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
+    OS.set_environment("VEREDAS_BILLING_UI_TEST", "1")
     await get_tree().process_frame
     var localization := get_node_or_null("/root/LocalizationService")
     _expect(localization != null, "LocalizationService autoload missing")
@@ -89,7 +90,7 @@ func _walk(node: Node, locale_id: String, scene_path: String) -> void:
 
 
 func _check_button(button: BaseButton, locale_id: String, scene_path: String) -> void:
-    if not button.visible or button.disabled:
+    if not button.visible:
         return
     buttons_checked += 1
     var context := "%s %s %s" % [locale_id, scene_path.get_file(), str(button.get_path())]
@@ -182,7 +183,7 @@ func _expect(condition: bool, message: String) -> void:
 func _finish() -> void:
     if failures.is_empty():
         print(
-            "LOCALIZATION_ICONOGRAPHY_CERTIFICATION PASS: 11.6 locales=%d scene_cases=%d buttons=%d icon_controls=%d symbol_only=%d" % [
+            "LOCALIZATION_ICONOGRAPHY_CERTIFICATION PASS: 11.6 locales=%d scene_cases=%d buttons=%d icon_controls=%d symbol_only=%d billing_surface=1 disabled_visible_controls_included=1" % [
                 LOCALES.size(), scene_cases, buttons_checked, icon_controls, symbol_only_controls
             ]
         )
