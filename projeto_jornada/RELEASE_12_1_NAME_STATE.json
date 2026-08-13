@@ -1,22 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.1",
   "formal_status": "in_progress",
   "candidate_name": "Veredas da Trama",
-  "checked_on": "2026-08-12",
+  "checked_on": "2026-08-13",
   "scope": "commercial name, public discoverability, game-store collision reconnaissance, trademark and domain preflight",
   "public_reconnaissance": {
-    "exact_name_web_search": "no exact game/app collision surfaced in the public indexed searches performed on 2026-08-12",
-    "game_store_searches": ["Google Play indexed web results", "Steam indexed web results", "Apple App Store indexed web results", "general game/app web search"],
+    "rounds": [
+      {"date": "2026-08-12", "result": "no exact game/app collision surfaced in indexed web/store reconnaissance"},
+      {"date": "2026-08-13", "queries": ["exact phrase plus game/app/software", "exact phrase scoped to public INPI-indexed pages", "exact phrase scoped to WIPO-indexed pages"], "result": "no exact indexed game/app/software collision or exact official indexed registry result surfaced; returned pages used the words veredas/trama in unrelated generic or literary contexts"}
+    ],
     "game_store_exact_collision_found": false,
+    "indexed_exact_trademark_collision_found": false,
     "legal_clearance": false,
-    "note": "Search-engine/store reconnaissance is only an early collision screen and is not a legal trademark clearance; confusingly similar marks and unindexed records remain possible."
+    "note": "Search-engine/store reconnaissance is only an early collision screen. It cannot exclude confusingly similar marks, unindexed records, figurative marks or records visible only through interactive registries."
   },
   "official_methodology_evidence": {
-    "inpi": "INPI recommends a prior search in the relevant class to identify earlier filed/registered identical or similar marks before filing.",
-    "wipo": "WIPO recommends searching existing/pending marks in target markets using the Global Brand Database and national/regional registers.",
-    "wipo_automation_constraint": "WIPO Global Brand Database terms/FAQ disallow automated/robot querying; no automated result is represented here as an official registry search.",
-    "wipo_scope_note": "Global Brand Database combines international and participating national/regional collections but WIPO still recommends checking national/regional offices directly."
+    "inpi": "A final decision requires an interactive exact/similar search in the relevant Brazilian trademark classes and review of material candidates.",
+    "wipo": "A final decision requires a human Global Brand Database/national-regional cross-check; no automated result is represented as an official registry clearance.",
+    "automation_boundary": "No claim of INPI/WIPO clearance is made from public search-engine indexing."
   },
   "authoritative_checks": {
     "inpi_brazil_exact_and_similar_mark_search": "pending_interactive_registry_search_in_relevant_nice_classes",
@@ -30,10 +32,10 @@
     "application_id_is_not_legal_name_clearance": true
   },
   "completion_requirements": [
-    "complete exact and confusingly-similar human search in INPI classes relevant to software/games",
+    "complete exact and confusingly-similar human search in INPI classes relevant to downloadable game software and entertainment services",
     "complete WIPO/global human cross-check and record material candidates if any",
     "confirm desired domains/social handles or explicitly accept alternatives",
-    "record final name decision and any trademark filing strategy",
+    "record final name decision and trademark filing strategy or explicit no-filing decision",
     "verify store listing name can be created without material collision"
   ],
   "result": "provisional_public_clearance_only"
