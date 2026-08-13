@@ -104,9 +104,7 @@ func restore() -> bool:
     _discard_pending_restore_verifications()
     var result = _store.call("query_owned_purchases")
     if typeof(result) == TYPE_BOOL and not bool(result):
-        _restore_active = false
-        _restore_collecting = false
-        restore_completed.emit(false, _summary())
+        _fail_restore()
         return false
     return true
 
@@ -127,6 +125,8 @@ func _on_store_ready() -> void:
 
 
 func _on_store_error(code: String, _message: String) -> void:
+    _products_ready = false
+    _fail_restore()
     coordinator_error.emit(code)
 
 
@@ -156,9 +156,7 @@ func _on_purchases_received(response: Dictionary) -> void:
     if not _restore_active:
         return
     if not bool(response.get("ok", false)):
-        _restore_active = false
-        _restore_collecting = false
-        restore_completed.emit(false, _summary())
+        _fail_restore()
         return
 
     var purchases: Array = []
@@ -308,6 +306,17 @@ func _finish_restore_if_ready() -> void:
         return
     _entitlement_engine().apply_authoritative_snapshot(_restore_verified, SOURCE_ID)
     restore_completed.emit(true, _summary())
+
+
+func _fail_restore() -> void:
+    if not _restore_active:
+        return
+    _restore_active = false
+    _restore_collecting = false
+    _restore_failed = true
+    _restore_verified.clear()
+    _discard_pending_restore_verifications()
+    restore_completed.emit(false, _summary())
 
 
 func _valid_verification(result: Dictionary, request_id: String, token: String, product_id: String) -> bool:
