@@ -14,9 +14,16 @@ IDENTITY = ROOT / "mobile" / "release_identity.json"
 EXPORT = ROOT / "export_presets.cfg"
 PROJECT = ROOT / "project.godot"
 COORDINATOR = ROOT / "core" / "systems" / "PlayBillingCoordinator.gd"
+COMMERCIAL_ENGINE = ROOT / "core" / "systems" / "CommercialPolicyEngine.gd"
 ADAPTER = ROOT / "mobile" / "GooglePlayBillingStoreAdapter.gd"
 VERIFIER_CLIENT = ROOT / "mobile" / "PlayPurchaseVerificationClient.gd"
 BILLING_SERVICE = ROOT / "mobile" / "BillingService.gd"
+HUB = ROOT / "scenes" / "Hub.gd"
+JOURNEY_SETUP = ROOT / "scenes" / "JourneySetup.gd"
+SUPPORTER_SEAL = ROOT / "ui" / "SupporterSeal.gd"
+LOC_MANIFEST = ROOT / "localization" / "manifest.json"
+LOC_PT = ROOT / "localization" / "ui" / "pt_BR.json"
+LOC_EN = ROOT / "localization" / "ui" / "en.json"
 CERT = ROOT / "tests" / "PlayBillingCoordinatorCertification.gd"
 CERT_SCENE = ROOT / "tests" / "play_billing_coordinator_certification.tscn"
 CORRELATION_CERT = ROOT / "tests" / "PlayBillingCorrelationCertification.gd"
@@ -26,9 +33,24 @@ VERIFIER_SCENE = ROOT / "tests" / "play_purchase_verification_client_certificati
 PLUGIN_ROOT = ROOT / "addons" / "GodotGooglePlayBilling"
 
 EXPECTED_PRODUCTS = {"full_game_unlock", "supporter_cosmetic_pack"}
+EXPECTED_SUPPORTER_COSMETICS = ["supporter_badge"]
 EXPECTED_VERIFICATION_API = "purchases.productsv2.getproductpurchasev2"
 EXPECTED_ACK_API = "purchases.products.acknowledge"
 EXPECTED_CORRELATION = "verification_request_id_must_echo_exactly"
+BILLING_UI_KEYS = {
+    "hub.billing.section",
+    "hub.billing.full_owned",
+    "hub.billing.supporter_owned",
+    "hub.billing.unlock_full",
+    "hub.billing.buy_supporter",
+    "hub.billing.restore",
+    "hub.billing.unavailable",
+    "hub.billing.pending",
+    "hub.billing.failed",
+    "hub.billing.restored",
+    "hub.billing.supporter_badge",
+    "journey_setup.entitlement_required",
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -80,22 +102,10 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
     required = [
-        CONTRACT,
-        COMMERCIAL,
-        PRIVACY,
-        IDENTITY,
-        EXPORT,
-        PROJECT,
-        COORDINATOR,
-        ADAPTER,
-        VERIFIER_CLIENT,
-        BILLING_SERVICE,
-        CERT,
-        CERT_SCENE,
-        CORRELATION_CERT,
-        CORRELATION_SCENE,
-        VERIFIER_CERT,
-        VERIFIER_SCENE,
+        CONTRACT, COMMERCIAL, PRIVACY, IDENTITY, EXPORT, PROJECT,
+        COORDINATOR, COMMERCIAL_ENGINE, ADAPTER, VERIFIER_CLIENT, BILLING_SERVICE,
+        HUB, JOURNEY_SETUP, SUPPORTER_SEAL, LOC_MANIFEST, LOC_PT, LOC_EN,
+        CERT, CERT_SCENE, CORRELATION_CERT, CORRELATION_SCENE, VERIFIER_CERT, VERIFIER_SCENE,
     ]
     for path in required:
         if not path.exists():
@@ -110,12 +120,19 @@ def main() -> int:
     commercial = read_json(COMMERCIAL)
     privacy = read_json(PRIVACY)
     identity = read_json(IDENTITY)
+    loc_manifest = read_json(LOC_MANIFEST)
+    loc_pt = read_json(LOC_PT)
+    loc_en = read_json(LOC_EN)
     export_text = EXPORT.read_text(encoding="utf-8")
     project_text = PROJECT.read_text(encoding="utf-8")
     coordinator_text = COORDINATOR.read_text(encoding="utf-8")
+    commercial_engine_text = COMMERCIAL_ENGINE.read_text(encoding="utf-8")
     adapter_text = ADAPTER.read_text(encoding="utf-8")
     verifier_text = VERIFIER_CLIENT.read_text(encoding="utf-8")
     service_text = BILLING_SERVICE.read_text(encoding="utf-8")
+    hub_text = HUB.read_text(encoding="utf-8")
+    journey_setup_text = JOURNEY_SETUP.read_text(encoding="utf-8")
+    supporter_seal_text = SUPPORTER_SEAL.read_text(encoding="utf-8")
     cert_text = CERT.read_text(encoding="utf-8")
     correlation_cert_text = CORRELATION_CERT.read_text(encoding="utf-8")
     verifier_cert_text = VERIFIER_CERT.read_text(encoding="utf-8")
@@ -155,16 +172,8 @@ def main() -> int:
 
     products = contract.get("products", [])
     commercial_products = commercial.get("products", [])
-    contract_ids = {
-        str(row.get("product_id", ""))
-        for row in products
-        if isinstance(row, dict)
-    }
-    commercial_ids = {
-        str(row.get("id", ""))
-        for row in commercial_products
-        if isinstance(row, dict)
-    }
+    contract_ids = {str(row.get("product_id", "")) for row in products if isinstance(row, dict)}
+    commercial_ids = {str(row.get("id", "")) for row in commercial_products if isinstance(row, dict)}
     if contract_ids != EXPECTED_PRODUCTS or commercial_ids != EXPECTED_PRODUCTS:
         errors.append(
             f"paid product set mismatch: contract={sorted(contract_ids)} commercial={sorted(commercial_ids)}"
@@ -181,6 +190,19 @@ def main() -> int:
         for flag in ("offers_allowed_at_launch", "rent_allowed", "preorder_allowed"):
             if row.get(flag) is not False:
                 errors.append(f"launch product option flag must remain false: {product_id}.{flag}")
+
+    supporter_rows = [row for row in commercial_products if isinstance(row, dict) and row.get("id") == "supporter_cosmetic_pack"]
+    if len(supporter_rows) != 1:
+        errors.append("commercial model must contain exactly one supporter cosmetic product")
+    else:
+        supporter = supporter_rows[0]
+        if supporter.get("effect_kind") != "cosmetic_only" or supporter.get("content_scope") != "cosmetics_only":
+            errors.append("supporter product must remain cosmetics-only")
+        if supporter.get("cosmetic_ids") != EXPECTED_SUPPORTER_COSMETICS:
+            errors.append(f"supporter product must grant exactly {EXPECTED_SUPPORTER_COSMETICS}")
+        for key in ("grants_power", "grants_currency", "grants_stats", "grants_drop_rate"):
+            if supporter.get(key) is not False:
+                errors.append(f"supporter cosmetic unexpectedly grants gameplay effect: {key}")
 
     launch_product_configuration = contract.get("launch_product_configuration", {})
     if not isinstance(launch_product_configuration, dict):
@@ -199,32 +221,13 @@ def main() -> int:
         errors.append("client-only purchase verification is forbidden")
     require_members(
         verification.get("request_fields"),
-        {
-            "verification_request_id",
-            "application_id",
-            "product_id",
-            "purchase_token",
-            "purchase_time",
-            "package_name",
-            "client_acknowledged_state",
-        },
-        "verification request_fields",
-        errors,
+        {"verification_request_id", "application_id", "product_id", "purchase_token", "purchase_time", "package_name", "client_acknowledged_state"},
+        "verification request_fields", errors,
     )
     require_members(
         verification.get("required_response_fields"),
-        {
-            "verification_request_id",
-            "ok",
-            "purchase_token",
-            "product_id",
-            "owned",
-            "purchase_state",
-            "acknowledged",
-            "source",
-        },
-        "verification required_response_fields",
-        errors,
+        {"verification_request_id", "ok", "purchase_token", "product_id", "owned", "purchase_state", "acknowledged", "source"},
+        "verification required_response_fields", errors,
     )
     if verification.get("client_response_correlation") != EXPECTED_CORRELATION:
         errors.append("backend response must echo exact verification_request_id")
@@ -239,10 +242,7 @@ def main() -> int:
     if verification.get("play_developer_api_acknowledgement") != EXPECTED_ACK_API:
         errors.append("one-time non-consumable acknowledgement endpoint drifted")
 
-    backend_requirements = {
-        str(value) for value in verification.get("backend_validation_requirements", [])
-        if isinstance(value, str)
-    }
+    backend_requirements = {str(value) for value in verification.get("backend_validation_requirements", []) if isinstance(value, str)}
     for fragment in [
         "purchaseStateContext.purchaseState is PURCHASED",
         "returned productId equals the claimed configured product_id",
@@ -266,107 +266,58 @@ def main() -> int:
         if restore_policy.get(flag) is not True:
             errors.append(f"restore safety contract missing: {flag}")
 
-    require_fragments(
-        coordinator_text,
-        [
-            'PURCHASED_STATE := 1',
-            'PENDING_STATE := 2',
-            '"verification_request_id"',
-            '_next_verification_request_id',
-            'verification_for_unknown_request',
-            '"acknowledged"',
-            '"play_backend"',
-            'apply_authoritative_snapshot',
-            'apply_purchase_result',
-            '_on_store_error',
-            '_fail_restore',
-        ],
-        "coordinator security contract",
-        errors,
-    )
-    require_fragments(
-        adapter_text,
-        [
-            "BILLING_CLIENT_SCRIPT",
-            "PackedStringArray(product_ids)",
-            "query_product_details",
-            "query_purchases",
-            "on_purchase_updated",
-            "get_script_constant_map",
-            "_started = false",
-            "_client = null",
-        ],
-        "billing adapter contract",
-        errors,
-    )
-    require_fragments(
-        verifier_text,
-        [
-            'normalized.begins_with("https://")',
-            '"Cache-Control: no-store"',
-            "HTTPRequest.RESULT_SUCCESS",
-            '"verification_request_id"',
-            '"response_request_id_mismatch"',
-            '"response_token_mismatch"',
-            '"response_product_mismatch"',
-            "pending_count",
-            "DEFAULT_TIMEOUT_SECONDS",
-        ],
-        "purchase verification HTTPS client",
-        errors,
-    )
-    require_fragments(
-        service_text,
-        [
-            'OS.has_feature("android")',
-            "NOTIFICATION_APPLICATION_RESUMED",
-            "PlayPurchaseVerificationClient.new()",
-            "GooglePlayBillingStoreAdapter.new()",
-            "PlayBillingCoordinator.new()",
-            '"configuration_pending"',
-            "EntitlementEngine.new().ensure_state()",
-        ],
-        "billing runtime service",
-        errors,
-    )
-    require_fragments(
-        cert_text,
-        [
-            "pending_no_grant=1",
-            "verify_fail_no_grant=1",
-            "ack_required=1",
-            "authoritative_restore=1",
-            "partial_failure_cache_safe=1",
-            "package_guard=1",
-            "request_id=1",
-        ],
-        "billing coordinator certification",
-        errors,
-    )
-    require_fragments(
-        correlation_cert_text,
-        [
-            "request_correlation=1",
-            "overlap_safe=1",
-            "stale_response_isolation=1",
-            "store_error_restore_safe=1",
-        ],
-        "billing correlation certification",
-        errors,
-    )
-    require_fragments(
-        verifier_cert_text,
-        [
-            "https_only=1",
-            "concurrent_requests=1",
-            "correlation_fail_closed=1",
-            "http_fail_closed=1",
-            "malformed_json_fail_closed=1",
-            "payload_guard=1",
-        ],
-        "purchase verification client certification",
-        errors,
-    )
+    require_fragments(coordinator_text, [
+        'PURCHASED_STATE := 1', 'PENDING_STATE := 2', '"verification_request_id"',
+        '_next_verification_request_id', 'verification_for_unknown_request', '"acknowledged"',
+        '"play_backend"', 'apply_authoritative_snapshot', 'apply_purchase_result', '_on_store_error', '_fail_restore',
+    ], "coordinator security contract", errors)
+    require_fragments(commercial_engine_text, [
+        'REQUIRED_SUPPORTER_COSMETICS := ["supporter_badge"]', 'supporter_cosmetic_ids_mismatch', 'supporter_pack_not_cosmetic',
+    ], "commercial policy runtime guard", errors)
+    require_fragments(adapter_text, [
+        "BILLING_CLIENT_SCRIPT", "PackedStringArray(product_ids)", "query_product_details", "query_purchases",
+        "on_purchase_updated", "get_script_constant_map", "_started = false", "_client = null",
+    ], "billing adapter contract", errors)
+    require_fragments(verifier_text, [
+        'normalized.begins_with("https://")', '"Cache-Control: no-store"', "HTTPRequest.RESULT_SUCCESS",
+        '"verification_request_id"', '"response_request_id_mismatch"', '"response_token_mismatch"',
+        '"response_product_mismatch"', "pending_count", "DEFAULT_TIMEOUT_SECONDS",
+    ], "purchase verification HTTPS client", errors)
+    require_fragments(service_text, [
+        'OS.has_feature("android")', "NOTIFICATION_APPLICATION_RESUMED", "PlayPurchaseVerificationClient.new()",
+        "GooglePlayBillingStoreAdapter.new()", "PlayBillingCoordinator.new()", '"configuration_pending"',
+        "EntitlementEngine.new().ensure_state()",
+    ], "billing runtime service", errors)
+    require_fragments(hub_text, [
+        "SupporterSeal.new()", "BillingService.purchase", "BillingService.restore", "hub.billing.unlock_full",
+        "hub.billing.buy_supporter", "hub.billing.restore", "BILLING_UI_TEST_ENV",
+    ], "Hub purchase/restore surface", errors)
+    require_fragments(journey_setup_text, ["journey_setup.entitlement_required", '"entitlement_required" in errors'], "commercial route guidance", errors)
+    require_fragments(supporter_seal_text, ["class_name SupporterSeal", "draw_arc", "draw_polyline", "draw_circle"], "supporter cosmetic visual", errors)
+
+    required_ui = loc_manifest.get("ui_required_keys", [])
+    if not isinstance(required_ui, list):
+        errors.append("localization manifest UI required list missing")
+        required_ui = []
+    missing_required_billing_keys = BILLING_UI_KEYS - {str(value) for value in required_ui}
+    if missing_required_billing_keys:
+        errors.append(f"Billing UI keys missing from localization manifest: {sorted(missing_required_billing_keys)}")
+    for locale_id, catalog in (("pt_BR", loc_pt), ("en", loc_en)):
+        missing = [key for key in sorted(BILLING_UI_KEYS) if not isinstance(catalog.get(key), str) or not str(catalog.get(key, "")).strip()]
+        if missing:
+            errors.append(f"{locale_id} Billing UI translation missing: {missing}")
+
+    require_fragments(cert_text, [
+        "pending_no_grant=1", "verify_fail_no_grant=1", "ack_required=1", "authoritative_restore=1",
+        "partial_failure_cache_safe=1", "package_guard=1", "request_id=1",
+    ], "billing coordinator certification", errors)
+    require_fragments(correlation_cert_text, [
+        "request_correlation=1", "overlap_safe=1", "stale_response_isolation=1", "store_error_restore_safe=1",
+    ], "billing correlation certification", errors)
+    require_fragments(verifier_cert_text, [
+        "https_only=1", "concurrent_requests=1", "correlation_fail_closed=1", "http_fail_closed=1",
+        "malformed_json_fail_closed=1", "payload_guard=1",
+    ], "purchase verification client certification", errors)
 
     privacy_behavior = privacy.get("current_application_behavior", {})
     if not isinstance(privacy_behavior, dict):
@@ -375,11 +326,7 @@ def main() -> int:
     if privacy_behavior.get("internet_permission") is not True:
         errors.append("privacy contract must declare INTERNET permission used by billing verification")
     privacy_commercial = privacy.get("commercial_behavior", {})
-    production_verification = (
-        privacy_commercial.get("production_purchase_verification", {})
-        if isinstance(privacy_commercial, dict)
-        else {}
-    )
+    production_verification = privacy_commercial.get("production_purchase_verification", {}) if isinstance(privacy_commercial, dict) else {}
     if not isinstance(production_verification, dict):
         errors.append("privacy purchase-verification section missing")
         production_verification = {}
@@ -415,8 +362,8 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PLAY_BILLING_RELEASE_GATE %s: products=%d plugin=%s pending=%d errors=%d warnings=%d correlation=exact ProductPurchaseV2=1 runtime_service=1 https_client=1"
-        % (mode, len(contract_ids), "installed" if plugin_installed else "pending", len(pending), len(errors), len(warnings))
+        "PLAY_BILLING_RELEASE_GATE %s: products=%d plugin=%s pending=%d ui_keys=%d errors=%d warnings=%d correlation=exact ProductPurchaseV2=1 runtime_service=1 https_client=1 purchase_surface=1 supporter_badge=1"
+        % (mode, len(contract_ids), "installed" if plugin_installed else "pending", len(pending), len(BILLING_UI_KEYS), len(errors), len(warnings))
     )
     for warning in warnings:
         print("WARNING:", warning)
@@ -425,7 +372,7 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    print("PLAY_BILLING_RELEASE_GATE PASS: billing contract and runtime integration are internally consistent")
+    print("PLAY_BILLING_RELEASE_GATE PASS: billing contract, runtime integration and product surface are internally consistent")
     return 0
 
 
