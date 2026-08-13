@@ -20,6 +20,7 @@ var _entitlements: Variant = null
 var _configured := false
 var _products_ready := false
 var _pending_verifications: Dictionary = {}
+var _verification_sequence := 0
 var _restore_active := false
 var _restore_collecting := false
 var _restore_generation := 0
@@ -125,6 +126,10 @@ func _on_store_ready() -> void:
     restore()
 
 
+func _on_store_error(code: String, _message: String) -> void:
+    coordinator_error.emit(code)
+
+
 func _on_product_details_received(response: Dictionary) -> void:
     if not bool(response.get("ok", false)):
         _products_ready = false
@@ -218,10 +223,10 @@ func _request_verification(purchase: Dictionary, context: String, generation: in
     var package_name := str(purchase.get("package_name", "")).strip_edges()
     if package_name != "" and package_name != APPLICATION_ID:
         return false
-    if _pending_verifications.has(token):
-        return true
 
+    var request_id := _next_verification_request_id(context, generation)
     var payload := {
+        "verification_request_id": request_id,
         "application_id": APPLICATION_ID,
         "product_id": product_id,
         "purchase_token": token,
@@ -229,33 +234,35 @@ func _request_verification(purchase: Dictionary, context: String, generation: in
         "package_name": package_name if package_name != "" else APPLICATION_ID,
         "client_acknowledged_state": bool(purchase.get("is_acknowledged", false)),
     }
-    _pending_verifications[token] = {
+    _pending_verifications[request_id] = {
         "context": context,
         "generation": generation,
         "product_id": product_id,
+        "purchase_token": token,
         "purchase": purchase.duplicate(true),
     }
     var result = _verifier.call("verify_purchase", payload)
     if typeof(result) == TYPE_DICTIONARY and not (result as Dictionary).is_empty():
         _on_verification_completed(result as Dictionary)
     elif typeof(result) == TYPE_BOOL and not bool(result):
-        _pending_verifications.erase(token)
+        _pending_verifications.erase(request_id)
         return false
     return true
 
 
 func _on_verification_completed(result: Dictionary) -> void:
-    var token := str(result.get("purchase_token", "")).strip_edges()
-    if token == "" or not _pending_verifications.has(token):
-        coordinator_error.emit("verification_for_unknown_token")
+    var request_id := str(result.get("verification_request_id", "")).strip_edges()
+    if request_id == "" or not _pending_verifications.has(request_id):
+        coordinator_error.emit("verification_for_unknown_request")
         return
-    var pending: Dictionary = _pending_verifications[token] as Dictionary
-    _pending_verifications.erase(token)
+    var pending: Dictionary = _pending_verifications[request_id] as Dictionary
+    _pending_verifications.erase(request_id)
     var context := str(pending.get("context", ""))
     var product_id := str(pending.get("product_id", ""))
+    var token := str(pending.get("purchase_token", ""))
     var generation := int(pending.get("generation", 0))
 
-    var verified := _valid_verification(result, token, product_id)
+    var verified := _valid_verification(result, request_id, token, product_id)
     if context == "restore":
         if generation != _restore_generation or not _restore_active:
             return
@@ -303,8 +310,10 @@ func _finish_restore_if_ready() -> void:
     restore_completed.emit(true, _summary())
 
 
-func _valid_verification(result: Dictionary, token: String, product_id: String) -> bool:
+func _valid_verification(result: Dictionary, request_id: String, token: String, product_id: String) -> bool:
     if not bool(result.get("ok", false)):
+        return false
+    if str(result.get("verification_request_id", "")) != request_id:
         return false
     if str(result.get("purchase_token", "")) != token:
         return false
@@ -319,6 +328,11 @@ func _valid_verification(result: Dictionary, token: String, product_id: String) 
     if str(result.get("source", "")) != SOURCE_ID:
         return false
     return true
+
+
+func _next_verification_request_id(context: String, generation: int) -> String:
+    _verification_sequence += 1
+    return "vreq-%s-%d-%d" % [context, generation, _verification_sequence]
 
 
 func _purchase_state(purchase: Dictionary) -> String:
@@ -361,13 +375,13 @@ func _required_product_ids() -> Array[String]:
 
 func _discard_pending_restore_verifications() -> void:
     var remove: Array[String] = []
-    for token_variant in _pending_verifications.keys():
-        var token := str(token_variant)
-        var pending: Dictionary = _pending_verifications[token] as Dictionary
+    for request_variant in _pending_verifications.keys():
+        var request_id := str(request_variant)
+        var pending: Dictionary = _pending_verifications[request_id] as Dictionary
         if str(pending.get("context", "")) == "restore":
-            remove.append(token)
-    for token in remove:
-        _pending_verifications.erase(token)
+            remove.append(request_id)
+    for request_id in remove:
+        _pending_verifications.erase(request_id)
 
 
 func _summary() -> Dictionary:
