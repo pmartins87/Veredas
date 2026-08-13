@@ -14,6 +14,10 @@ from verifier import GatewayError
 ANDROID_PUBLISHER_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 API_ROOT = "https://androidpublisher.googleapis.com/androidpublisher/v3"
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+MAX_ATTEMPTS = 2
+CONNECT_TIMEOUT_SECONDS = 1.5
+READ_TIMEOUT_SECONDS = 2.5
+BACKOFF_BASE_SECONDS = 0.25
 
 
 class GooglePlayPublisherGateway:
@@ -47,26 +51,26 @@ class GooglePlayPublisherGateway:
 
     def _request(self, method: str, url: str, json_body: dict[str, Any] | None = None):
         last_error: Exception | None = None
-        for attempt in range(3):
+        for attempt in range(MAX_ATTEMPTS):
             try:
                 response = self._session.request(
                     method,
                     url,
                     json=json_body,
-                    timeout=(3.05, 10.0),
+                    timeout=(CONNECT_TIMEOUT_SECONDS, READ_TIMEOUT_SECONDS),
                     headers={"Accept": "application/json", "Cache-Control": "no-store"},
                 )
             except (requests.RequestException, google_auth_exceptions.GoogleAuthError) as exc:
                 last_error = exc
-                if attempt < 2:
-                    time.sleep(0.25 * (2**attempt))
+                if attempt + 1 < MAX_ATTEMPTS:
+                    time.sleep(BACKOFF_BASE_SECONDS * (2**attempt))
                     continue
                 raise GatewayError("play_transport_or_auth_error") from exc
 
             if 200 <= response.status_code < 300:
                 return response
-            if response.status_code in RETRYABLE_STATUS and attempt < 2:
-                time.sleep(0.25 * (2**attempt))
+            if response.status_code in RETRYABLE_STATUS and attempt + 1 < MAX_ATTEMPTS:
+                time.sleep(BACKOFF_BASE_SECONDS * (2**attempt))
                 continue
             raise GatewayError("play_http_error", response.status_code)
 
