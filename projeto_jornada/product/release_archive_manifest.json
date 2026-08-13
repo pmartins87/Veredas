@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -21,72 +21,18 @@
     "play_console_acceptance_evidence": "PENDING_12_9_PLAY_ACCEPTANCE_EVIDENCE"
   },
   "archive_items": [
-    {
-      "id": "release_input_manifest",
-      "path": "PENDING_12_9_RELEASE_INPUT_MANIFEST_ARCHIVE",
-      "sha256": "PENDING_12_9_RELEASE_INPUT_MANIFEST_SHA256",
-      "required": true
-    },
-    {
-      "id": "asset_provenance",
-      "path": "product/release_provenance.json",
-      "sha256": "PENDING_12_9_ASSET_PROVENANCE_SHA256",
-      "required": true
-    },
-    {
-      "id": "backend_dependency_lock",
-      "path": "backend/play_purchase_verifier/requirements.lock",
-      "sha256": "PENDING_12_9_BACKEND_LOCK_SHA256",
-      "required": true
-    },
-    {
-      "id": "backend_software_sbom",
-      "path": "product/software_sbom.json",
-      "sha256": "PENDING_12_9_BACKEND_SBOM_SHA256",
-      "required": true
-    },
-    {
-      "id": "android_dependency_inventory",
-      "path": "product/android_dependency_inventory.json",
-      "sha256": "PENDING_12_9_ANDROID_DEPENDENCY_INVENTORY_SHA256",
-      "required": true
-    },
-    {
-      "id": "privacy_policy_final",
-      "path": "PENDING_12_9_PRIVACY_POLICY_ARCHIVE",
-      "sha256": "PENDING_12_9_PRIVACY_POLICY_SHA256",
-      "required": true
-    },
-    {
-      "id": "terms_final",
-      "path": "PENDING_12_9_TERMS_ARCHIVE",
-      "sha256": "PENDING_12_9_TERMS_SHA256",
-      "required": true
-    },
-    {
-      "id": "store_listing_final",
-      "path": "product/store_listing_google_play.json",
-      "sha256": "PENDING_12_9_STORE_LISTING_SHA256",
-      "required": true
-    },
-    {
-      "id": "release_notes",
-      "path": "PENDING_12_9_RELEASE_NOTES_ARCHIVE",
-      "sha256": "PENDING_12_9_RELEASE_NOTES_SHA256",
-      "required": true
-    },
-    {
-      "id": "public_signing_identity_record",
-      "path": "PENDING_12_9_SIGNING_IDENTITY_RECORD",
-      "sha256": "PENDING_12_9_SIGNING_IDENTITY_RECORD_SHA256",
-      "required": true
-    },
-    {
-      "id": "recovery_and_backup_drill_record",
-      "path": "PENDING_12_9_RECOVERY_DRILL_RECORD",
-      "sha256": "PENDING_12_9_RECOVERY_DRILL_RECORD_SHA256",
-      "required": true
-    }
+    {"id": "release_input_manifest", "path": "PENDING_12_9_RELEASE_INPUT_MANIFEST_ARCHIVE", "sha256": "PENDING_12_9_RELEASE_INPUT_MANIFEST_SHA256", "required": true},
+    {"id": "asset_provenance", "path": "product/release_provenance.json", "sha256": "PENDING_12_9_ASSET_PROVENANCE_SHA256", "required": true},
+    {"id": "backend_dependency_lock", "path": "backend/play_purchase_verifier/requirements.lock", "sha256": "PENDING_12_9_BACKEND_LOCK_SHA256", "required": true},
+    {"id": "backend_software_sbom", "path": "product/software_sbom.json", "sha256": "PENDING_12_9_BACKEND_SBOM_SHA256", "required": true},
+    {"id": "third_party_notices", "path": "product/third_party_notices.json", "sha256": "PENDING_12_9_THIRD_PARTY_NOTICES_SHA256", "required": true},
+    {"id": "android_dependency_inventory", "path": "product/android_dependency_inventory.json", "sha256": "PENDING_12_9_ANDROID_DEPENDENCY_INVENTORY_SHA256", "required": true},
+    {"id": "privacy_policy_final", "path": "PENDING_12_9_PRIVACY_POLICY_ARCHIVE", "sha256": "PENDING_12_9_PRIVACY_POLICY_SHA256", "required": true},
+    {"id": "terms_final", "path": "PENDING_12_9_TERMS_ARCHIVE", "sha256": "PENDING_12_9_TERMS_SHA256", "required": true},
+    {"id": "store_listing_final", "path": "product/store_listing_google_play.json", "sha256": "PENDING_12_9_STORE_LISTING_SHA256", "required": true},
+    {"id": "release_notes", "path": "PENDING_12_9_RELEASE_NOTES_ARCHIVE", "sha256": "PENDING_12_9_RELEASE_NOTES_SHA256", "required": true},
+    {"id": "public_signing_identity_record", "path": "PENDING_12_9_SIGNING_IDENTITY_RECORD", "sha256": "PENDING_12_9_SIGNING_IDENTITY_RECORD_SHA256", "required": true},
+    {"id": "recovery_and_backup_drill_record", "path": "PENDING_12_9_RECOVERY_DRILL_RECORD", "sha256": "PENDING_12_9_RECOVERY_DRILL_RECORD_SHA256", "required": true}
   ],
   "external_evidence": {
     "play_console_release_record": "PENDING_12_9_PLAY_RELEASE_RECORD",
@@ -102,6 +48,7 @@
     "signing_identity_matches_release_artifact": false,
     "release_input_fingerprint_matches_rc": false,
     "every_required_archive_item_present_and_hash_verified": false,
+    "third_party_notice_coverage_complete": false,
     "provenance_and_dependency_evidence_finalized": false,
     "no_private_secret_material_archived_in_repository": true
   },
@@ -109,7 +56,8 @@
     "identity fields exactly match the certified 12.6 artifact and 12.8 candidate",
     "release tag resolves exactly to rc_commit_sha",
     "AAB hash/signing identity/release-input fingerprint match the tested and Play-accepted artifact",
-    "every required archive item exists and its stored SHA-256 matches",
+    "all twelve required archive items exist and their stored SHA-256 values match",
+    "third-party notice manifest covers final backend and Android dependency inventories and points to archived license/notice evidence",
     "provenance/license/dependency evidence is finalized before archive freeze",
     "external evidence references are real non-placeholder records and contain no secrets",
     "tools/release_archive_gate.py --release passes on the exact release ancestry"
