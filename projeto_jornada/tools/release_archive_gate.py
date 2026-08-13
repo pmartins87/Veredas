@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,7 @@ MANIFEST = ROOT / "product" / "release_archive_manifest.json"
 RC_CONTRACT = ROOT / "product" / "release_candidate_final_contract.json"
 ARTIFACT_CONTRACT = ROOT / "mobile" / "release_artifact_contract.json"
 PROVENANCE = ROOT / "product" / "release_provenance.json"
+INPUT_SCOPE_GATE = ROOT / "tools" / "release_input_scope_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
@@ -71,6 +73,20 @@ def git_output(*args: str) -> str:
         return ""
 
 
+def run_input_scope_gate() -> tuple[bool, str]:
+    if not INPUT_SCOPE_GATE.is_file():
+        return False, "release_input_scope_gate.py missing"
+    result = subprocess.run(
+        [sys.executable, str(INPUT_SCOPE_GATE)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
+    return result.returncode == 0, output
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate the canonical 12.9 release archive manifest and identity chain.")
     parser.add_argument("--release", action="store_true")
@@ -87,6 +103,12 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"RELEASE_ARCHIVE FAIL: {exc}")
         return 1
+
+    scope_ok, scope_output = run_input_scope_gate()
+    if not scope_ok:
+        errors.append("release input scope gate failed; archive fingerprint identity is unsafe")
+        if scope_output:
+            errors.append("release input scope detail: " + scope_output.splitlines()[-1][:500])
 
     if manifest.get("schema_version") != 1 or manifest.get("roadmap_step") != "12.9":
         errors.append("release archive manifest schema/roadmap_step invalid")
@@ -210,11 +232,12 @@ def main() -> int:
             warnings.append("release provenance remains in progress, expected before final assets/dependency evidence")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "archive_item_count": len(items),
         "placeholder_count": len(pending),
+        "release_input_scope_verified": scope_ok,
         "errors": errors,
         "warnings": warnings,
     }
@@ -228,7 +251,7 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
-    print(f"RELEASE_ARCHIVE {mode} PASS: items={len(items)} placeholders={len(pending)} warnings={len(warnings)}")
+    print(f"RELEASE_ARCHIVE {mode} PASS: items={len(items)} placeholders={len(pending)} warnings={len(warnings)} input_scope=1")
     for warning in warnings:
         print("WARNING:", warning)
     return 0
