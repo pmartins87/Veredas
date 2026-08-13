@@ -39,8 +39,11 @@ jobs:
           python tools/play_billing_timeout_budget_gate.py
       - name: Compile backend sources
         working-directory: projeto_jornada/backend/play_purchase_verifier
-        run: python -m py_compile verifier.py google_play_gateway.py firestore_repository.py app.py tests/test_verifier.py
-      - name: Unit-test fail-closed purchase semantics
+        run: |
+          python -m py_compile \
+            verifier.py google_play_gateway.py firestore_repository.py purchase_record_merge.py app.py \
+            tests/test_verifier.py tests/test_purchase_record_merge.py
+      - name: Unit-test fail-closed purchase and persistence semantics
         working-directory: projeto_jornada/backend/play_purchase_verifier
         run: python -m unittest discover -s tests -v
       - name: Preserve clean tree
