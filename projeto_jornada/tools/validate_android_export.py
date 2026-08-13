@@ -74,7 +74,8 @@ if godot_version != "4.7.1-stable":
 if build_tools != "36.1.0":
     errors.append(f"release Android Build Tools drift: expected='36.1.0' got={build_tools!r}")
 
-for name in ["Android Debug APK", "Android Play AAB (Unsigned CI Template)"]:
+preset_names = ["Android Debug APK", "Android Play AAB (Unsigned CI Template)"]
+for name in preset_names:
     if f'name="{name}"' not in text:
         errors.append(f"missing preset {name}")
 
@@ -114,6 +115,35 @@ if target_sdk >= 1:
             f"target SDK must be explicit and match identity in both presets: expected=2 got={target_sdk_occurrences}"
         )
 
+internet_occurrences = text.count("permissions/internet=true")
+if internet_occurrences != 2:
+    errors.append(
+        f"Android billing verification requires explicit INTERNET permission in both presets: expected=2 got={internet_occurrences}"
+    )
+if "permissions/internet=false" in text:
+    errors.append("Android INTERNET permission must not be disabled while production billing verification uses HTTPS")
+
+custom_permission_matches = re.findall(
+    r"permissions/custom_permissions=PackedStringArray\((.*?)\)", text
+)
+if len(custom_permission_matches) != 2:
+    errors.append("both Android presets must declare the custom-permission field explicitly")
+if any(value.strip() for value in custom_permission_matches):
+    errors.append("unexpected custom Android permissions are forbidden by the current release privacy baseline")
+
+for privacy_sensitive in [
+    "permissions/camera=true",
+    "permissions/record_audio=true",
+    "permissions/access_fine_location=true",
+    "permissions/access_coarse_location=true",
+    "permissions/read_contacts=true",
+    "permissions/write_contacts=true",
+    "permissions/read_external_storage=true",
+    "permissions/write_external_storage=true",
+]:
+    if privacy_sensitive in text:
+        errors.append(f"unexpected privacy-sensitive Android permission enabled: {privacy_sensitive}")
+
 if 'architectures/arm64-v8a=true' not in text:
     errors.append("arm64 export must be enabled")
 
@@ -121,6 +151,8 @@ if "[preset.0.options]" in text and "[preset.1]" in text:
     debug = text.split("[preset.0.options]", 1)[1].split("[preset.1]", 1)[0]
     if "architectures/x86_64=true" not in debug:
         errors.append("debug APK must retain x86_64 for emulator certification")
+    if "permissions/internet=true" not in debug:
+        errors.append("debug APK must retain INTERNET for billing verification testing")
 
 if "[preset.1.options]" in text:
     aab = text.split("[preset.1.options]", 1)[-1]
@@ -132,6 +164,7 @@ if "[preset.1.options]" in text:
         "architectures/arm64-v8a=true",
         "architectures/x86_64=false",
         "package/signed=true",
+        "permissions/internet=true",
     ]:
         if expected not in aab:
             errors.append(f"AAB preset missing {expected}")
@@ -152,7 +185,7 @@ if errors:
     sys.exit(1)
 
 print(
-    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) minSdk=%d targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; debug APK + arm64 Gradle AAB; no release credentials committed"
+    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) minSdk=%d targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; INTERNET=explicit; debug APK + arm64 Gradle AAB; no release credentials/custom sensitive permissions committed"
     % (
         package_id,
         version_name,
