@@ -8,8 +8,7 @@ from types import ModuleType
 
 ROOT = Path(__file__).resolve().parents[1]
 FINGERPRINT_TOOL = ROOT / "tools" / "release_input_fingerprint.py"
-RUNTIME_SCAN_ROOTS = [ROOT / "core", ROOT / "ui", ROOT / "scenes", ROOT / "mobile"]
-RUNTIME_SCAN_SUFFIXES = {".gd", ".tscn", ".tres", ".cfg", ".json"}
+RUNTIME_SCAN_SUFFIXES = {".gd", ".tscn", ".tres", ".cfg", ".json", ".gdshader"}
 PRODUCT_REF_RE = re.compile(r"res://(product/[A-Za-z0-9_.\-/]+)")
 FORBIDDEN_EVIDENCE_FILES = {
     "product/continuity_support_contract.json",
@@ -36,17 +35,34 @@ def load_fingerprint_module() -> ModuleType:
     return module
 
 
-def runtime_product_references() -> set[str]:
+def scan_file(path: Path, found: set[str]) -> None:
+    if not path.is_file() or path.suffix.lower() not in RUNTIME_SCAN_SUFFIXES:
+        return
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    for match in PRODUCT_REF_RE.finditer(text):
+        found.add(match.group(1))
+
+
+def runtime_product_references(input_roots: list[Path], single_files: list[Path]) -> set[str]:
     found: set[str] = set()
-    for directory in RUNTIME_SCAN_ROOTS:
-        if not directory.exists():
+    product_root = (ROOT / "product").resolve()
+    for directory in input_roots:
+        if not isinstance(directory, Path) or not directory.exists():
+            continue
+        if directory.resolve() == product_root:
             continue
         for path in directory.rglob("*"):
-            if not path.is_file() or path.suffix.lower() not in RUNTIME_SCAN_SUFFIXES:
-                continue
-            text = path.read_text(encoding="utf-8", errors="ignore")
-            for match in PRODUCT_REF_RE.finditer(text):
-                found.add(match.group(1))
+            scan_file(path, found)
+    for path in single_files:
+        if not isinstance(path, Path):
+            continue
+        try:
+            relative = path.resolve().relative_to(product_root)
+            _ = relative
+            continue
+        except ValueError:
+            pass
+        scan_file(path, found)
     return found
 
 
@@ -60,6 +76,7 @@ def main() -> int:
 
     runtime_files_raw = getattr(module, "RUNTIME_PRODUCT_FILES", None)
     input_roots_raw = getattr(module, "INPUT_ROOTS", None)
+    single_files_raw = getattr(module, "SINGLE_FILES", None)
     collect = getattr(module, "collect", None)
     if not isinstance(runtime_files_raw, list):
         errors.append("release fingerprint must expose RUNTIME_PRODUCT_FILES as an explicit list")
@@ -67,6 +84,9 @@ def main() -> int:
     if not isinstance(input_roots_raw, list):
         errors.append("release fingerprint must expose INPUT_ROOTS as an explicit list")
         input_roots_raw = []
+    if not isinstance(single_files_raw, list):
+        errors.append("release fingerprint must expose SINGLE_FILES as an explicit list")
+        single_files_raw = []
     if not callable(collect):
         errors.append("release fingerprint collect() missing")
 
@@ -87,7 +107,7 @@ def main() -> int:
         if not path.is_file():
             errors.append(f"declared runtime product file missing: {relative}")
 
-    observed_runtime_product_files = runtime_product_references()
+    observed_runtime_product_files = runtime_product_references(input_roots_raw, single_files_raw)
     if observed_runtime_product_files != declared_runtime_product_files:
         missing = sorted(observed_runtime_product_files - declared_runtime_product_files)
         stale = sorted(declared_runtime_product_files - observed_runtime_product_files)
@@ -100,6 +120,21 @@ def main() -> int:
     for root in input_roots_raw:
         if isinstance(root, Path) and root.resolve() == product_root:
             errors.append("whole product/ directory must never be an INPUT_ROOT; release evidence would create fingerprint self-reference")
+
+    single_file_relatives: set[str] = set()
+    for path in single_files_raw:
+        if not isinstance(path, Path):
+            continue
+        try:
+            single_file_relatives.add(path.resolve().relative_to(ROOT.resolve()).as_posix())
+        except ValueError:
+            errors.append(f"SINGLE_FILES value escapes repository root: {path}")
+    product_single_files = {path for path in single_file_relatives if path.startswith("product/")}
+    if product_single_files != declared_runtime_product_files:
+        errors.append(
+            "product/ SINGLE_FILES must exactly equal RUNTIME_PRODUCT_FILES: declared=%s single=%s"
+            % (sorted(declared_runtime_product_files), sorted(product_single_files))
+        )
 
     collected_paths: set[str] = set()
     if callable(collect):
@@ -130,8 +165,8 @@ def main() -> int:
         return 1
 
     print(
-        "RELEASE_INPUT_SCOPE PASS: runtime_product_refs=%d collected_inputs=%d forbidden_evidence=0 self_reference=0"
-        % (len(observed_runtime_product_files), len(collected_paths))
+        "RELEASE_INPUT_SCOPE PASS: runtime_product_refs=%d collected_inputs=%d scan_roots=%d forbidden_evidence=0 self_reference=0"
+        % (len(observed_runtime_product_files), len(collected_paths), len(input_roots_raw))
     )
     return 0
 
