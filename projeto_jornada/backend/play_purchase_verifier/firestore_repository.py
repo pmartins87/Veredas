@@ -6,6 +6,7 @@ from typing import Any
 from google.cloud import firestore
 
 from purchase_record_merge import merge_purchase_record
+from retention_policy import retention_expiry
 from verifier import RepositoryError
 
 DEFAULT_COLLECTION = "play_purchase_tokens_v1"
@@ -22,6 +23,13 @@ class FirestorePurchaseRepository:
             raise RepositoryError("invalid_firestore_collection")
         self._collection = self._client.collection(self._collection_name)
 
+    @staticmethod
+    def _activity_patch(record: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "last_seen_at": firestore.SERVER_TIMESTAMP,
+            "expires_at": retention_expiry(record),
+        }
+
     def bind(self, token_hash: str, package_name: str, product_id: str) -> bool:
         document = self._collection.document(token_hash)
         transaction = self._client.transaction()
@@ -35,17 +43,20 @@ class FirestorePurchaseRepository:
                     return False
                 if str(current.get("product_id", "")) != product_id:
                     return False
-                txn.set(document, {"last_seen_at": firestore.SERVER_TIMESTAMP}, merge=True)
+                txn.set(document, self._activity_patch(current), merge=True)
                 return True
+            bound = {
+                "package_name": package_name,
+                "product_id": product_id,
+                "owned": False,
+                "processing_stage": "bound",
+            }
             txn.set(
                 document,
                 {
-                    "package_name": package_name,
-                    "product_id": product_id,
-                    "owned": False,
-                    "processing_stage": "bound",
+                    **bound,
                     "created_at": firestore.SERVER_TIMESTAMP,
-                    "last_seen_at": firestore.SERVER_TIMESTAMP,
+                    **self._activity_patch(bound),
                 },
             )
             return True
@@ -87,11 +98,11 @@ class FirestorePurchaseRepository:
             except ValueError as exc:
                 raise RepositoryError(str(exc)) from exc
             if bool(merged.get("stale_observation", False)):
-                txn.set(document, {"last_seen_at": firestore.SERVER_TIMESTAMP}, merge=True)
+                txn.set(document, self._activity_patch(current), merge=True)
                 return
             effective = dict(merged.get("effective", {}))
             effective["updated_at"] = firestore.SERVER_TIMESTAMP
-            effective["last_seen_at"] = firestore.SERVER_TIMESTAMP
+            effective.update(self._activity_patch(effective))
             txn.set(document, effective, merge=True)
 
         try:
