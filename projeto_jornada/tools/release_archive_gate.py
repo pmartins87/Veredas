@@ -16,6 +16,7 @@ RC_CONTRACT = ROOT / "product" / "release_candidate_final_contract.json"
 ARTIFACT_CONTRACT = ROOT / "mobile" / "release_artifact_contract.json"
 PROVENANCE = ROOT / "product" / "release_provenance.json"
 INPUT_SCOPE_GATE = ROOT / "tools" / "release_input_scope_gate.py"
+NOTICES_GATE = ROOT / "tools" / "third_party_notices_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
@@ -24,6 +25,7 @@ EXPECTED_ARCHIVE_ITEMS = {
     "asset_provenance",
     "backend_dependency_lock",
     "backend_software_sbom",
+    "third_party_notices",
     "android_dependency_inventory",
     "privacy_policy_final",
     "terms_final",
@@ -73,16 +75,13 @@ def git_output(*args: str) -> str:
         return ""
 
 
-def run_input_scope_gate() -> tuple[bool, str]:
-    if not INPUT_SCOPE_GATE.is_file():
-        return False, "release_input_scope_gate.py missing"
-    result = subprocess.run(
-        [sys.executable, str(INPUT_SCOPE_GATE)],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+def run_gate(path: Path, *, release: bool = False) -> tuple[bool, str]:
+    if not path.is_file():
+        return False, f"gate missing: {path.name}"
+    command = [sys.executable, str(path)]
+    if release:
+        command.append("--release")
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
     output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
     return result.returncode == 0, output
 
@@ -104,13 +103,19 @@ def main() -> int:
         print(f"RELEASE_ARCHIVE FAIL: {exc}")
         return 1
 
-    scope_ok, scope_output = run_input_scope_gate()
+    scope_ok, scope_output = run_gate(INPUT_SCOPE_GATE)
     if not scope_ok:
         errors.append("release input scope gate failed; archive fingerprint identity is unsafe")
         if scope_output:
             errors.append("release input scope detail: " + scope_output.splitlines()[-1][:500])
 
-    if manifest.get("schema_version") != 1 or manifest.get("roadmap_step") != "12.9":
+    notices_ok, notices_output = run_gate(NOTICES_GATE, release=args.release)
+    if not notices_ok:
+        errors.append("third-party notices gate failed in matching mode")
+        if notices_output:
+            errors.append("third-party notices detail: " + notices_output.splitlines()[-1][:500])
+
+    if manifest.get("schema_version") != 2 or manifest.get("roadmap_step") != "12.9":
         errors.append("release archive manifest schema/roadmap_step invalid")
     if manifest.get("application_id") != rc_contract.get("application_id"):
         errors.append("archive application_id disagrees with 12.8 candidate")
@@ -232,18 +237,19 @@ def main() -> int:
             warnings.append("release provenance remains in progress, expected before final assets/dependency evidence")
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "archive_item_count": len(items),
         "placeholder_count": len(pending),
         "release_input_scope_verified": scope_ok,
+        "third_party_notice_coverage_verified": notices_ok,
         "errors": errors,
         "warnings": warnings,
     }
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if errors:
         print(f"RELEASE_ARCHIVE FAIL: {len(errors)} issue(s)")
@@ -251,7 +257,10 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
-    print(f"RELEASE_ARCHIVE {mode} PASS: items={len(items)} placeholders={len(pending)} warnings={len(warnings)} input_scope=1")
+    print(
+        "RELEASE_ARCHIVE %s PASS: items=%d placeholders=%d warnings=%d input_scope=1 notices=1"
+        % (mode, len(items), len(pending), len(warnings))
+    )
     for warning in warnings:
         print("WARNING:", warning)
     return 0
