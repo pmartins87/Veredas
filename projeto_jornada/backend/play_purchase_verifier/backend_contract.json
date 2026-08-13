@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -29,7 +29,23 @@
     "acknowledgement": "POST /androidpublisher/v3/applications/{packageName}/purchases/products/{productId}/tokens/{token}:acknowledge",
     "verification_resource": "ProductPurchaseV2",
     "grant_only_when_purchase_state": "PURCHASED",
-    "grant_only_when_acknowledgement_state": "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED"
+    "grant_only_when_acknowledgement_state": "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED",
+    "single_launch_line_item_required": true,
+    "purchase_option_id_required": true,
+    "offer_id_presence_allowed": false,
+    "rent_offer_details_presence_allowed": false,
+    "preorder_offer_details_presence_allowed": false
+  },
+  "timeout_budget": {
+    "mobile_http_timeout_seconds": 30.0,
+    "google_max_attempts_per_call": 2,
+    "google_connect_timeout_seconds": 1.5,
+    "google_read_timeout_seconds": 2.5,
+    "retry_backoff_base_seconds": 0.25,
+    "maximum_google_calls_in_acknowledgement_path": 3,
+    "conservative_google_io_upper_bound_seconds": 24.75,
+    "nominal_mobile_margin_seconds": 5.25,
+    "policy": "server Google-I/O budget must remain below the mobile verification timeout; timeout/failure never grants a new entitlement"
   },
   "persistence": {
     "reference_store": "Google Cloud Firestore",
@@ -83,6 +99,7 @@
     "create/configure Firestore and prove transactional token-to-product binding under concurrent requests",
     "freeze a public HTTPS endpoint and production abuse/rate-limit controls",
     "freeze purchase-record retention/deletion with 12.3 privacy policy and Data Safety",
+    "preserve the bounded server/mobile timeout budget under the production ingress configuration",
     "run unit tests and static backend gate on the exact deployment commit",
     "exercise PURCHASED, PENDING, cancelled, restored, refunded/revoked, duplicate and concurrent acknowledgement cases against Play test tracks",
     "persist deployment revision, endpoint, service identity fingerprint/non-secret identifier and evidence without committing credentials"
