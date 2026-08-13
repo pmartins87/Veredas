@@ -12,16 +12,20 @@ CONTRACT = BACKEND / "backend_contract.json"
 BILLING = ROOT / "mobile" / "play_billing_contract.json"
 EXPORT = ROOT / "export_presets.cfg"
 RELEASE_STATE = ROOT / "RELEASE_12_4_STATE.json"
+MERGE = BACKEND / "purchase_record_merge.py"
+MERGE_TEST = BACKEND / "tests" / "test_purchase_record_merge.py"
 
 REQUIRED_FILES = [
     CONTRACT,
     BACKEND / "verifier.py",
     BACKEND / "google_play_gateway.py",
     BACKEND / "firestore_repository.py",
+    MERGE,
     BACKEND / "app.py",
     BACKEND / "requirements.txt",
     BACKEND / "Dockerfile",
     BACKEND / "tests" / "test_verifier.py",
+    MERGE_TEST,
     BILLING,
     EXPORT,
     RELEASE_STATE,
@@ -92,9 +96,11 @@ def main() -> int:
     verifier = (BACKEND / "verifier.py").read_text(encoding="utf-8")
     gateway = (BACKEND / "google_play_gateway.py").read_text(encoding="utf-8")
     repository = (BACKEND / "firestore_repository.py").read_text(encoding="utf-8")
+    merge_text = MERGE.read_text(encoding="utf-8")
     app = (BACKEND / "app.py").read_text(encoding="utf-8")
     dockerfile = (BACKEND / "Dockerfile").read_text(encoding="utf-8")
     tests = (BACKEND / "tests" / "test_verifier.py").read_text(encoding="utf-8")
+    merge_tests = MERGE_TEST.read_text(encoding="utf-8")
     export_text = EXPORT.read_text(encoding="utf-8")
     requirements = {
         line.strip()
@@ -150,6 +156,7 @@ def main() -> int:
 
     for fragment in [
         "hashlib.sha256",
+        "class RepositoryError",
         "len(line_items) != 1",
         "quantity != 1",
         'purchase_option_id = str(offer_details.get("purchaseOptionId", "")).strip()',
@@ -161,6 +168,8 @@ def main() -> int:
         "play_rent_not_allowed_at_launch",
         "play_preorder_not_allowed_at_launch",
         "purchase_token_bound_to_different_product",
+        'return self._failure(request, "repository_unavailable"), 503',
+        'if not self._record(request, purchase, owned=True, stage="owned_acknowledged"):',
         "ACK_PENDING",
         "ACKNOWLEDGED",
     ]:
@@ -173,21 +182,53 @@ def main() -> int:
     bind_index = verifier.find("self._repository.bind(request.token_hash")
     if parse_index < 0 or bind_index < 0 or bind_index < parse_index:
         errors.append("token/product binding must occur only after authoritative product validation")
+    final_record_index = verifier.find('if not self._record(request, purchase, owned=True, stage="owned_acknowledged"):')
+    success_index = verifier.find('"owned": True,', final_record_index)
+    if final_record_index < 0 or success_index < final_record_index:
+        errors.append("owned=true response must occur only after durable final record")
 
     for fragment in [
         "google.auth.default",
+        "google_auth_exceptions.GoogleAuthError",
         "AuthorizedSession",
         "/purchases/productsv2/tokens/",
         "/purchases/products/",
         ":acknowledge",
+        "MAX_ATTEMPTS = 2",
+        "CONNECT_TIMEOUT_SECONDS = 1.5",
+        "READ_TIMEOUT_SECONDS = 2.5",
         "RETRYABLE_STATUS",
     ]:
         require_fragment(gateway, fragment, "Google Play gateway", errors)
 
-    for fragment in ["firestore.transactional", "token_hash", "last_seen_at", "SERVER_TIMESTAMP"]:
+    for fragment in [
+        "from purchase_record_merge import merge_purchase_record",
+        "from verifier import RepositoryError",
+        "firestore.transactional",
+        "record_transaction",
+        "repository_bind_failed",
+        "repository_record_failed",
+        "token_hash",
+        "last_seen_at",
+        "SERVER_TIMESTAMP",
+    ]:
         require_fragment(repository, fragment, "Firestore repository", errors)
+    if repository.count("@firestore.transactional") < 2:
+        errors.append("both token binding and purchase-state recording must be Firestore transactions")
     if "purchase_token" in repository:
         errors.append("Firestore repository source must never accept/store the raw purchase_token")
+
+    for fragment in [
+        '"PENDING": 1',
+        '"PURCHASED": 2',
+        '"CANCELLED": 3',
+        "incoming_rank < current_rank",
+        'effective["owned"] = prior_owned or incoming_owned',
+        'effective["acknowledgement_state"] = current_ack',
+        "incoming_purchase_state_invalid",
+        "incoming_acknowledgement_state_invalid",
+    ]:
+        require_fragment(merge_text, fragment, "monotonic purchase-record merge", errors)
 
     for fragment in ["MAX_BODY_BYTES = 16 * 1024", '"Cache-Control"] = "no-store"', '"/v1/play/verify"']:
         require_fragment(app, fragment, "HTTP service", errors)
@@ -196,6 +237,8 @@ def main() -> int:
 
     if "USER appuser" not in dockerfile:
         errors.append("backend container must run as non-root appuser")
+    if "purchase_record_merge.py" not in dockerfile:
+        errors.append("backend container must include the monotonic purchase-record merge module")
     if requirements != EXPECTED_REQUIREMENTS:
         errors.append(f"backend dependency pins drifted: got={sorted(requirements)}")
 
@@ -207,11 +250,26 @@ def main() -> int:
         "test_launch_offer_rent_and_preorder_presence_are_rejected",
         "rent_marker=True",
         "test_existing_token_binding_cannot_switch_product",
+        "test_repository_bind_outage_never_grants_or_acknowledges",
+        "test_repository_pre_ack_record_outage_stops_before_acknowledgement",
+        "test_repository_final_record_outage_never_returns_owned_true",
         "test_concurrent_ack_error_is_safe_if_refetch_confirms_acknowledged",
         "test_failed_ack_never_grants_if_refetch_stays_pending",
         "test_play_outage_returns_service_unavailable_without_grant",
     ]:
-        require_fragment(tests, fragment, "backend tests", errors)
+        require_fragment(tests, fragment, "backend verifier tests", errors)
+
+    for fragment in [
+        "test_pending_can_advance_to_purchased_owned",
+        "test_late_pending_cannot_regress_purchased_owned",
+        "test_late_pre_ack_purchased_write_cannot_clear_owned",
+        "test_acknowledgement_cannot_regress_within_purchased",
+        "test_cancelled_after_purchased_is_terminal_revocation",
+        "test_late_purchased_cannot_resurrect_cancelled",
+        "test_unknown_purchase_state_fails_closed",
+        "test_unknown_acknowledgement_state_fails_closed",
+    ]:
+        require_fragment(merge_tests, fragment, "purchase-record merge tests", errors)
 
     backend_text = "\n".join(
         path.read_text(encoding="utf-8", errors="ignore")
@@ -257,7 +315,7 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0 option_presence_guard=1"
+        "PLAY_BILLING_BACKEND_GATE %s: files=%d pending=%d errors=%d warnings=%d raw_token_persisted=0 embedded_secret=0 option_presence_guard=1 monotonic_persistence=1 durable_before_grant=1"
         % (mode, len(REQUIRED_FILES), len(pending), len(errors), len(warnings))
     )
     for warning in warnings:
