@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DIRECT = ROOT / "backend" / "play_purchase_verifier" / "requirements.txt"
-LOCK = ROOT / "backend" / "play_purchase_verifier" / "requirements.lock"
-SBOM = ROOT / "product" / "software_sbom.json"
+DEFAULT_DIRECT = ROOT / "backend" / "play_purchase_verifier" / "requirements.txt"
+DEFAULT_LOCK = ROOT / "backend" / "play_purchase_verifier" / "requirements.lock"
+DEFAULT_SBOM = ROOT / "product" / "software_sbom.json"
 PROVENANCE = ROOT / "product" / "release_provenance.json"
 PIN_RE = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s;]+)$")
 LOCK_RE = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s;]+) --hash=sha256:([0-9a-f]{64})$")
@@ -19,6 +20,14 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 def canonical(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -68,23 +77,28 @@ def parse_lock(path: Path) -> dict[str, dict[str, str]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate the Veredas Billing backend hash lock and internal SBOM evidence.")
-    parser.add_argument("--release", action="store_true", help="Require the lock/SBOM to exist and be final-release quality.")
+    parser.add_argument("--direct", type=Path, default=DEFAULT_DIRECT)
+    parser.add_argument("--lock", type=Path, default=DEFAULT_LOCK)
+    parser.add_argument("--sbom", type=Path, default=DEFAULT_SBOM)
+    parser.add_argument("--require-evidence", action="store_true", help="Require supplied lock/SBOM now without requiring final 12.9 certification flags.")
+    parser.add_argument("--release", action="store_true", help="Require persisted lock/SBOM plus final-release provenance status.")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
     errors: list[str] = []
     warnings: list[str] = []
     try:
-        direct = parse_direct(DIRECT)
+        direct = parse_direct(args.direct)
         provenance = read_json(PROVENANCE)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"BACKEND_DEPENDENCY_EVIDENCE_GATE FAIL: {exc}")
         return 1
 
-    evidence_exists = LOCK.is_file() and SBOM.is_file()
+    evidence_exists = args.lock.is_file() and args.sbom.is_file()
+    require_now = args.require_evidence or args.release
     if not evidence_exists:
-        message = "backend requirements.lock and product/software_sbom.json are not both present"
-        if args.release:
+        message = f"dependency evidence missing: lock={args.lock} sbom={args.sbom}"
+        if require_now:
             errors.append(message)
         else:
             warnings.append(message + "; expected until a functioning Python 3.12/Linux resolver produces final evidence")
@@ -92,15 +106,15 @@ def main() -> int:
         sbom: dict[str, Any] = {}
     else:
         try:
-            lock = parse_lock(LOCK)
-            sbom = read_json(SBOM)
+            lock = parse_lock(args.lock)
+            sbom = read_json(args.sbom)
         except (OSError, ValueError, json.JSONDecodeError) as exc:
             errors.append(str(exc))
             lock = {}
             sbom = {}
 
     if evidence_exists and not errors:
-        if sbom.get("schema_version") != 1 or sbom.get("document_type") != "veredas_internal_software_bill_of_materials":
+        if sbom.get("schema_version") != 2 or sbom.get("document_type") != "veredas_internal_software_bill_of_materials":
             errors.append("software SBOM schema/document_type invalid")
         if sbom.get("scope") != "billing_backend_python_runtime":
             errors.append("software SBOM scope must remain billing_backend_python_runtime")
@@ -108,6 +122,21 @@ def main() -> int:
             errors.append("software SBOM generator mismatch")
         if sbom.get("all_components_hash_bound_to_wheel") is not True:
             errors.append("software SBOM must assert all components are wheel-hash bound")
+
+        input_row = sbom.get("input", {})
+        if not isinstance(input_row, dict):
+            errors.append("software SBOM input record missing")
+            input_row = {}
+        if input_row.get("direct_requirements_path") != "backend/play_purchase_verifier/requirements.txt":
+            errors.append("software SBOM direct requirements path mismatch")
+        if str(input_row.get("direct_requirements_sha256", "")).lower() != sha256_file(args.direct):
+            errors.append("software SBOM direct requirements SHA-256 mismatch")
+
+        resolver = sbom.get("resolver", {})
+        if not isinstance(resolver, dict) or resolver.get("tool") != "pip" or not str(resolver.get("version", "")).strip():
+            errors.append("software SBOM resolver identity/version missing")
+        if not isinstance(resolver, dict) or not str(resolver.get("packaging_library_version", "")).strip():
+            errors.append("software SBOM packaging parser version missing")
 
         environment = sbom.get("environment", {})
         if not isinstance(environment, dict):
@@ -137,18 +166,14 @@ def main() -> int:
                 continue
             if normalized != canonical(display):
                 errors.append(f"SBOM display/normalized package name mismatch: {display}:{normalized}")
-            if not version:
-                errors.append(f"SBOM component version missing: {display}")
-            if not SHA256_RE.fullmatch(digest):
-                errors.append(f"SBOM wheel SHA-256 missing/invalid: {display}=={version}")
+            if not version or not SHA256_RE.fullmatch(digest):
+                errors.append(f"SBOM version/wheel SHA invalid: {display}=={version}")
             expected_purl = f"pkg:pypi/{normalized}@{version}"
             if row.get("purl") != expected_purl:
                 errors.append(f"SBOM purl mismatch: {display} expected={expected_purl}")
-            wheel_filename = str(row.get("wheel_filename", ""))
-            if not wheel_filename.endswith(".whl"):
-                errors.append(f"SBOM wheel filename invalid: {display}:{wheel_filename}")
-            metadata = row.get("metadata", {})
-            if not isinstance(metadata, dict):
+            if not str(row.get("wheel_filename", "")).endswith(".whl"):
+                errors.append(f"SBOM wheel filename invalid: {display}")
+            if not isinstance(row.get("metadata", {}), dict):
                 errors.append(f"SBOM metadata missing: {display}")
             component_map[normalized] = row
 
@@ -171,6 +196,9 @@ def main() -> int:
             if str(component.get("wheel_sha256", "")).lower() != locked["sha256"]:
                 errors.append(f"lock/SBOM wheel hash mismatch: {name}")
 
+        software = provenance.get("software_inventory", {})
+        known = software.get("known_components", []) if isinstance(software, dict) else []
+        known_map = {canonical(str(row.get("id", ""))): row for row in known if isinstance(row, dict)}
         for name, (_display, version) in direct.items():
             locked = lock.get(name)
             component = component_map.get(name)
@@ -181,32 +209,19 @@ def main() -> int:
                 errors.append(f"direct dependency lock version drift: {name} direct={version} lock={locked['version']}")
             if component.get("direct") is not True:
                 errors.append(f"direct dependency not marked direct in SBOM: {name}")
-
-        for name, component in component_map.items():
-            expected_direct = name in direct
-            if bool(component.get("direct", False)) != expected_direct:
-                errors.append(f"SBOM direct/transitive classification mismatch: {name}")
-
-        software = provenance.get("software_inventory", {})
-        known = software.get("known_components", []) if isinstance(software, dict) else []
-        known_map = {
-            canonical(str(row.get("id", ""))): row
-            for row in known
-            if isinstance(row, dict)
-        }
-        for name, (_display, version) in direct.items():
             row = known_map.get(name)
             if row is None:
                 errors.append(f"release provenance lacks direct dependency: {name}")
                 continue
             expected_hash = str(row.get("primary_wheel_sha256", "")).lower()
-            locked = lock.get(name, {})
-            if expected_hash != str(locked.get("sha256", "")).lower():
-                errors.append(
-                    f"direct dependency wheel hash differs from primary-source provenance: {name} provenance={expected_hash} lock={locked.get('sha256', '')}"
-                )
+            if expected_hash != locked["sha256"]:
+                errors.append(f"direct wheel hash differs from primary provenance: {name} provenance={expected_hash} lock={locked['sha256']}")
             if str(row.get("version", "")) != version:
                 errors.append(f"release provenance direct dependency version drift: {name}")
+
+        for name, component in component_map.items():
+            if bool(component.get("direct", False)) != (name in direct):
+                errors.append(f"SBOM direct/transitive classification mismatch: {name}")
 
     if args.release and evidence_exists and not errors:
         software = provenance.get("software_inventory", {})
@@ -219,9 +234,9 @@ def main() -> int:
                 errors.append("release provenance does not mark final backend SBOM archived")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "roadmap_step": "12.9",
-        "mode": "release" if args.release else "preflight",
+        "mode": "release" if args.release else ("required_evidence" if args.require_evidence else "preflight"),
         "evidence_present": evidence_exists,
         "direct_requirement_count": len(direct),
         "locked_component_count": len(lock),
@@ -237,9 +252,9 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    mode = "RELEASE" if args.release else "PREFLIGHT"
+    mode = "RELEASE" if args.release else ("REQUIRED" if args.require_evidence else "PREFLIGHT")
     print(
-        "BACKEND_DEPENDENCY_EVIDENCE_GATE %s PASS: evidence=%d direct=%d locked=%d warnings=%d"
+        "BACKEND_DEPENDENCY_EVIDENCE_GATE %s PASS: evidence=%d direct=%d locked=%d warnings=%d resolver_bound=1 input_hash_bound=1"
         % (mode, 1 if evidence_exists else 0, len(direct), len(lock), len(warnings))
     )
     for warning in warnings:
