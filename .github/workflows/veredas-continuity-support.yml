@@ -1,6 +1,21 @@
 name: Veredas Continuity and Support 12.9
 
 on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/RELEASE_12_9_STATE.json'
+      - 'projeto_jornada/product/continuity_support_contract.json'
+      - 'projeto_jornada/product/release_provenance.json'
+      - 'projeto_jornada/backend/play_purchase_verifier/requirements.txt'
+      - 'projeto_jornada/backend/play_purchase_verifier/requirements.lock'
+      - 'projeto_jornada/product/software_sbom.json'
+      - 'projeto_jornada/product/android_dependency_inventory.json'
+      - 'projeto_jornada/docs/CONTINUITY_AND_SUPPORT.md'
+      - 'projeto_jornada/tools/provenance_license_gate.py'
+      - 'projeto_jornada/tools/continuity_support_gate.py'
+      - '.github/workflows/veredas-continuity-support.yml'
   workflow_dispatch:
     inputs:
       certify_release:
@@ -27,14 +42,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Validate asset provenance, third-party software and service inventory
+        working-directory: projeto_jornada
+        run: python tools/provenance_license_gate.py --output /tmp/veredas-12-9-provenance-preflight.json
       - name: Validate 12.9 continuity and support contract
         working-directory: projeto_jornada
         run: python tools/continuity_support_gate.py --output /tmp/veredas-12-9-preflight.json
       - name: Preserve zero release-blocking product defects
         working-directory: projeto_jornada
         run: python tools/qa_triage_gate.py --require-zero
+      - name: Run final provenance/license certification
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/provenance_license_gate.py --release --output /tmp/veredas-12-9-provenance-release.json
       - name: Run final 12.9 continuity certification
-        if: ${{ inputs.certify_release }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
         run: python tools/continuity_support_gate.py --release --output /tmp/veredas-12-9-release.json
       - name: Upload 12.9 reports
@@ -43,7 +65,9 @@ jobs:
         with:
           name: veredas-12-9-continuity-support
           path: |
+            /tmp/veredas-12-9-provenance-preflight.json
             /tmp/veredas-12-9-preflight.json
+            /tmp/veredas-12-9-provenance-release.json
             /tmp/veredas-12-9-release.json
           if-no-files-found: ignore
           retention-days: 14
