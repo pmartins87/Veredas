@@ -1,8 +1,8 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-13",
   "application_id": "com.pmartins87.veredasdatrama",
   "implementation": {
     "runtime": "python_3_12",
@@ -67,7 +67,8 @@
       "processing_stage",
       "purchase_completion_time",
       "test_purchase",
-      "timestamps"
+      "timestamps",
+      "expires_at"
     ],
     "token_product_binding_transactional": true,
     "purchase_state_record_transactional": true,
@@ -78,7 +79,23 @@
     "purchased_owned_true_cannot_be_overwritten_by_late_pre_ack_false": true,
     "durable_final_record_required_before_owned_response": true,
     "repository_failure_response": "503 repository_unavailable; never owned=true",
-    "retention_and_deletion_policy": "PENDING_12_3_12_4_RETENTION_POLICY"
+    "retention_and_deletion_policy": {
+      "status": "implementation_frozen_pre_deployment",
+      "implementation": "retention_policy.py",
+      "ttl_provider": "Google Cloud Firestore TTL",
+      "ttl_field": "expires_at",
+      "active_verified_nonconsumable_days_since_last_activity": 730,
+      "non_owned_pending_bound_cancelled_days_since_last_activity": 30,
+      "test_purchase_days_since_last_activity": 7,
+      "refresh_on_backend_activity": true,
+      "all_records_have_finite_expiry": true,
+      "raw_purchase_token_persisted": false,
+      "expired_record_recreation_requires_authoritative_google_verification": true,
+      "expiration_is_not_entitlement_evidence": true,
+      "provider_deletion_is_asynchronous": true,
+      "provider_typical_deletion_after_expiry": "within approximately 24 hours according to Firestore TTL documentation",
+      "production_ttl_policy_required": true
+    }
   },
   "abuse_and_data_minimization": {
     "request_body_logged_by_application": false,
@@ -101,6 +118,8 @@
     "android_publisher_api_enabled": false,
     "play_console_service_account_access_configured": false,
     "firestore_access_configured": false,
+    "firestore_ttl_expires_at_enabled": false,
+    "firestore_ttl_policy_verified": false,
     "public_https_ingress_configured": false,
     "liveness_probe_verified": false,
     "readiness_probe_verified": false,
@@ -112,15 +131,17 @@
     "attach a dedicated service account and grant only the Google Play/Firestore permissions needed by this service",
     "enable Google Play Android Developer API and authorize the service identity for the application",
     "create/configure Firestore and prove transactional token-to-product binding and monotonic state recording under concurrent requests",
+    "enable Firestore TTL on expires_at for collection group play_purchase_tokens_v1 and verify the policy is ACTIVE",
+    "prove real records receive the frozen 730/30/7-day expires_at horizons and activity refreshes expiry without changing authoritative purchase state",
+    "prove an expired/missing backend record can never grant entitlement without a fresh authoritative Google Play verification",
     "prove a delayed PENDING/pre-ack write cannot regress PURCHASED owned=true and a delayed PURCHASED cannot resurrect CANCELLED",
     "prove Firestore bind/record outages return 503 and never produce owned=true",
     "verify /healthz liveness and /readyz dependency-initialization readiness on the deployed revision",
     "freeze a public HTTPS endpoint and production abuse/rate-limit controls",
-    "freeze purchase-record retention/deletion with 12.3 privacy policy and Data Safety",
     "preserve the bounded server/mobile timeout budget under the production ingress configuration",
     "run unit tests and static backend gate on the exact deployment commit",
     "exercise PURCHASED, PENDING, cancelled, restored, refunded/revoked, duplicate and concurrent acknowledgement cases against Play test tracks",
-    "persist deployment revision, endpoint, service identity fingerprint/non-secret identifier and evidence without committing credentials"
+    "persist deployment revision, endpoint, service identity fingerprint/non-secret identifier, TTL policy evidence and other release evidence without committing credentials"
   ],
   "pass_recorded": false
 }
