@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.3",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-13",
+  "contract": "product/content_rating_target_audience.json",
+  "gate": "tools/content_rating_target_audience_gate.py",
+  "workflow": ".github/workflows/veredas-content-rating-12-3.yml",
+  "policy_baseline_checked_on": "2026-08-13",
+  "implemented": {
+    "iarc_required_and_unrated_release_forbidden_recorded": true,
+    "target_audience_separate_from_content_rating_recorded": true,
+    "final_rating_prediction_forbidden": true,
+    "known_fantasy_combat_and_monster_content_declared": true,
+    "commercial_no_ads_no_subscriptions_no_lootboxes_cross_check": true,
+    "privacy_account_and_advertising_cross_check": true,
+    "store_combat_disclosure_cross_check": true,
+    "final_content_review_matrix": true,
+    "release_requires_real_play_console_questionnaire": true,
+    "release_requires_iarc_certificate_and_regional_ratings": true
+  },
+  "current_preflight": {
+    "final_content_review_categories": 13,
+    "final_content_review_status": "pending_final_art_audio_and_pt_BR_en_corpus",
+    "final_target_audience_age_groups": "pending_product_and_legal_decision",
+    "iarc_questionnaire": "pending_play_console",
+    "iarc_certificate": "pending_play_console",
+    "internal_predicted_rating": null
+  },
+  "remaining": [
+    "review the exact final art, audio and pt_BR/en narrative corpus for all rating-relevant content categories",
+    "choose only the Google Play audience age groups the game was actually designed for",
+    "complete any additional policy/privacy review triggered by the selected age groups",
+    "complete the IARC questionnaire for the exact release candidate in Play Console",
+    "persist the IARC certificate/reference and regional ratings",
+    "execute content_rating_target_audience_gate.py --release on the exact release ancestry"
+  ],
+  "pass_recorded": false
+}
