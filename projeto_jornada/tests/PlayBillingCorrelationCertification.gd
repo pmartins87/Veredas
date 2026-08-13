@@ -68,6 +68,9 @@ class DeferredStore:
     func emit_purchase(purchase: Dictionary) -> void:
         purchase_updated.emit({"ok": true, "purchases": [purchase]})
 
+    func emit_error(code: String) -> void:
+        store_error.emit(code, "test")
+
 
 class DeferredVerifier:
     extends RefCounted
@@ -118,6 +121,7 @@ func _ready() -> void:
 
     _overlapping_purchase_restore_gate()
     _stale_restore_response_isolation_gate()
+    _store_error_during_restore_gate()
     _finish()
 
 
@@ -191,6 +195,34 @@ func _stale_restore_response_isolation_gate() -> void:
     expect(not bool(entitlements.summary().supporter_cosmetics), "12.4 current restore failed to revoke absent supporter pack")
 
 
+func _store_error_during_restore_gate() -> void:
+    entitlements.owned["full_game_unlock"] = true
+    entitlements.owned["supporter_cosmetic_pack"] = true
+    store.owned_purchases = [_purchase("full_game_unlock", "disconnect-token")]
+
+    var request_start := verifier.requests.size()
+    var restore_start := restores.size()
+    var snapshot_start := entitlements.snapshot_apply_count
+
+    expect(billing.restore(), "12.4 disconnect-race restore did not launch")
+    expect(verifier.requests.size() == request_start + 1, "12.4 disconnect-race verification request missing")
+    expect(billing.pending_verification_count() == 1, "12.4 disconnect-race restore was not pending")
+
+    store.emit_error("billing_disconnected")
+    expect(not billing.products_ready(), "12.4 store error left product catalog marked ready")
+    expect(billing.pending_verification_count() == 0, "12.4 store error left restore verification pending")
+    expect(restores.size() == restore_start + 1, "12.4 store error did not complete active restore")
+    expect(not bool(restores.back().get("ok", true)), "12.4 store error reported restore success")
+    expect(entitlements.snapshot_apply_count == snapshot_start, "12.4 store error applied destructive authoritative snapshot")
+    expect(bool(entitlements.summary().full_game), "12.4 store error revoked cached full game")
+    expect(bool(entitlements.summary().supporter_cosmetics), "12.4 store error revoked cached supporter pack")
+    expect("billing_disconnected" in coordinator_errors, "12.4 store error was not surfaced by coordinator")
+
+    verifier.respond(request_start)
+    expect(restores.size() == restore_start + 1, "12.4 late verifier response duplicated restore completion after disconnect")
+    expect(entitlements.snapshot_apply_count == snapshot_start, "12.4 late verifier response applied snapshot after disconnect")
+
+
 func _purchase(product_id: String, token: String) -> Dictionary:
     return {
         "product_ids": [product_id],
@@ -205,7 +237,7 @@ func _purchase(product_id: String, token: String) -> Dictionary:
 func _finish() -> void:
     if failures.is_empty():
         print(
-            "PLAY_BILLING_CORRELATION_CERTIFICATION PASS: 12.4 request_correlation=1 overlap_safe=1 stale_response_isolation=1"
+            "PLAY_BILLING_CORRELATION_CERTIFICATION PASS: 12.4 request_correlation=1 overlap_safe=1 stale_response_isolation=1 store_error_restore_safe=1"
         )
         get_tree().quit(0)
         return
