@@ -67,7 +67,8 @@
     "11.8": {
       "completion_file": "QA_11_8_COMPLETION.json",
       "status": "pass",
-      "active_blocker_critical": 0
+      "active_blocker_critical": 0,
+      "post_completion_note": "BILL-124-001 was discovered later during 12.4 hardening and fixed before release; current triage still has zero active blocker/critical defects."
     }
   },
   "phase11_in_progress": {
@@ -86,14 +87,19 @@
       "english_base_units": 3470,
       "english_combined_units": 18804,
       "english_pack_base64_chars": 133572,
-      "scope_hardening": "manifest-driven; compact-pack-aware; obsolete three-locale one-shot applicator retired",
+      "required_ui_units": 131,
+      "pt_BR_ui_units": 131,
+      "en_ui_units": 131,
+      "ui_growth_reason": "12 Billing/runtime UI keys added for purchase, restore, supporter state and full-game route guidance",
+      "scope_hardening": "manifest-driven; compact-pack-aware; obsolete three-locale one-shot applicator retired; headless certification can expose Android Billing UI without network",
       "remaining": [
         "pack certification on current HEAD",
         "full glossary/token/BBCode gate",
+        "131/131 UI completeness certification",
         "localization architecture certification on current two-language scope",
         "linguistic sanity",
-        "localized overflow/render matrix",
-        "iconography/accessibility consistency",
+        "localized overflow/render matrix including Billing controls",
+        "iconography/accessibility consistency including Billing controls",
         "same-HEAD regressions"
       ]
     },
@@ -119,7 +125,7 @@
     "12.1": "in_progress_authoritative_name_checks_pending",
     "12.2": "in_progress_signing_and_console_pending",
     "12.3": "in_progress_final_legal_platform_data_safety_and_console_evidence_pending",
-    "12.4": "in_progress_plugin_backend_play_testing_pending",
+    "12.4": "in_progress_client_runtime_ready_execution_plugin_backend_play_testing_pending",
     "12.5": "in_progress_final_art_rc_captures_console_pending",
     "12.6": "in_progress_prerequisites_and_signed_artifact_pending",
     "12.7": "in_progress_real_play_tracks_and_evidence_pending",
@@ -151,22 +157,31 @@
       "platform_gate": "tools/platform_compliance_gate.py",
       "legal_surface_gate": "tools/legal_surface_gate.py",
       "in_app_legal_surface": "implemented_pre_release_pt_BR_en",
-      "status": "final_billing_aab_policy_terms_urls_data_safety_rating_and_console_evidence_pending"
+      "runtime_network_boundary": "INTERNET permission enabled; runtime HTTP allowlist restricted to mobile/PlayPurchaseVerificationClient.gd for purchase verification",
+      "status": "final_billing_backend_retention_aab_policy_terms_urls_data_safety_rating_and_console_evidence_pending"
     },
     "12.4": {
       "state_file": "RELEASE_12_4_STATE.json",
       "billing_contract": "mobile/play_billing_contract.json",
       "coordinator": "core/systems/PlayBillingCoordinator.gd",
       "store_adapter": "mobile/GooglePlayBillingStoreAdapter.gd",
+      "verification_client": "mobile/PlayPurchaseVerificationClient.gd",
+      "runtime_service": "mobile/BillingService.gd",
+      "runtime_autoload": "BillingService",
+      "purchase_restore_ui": "scenes/Hub.gd",
+      "supporter_cosmetic": "supporter_badge via ui/SupporterSeal.gd",
+      "android_internet_permission": true,
+      "verification_api": "purchases.productsv2.getproductpurchasev2",
       "gate": "tools/play_billing_release_gate.py",
       "workflow": ".github/workflows/veredas-play-billing-12-4.yml",
-      "status": "architecture_ready_logic_execution_plugin_backend_play_track_pending"
+      "status": "client_runtime_surface_ready_unexecuted_plugin_backend_play_track_pending"
     },
     "12.5": {
       "state_file": "RELEASE_12_5_STATE.json",
       "listing_source": "product/store_listing_google_play.json",
       "gate": "tools/store_listing_gate.py",
       "store_locales": ["pt-BR", "en-US"],
+      "commercial_copy": "full-game non-consumable unlock plus optional visual-only Supporter Seal",
       "status": "copy_ready_final_visual_assets_and_rc_captures_pending"
     },
     "12.6": {
@@ -209,6 +224,7 @@
   },
   "release_triage": {
     "active_blocker_critical_product_defects": 0,
+    "resolved_post_11_8_critical_defects": ["BILL-124-001"],
     "non_defect_release_dependencies": [
       "DEP-113-PHYSICAL",
       "DEP-078-AUDIO",
