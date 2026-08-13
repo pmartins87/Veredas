@@ -5,7 +5,7 @@ signal verification_completed(result: Dictionary)
 
 const APPLICATION_ID := "com.pmartins87.veredasdatrama"
 const SOURCE_ID := "play_backend"
-const DEFAULT_TIMEOUT_SECONDS := 15.0
+const DEFAULT_TIMEOUT_SECONDS := 30.0
 const EXPECTED_PRODUCTS := ["full_game_unlock", "supporter_cosmetic_pack"]
 
 var _endpoint := ""
