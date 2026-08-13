@@ -1,0 +1,156 @@
+import groovy.json.JsonOutput
+import java.security.MessageDigest
+
+String sha256File(File file) {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256")
+    file.withInputStream { stream ->
+        byte[] buffer = new byte[1024 * 1024]
+        int read
+        while ((read = stream.read(buffer)) > 0) {
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().collect { String.format('%02x', it) }.join()
+}
+
+gradle.projectsEvaluated {
+    Project root = gradle.rootProject
+    root.tasks.register("veredasDependencyInventory") {
+        group = "verification"
+        description = "Emit the exact releaseRuntimeClasspath dependency/artifact inventory for Veredas release evidence."
+
+        doLast {
+            String outputRaw = root.findProperty("veredasInventoryOutput")?.toString()?.trim()
+            if (!outputRaw) {
+                throw new GradleException("-PveredasInventoryOutput=<path> is required")
+            }
+            String applicationId = root.findProperty("veredasApplicationId")?.toString()?.trim()
+            if (!applicationId) {
+                throw new GradleException("-PveredasApplicationId=<application id> is required")
+            }
+
+            List<Map<String, Object>> configurationsSeen = []
+            Map<String, Map<String, Object>> components = new TreeMap<>()
+
+            root.allprojects.sort { it.path }.each { Project project ->
+                def configuration = project.configurations.findByName("releaseRuntimeClasspath")
+                if (configuration == null) {
+                    return
+                }
+                configurationsSeen.add([
+                    project: project.path,
+                    configuration: configuration.name,
+                ])
+
+                Set<String> resolvedArtifactPaths = new HashSet<>()
+                configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                    File file = artifact.file.canonicalFile
+                    resolvedArtifactPaths.add(file.absolutePath)
+                    def module = artifact.moduleVersion.id
+                    String groupId = module.group ?: ""
+                    String artifactId = module.name ?: artifact.name ?: file.name
+                    String version = module.version ?: ""
+                    if (!groupId || !artifactId || !version) {
+                        throw new GradleException("unresolved Maven identity for ${file}")
+                    }
+                    String digest = sha256File(file)
+                    String key = "maven:${groupId}:${artifactId}@${version}#${file.name}"
+                    Map<String, Object> row = components.get(key)
+                    if (row == null) {
+                        row = [
+                            component_key: "maven:${groupId}:${artifactId}@${version}",
+                            artifact_key: key,
+                            kind: "maven_module",
+                            group: groupId,
+                            name: artifactId,
+                            version: version,
+                            artifact_name: artifact.name ?: "",
+                            artifact_type: artifact.type ?: "",
+                            artifact_extension: artifact.extension ?: "",
+                            classifier: artifact.classifier ?: "",
+                            file_name: file.name,
+                            file_sha256: digest,
+                            bytes: file.length(),
+                            third_party: true,
+                            consumers: [],
+                        ]
+                        components.put(key, row)
+                    } else if (row.file_sha256 != digest) {
+                        throw new GradleException("same Maven artifact key resolved to different bytes: ${key}")
+                    }
+                    List<String> consumers = row.consumers as List<String>
+                    String consumer = "${project.path}:${configuration.name}"
+                    if (!consumers.contains(consumer)) {
+                        consumers.add(consumer)
+                        consumers.sort()
+                    }
+                }
+
+                configuration.resolve().collect { it.canonicalFile }.sort { it.absolutePath }.each { File file ->
+                    if (resolvedArtifactPaths.contains(file.absolutePath)) {
+                        return
+                    }
+                    String digest = sha256File(file)
+                    String key = "local:${file.name}#${digest}"
+                    Map<String, Object> row = components.get(key)
+                    if (row == null) {
+                        row = [
+                            component_key: "local:${file.name}@sha256:${digest}",
+                            artifact_key: key,
+                            kind: "local_file",
+                            group: "",
+                            name: file.name,
+                            version: "",
+                            file_name: file.name,
+                            file_sha256: digest,
+                            bytes: file.length(),
+                            third_party: true,
+                            consumers: [],
+                        ]
+                        components.put(key, row)
+                    }
+                    List<String> consumers = row.consumers as List<String>
+                    String consumer = "${project.path}:${configuration.name}"
+                    if (!consumers.contains(consumer)) {
+                        consumers.add(consumer)
+                        consumers.sort()
+                    }
+                }
+            }
+
+            if (configurationsSeen.isEmpty()) {
+                throw new GradleException("no releaseRuntimeClasspath configuration found; Android release Gradle project/plugin integration is not ready")
+            }
+            if (components.isEmpty()) {
+                throw new GradleException("releaseRuntimeClasspath resolved no artifacts")
+            }
+
+            File output = new File(outputRaw)
+            if (!output.isAbsolute()) {
+                output = new File(root.rootDir, outputRaw)
+            }
+            output.parentFile.mkdirs()
+            Map<String, Object> report = [
+                schema_version: 1,
+                roadmap_step: "12.9",
+                formal_status: "evidence_generated_unreviewed",
+                application_id: applicationId,
+                scope: "android_release_runtime_classpath",
+                generator: "tools/gradle_dependency_inventory.init.gradle",
+                environment: [
+                    gradle_version: gradle.gradleVersion,
+                    java_version: System.getProperty("java.version"),
+                    java_vendor: System.getProperty("java.vendor"),
+                    os_name: System.getProperty("os.name"),
+                    os_arch: System.getProperty("os.arch"),
+                ],
+                configurations: configurationsSeen,
+                component_count: components.size(),
+                all_artifacts_sha256_bound: true,
+                components: components.values().toList(),
+            ]
+            output.text = JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator()
+            println("VEREDAS_ANDROID_DEPENDENCY_INVENTORY PASS: configurations=${configurationsSeen.size()} components=${components.size()} output=${output}")
+        }
+    }
+}
