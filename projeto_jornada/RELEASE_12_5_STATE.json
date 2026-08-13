@@ -1,32 +1,21 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.5",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
   "listing_source": "product/store_listing_google_play.json",
   "capture_manifest": "product/store_capture_manifest.json",
   "listing_gate": "tools/store_listing_gate.py",
+  "commercial_consistency_gate": "tools/store_commercial_consistency_gate.py",
   "capture_provenance_gate": "tools/store_capture_provenance_gate.py",
   "capture_finalizer": "tools/finalize_store_capture_manifest.py",
   "workflow": ".github/workflows/veredas-store-listing-12-5.yml",
   "launch_store_locales": ["pt-BR", "en-US"],
   "google_play_policy_baseline_checked_on": "2026-08-13",
   "copy": {
-    "pt-BR": {
-      "title_chars": 16,
-      "short_description_chars": 68,
-      "full_description_chars": 1319
-    },
-    "en-US": {
-      "title_chars": 16,
-      "short_description_chars": 59,
-      "full_description_chars": 1207
-    },
-    "limits": {
-      "title": 30,
-      "short_description": 80,
-      "full_description": 4000
-    },
+    "pt-BR": {"title_chars": 16, "short_description_chars": 68, "full_description_chars": 1319},
+    "en-US": {"title_chars": 16, "short_description_chars": 59, "full_description_chars": 1207},
+    "limits": {"title": 30, "short_description": 80, "full_description": 4000},
     "status": "draft_copy_persisted_with_current_character_counts_and_aligned_with_two_product_Billing_contract"
   },
   "visual_assets": {
@@ -37,14 +26,7 @@
     "en_phone_screenshots_1080x1920": "0/6 final RC captures",
     "preview_video": "optional_pending_decision"
   },
-  "screenshot_plan": [
-    "Hub / journey setup",
-    "narrative choice",
-    "combat",
-    "Domain/location exploration",
-    "codex/progress",
-    "accessibility/settings"
-  ],
+  "screenshot_plan": ["Hub / journey setup", "narrative choice", "combat", "Domain/location exploration", "codex/progress", "accessibility/settings"],
   "implemented": {
     "google_play_current_asset_requirement_baseline_recorded": true,
     "six_portrait_1080x1920_screenshots_per_locale_exceed_game_recommendation_minimum": true,
@@ -62,7 +44,13 @@
     "11_10_completion_content_validation": true,
     "11_10_completion_artifact_writer_implemented": true,
     "11_10_completion_can_only_be_emitted_after_full_freeze_workflow": true,
-    "stale_copy_character_counts_corrected": true
+    "stale_copy_character_counts_corrected": true,
+    "store_commercial_model_product_set_cross_check": true,
+    "store_billing_product_set_cross_check": true,
+    "full_unlock_content_only_cross_check": true,
+    "supporter_seal_visual_only_cross_check": true,
+    "no_ads_subscriptions_lootboxes_paid_power_copy_cross_check": true,
+    "terms_store_billing_commercial_truth_cross_check": true
   },
   "quality_contract": {
     "actual_gameplay_or_ui_only": true,
@@ -79,6 +67,7 @@
   },
   "current_preflight": {
     "listing_copy_ready": true,
+    "commercial_truth_gate_ready": true,
     "capture_manifest_structured": true,
     "capture_rows": 12,
     "capture_rows_final": 0,
@@ -90,11 +79,12 @@
   "dependencies": ["7.3", "7.4", "7.5", "7.10", "11.10", "12.1", "12.4"],
   "completion_requirements": [
     "freeze copy against the release candidate and final 12.4 Billing product set",
+    "prove listing, commercial model, Billing product set and Terms describe the same two non-consumable products and the same no-ads/no-subscriptions/no-loot-boxes/no-paid-power model",
     "produce final original icon and feature graphic",
     "obtain QA_11_10_COMPLETION.json from a fully executed green 11.10 workflow and persist the reviewed completion record",
     "capture six PT-BR and six en-US screenshots from the same certified Android RC",
     "bind the 12 screenshots to the exact RC commit, runtime version and release-input fingerprint with SHA-256 evidence",
-    "pass store_listing_gate.py --release and store_capture_provenance_gate.py --release",
+    "pass store_listing_gate.py --release, store_commercial_consistency_gate.py --release and store_capture_provenance_gate.py --release",
     "human-review all listing claims and imagery for accuracy",
     "upload and visually inspect the localized listing in Play Console",
     "record exact RC capture commit and final listing revision"
