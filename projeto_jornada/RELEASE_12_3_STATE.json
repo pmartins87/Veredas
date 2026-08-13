@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
@@ -14,6 +14,10 @@
   "platform_gate": "tools/platform_compliance_gate.py",
   "legal_surface_gate": "tools/legal_surface_gate.py",
   "legal_surface_certification": "tests/legal_surface_certification.tscn",
+  "content_rating_state": "CONTENT_RATING_12_3_STATE.json",
+  "content_rating_contract": "product/content_rating_target_audience.json",
+  "content_rating_gate": "tools/content_rating_target_audience_gate.py",
+  "content_rating_workflow": ".github/workflows/veredas-content-rating-12-3.yml",
   "application_id": "com.pmartins87.veredasdatrama",
   "implemented": {
     "data_minimization_contract": true,
@@ -53,6 +57,13 @@
     "legal_surface_godot_certification_prepared": true,
     "android_36_release_baseline_pinned": true,
     "commercial_billing_store_terms_consistency_gate": true,
+    "content_rating_and_target_audience_fail_closed_preflight": true,
+    "content_rating_known_fantasy_combat_and_monster_content_declared": true,
+    "content_rating_internal_prediction_forbidden": true,
+    "content_rating_final_human_review_matrix_categories": 13,
+    "target_audience_separate_from_iarc_rating": true,
+    "under_13_selection_requires_families_review": true,
+    "age_13_17_selection_requires_child_status_privacy_purchase_marketing_review": true,
     "release_placeholder_fail_closed_gate": true
   },
   "current_baseline": {
@@ -101,7 +112,22 @@
     "full_game_unlock": "one_time_non_consumable",
     "optional_supporter_pack": "one_time_non_consumable_visual_supporter_badge_only",
     "runtime_legal_launch_locales": ["pt_BR", "en"],
-    "runtime_legal_publication_status": "pre_release"
+    "runtime_legal_publication_status": "pre_release",
+    "content_rating": {
+      "provider": "Google Play IARC",
+      "final_internal_prediction": null,
+      "final_content_review_categories": 13,
+      "final_content_review_status": "pending_final_art_audio_and_pt_BR_en_corpus",
+      "canonical_text_source": "14 data datasets through tools/export_localization_catalog.py plus launch localization overlays",
+      "zero_keyword_hit_is_clearance": false,
+      "questionnaire_completed": false,
+      "certificate_received": false
+    },
+    "target_audience": {
+      "final_age_groups": "pending_human_product_and_legal_decision",
+      "designed_primarily_for_children_under_13": false,
+      "child_directed_marketing_planned": false
+    }
   },
   "pending": {
     "12_4_billing_data_flow_frozen": false,
@@ -123,7 +149,11 @@
     "legal_surface_godot_certification_executed_on_final_ancestry": false,
     "terms_placeholders_resolved": false,
     "terms_legal_review_completed": false,
-    "store_content_rating_and_target_audience_finalized": false,
+    "content_rating_final_content_review_complete": false,
+    "target_audience_age_groups_finalized": false,
+    "target_audience_child_status_and_families_review_complete_if_applicable": false,
+    "iarc_questionnaire_completed_in_play_console": false,
+    "iarc_certificate_and_regional_ratings_archived": false,
     "play_console_data_safety_form_completed": false,
     "current_play_policy_rechecked_for_release": false,
     "play_console_policy_status_clear": false,
@@ -144,10 +174,12 @@
     "finalize product/legal_documents.json from pre_release to final with the same pt_BR + en launch scope",
     "publish final privacy/terms URLs and expose the final frozen content through the in-app legal surface",
     "execute LegalSurfaceCertification.gd on the final release ancestry",
-    "complete content-rating and target-audience declarations",
+    "review final art/audio and exact pt_BR/en corpus against all 13 rating-relevant categories without treating zero keyword hits as proof of absence",
+    "select only target-audience age groups the product was actually designed for and complete Families/child-status/privacy/purchase/marketing review if triggered",
+    "complete the IARC questionnaire in Play Console against the exact RC and archive the certificate/reference plus regional ratings",
     "complete Google Play Data Safety answers from the frozen release artifact and services",
-    "pass privacy_data_safety_gate.py --release, play_billing_local_reference_gate.py, play_billing_retention_gate.py --release, platform_compliance_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
-    "record final Data Safety, platform-policy, Terms and privacy revisions in the repository"
+    "pass content_rating_target_audience_gate.py --release, privacy_data_safety_gate.py --release, play_billing_local_reference_gate.py, play_billing_retention_gate.py --release, platform_compliance_gate.py --release and legal_surface_gate.py --release on the final release ancestry",
+    "record final Data Safety, IARC, target-audience, platform-policy, Terms and privacy revisions in the repository"
   ],
   "pass_recorded": false
 }
