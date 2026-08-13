@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.3",
   "formal_status": "in_progress",
   "audited_on": "2026-08-12",
@@ -19,10 +19,28 @@
     "health_data_access": false,
     "photos_or_files_user_import": false,
     "custom_android_permissions": [],
+    "internet_permission": true,
+    "internet_permission_purpose": "Google Play Billing and HTTPS purchase-token verification only; gameplay remains offline-first",
     "gameplay_profile_and_save_storage": "on_device_only",
     "gameplay_profile_transmitted_off_device": false,
     "canonical_game_content_transmitted_off_device": false
   },
+  "allowlisted_runtime_data_integrations": [
+    {
+      "path": "mobile/PlayPurchaseVerificationClient.gd",
+      "token": "HTTPRequest",
+      "purpose": "HTTPS purchase-token verification for Google Play Billing entitlements",
+      "data_scope": ["verification request id", "application id", "product id", "purchase token", "purchase time", "client acknowledgement state"],
+      "gameplay_data_allowed": false
+    },
+    {
+      "path": "mobile/PlayPurchaseVerificationClient.gd",
+      "token": "HTTPClient",
+      "purpose": "HTTP method enum used by the same HTTPS purchase-verification client",
+      "data_scope": ["billing verification request only"],
+      "gameplay_data_allowed": false
+    }
+  ],
   "commercial_behavior": {
     "model": "free_trial_one_time_unlock",
     "ads": false,
@@ -41,12 +59,24 @@
     ],
     "production_purchase_verification": {
       "status": "pending_12_4",
-      "recommended_architecture": "server-side purchase-token verification before authoritative entitlement grant",
+      "architecture": "app sends the minimum purchase verification envelope over HTTPS to a developer backend; backend verifies with Google Play before authoritative entitlement grant",
+      "runtime_client": "mobile/PlayPurchaseVerificationClient.gd",
+      "transport": "HTTPS POST JSON; no-store; concurrent request isolation; exact verification_request_id correlation",
       "possible_off_device_data": [
+        "verification request id",
+        "application/package id",
         "purchase token",
         "product id",
-        "purchase/entitlement status",
-        "transaction/order reference if required"
+        "purchase time",
+        "client acknowledgement state"
+      ],
+      "explicitly_excluded_from_billing_verification": [
+        "gameplay profile",
+        "save data",
+        "combat data",
+        "location",
+        "contacts",
+        "advertising identifiers"
       ],
       "data_safety_reaudit_required_after_integration": true
     }
@@ -70,6 +100,7 @@
       "developer identity and privacy contact",
       "data accessed, collected, used and shared",
       "third-party services and SDKs",
+      "Google Play purchase-token verification and backend handling",
       "secure handling",
       "retention and deletion",
       "children/age treatment if applicable",
@@ -78,8 +109,10 @@
   },
   "release_requirements": [
     "complete 12.4 billing integration and repeat technical data-flow audit",
+    "freeze the production HTTPS verification endpoint, authentication and backend retention/deletion behavior",
     "inspect final Android manifest and merged permissions from the release AAB",
     "inventory every third-party SDK in the final artifact",
+    "confirm the only application runtime network path beyond Google Play Billing is the allowlisted purchase-verification client",
     "replace privacy contact placeholder",
     "publish privacy policy on a stable public URL and expose the final version in-app",
     "finalize product/legal_documents.json from pre_release to final and synchronize its public URLs",
