@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.3",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-13",
+  "policy_baseline": {
+    "checked_on": "2026-08-13",
+    "provider": "Google Play / IARC",
+    "content_rating_required_for_google_play": true,
+    "unrated_public_release_forbidden": true,
+    "questionnaire_must_be_updated_when_rating_relevant_content_changes": true,
+    "target_audience_declaration_separate_from_iarc_rating": true,
+    "selecting_any_child_age_group_triggers_google_play_families_requirements": true,
+    "age_groups_must_reflect_who_the_app_was_designed_for_not_maximize_availability": true,
+    "ages_13_15_or_16_17_may_still_be_children_in_some_locales": true
+  },
+  "proven_product_facts": {
+    "genre": "fantasy_gamebook",
+    "sophisticated_text_and_choice_driven_narrative": true,
+    "fictional_fantasy_combat": true,
+    "monsters_and_bosses": true,
+    "tactical_damage_and_defeat_mechanics": true,
+    "advertising": false,
+    "subscriptions": false,
+    "loot_boxes": false,
+    "paid_random_rewards": false,
+    "real_money_gambling": false,
+    "user_accounts": false,
+    "user_generated_content": false,
+    "direct_user_to_user_interaction": false,
+    "location_sharing": false,
+    "social_sdk": false,
+    "commercial_products": [
+      "one-time non-consumable full-game content unlock",
+      "optional one-time non-consumable visual-only Supporter Seal"
+    ]
+  },
+  "final_content_review_required": {
+    "violence_visual_intensity": "pending_final_art_and_gameplay_review",
+    "violence_realism": "pending_final_art_and_gameplay_review",
+    "blood": "pending_final_content_review",
+    "gore_or_dismemberment": "pending_final_content_review",
+    "fear_or_horror_intensity": "pending_final_art_audio_narrative_review",
+    "profanity_or_crude_language": "pending_final_pt_BR_en_corpus_review",
+    "sexual_or_suggestive_content": "pending_final_content_review",
+    "nudity": "pending_final_content_review",
+    "alcohol_tobacco_or_drug_references": "pending_final_content_review",
+    "simulated_gambling_or_casino_mechanics": "pending_final_content_review",
+    "discriminatory_or_hateful_content": "pending_final_content_review",
+    "self_harm_or_suicide_themes": "pending_final_content_review",
+    "other_mature_themes": "pending_final_narrative_review"
+  },
+  "target_audience": {
+    "final_selected_google_play_age_groups": "PENDING_12_3_TARGET_AUDIENCE_DECISION",
+    "designed_primarily_for_children_under_13": false,
+    "child_directed_marketing_planned": false,
+    "families_policy_scope_currently_intended": false,
+    "final_decision_requires_human_product_and_legal_review": true,
+    "rule_if_any_under_13_group_selected": "stop release and perform full Google Play Families compliance review before publication",
+    "rule_if_13_15_or_16_17_selected": "re-evaluate local child-status, privacy, purchase design, marketing and content suitability before final declaration"
+  },
+  "iarc": {
+    "questionnaire_category": "game",
+    "questionnaire_completed_in_play_console": false,
+    "certificate_received": false,
+    "final_regional_ratings": {},
+    "internal_predicted_rating_used_as_release_evidence": false,
+    "rule": "Do not invent or persist a final age rating from source inspection; final ratings must come from the completed IARC questionnaire for the exact release content."
+  },
+  "evidence_dependencies": [
+    "7.3-7.5 final visual assets",
+    "7.8 final audio",
+    "7.10 audiovisual QA",
+    "11.6 final pt_BR/en linguistic corpus",
+    "11.7 final audiovisual content review",
+    "11.10 certified RC",
+    "12.5 final store imagery"
+  ],
+  "release_requirements": [
+    "review the exact final pt_BR/en narrative corpus and final art/audio for every rating-relevant category in this manifest",
+    "select only the Google Play target audience age groups the product was actually designed for",
+    "if any child age group is selected, complete the resulting Families-policy review before release",
+    "complete the IARC content rating questionnaire in Play Console honestly against the exact RC content",
+    "record the IARC certificate/reference and regional ratings without substituting an internal prediction",
+    "re-submit the questionnaire if a later update changes rating-relevant content",
+    "pass content_rating_target_audience_gate.py --release on the exact release ancestry"
+  ],
+  "pass_recorded": false
+}
