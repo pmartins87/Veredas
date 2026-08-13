@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PRESET = ROOT / "export_presets.cfg"
 IDENTITY = ROOT / "mobile" / "release_identity.json"
+BACKEND_EXCLUDE = 'exclude_filter="art/final_source/*,docs/*,tools/*,tests/*,backend/*,backend/**/*"'
 errors: list[str] = []
 
 if not PRESET.exists():
@@ -78,6 +79,12 @@ preset_names = ["Android Debug APK", "Android Play AAB (Unsigned CI Template)"]
 for name in preset_names:
     if f'name="{name}"' not in text:
         errors.append(f"missing preset {name}")
+
+if text.count(BACKEND_EXCLUDE) != 2:
+    errors.append("both Android presets must explicitly exclude backend/* and backend/**/* from the packaged artifact")
+for forbidden_include in ["include_filter=\"backend/", "include_filter=\"*backend", "include_filter=\"**/backend"]:
+    if forbidden_include in text:
+        errors.append(f"Android preset must not explicitly include backend sources: {forbidden_include}")
 
 for secret_key in ["keystore/release", "keystore/release_user", "keystore/release_password"]:
     for match in re.finditer(rf'{re.escape(secret_key)}="([^"]*)"', text):
@@ -185,7 +192,7 @@ if errors:
     sys.exit(1)
 
 print(
-    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) minSdk=%d targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; INTERNET=explicit; debug APK + arm64 Gradle AAB; no release credentials/custom sensitive permissions committed"
+    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) minSdk=%d targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; INTERNET=explicit; backend=excluded; debug APK + arm64 Gradle AAB; no release credentials/custom sensitive permissions committed"
     % (
         package_id,
         version_name,
