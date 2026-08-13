@@ -1,32 +1,38 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.5",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-13",
   "listing_source": "product/store_listing_google_play.json",
-  "gate": "tools/store_listing_gate.py",
+  "capture_manifest": "product/store_capture_manifest.json",
+  "listing_gate": "tools/store_listing_gate.py",
+  "capture_provenance_gate": "tools/store_capture_provenance_gate.py",
+  "capture_finalizer": "tools/finalize_store_capture_manifest.py",
+  "workflow": ".github/workflows/veredas-store-listing-12-5.yml",
   "launch_store_locales": ["pt-BR", "en-US"],
+  "google_play_policy_baseline_checked_on": "2026-08-13",
   "copy": {
     "pt-BR": {
       "title_chars": 16,
       "short_description_chars": 68,
-      "full_description_chars": 1245
+      "full_description_chars": 1319
     },
     "en-US": {
       "title_chars": 16,
       "short_description_chars": 59,
-      "full_description_chars": 1148
+      "full_description_chars": 1207
     },
     "limits": {
       "title": 30,
       "short_description": 80,
       "full_description": 4000
     },
-    "status": "draft_copy_persisted_within_limits_and_aligned_with_current_two-product Billing contract"
+    "status": "draft_copy_persisted_with_current_character_counts_and_aligned_with_two_product_Billing_contract"
   },
   "visual_assets": {
     "icon_512": "pending_final_art",
     "feature_graphic_1024x500": "pending_final_art",
+    "feature_graphic_alt_text": "implemented_preflight",
     "pt_BR_phone_screenshots_1080x1920": "0/6 final RC captures",
     "en_phone_screenshots_1080x1920": "0/6 final RC captures",
     "preview_video": "optional_pending_decision"
@@ -39,6 +45,25 @@
     "codex/progress",
     "accessibility/settings"
   ],
+  "implemented": {
+    "google_play_current_asset_requirement_baseline_recorded": true,
+    "six_portrait_1080x1920_screenshots_per_locale_exceed_game_recommendation_minimum": true,
+    "actual_android_rc_only_capture_policy": true,
+    "single_certified_rc_commit_required_for_all_screenshots": true,
+    "single_runtime_version_required_for_all_locales": true,
+    "screenshot_sha256_binding": true,
+    "screenshot_capture_timestamp_required": true,
+    "android_device_or_emulator_profile_required": true,
+    "release_input_fingerprint_binding_required": true,
+    "listing_capture_path_set_cross_check": true,
+    "mockups_presented_as_gameplay_forbidden": true,
+    "post_capture_gameplay_or_ui_content_edits_forbidden": true,
+    "deterministic_capture_manifest_finalizer": true,
+    "11_10_completion_content_validation": true,
+    "11_10_completion_artifact_writer_implemented": true,
+    "11_10_completion_can_only_be_emitted_after_full_freeze_workflow": true,
+    "stale_copy_character_counts_corrected": true
+  },
   "quality_contract": {
     "actual_gameplay_or_ui_only": true,
     "mockups_presented_as_gameplay_forbidden": true,
@@ -47,16 +72,29 @@
     "commercial_copy_must_match_final_12_4_product_set": true,
     "alt_text_max_chars": 140,
     "png_header_and_dimensions_checked_without_external_library": true,
-    "release_requires_11_10_completion": true,
+    "release_requires_11_10_completion_status_pass": true,
+    "release_requires_11_10_certified_against_head_full_sha": true,
     "release_requires_12_1_name_certification": true,
     "release_requires_12_4_billing_certification": true
+  },
+  "current_preflight": {
+    "listing_copy_ready": true,
+    "capture_manifest_structured": true,
+    "capture_rows": 12,
+    "capture_rows_final": 0,
+    "rc_identity": "pending_11_10",
+    "final_icon": false,
+    "final_feature_graphic": false,
+    "runner_execution": "pending_functioning_runner"
   },
   "dependencies": ["7.3", "7.4", "7.5", "7.10", "11.10", "12.1", "12.4"],
   "completion_requirements": [
     "freeze copy against the release candidate and final 12.4 Billing product set",
     "produce final original icon and feature graphic",
-    "capture six PT-BR and six en-US screenshots from the certified RC",
-    "pass store_listing_gate.py --release",
+    "obtain QA_11_10_COMPLETION.json from a fully executed green 11.10 workflow and persist the reviewed completion record",
+    "capture six PT-BR and six en-US screenshots from the same certified Android RC",
+    "bind the 12 screenshots to the exact RC commit, runtime version and release-input fingerprint with SHA-256 evidence",
+    "pass store_listing_gate.py --release and store_capture_provenance_gate.py --release",
     "human-review all listing claims and imagery for accuracy",
     "upload and visually inspect the localized listing in Play Console",
     "record exact RC capture commit and final listing revision"
