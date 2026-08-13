@@ -7,7 +7,6 @@ import importlib.metadata
 import json
 import platform
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -117,7 +116,9 @@ def main() -> int:
         direct = parse_pin_file(args.direct)
         resolved = parse_pin_file(args.resolved)
         wheels = wheel_index(args.wheel_dir)
-    except (OSError, ValueError) as exc:
+        pip_version = importlib.metadata.version("pip")
+        packaging_version = importlib.metadata.version("packaging")
+    except (OSError, ValueError, importlib.metadata.PackageNotFoundError) as exc:
         print(f"BACKEND_DEPENDENCY_EVIDENCE FAIL: {exc}")
         return 1
 
@@ -138,6 +139,7 @@ def main() -> int:
     lock_rows: list[str] = []
     errors: list[str] = []
     direct_names = set(direct)
+    resolved_keys = {(name, version) for name, (_display, version) in resolved.items()}
     for normalized_name in sorted(resolved):
         display_name, version = resolved[normalized_name]
         matches = wheels.get((normalized_name, version), [])
@@ -154,12 +156,7 @@ def main() -> int:
         except ValueError as exc:
             errors.append(str(exc))
 
-    extra_wheels = sorted(
-        path.name
-        for key, paths in wheels.items()
-        if key not in {(name, version) for name, (_display, version) in resolved.items()}
-        for path in paths
-    )
+    extra_wheels = sorted(path.name for key, paths in wheels.items() if key not in resolved_keys for path in paths)
     if extra_wheels:
         errors.append(f"wheel directory contains package(s) outside resolved set: {extra_wheels}")
 
@@ -180,10 +177,19 @@ def main() -> int:
     )
 
     sbom = {
-        "schema_version": 1,
+        "schema_version": 2,
         "document_type": "veredas_internal_software_bill_of_materials",
         "scope": "billing_backend_python_runtime",
         "generator": "tools/build_backend_dependency_evidence.py",
+        "input": {
+            "direct_requirements_path": "backend/play_purchase_verifier/requirements.txt",
+            "direct_requirements_sha256": sha256_file(args.direct),
+        },
+        "resolver": {
+            "tool": "pip",
+            "version": pip_version,
+            "packaging_library_version": packaging_version,
+        },
         "environment": {
             "python": platform.python_version(),
             "implementation": platform.python_implementation(),
@@ -199,8 +205,8 @@ def main() -> int:
     args.sbom_output.write_text(json.dumps(sbom, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(
-        "BACKEND_DEPENDENCY_EVIDENCE PASS: direct=%d resolved=%d wheels=%d hash_locked=1 sbom_components=%d"
-        % (len(direct), len(resolved), sum(len(paths) for paths in wheels.values()), len(components))
+        "BACKEND_DEPENDENCY_EVIDENCE PASS: direct=%d resolved=%d wheels=%d hash_locked=1 sbom_components=%d pip=%s"
+        % (len(direct), len(resolved), sum(len(paths) for paths in wheels.values()), len(components), pip_version)
     )
     return 0
 
