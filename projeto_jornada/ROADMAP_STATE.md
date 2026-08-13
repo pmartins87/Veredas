@@ -1,91 +1,114 @@
 # Veredas da Trama — Estado Canônico do Roadmap
 
 ## Identidade e contrato de estado
-- Título oficial de trabalho: **Veredas da Trama**.
+- Título: **Veredas da Trama**.
 - Sem referências no produto ao jogo externo usado como inspiração inicial.
 - Direção visual: livro-jogo ilustrado à mão, nanquim/grafite, papel orgânico e paletas próprias dos 12 Domínios.
-- Roadmap finito detalhado: `ROADMAP_MASTER.md`.
-- Este arquivo é o **índice canônico de status**, não deve duplicar relatórios extensos dos arquivos `*_STATE.json`/`*_COMPLETION.json`.
-- `✅` só é usado quando o gate/evidência exigido foi realmente concluído e persistido.
-- `🟡` significa implementação/preflight em andamento ou gate preparado aguardando evidência real.
-- `⏳` significa ainda não iniciado estruturalmente.
-- Preparar um gate ou uma implementação de referência **não aumenta a contagem formal**.
+- Roadmap detalhado: `ROADMAP_MASTER.md`.
+- `✅` exige gate/evidência real persistida; `🟡` é implementação/preflight/evidência pendente; `⏳` é ainda não iniciado.
+- Preparar código, workflow ou contrato **não aumenta a contagem formal**.
 
 ## Contagem formal
 **110/130 passos concluídos.**
 
 ## Escopo de lançamento
-- Idiomas: **pt_BR + en**.
-- `es_419` permanece preservado como idioma adiado e não integra os gates do release atual.
+- Idiomas: **pt_BR + en**; `es_419` preservado e adiado.
 - Android application ID: **`com.pmartins87.veredasdatrama`**.
-- Ponto final permanece **12.10: projeto/build completos, testados e prontos para jogar, divulgar e publicar**.
+- Ponto final: **12.10 — projeto/build completos, testados e prontos para jogar, divulgar e publicar**.
 
 ## Fases 0–6
 - **0.1–6.10: 10/10 ✅ em cada fase.**
 
 ## Fase 7 — Assets finais
-- 7.1 ✅
-- 7.2 ✅
-- 7.3 🟡 — 12 Domínios + 120 localidades, grandes ilustrações finais.
-- 7.4 🟡 — 36 personagens + NPCs, ilustrações finais.
-- 7.5 🟡 — 300 monstros + 60 chefes/subchefes, ilustrações finais.
-- 7.6 ✅
-- 7.7 ✅
-- 7.8 🟡 — áudio/música finais; dependência `DEP-078-AUDIO`.
-- 7.9 ✅
-- 7.10 ⏳ — QA audiovisual final; depende de 7.3–7.5 e 7.8.
+- 7.1 ✅; 7.2 ✅; 7.3 🟡; 7.4 🟡; 7.5 🟡; 7.6 ✅; 7.7 ✅; 7.8 🟡; 7.9 ✅; 7.10 ⏳.
+- 7.3–7.5: ilustrações finais de Domínios/localidades, personagens/NPCs e monstros/chefes.
+- 7.8: áudio/música finais (`DEP-078-AUDIO`).
+- 7.10 depende dos assets finais 7.3–7.5/7.8.
 
-## Fase 8
-- **8.1–8.10 ✅ — concluída.**
-
-## Fase 9
-- **9.1–9.10 ✅ — concluída.**
-
-## Fase 10 — Balanceamento e simulação
-- **10.1–10.10 ✅ — concluída e congelada.**
-- Evidência central: `BALANCE_FREEZE.json` + gates estatísticos/canônicos existentes.
-- Marcos já certificados incluem matriz de personagens, inimigos, itens/economia, narrativa, quatro dificuldades, ritmo/attrition, simulações massivas e playtests adversariais.
+## Fases 8–10
+- **8.1–8.10 ✅**.
+- **9.1–9.10 ✅**.
+- **10.1–10.10 ✅ e congelada**, com `BALANCE_FREEZE.json` e gates estatísticos/canônicos.
 
 ## Fase 11 — QA, otimização e localização
-- 11.1 ✅ — matriz ampla de regressão/integração. Referência: commit `0afd8f2`; 288 jornadas completas e cenários live certificados.
-- 11.2 ✅ — fuzzing/migração de saves. Referências `39a811c`/`7aec534`; migrações, rejeição de corrupção e compatibilidade certificadas.
-- 11.3 🟡 — performance/memória/bateria/térmica/loading. Automação/emuladores verdes; falta aparelho físico com soak >= 1.800 s. Dependência `DEP-113-PHYSICAL`.
-- 11.4 ✅ — UI responsiva/acessibilidade. Referência `c988448`; matriz de dispositivos passou.
-- 11.5 ✅ — arquitetura de localização. Fonte/fallback `pt_BR`; launch `pt_BR + en`; IDs estáveis/overlays.
-- 11.6 🟡 — QA linguístico/overflow/iconografia/terminologia. Pack inglês físico está íntegro (`part_000`–`part_009`, 133.572 caracteres Base64); `LOC-116-001` resolvido. A superfície obrigatória de UI cresceu de 119 para **131 chaves**, já preenchidas em **131/131 pt_BR + 131/131 en**, para cobrir compra/restauração, estados de Billing, Selo de Apoiador e orientação para rotas do jogo completo. Overflow e iconografia possuem modo de certificação que torna a superfície Android de Billing renderizável em Linux headless **sem iniciar loja nem rede**. Faltam execuções finais no mesmo HEAD. Estados: `LOCALIZATION_11_6_STATE.json`, `LOCALIZATION_11_6_STATUS.md`, `LOCALIZATION_11_6_PACK_CHECKPOINT.md`.
-- 11.7 🟡 — QA audiovisual real. Preflight existe, mas 38 referências de áudio final e assets associados ainda bloqueiam a certificação. Estado: `AUDIOVISUAL_11_7_STATUS.md`.
-- 11.8 ✅ — zero blocker/critical ativo no gate certificado. `QA_11_8_COMPLETION.json`; resultado persistido: `active_blocker_critical=0`. Durante o endurecimento posterior de 12.4 foi descoberto `BILL-124-001` (corrida crítica de correlação compra/restore), corrigido e registrado como **resolved**; a triagem atual continua com zero blocker/critical ativo.
-- 11.9 🟡 — soak/long sessions/suspend-resume/confiabilidade. Gate implementa 128 ciclos pause/resume + 24 restaurações tipo restart (152 reloads antes do roundtrip final). Estado: `RELIABILITY_11_9_STATE.json`. Execução real ainda pendente.
-- 11.10 🟡 — freeze de QA/RC. Gate `tools/qa_release_candidate_gate.py`, estado `QA_11_10_STATE.json`; depende de 11.3/11.6/11.7/11.9 certificados.
+- 11.1 ✅ — regressão/integração ampla; 288 jornadas completas.
+- 11.2 ✅ — fuzzing/migração/corrupção de saves.
+- 11.3 🟡 — automação/emuladores verdes; falta soak físico >=1.800 s (`DEP-113-PHYSICAL`).
+- 11.4 ✅ — responsividade/acessibilidade.
+- 11.5 ✅ — arquitetura de localização; fonte/fallback `pt_BR`, launch `pt_BR + en`.
+- 11.6 🟡 — pack inglês físico íntegro; **131/131 pt_BR + 131/131 en** na UI; faltam pack/glossário/arquitetura/linguística/overflow/iconografia/regressões no mesmo HEAD.
+- 11.7 🟡 — QA audiovisual real; faltam assets finais, incluindo 38 referências de áudio.
+- 11.8 ✅ — zero blocker/critical ativo; `BILL-124-001` descoberto depois foi corrigido e permanece resolved.
+- 11.9 🟡 — 128 pause/resume + 24 restart rounds preparados; execução real pendente.
+- 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9.
 
 ### Infraestrutura de execução
-GitHub Actions tem apresentado falhas de infraestrutura anteriores ao primeiro step (`runner_id=0`, `steps=[]`). Isso **não** vale como PASS ou FAIL do código. Não repetir runners mortos como substituto de progresso; avançar infraestrutura independente e executar gates reais quando houver executor/aparelho/assets.
+GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. O último probe de Billing 12.4 nesta ancestry repetiu exatamente esse padrão. Não gastar interações rerodando executor inexistente; usar o runner apenas quando houver indício de recuperação.
 
 ## Fase 12 — Publicação e release
-Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 estão 🟡**, com infraestrutura preparada e evidência real progressivamente pendente.
+Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 seguem 🟡**.
 
-- 12.1 🟡 — nome comercial/identidade. Candidato: **Veredas da Trama**. Estado: `RELEASE_12_1_NAME_STATE.json`. Busca pública inicial sem colisão exata relevante não equivale a clearance jurídico; INPI/WIPO/handles/domínios e decisão de marca permanecem pendentes.
-- 12.2 🟡 — package ID/versionamento/assinatura/toolchain. Estado: `RELEASE_12_2_STATE.json`; identidade em `mobile/release_identity.json`; validador `tools/validate_android_export.py`. Baseline Android explicitamente congelado em Godot 4.7.1, minSdk 24, compile/target API 36 e Build Tools 36.1.0. `INTERNET` está explícito nos dois presets Android porque a verificação de compra usa HTTPS; nenhuma permissão custom/sensível adicional integra o baseline. Os dois presets agora excluem explicitamente `backend/*`/`backend/**/*`, e o validador torna essa separação obrigatória para impedir código/configuração de servidor no APK/AAB. Faltam rechecagem de política no release, keystore real/backup seguro, secrets, Play Console, freeze de versão e artefato real.
-- 12.3 🟡 — privacidade/Data Safety/termos/requisitos de plataforma. Estado: `RELEASE_12_3_STATE.json`; contratos `product/privacy_data_safety.json` e `product/platform_compliance.json`; recurso runtime `product/legal_documents.json`; drafts `docs/PRIVACY_POLICY_DRAFT.md` e `docs/TERMS_OF_USE_DRAFT.md`; gates `tools/privacy_data_safety_gate.py`, `tools/platform_compliance_gate.py` e `tools/legal_surface_gate.py`. A via in-app **Privacidade e termos** já está implementada para pt_BR + en. A rede de runtime está fail-closed por allowlist: fora do próprio Google Play Billing, o único caminho HTTP declarado é `mobile/PlayPurchaseVerificationClient.gd`, usado exclusivamente para o envelope mínimo de verificação de compra; gameplay/save não podem integrar esse fluxo. O backend de referência de 12.4 está implementado com token bruto somente transitório, persistência por **SHA-256 do token + estado mínimo**, sem `orderId`, e sem chave de service account no app/container; a política de privacidade PT-BR/EN já descreve esse desenho. Ainda faltam deploy/backend final, política de retenção/eliminação, auditoria da persistência real, AAB final, contato/URLs públicas, congelamento jurídico, rating/público-alvo/Data Safety, execução real e verificação no Play Console.
-- 12.4 🟡 — Billing/entitlements de produção. Contrato `mobile/play_billing_contract.json`, estado `RELEASE_12_4_STATE.json`; gate composto `tools/play_billing_12_4_gate.py` exige lado cliente/runtime **e** backend. A superfície cliente está implementada: adapter Google Play, coordenador, `PlayPurchaseVerificationClient.gd` HTTPS concorrente/fail-closed, `BillingService.gd` autoload, compra/restauração no Hub e orientação de rota bloqueada. A implementação de backend de referência está em `backend/play_purchase_verifier`: consulta `ProductPurchaseV2`, valida pacote/SKU/estado/quantidade e ausência de offer/rent/preorder antes de vincular o token, persiste apenas `SHA-256(purchase_token)` + estado mínimo em Firestore, faz binding token→produto transacional, executa acknowledgement server-side e refaz a consulta antes de retornar `owned=true`. A autenticação servidor→Google é projetada por identidade de serviço anexada/ADC, sem chave no repositório/imagem; o endpoint cliente→backend não depende de segredo reutilizável embutido no APK. Há gate estático `tools/play_billing_backend_gate.py`, suíte unitária e workflow isolado `.github/workflows/veredas-play-billing-backend-12-4.yml`. Modelo comercial: desbloqueio integral não consumível + **Selo de Apoiador** opcional, também não consumível e estritamente visual. Ainda faltam execução real dos gates, addon 3.3.0 instalado, deploy HTTPS real, identidade/permissões Google Play, Firestore e rate limit reais, política final de retenção, produtos no Play Console e testes de PURCHASED/PENDING/restore/reinstall/refund/revogação/offline em track.
-- 12.5 🟡 — store listing/ASO/assets. Copy PT-BR/en-US e gate `tools/store_listing_gate.py` preparados; a copy descreve explicitamente desbloqueio integral + **Selo de Apoiador visual-only**, coerente com código, Billing e Termos. Faltam arte final, screenshots reais do RC e inspeção no Play Console. Estado `RELEASE_12_5_STATE.json`.
-- 12.6 🟡 — AAB/APK final assinado/reproduzível. Estado `RELEASE_12_6_STATE.json`, contrato `mobile/release_artifact_contract.json`, fingerprint `tools/release_input_fingerprint.py` e escopo `tools/release_input_scope_gate.py`. O fingerprint agora cobre apenas inputs reais de runtime/build; `product/commercial_model.json` e `product/legal_documents.json` são os recursos `product/` explicitamente consumidos pelo jogo, enquanto contratos/manifestos de release ficam fora para impedir auto-referência. O workflow assinado gera o manifesto de inputs **antes** do export e exige equivalência **depois** do import/export. Faltam pré-requisitos certificados, execução real do gate, artefato real, assinatura/hash/fingerprint, rebuild equivalence, inspeção do bundle e Play acceptance.
-- 12.7 🟡 — teste interno/fechado/rollout. Estado `RELEASE_12_7_STATE.json`, plano `product/play_test_rollout_plan.json`, gate `tools/play_test_rollout_gate.py`. Baseline do projeto: track interno + fechado com >=12 testers por >=14 dias contínuos; faltam evidências reais e Billing/tester feedback/production access quando aplicável.
-- 12.8 🟡 — RC final/checklist/rollback. Contrato `product/release_candidate_final_contract.json`, estado `RELEASE_12_8_STATE.json`, gate `tools/release_candidate_final_gate.py`, workflow `Veredas Final Release Candidate 12.8`. Exige 11.10 + 12.1–12.7 certificados, mesma identidade de artefato, zero blockers, dry run e go/no-go. Primeira publicação usa hotfix de versionCode maior; updates podem usar rollout 10/25/50/100; nunca downgrade.
-- 12.9 🟡 — documentação/continuidade/suporte/proveniência. Estado `RELEASE_12_9_STATE.json`; contrato `product/continuity_support_contract.json`; proveniência `product/release_provenance.json`; manifesto canônico `product/release_archive_manifest.json`; runbook `docs/CONTINUITY_AND_SUPPORT.md`; gates `tools/provenance_license_gate.py`, `tools/release_archive_gate.py`, `tools/release_input_scope_gate.py` e `tools/continuity_support_gate.py`. A árvore atual contém **4 SVGs** de UI sob controle de proveniência, cada um vinculado ao blob Git exato e ainda com revisão final de direitos deliberadamente pendente. Os **7 componentes de software conhecidos** já têm licença identificada em fonte primária (Godot/plugin MIT; Flask BSD-3-Clause; google-auth/Firestore/Requests Apache-2.0; Gunicorn MIT), mas revisão final/notices continuam pendentes. O arquivo final exige 11 itens hashados e identidade coerente com 12.6/12.8. Ainda faltam 12.8 certificado, tag/artefato real, owners/canais/recovery drills, revisão final de direitos dos assets, lock transitivo hashado do backend, SBOM, inventário Gradle final, notices/licenças, termos de serviços externos e handoff.
-- 12.10 🟡 — **FINAL**. Contrato `product/final_release_contract.json`, estado `RELEASE_12_10_STATE.json`, gate `tools/final_release_gate.py`, workflow `Veredas Final Release 12.10`. Só pode PASS quando 12.8/12.9 passarem, tag/commit/version/AAB/signing/archive coincidirem, final smoke/store/privacy/Billing/support/rollback estiverem prontos e as três afirmações `ready_to_play`, `ready_to_promote`, `ready_to_publish` forem verdadeiras com decisão final `go`.
+### 12.1 🟡 — nome/identidade
+Candidato **Veredas da Trama**. Busca pública inicial não é clearance jurídico. INPI/WIPO, domínios/handles e decisão final de marca seguem pendentes.
 
-## Blockers/dependências reais ainda abertas
-1. **Aparelho físico** para 11.3 e evidência operacional associada.
-2. **Execução real dos gates** de 11.6/11.9 e freeze 11.10 quando houver executor funcional.
-3. **Assets finais de arte e áudio**, necessários para 7.3–7.5/7.8/7.10, 11.7 e store assets. Qualquer novo arquivo visual/áudio/fonte versionado passa agora pelo gate de proveniência de 12.9.
-4. **Contas/infra de publicação reais**: Play Console, assinatura/backup, addon Billing; para o backend de Billing faltam deploy HTTPS, identidade de serviço/permissões da Play Developer API, Firestore, rate limit e política final de retenção/eliminação. A implementação cliente + backend de referência já existe e não é mais um blocker de construção.
-5. **Test track real** de 12.7 e evidência do AAB exato, incluindo compra, restore, refund/revogação, reinstalação e comportamento offline dos entitlements.
-6. **Continuidade/reprodutibilidade finais**: lock transitivo hashado/SBOM do backend, inventário Gradle final, notices de terceiros, revisão de direitos/proveniência dos assets, arquivo final hashado, recuperação/backup/handoff e owners/canais reais.
-7. **Due diligence final do nome**, política/loja e documentação pública.
+### 12.2 🟡 — package/versionamento/assinatura/toolchain
+- Godot 4.7.1; minSdk 24; compile/target API 36; Build Tools 36.1.0.
+- `INTERNET` explícito e backend excluído dos dois presets Android.
+- Faltam keystore/backup, secrets, Play Console, freeze de versão e artefato assinado real.
 
-## Próxima regra de avanço
-- Não voltar a diagnosticar blockers já conhecidos a cada interação.
-- Avançar primeiro qualquer trabalho independente ainda executável.
-- Quando só restarem dependências externas, registrar explicitamente qual evidência externa desbloqueia qual gate.
-- Nunca aumentar 110/130 por preflight; só por `PASS` real persistido.
+### 12.3 🟡 — privacidade, Data Safety, termos e plataforma
+- Runtime legal PT-BR/en e drafts bilíngues implementados.
+- Gameplay/save permanecem offline-first; caminho HTTP de aplicação allowlisted apenas para verificação de Billing.
+- Token bruto de compra é transitório; local/backend persistem referência/hash SHA-256 + estado mínimo; `orderId` não é persistido.
+- **Política de retenção do backend agora está congelada em código e contratos:** `expires_at` + Firestore TTL; 730 dias para compra real PURCHASED/owned, 30 dias para bound/PENDING/CANCELLED/non-owned e 7 dias para compra de teste, sempre desde a última atividade legítima.
+- Expiração do cache não é prova de entitlement; recriação exige nova verificação autoritativa Google Play.
+- `tools/play_billing_retention_gate.py` valida código/contrato; `tools/privacy_retention_consistency_gate.py` cruza backend ↔ privacy manifest ↔ política PT/EN ↔ texto legal in-app.
+- Permanecem pendentes: deploy real, habilitar/verificar TTL no Firestore, auditoria da persistência real/AAB, contato/URLs, revisão legal final, rating/público-alvo, Data Safety, políticas e Play Console.
+
+### 12.4 🟡 — Billing/entitlements de produção
+- Cliente/runtime e backend de referência implementados fail-closed.
+- ProductPurchaseV2, validação de pacote/produto/estado/quantidade/opção, ausência de offer/rent/preorder, binding token→produto, estado monotônico, acknowledgement+refetch, ADC e persistência mínima já estão implementados.
+- Retenção finita 730/30/7 está implementada em `retention_policy.py`, aplicada transacionalmente em Firestore e integrada ao gate combinado 12.4.
+- Permanecem: addon 3.3.0 real, produtos Play, backend HTTPS, identidade/Play API, Firestore+TTL, rate limit, execução de testes/gates e cenários reais PURCHASED/PENDING/restore/reinstall/refund/revogação/offline.
+
+### 12.5 🟡 — store listing/ASO/assets
+Copy PT-BR/en-US pronta e coerente com desbloqueio integral + Selo de Apoiador visual-only. Faltam arte final, screenshots reais do RC e Play Console.
+
+### 12.6 🟡 — AAB/APK final assinado/reproduzível
+- Fingerprint de inputs é acíclico: só recursos runtime reais entram; evidência de release fica fora.
+- Workflow exige equivalência pre/post export.
+- Inventário Android final é extraído do `releaseRuntimeClasspath` no mesmo Gradle do AAB, com SHA-256 de AAR/JAR/local e cross-check da versão Billing.
+- Faltam pré-requisitos certificados, addon/template Gradle real, AAB assinado, inventário persistido, rebuild equivalence e Play acceptance.
+
+### 12.7 🟡 — teste interno/fechado
+Baseline: interno + fechado, >=12 testers por >=14 dias contínuos. Evidência real pendente.
+
+### 12.8 🟡 — RC final/go-no-go/rollback
+Exige 11.10 + 12.1–12.7 certificados, mesma identidade de artefato, zero blockers, dry run e decisão go/no-go.
+
+### 12.9 🟡 — continuidade/suporte/proveniência/licenças
+- 4 SVGs atuais têm blob Git + commit de introdução; revisão final de direitos pendente.
+- 7 componentes conhecidos têm licença identificada em fonte primária; review/notices finais pendentes.
+- Backend: pipeline de lock/SBOM resolve em Python 3.12/Linux **sem instalar tooling de evidência no venv runtime**; lê `METADATA` dos wheels com stdlib `zipfile/email`, gera hashes e prova reinstall offline com `--require-hashes`, `pip check`, freeze idêntico e imports.
+- Android: inventário final captura `releaseRuntimeClasspath` do mesmo build assinado.
+- `third_party_notices.json` é evidência separada do SBOM e precisa cobrir cada componente final backend/Android.
+- O arquivo canônico `product/release_archive_manifest.json` exige **12 itens obrigatórios hashados**, incluindo notices de terceiros.
+- Faltam runner para lock/SBOM, Gradle/addon final para inventário Android, revisão de direitos/licenças, notices completos, tag/AAB/identidade, owners/canais, backups/recovery drills, termos de serviços externos e handoff.
+
+### 12.10 🟡 — FINAL
+Somente PASS quando 12.8/12.9 e toda identidade tag/commit/version/AAB/signing/archive/smoke/store/privacy/Billing/support/rollback coincidirem, com `ready_to_play`, `ready_to_promote`, `ready_to_publish` verdadeiros e decisão `go`.
+
+## Blockers/dependências reais
+1. Aparelho físico para 11.3.
+2. Executor funcional para gates reais 11.6/11.9/11.10 e suítes 12.x.
+3. Assets finais de arte/áudio para Fase 7, 11.7 e store assets.
+4. Play Console, assinatura, addon Billing e AAB real.
+5. Backend de produção: endpoint HTTPS, identidade/Play API, Firestore, **TTL `expires_at` habilitado/verificado**, rate limit e auditoria real.
+6. Test track real 12.7.
+7. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
+8. Due diligence final do nome e documentação pública/legal.
+
+## Regra de avanço
+- Não repetir diagnóstico de blocker conhecido sem nova evidência.
+- Avançar qualquer trabalho independente que reduza risco de release.
+- Nunca aumentar **110/130** por preflight; somente por PASS real persistido.
