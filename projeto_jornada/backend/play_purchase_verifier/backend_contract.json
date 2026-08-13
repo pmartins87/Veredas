@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.4",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "implementation": {
+    "runtime": "python_3_12",
+    "http_framework": "Flask",
+    "reference_deployment": "Google Cloud Run",
+    "entrypoint": "app:app",
+    "container_runs_as_root": false,
+    "endpoint_path": "/v1/play/verify",
+    "health_path": "/healthz",
+    "maximum_request_body_bytes": 16384
+  },
+  "authentication_model": {
+    "client_to_backend": "public_https_no_reusable_client_secret",
+    "client_secret_embedded_in_app": false,
+    "rationale": "A native APK cannot safely retain a reusable backend secret. Authorization to an entitlement is therefore never inferred from possession of a client credential; the backend validates the unguessable Play purchase token against Google and the exact package/product contract.",
+    "backend_to_google": "attached_service_account_via_application_default_credentials",
+    "google_oauth_scope": "https://www.googleapis.com/auth/androidpublisher",
+    "service_account_key_file_in_repository_or_image": false,
+    "service_account_must_be_dedicated": true,
+    "least_privilege_play_console_access_required": true
+  },
+  "play_api": {
+    "verification": "GET /androidpublisher/v3/applications/{packageName}/purchases/productsv2/tokens/{token}",
+    "acknowledgement": "POST /androidpublisher/v3/applications/{packageName}/purchases/products/{productId}/tokens/{token}:acknowledge",
+    "verification_resource": "ProductPurchaseV2",
+    "grant_only_when_purchase_state": "PURCHASED",
+    "grant_only_when_acknowledgement_state": "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED"
+  },
+  "persistence": {
+    "reference_store": "Google Cloud Firestore",
+    "collection": "play_purchase_tokens_v1",
+    "deduplication_document_id": "sha256(purchase_token)",
+    "raw_purchase_token_persisted": false,
+    "order_id_persisted": false,
+    "minimum_fields": [
+      "package_name",
+      "product_id",
+      "purchase_state",
+      "acknowledgement_state",
+      "owned",
+      "processing_stage",
+      "purchase_completion_time",
+      "test_purchase",
+      "timestamps"
+    ],
+    "token_product_binding_transactional": true,
+    "retention_and_deletion_policy": "PENDING_12_3_12_4_RETENTION_POLICY"
+  },
+  "abuse_and_data_minimization": {
+    "request_body_logged_by_application": false,
+    "purchase_token_logged_by_application": false,
+    "cors_enabled": false,
+    "cache_control": "no-store",
+    "strict_package_allowlist": ["com.pmartins87.veredasdatrama"],
+    "strict_product_allowlist": ["full_game_unlock", "supporter_cosmetic_pack"],
+    "edge_or_platform_rate_limiting_required_before_production": true,
+    "rate_limit_configuration": "PENDING_12_4_RATE_LIMIT_CONFIGURATION",
+    "play_integrity_attestation_required_at_launch": false,
+    "play_integrity_note": "Not required by the current launch contract; reconsider if abuse telemetry shows public verification endpoint quota/cost pressure. Do not add an attestation SDK silently because it changes privacy/Data Safety scope."
+  },
+  "deployment": {
+    "endpoint": "PENDING_12_4_BACKEND_ENDPOINT",
+    "cloud_project": "PENDING_12_4_CLOUD_PROJECT",
+    "region": "PENDING_12_4_CLOUD_REGION",
+    "service_account": "PENDING_12_4_SERVICE_ACCOUNT",
+    "firestore_database": "PENDING_12_4_FIRESTORE_DATABASE",
+    "android_publisher_api_enabled": false,
+    "play_console_service_account_access_configured": false,
+    "firestore_access_configured": false,
+    "public_https_ingress_configured": false,
+    "rate_limit_configured": false,
+    "deployed": false
+  },
+  "release_requirements": [
+    "deploy the exact reviewed container revision without embedding service-account keys",
+    "attach a dedicated service account and grant only the Google Play/Firestore permissions needed by this service",
+    "enable Google Play Android Developer API and authorize the service identity for the application",
+    "create/configure Firestore and prove transactional token-to-product binding under concurrent requests",
+    "freeze a public HTTPS endpoint and production abuse/rate-limit controls",
+    "freeze purchase-record retention/deletion with 12.3 privacy policy and Data Safety",
+    "run unit tests and static backend gate on the exact deployment commit",
+    "exercise PURCHASED, PENDING, cancelled, restored, refunded/revoked, duplicate and concurrent acknowledgement cases against Play test tracks",
+    "persist deployment revision, endpoint, service identity fingerprint/non-secret identifier and evidence without committing credentials"
+  ],
+  "pass_recorded": false
+}
