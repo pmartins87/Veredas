@@ -210,7 +210,11 @@ func _start() -> void:
     }
     var check := setup_engine.validate(setup)
     if not bool(check.get("ok", false)):
-        status_label.text = localization.text("journey_setup.invalid") % ", ".join(check.get("errors", []))
+        var errors: Array = check.get("errors", []) as Array
+        if "entitlement_required" in errors:
+            status_label.text = localization.text("journey_setup.entitlement_required")
+        else:
+            status_label.text = localization.text("journey_setup.invalid") % ", ".join(errors)
         return
     if not setup_engine.start(setup):
         status_label.text = localization.text("journey_setup.start_failed")
