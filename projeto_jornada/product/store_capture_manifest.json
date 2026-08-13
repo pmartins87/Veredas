@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.5",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-13",
+  "source_listing": "product/store_listing_google_play.json",
+  "source_rc_completion": "QA_11_10_COMPLETION.json",
+  "policy": {
+    "actual_release_candidate_runtime_only": true,
+    "single_rc_commit_for_all_locales": true,
+    "single_runtime_version_for_all_locales": true,
+    "mockups_presented_as_gameplay_forbidden": true,
+    "post_capture_gameplay_or_ui_content_edits_forbidden": true,
+    "allowed_post_capture_edits": [
+      "lossless metadata stripping",
+      "notification/status-bar sanitation that does not alter game UI",
+      "lossless crop only when final dimensions remain exactly 1080x1920"
+    ],
+    "capture_platform": "Android",
+    "required_store_locales": ["pt-BR", "en-US"],
+    "required_per_locale": 6,
+    "width": 1080,
+    "height": 1920,
+    "orientation": "portrait_9_16",
+    "format": "PNG",
+    "png_color_type": 2,
+    "alpha_allowed": false,
+    "sha256_required": true,
+    "captured_at_utc_required": true,
+    "device_or_emulator_profile_required": true,
+    "release_input_fingerprint_required": true
+  },
+  "rc_identity": {
+    "commit_sha": "PENDING_12_5_RC_COMMIT_SHA",
+    "version_name": "PENDING_12_5_RC_VERSION_NAME",
+    "version_code": 0,
+    "release_input_fingerprint_sha256": "PENDING_12_5_RELEASE_INPUT_FINGERPRINT"
+  },
+  "capture_environment": {
+    "device_or_emulator_profile": "PENDING_12_5_CAPTURE_DEVICE_OR_EMULATOR",
+    "android_version": "PENDING_12_5_ANDROID_VERSION",
+    "capture_method": "PENDING_12_5_CAPTURE_METHOD",
+    "notes": "Final rows must describe the real Android RC capture environment. Do not substitute generated mockups or desktop-only scene renders for store gameplay screenshots."
+  },
+  "screenshots": [
+    {"locale":"pt-BR","slot":1,"scene_id":"hub","listing_path":"store/google_play/pt-BR/01_hub.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"pt-BR","slot":2,"scene_id":"story_choice","listing_path":"store/google_play/pt-BR/02_story_choice.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"pt-BR","slot":3,"scene_id":"combat","listing_path":"store/google_play/pt-BR/03_combat.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"pt-BR","slot":4,"scene_id":"domain","listing_path":"store/google_play/pt-BR/04_domain.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"pt-BR","slot":5,"scene_id":"codex","listing_path":"store/google_play/pt-BR/05_codex.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"pt-BR","slot":6,"scene_id":"accessibility","listing_path":"store/google_play/pt-BR/06_accessibility.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":1,"scene_id":"hub","listing_path":"store/google_play/en-US/01_hub.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":2,"scene_id":"story_choice","listing_path":"store/google_play/en-US/02_story_choice.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":3,"scene_id":"combat","listing_path":"store/google_play/en-US/03_combat.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":4,"scene_id":"domain","listing_path":"store/google_play/en-US/04_domain.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":5,"scene_id":"codex","listing_path":"store/google_play/en-US/05_codex.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""},
+    {"locale":"en-US","slot":6,"scene_id":"accessibility","listing_path":"store/google_play/en-US/06_accessibility.png","status":"pending_rc_capture","captured_at_utc":"","sha256":""}
+  ],
+  "completion_requirements": [
+    "QA_11_10_COMPLETION.json exists with roadmap_step 11.10, status pass and a certified_against_head commit",
+    "rc_identity.commit_sha exactly equals the certified 11.10 RC commit",
+    "all twelve rows belong to the same RC commit/version/fingerprint and real Android capture environment",
+    "every listing screenshot path appears exactly once in this manifest and every manifest path appears in the listing",
+    "every screenshot exists as 1080x1920 24-bit RGB PNG without alpha and matches its recorded SHA-256",
+    "all rows are final_rc_capture and include a UTC capture timestamp",
+    "store_capture_provenance_gate.py --release passes on the exact release ancestry"
+  ],
+  "pass_recorded": false
+}
