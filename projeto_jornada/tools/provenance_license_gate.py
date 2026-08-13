@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "product" / "release_provenance.json"
 BACKEND_REQUIREMENTS = ROOT / "backend" / "play_purchase_verifier" / "requirements.txt"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 RELEASE_ONLY_EVIDENCE = [
     ROOT / "backend" / "play_purchase_verifier" / "requirements.lock",
     ROOT / "product" / "software_sbom.json",
@@ -86,7 +87,7 @@ def main() -> int:
         print(f"PROVENANCE_LICENSE FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 2 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 3 or contract.get("roadmap_step") != "12.9":
         errors.append("release provenance contract schema/roadmap_step invalid")
 
     assets = contract.get("asset_provenance", {})
@@ -166,6 +167,12 @@ def main() -> int:
             errors.append(f"software component id missing/duplicate: {component_id!r}")
             continue
         component_map[key] = row
+        if unresolved(row.get("license_id")):
+            errors.append(f"software license id is not identified from primary source: {component_id}")
+        if row.get("license_identified_from_primary_source") is not True:
+            errors.append(f"software primary-source license identification missing: {component_id}")
+        if unresolved(row.get("license_source_record")):
+            errors.append(f"software license source record missing: {component_id}")
 
     try:
         direct_requirements = parse_requirements()
@@ -179,6 +186,9 @@ def main() -> int:
             continue
         if str(row.get("version", "")) != version:
             errors.append(f"software inventory version mismatch: {name} requirements={version} inventory={row.get('version')}")
+        wheel_sha = str(row.get("primary_wheel_sha256", "")).lower()
+        if not SHA256_RE.fullmatch(wheel_sha):
+            errors.append(f"backend direct dependency primary wheel SHA-256 missing/invalid: {name}=={version}")
     for required_id in ("godot-engine", "godotgoogleplaybilling"):
         if required_id not in component_map:
             errors.append(f"required release software component missing: {required_id}")
@@ -194,8 +204,6 @@ def main() -> int:
             component_id = str(row.get("id", ""))
             if row.get("reviewed") is not True:
                 errors.append(f"software license/source review incomplete: {component_id}")
-            if unresolved(row.get("license_id")):
-                errors.append(f"software license id unresolved: {component_id}")
             if unresolved(row.get("license_notice_archive")):
                 errors.append(f"software license notice archive unresolved: {component_id}")
         if software.get("backend_transitive_lock_status") != "complete_hash_locked_dependency_set":
@@ -227,12 +235,9 @@ def main() -> int:
         if contract.get("formal_status") != "certified" or contract.get("pass_recorded") is not True:
             errors.append("release provenance contract is not certified")
     else:
-        unresolved_licenses = sum(
-            1 for row in components
-            if isinstance(row, dict) and (row.get("reviewed") is not True or unresolved(row.get("license_id")))
-        )
-        if unresolved_licenses:
-            warnings.append(f"{unresolved_licenses} software component license/source review(s) pending")
+        pending_reviews = sum(1 for row in components if isinstance(row, dict) and row.get("reviewed") is not True)
+        if pending_reviews:
+            warnings.append(f"{pending_reviews} software component final review/notice archive(s) pending")
         if software.get("backend_transitive_lock_status") != "complete_hash_locked_dependency_set":
             warnings.append("backend transitive hash lock is still pending")
         if software.get("android_final_dependency_inventory_status") != "final_gradle_dependency_report_archived":
@@ -242,13 +247,16 @@ def main() -> int:
             warnings.append(f"{pending_rights} asset rights review(s) pending before release eligibility")
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "discovered_asset_count": len(discovered),
         "declared_asset_count": len(declared_paths),
         "direct_backend_dependency_count": len(direct_requirements),
         "known_software_component_count": len(component_map),
+        "primary_source_license_identifications": sum(
+            1 for row in components if isinstance(row, dict) and row.get("license_identified_from_primary_source") is True
+        ),
         "known_external_service_count": len(known_services),
         "errors": errors,
         "warnings": warnings,
@@ -264,8 +272,15 @@ def main() -> int:
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PROVENANCE_LICENSE %s PASS: assets=%d dependencies=%d services=%d warnings=%d blob_binding=1"
-        % (mode, len(discovered), len(component_map), len(known_services), len(warnings))
+        "PROVENANCE_LICENSE %s PASS: assets=%d dependencies=%d primary_licenses=%d services=%d warnings=%d blob_binding=1"
+        % (
+            mode,
+            len(discovered),
+            len(component_map),
+            report["primary_source_license_identifications"],
+            len(known_services),
+            len(warnings),
+        )
     )
     for warning in warnings:
         print("WARNING:", warning)
