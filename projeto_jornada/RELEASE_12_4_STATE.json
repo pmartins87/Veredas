@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.4",
   "formal_status": "in_progress",
   "updated_on": "2026-08-12",
@@ -10,17 +10,26 @@
     "store_adapter": "mobile/GooglePlayBillingStoreAdapter.gd",
     "billing_contract": "mobile/play_billing_contract.json",
     "release_gate": "tools/play_billing_release_gate.py",
-    "logic_certification": "tests/play_billing_coordinator_certification.tscn"
+    "logic_certification": "tests/play_billing_coordinator_certification.tscn",
+    "correlation_certification": "tests/play_billing_correlation_certification.tscn"
   },
   "implemented": {
     "plugin_version_pinned": "3.3.0",
     "billing_library_documented_by_plugin_release": "9.1.0",
     "async_store_boundary": true,
     "no_static_BillingClient_dependency_before_addon_install": true,
+    "billing_plugin_query_type_aligned": true,
+    "disconnect_reinitialization_path": true,
     "pending_purchase_never_grants": true,
     "backend_verification_required_before_new_grant": true,
+    "products_v2_server_verification_baseline": true,
+    "verification_request_id_correlation": true,
+    "overlap_purchase_restore_same_token_isolated": true,
+    "stale_restore_response_generation_isolated": true,
     "purchase_token_deduplication_contract": true,
     "backend_acknowledgement_required": true,
+    "single_deterministic_buy_option_per_launch_product": true,
+    "launch_offers_rent_preorder_bundles_disabled": true,
     "authoritative_restore_waits_for_all_verifications": true,
     "partial_restore_verification_failure_preserves_cache": true,
     "wrong_application_package_fails_closed": true,
@@ -30,31 +39,46 @@
   "logic_test_status": {
     "implemented": true,
     "executed_on_current_head": false,
-    "reason": "GitHub Actions runner availability remains external; no PASS is inferred from unexecuted test code",
-    "expected_success_marker": "PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4"
+    "reason": "GitHub Actions jobs still terminate before any step with runner_id=0; no PASS is inferred from unexecuted Godot test code",
+    "expected_success_markers": [
+      "PLAY_BILLING_COORDINATOR_CERTIFICATION PASS: 12.4",
+      "PLAY_BILLING_CORRELATION_CERTIFICATION PASS: 12.4"
+    ],
+    "adversarial_cases_added": [
+      "overlapping purchase and restore for the same purchase_token maintain distinct verification requests",
+      "purchase-context response cannot complete or consume restore-context verification",
+      "stale response from a retired restore generation cannot satisfy the current restore",
+      "authoritative snapshot is applied only after the current restore generation verifies"
+    ]
   },
   "production_dependencies": {
     "plugin_addon_installed": false,
     "play_console_products_configured": false,
+    "play_console_single_buy_options_verified": false,
     "secure_verification_backend_deployed": false,
     "backend_endpoint_frozen": false,
     "backend_authentication_frozen": false,
     "google_play_developer_api_credentials_configured_server_side": false,
+    "products_v2_response_validation_implemented_server_side": false,
+    "server_side_acknowledgement_implemented": false,
     "real_purchase_tested": false,
     "pending_purchase_tested": false,
+    "concurrent_purchase_restore_tested": false,
     "restore_after_reinstall_tested": false,
     "refund_or_revocation_tested": false,
     "offline_verified_cache_tested_on_device": false,
     "post_billing_privacy_data_safety_reaudit_complete": false
   },
   "completion_requirements": [
-    "vendor/enable the exact pinned GodotGooglePlayBilling release",
-    "execute coordinator certification with real Godot parser/runtime",
-    "configure full_game_unlock and supporter_cosmetic_pack as one-time non-consumables in Play Console",
-    "deploy secure backend purchaseToken verification using Google Play Developer API",
+    "vendor/enable the exact pinned GodotGooglePlayBilling 3.3.0 release and confirm the shipped Billing Library 9.1.0 integration",
+    "execute coordinator and async-correlation certifications with real Godot parser/runtime on the same candidate HEAD",
+    "configure full_game_unlock and supporter_cosmetic_pack as one-time non-consumables with one deterministic launch buy option each and no launch offers/rent/preorder/bundle",
+    "deploy secure backend purchaseToken verification using purchases.productsv2.getproductpurchasev2",
+    "validate package, PURCHASED state, expected product line item and quantity before grant",
     "freeze backend authentication and HTTPS endpoint without embedding a reusable server secret in the app",
-    "acknowledge verified non-consumables and prove duplicate-token protection",
-    "test PURCHASED, PENDING, canceled, restored, refunded/revoked and temporary-offline paths on Play test track",
+    "persist/deduplicate purchase tokens idempotently, acknowledge verified non-consumables server-side and return only after acknowledgement is confirmed",
+    "echo the exact verification_request_id and prove stale/out-of-order responses cannot satisfy a different client request",
+    "test PURCHASED, PENDING, canceled, overlapping purchase/restore, restored, refunded/revoked and temporary-offline paths on Play test track",
     "repeat and freeze 12.3 privacy/Data Safety declarations after final SDK/network behavior",
     "persist a 12.4 completion artifact with exact tested build and commit"
   ],
