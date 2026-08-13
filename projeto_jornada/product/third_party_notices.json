@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-12",
+  "coverage_sources": {
+    "known_software": "product/release_provenance.json",
+    "backend_runtime_sbom": "product/software_sbom.json",
+    "android_runtime_inventory": "product/android_dependency_inventory.json"
+  },
+  "policy": {
+    "every_final_runtime_or_redistributed_component_must_be_covered": true,
+    "license_identification_is_not_final_review": true,
+    "archived_files_must_be_versioned_and_sha256_bound": true,
+    "license_or_notice_obligations_must_not_be_inferred_from_package_name_only": true,
+    "final_notice_bundle_must_match_exact_release_dependency_inventories": true
+  },
+  "components": [
+    {
+      "component_key": "source:godot-engine@4.7.1",
+      "provenance_id": "godot-engine",
+      "name": "Godot Engine",
+      "version": "4.7.1",
+      "scope": "android_engine_runtime_and_build",
+      "license_id": "MIT",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "source:godot-google-play-billing@3.3.0",
+      "provenance_id": "GodotGooglePlayBilling",
+      "name": "GodotGooglePlayBilling",
+      "version": "3.3.0",
+      "scope": "android_billing_plugin",
+      "license_id": "MIT",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "pypi:flask@3.1.3",
+      "provenance_id": "Flask",
+      "name": "Flask",
+      "version": "3.1.3",
+      "scope": "backend_runtime_direct",
+      "license_id": "BSD-3-Clause",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "pypi:google-auth@2.56.3",
+      "provenance_id": "google-auth",
+      "name": "google-auth",
+      "version": "2.56.3",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "pypi:google-cloud-firestore@2.28.0",
+      "provenance_id": "google-cloud-firestore",
+      "name": "google-cloud-firestore",
+      "version": "2.28.0",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "pypi:gunicorn@26.0.0",
+      "provenance_id": "gunicorn",
+      "name": "gunicorn",
+      "version": "26.0.0",
+      "scope": "backend_runtime_direct",
+      "license_id": "MIT",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    },
+    {
+      "component_key": "pypi:requests@2.34.2",
+      "provenance_id": "requests",
+      "name": "requests",
+      "version": "2.34.2",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [],
+      "coverage_status": "license_identified_not_archived"
+    }
+  ],
+  "backend_transitive_coverage": {
+    "status": "pending_final_sbom",
+    "missing_component_count": null
+  },
+  "android_dependency_coverage": {
+    "status": "pending_final_gradle_inventory",
+    "missing_component_count": null
+  },
+  "finalized": false,
+  "completion_requirements": [
+    "known component rows match release_provenance id/version/license identifiers",
+    "every component in the final backend SBOM has a corresponding notice row",
+    "every third-party component in the final Android dependency inventory has a corresponding notice row",
+    "every final row has reviewed=true and one or more archived license/notice files when applicable",
+    "every archived file exists and matches its recorded SHA-256",
+    "coverage statuses are complete and this manifest is finalized",
+    "tools/third_party_notices_gate.py --release passes on the exact release ancestry"
+  ],
+  "pass_recorded": false
+}
