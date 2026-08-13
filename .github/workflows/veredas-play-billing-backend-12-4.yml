@@ -8,12 +8,17 @@ on:
       - 'projeto_jornada/backend/play_purchase_verifier/**'
       - 'projeto_jornada/mobile/play_billing_contract.json'
       - 'projeto_jornada/mobile/PlayPurchaseVerificationClient.gd'
+      - 'projeto_jornada/product/privacy_data_safety.json'
+      - 'projeto_jornada/product/legal_documents.json'
+      - 'projeto_jornada/docs/PRIVACY_POLICY_DRAFT.md'
+      - 'projeto_jornada/RELEASE_12_3_STATE.json'
       - 'projeto_jornada/RELEASE_12_4_STATE.json'
       - 'projeto_jornada/export_presets.cfg'
       - 'projeto_jornada/tools/play_billing_backend_gate.py'
       - 'projeto_jornada/tools/play_billing_timeout_budget_gate.py'
       - 'projeto_jornada/tools/play_billing_local_reference_gate.py'
       - 'projeto_jornada/tools/play_billing_retention_gate.py'
+      - 'projeto_jornada/tools/privacy_retention_consistency_gate.py'
       - 'projeto_jornada/tools/play_billing_12_4_gate.py'
       - '.github/workflows/veredas-play-billing-backend-12-4.yml'
   workflow_dispatch:
@@ -34,11 +39,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Static backend, retention and cross-layer timeout gates
+      - name: Static backend, retention, privacy-consistency and timeout gates
         working-directory: projeto_jornada
         run: |
           python tools/play_billing_backend_gate.py
           python tools/play_billing_retention_gate.py
+          python tools/privacy_retention_consistency_gate.py
           python tools/play_billing_timeout_budget_gate.py
       - name: Compile backend sources
         working-directory: projeto_jornada/backend/play_purchase_verifier
