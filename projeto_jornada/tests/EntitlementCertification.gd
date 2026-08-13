@@ -42,6 +42,7 @@ func _ready() -> void:
     _offline_cache_gate()
     _authoritative_revocation_gate()
     _purchase_gate()
+    _local_reference_minimization_gate()
     _save_load_gate()
     _power_neutrality_gate()
     _finish()
@@ -91,6 +92,29 @@ func _purchase_gate() -> void:
     expect(bool(supporter_purchase.get("ok", false)), "9.8 supporter purchase result failed")
     expect(entitlements.has_supporter_cosmetics(), "9.8 successful supporter purchase did not grant cosmetic entitlement")
 
+func _local_reference_minimization_gate() -> void:
+    var state: Dictionary = GameState.profile.get("entitlements", {}) as Dictionary
+    expect(int(state.get("schema_version", 0)) == 2, "12.4 entitlement cache schema did not migrate to hashed references")
+    var grants: Dictionary = state.get("grants", {}) as Dictionary
+    for product_id in ["full_game_unlock", "supporter_cosmetic_pack"]:
+        var record: Dictionary = grants.get(product_id, {}) as Dictionary
+        var reference := str(record.get("transaction_id", ""))
+        expect(PurchaseReference.is_reference(reference), "12.4 local entitlement reference is not canonical SHA-256: %s" % product_id)
+        expect("tx-" not in reference and "restore-" not in reference, "12.4 raw provider transaction id leaked into local entitlement cache: %s" % product_id)
+
+    var legacy_record: Dictionary = (grants.get("full_game_unlock", {}) as Dictionary).duplicate(true)
+    legacy_record.transaction_id = "legacy-sensitive-purchase-token"
+    grants.full_game_unlock = legacy_record
+    state.grants = grants
+    GameState.profile.entitlements = state
+    entitlements.ensure_state()
+    var migrated_state: Dictionary = GameState.profile.get("entitlements", {}) as Dictionary
+    var migrated_grants: Dictionary = migrated_state.get("grants", {}) as Dictionary
+    var migrated_record: Dictionary = migrated_grants.get("full_game_unlock", {}) as Dictionary
+    var migrated := str(migrated_record.get("transaction_id", ""))
+    expect(PurchaseReference.is_reference(migrated), "12.4 legacy raw entitlement reference was not migrated")
+    expect("legacy-sensitive-purchase-token" not in migrated, "12.4 legacy raw token remained in entitlement profile after migration")
+
 func _save_load_gate() -> void:
     var before := entitlements.summary().duplicate(true)
     expect(SaveService.save_game(), "9.8 entitlement save failed")
@@ -111,7 +135,7 @@ func _power_neutrality_gate() -> void:
 
 func _finish() -> void:
     if failures.is_empty():
-        print("ENTITLEMENT_CERTIFICATION PASS: 9.8")
+        print("ENTITLEMENT_CERTIFICATION PASS: 9.8 local_purchase_reference_sha256=1")
         get_tree().quit(0)
     else:
         for failure in failures:
