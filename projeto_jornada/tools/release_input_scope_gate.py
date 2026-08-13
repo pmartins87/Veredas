@@ -23,6 +23,7 @@ FORBIDDEN_EVIDENCE_FILES = {
     "product/store_listing_google_play.json",
     "product/software_sbom.json",
     "product/android_dependency_inventory.json",
+    "product/third_party_notices.json",
 }
 
 
@@ -57,8 +58,7 @@ def runtime_product_references(input_roots: list[Path], single_files: list[Path]
         if not isinstance(path, Path):
             continue
         try:
-            relative = path.resolve().relative_to(product_root)
-            _ = relative
+            path.resolve().relative_to(product_root)
             continue
         except ValueError:
             pass
@@ -154,8 +154,7 @@ def main() -> int:
     if forbidden_collected:
         errors.append(f"release evidence leaked into runtime/build fingerprint: {forbidden_collected}")
 
-    archive_manifest = "product/release_archive_manifest.json"
-    if archive_manifest in collected_paths:
+    if "product/release_archive_manifest.json" in collected_paths:
         errors.append("release archive manifest cannot participate in the fingerprint value it stores")
 
     if errors:
