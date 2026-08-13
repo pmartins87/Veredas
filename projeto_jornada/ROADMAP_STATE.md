@@ -43,7 +43,7 @@
 - 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9. O workflow agora só emite `QA_11_10_COMPLETION.json` **depois** de todos os gates passarem e a árvore estar limpa; o completion nasce como artifact da execução, com `status=pass` e `certified_against_head` exato, portanto job runnerless não consegue fabricar evidência.
 
 ### Infraestrutura de execução
-GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. O último probe de Billing 12.4 nesta ancestry repetiu exatamente esse padrão. Não gastar interações rerodando executor inexistente; usar o runner apenas quando houver indício de recuperação.
+GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. O workflow novo de 12.5 repetiu esse padrão; não gastar interações rerodando executor inexistente sem indício de recuperação.
 
 ## Fase 12 — Publicação e release
 Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 seguem 🟡**.
@@ -56,14 +56,18 @@ Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não enc
 - `INTERNET` explícito e backend excluído dos dois presets Android.
 - Faltam keystore/backup, secrets, Play Console, freeze de versão e artefato assinado real.
 
-### 12.3 🟡 — privacidade, Data Safety, termos e plataforma
+### 12.3 🟡 — privacidade, Data Safety, termos, classificação e plataforma
 - Runtime legal PT-BR/en e drafts bilíngues implementados.
 - Gameplay/save permanecem offline-first; caminho HTTP de aplicação allowlisted apenas para verificação de Billing.
 - Token bruto de compra é transitório; local/backend persistem referência/hash SHA-256 + estado mínimo; `orderId` não é persistido.
 - **Política de retenção do backend congelada em código e contratos:** `expires_at` + Firestore TTL; 730 dias para compra real PURCHASED/owned, 30 dias para bound/PENDING/CANCELLED/non-owned e 7 dias para compra de teste, sempre desde a última atividade legítima.
 - Expiração do cache não é prova de entitlement; recriação exige nova verificação autoritativa Google Play.
 - `tools/play_billing_retention_gate.py` valida código/contrato; `tools/privacy_retention_consistency_gate.py` cruza backend ↔ privacy manifest ↔ política PT/EN ↔ texto legal in-app.
-- Permanecem pendentes: deploy real, habilitar/verificar TTL no Firestore, auditoria da persistência real/AAB, contato/URLs, revisão legal final, rating/público-alvo, Data Safety, políticas e Play Console.
+- **Classificação/público-alvo:** `product/content_rating_target_audience.json`, `tools/content_rating_target_audience_gate.py`, `.github/workflows/veredas-content-rating-12-3.yml` e `CONTENT_RATING_12_3_STATE.json` foram adicionados. O preflight reconhece fantasia, combate, monstros e mecânicas de dano/derrota; cruza ausência de anúncios, assinaturas, loot boxes e recompensas aleatórias pagas com modelo comercial/privacidade/listing.
+- O projeto **não prevê nem inventa uma classificação etária**. Treze categorias potencialmente relevantes — violência, sangue/gore, horror, linguagem, sexualidade/nudez, substâncias, jogo de azar, ódio/discriminação, autoagressão e outros temas maduros — continuam exigindo revisão humana do conteúdo final. O questionário IARC e suas classificações regionais devem vir do Play Console para o RC exato.
+- Público-alvo é tratado separadamente da classificação: faixas finais permanecem pendentes de decisão humana. Seleção abaixo de 13 exige revisão de Famílias; seleção 13–15/16–17 exige revisão explícita de status infantil/privacidade e adequação de compra/marketing antes do release.
+- As fontes textuais canônicas para essa revisão são os mesmos 14 datasets em `data/` usados pelo catálogo de localização, além dos overlays do launch pt_BR/en; ausência de keyword hit **não** será usada como prova de ausência de uma categoria.
+- Permanecem pendentes: deploy real, habilitar/verificar TTL no Firestore, auditoria da persistência real/AAB, contato/URLs, revisão legal final, revisão do conteúdo final, decisão de público-alvo, questionário/certificado IARC, Data Safety, políticas e Play Console.
 
 ### 12.4 🟡 — Billing/entitlements de produção
 - Cliente/runtime e backend de referência implementados fail-closed.
@@ -77,8 +81,9 @@ Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não enc
 - `product/store_capture_manifest.json` define **12 capturas reais do Android RC**, todas obrigatoriamente do mesmo `QA_11_10_COMPLETION`/commit/versão/fingerprint; cada PNG recebe SHA-256, timestamp UTC e identidade do device/emulador.
 - `tools/finalize_store_capture_manifest.py` somente vincula metadados/hashes a PNGs já capturados e não edita pixels. `tools/store_capture_provenance_gate.py` valida o caminho inverso e rejeita mockup, RC divergente, hash divergente ou completion 11.10 sem `status=pass`/SHA completo.
 - `tools/store_listing_gate.py` também deixou de aceitar mera existência de `QA_11_10_COMPLETION.json`: no release valida o conteúdo do certificado.
-- `tools/store_commercial_consistency_gate.py` agora prova que **listing ↔ `commercial_model.json` ↔ Billing ↔ Termos** descrevem exatamente os mesmos dois produtos não consumíveis: desbloqueio integral content-only e Selo de Apoiador `supporter_badge` visual-only, sem anúncios, assinaturas, loot boxes ou poder pago.
-- Workflow estrutural `.github/workflows/veredas-store-listing-12-5.yml` executa os três gates quando houver runner. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
+- `tools/store_commercial_consistency_gate.py` prova que **listing ↔ `commercial_model.json` ↔ Billing ↔ Termos** descrevem os mesmos dois produtos não consumíveis: desbloqueio integral content-only e Selo de Apoiador `supporter_badge` visual-only, sem anúncios, assinaturas, loot boxes ou poder pago.
+- Feature graphic mantém alt text padrão PT-BR e variante localizada en-US no contrato; arte final ainda não existe.
+- Workflow `.github/workflows/veredas-store-listing-12-5.yml` executará os três gates quando houver runner. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
 
 ### 12.6 🟡 — AAB/APK final assinado/reproduzível
 - Fingerprint de inputs é acíclico: só recursos runtime reais entram; evidência de release fica fora.
@@ -107,13 +112,14 @@ Somente PASS quando 12.8/12.9 e toda identidade tag/commit/version/AAB/signing/a
 ## Blockers/dependências reais
 1. Aparelho físico para 11.3.
 2. Executor funcional para gates reais 11.6/11.9/11.10 e suítes 12.x.
-3. Assets finais de arte/áudio para Fase 7, 11.7 e store assets.
+3. Assets finais de arte/áudio para Fase 7, 11.7, classificação visual/audiovisual e store assets.
 4. Play Console, assinatura, addon Billing e AAB real.
 5. Backend de produção: endpoint HTTPS, identidade/Play API, Firestore, **TTL `expires_at` habilitado/verificado**, rate limit e auditoria real.
-6. Test track real 12.7.
-7. Store 12.5: completion real de 11.10 + 12 screenshots Android do mesmo RC + icon/feature graphic finais.
-8. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
-9. Due diligence final do nome e documentação pública/legal.
+6. Classificação/público-alvo: revisão do corpus/arte/áudio finais, faixas-alvo decididas, IARC real e eventuais revisões Famílias/menores.
+7. Test track real 12.7.
+8. Store 12.5: completion real de 11.10 + 12 screenshots Android do mesmo RC + icon/feature graphic finais.
+9. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
+10. Due diligence final do nome e documentação pública/legal.
 
 ## Regra de avanço
 - Não repetir diagnóstico de blocker conhecido sem nova evidência.
