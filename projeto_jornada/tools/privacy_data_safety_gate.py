@@ -15,6 +15,8 @@ BILLING = ROOT / "mobile" / "play_billing_contract.json"
 EXPORT = ROOT / "export_presets.cfg"
 POLICY = ROOT / "docs" / "PRIVACY_POLICY_DRAFT.md"
 VERIFIER_CLIENT = ROOT / "mobile" / "PlayPurchaseVerificationClient.gd"
+PURCHASE_REFERENCE = ROOT / "core" / "systems" / "PurchaseReference.gd"
+ENTITLEMENT = ROOT / "core" / "systems" / "EntitlementEngine.gd"
 PLUGIN_ROOT = ROOT / "addons" / "GodotGooglePlayBilling"
 RUNTIME_DIRS = [ROOT / "core", ROOT / "ui", ROOT / "scenes", ROOT / "mobile"]
 NETWORK_TOKENS = (
@@ -86,7 +88,10 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
 
-    for required in (PRIVACY, COMMERCIAL, IDENTITY, BILLING, EXPORT, POLICY, VERIFIER_CLIENT):
+    for required in (
+        PRIVACY, COMMERCIAL, IDENTITY, BILLING, EXPORT, POLICY, VERIFIER_CLIENT,
+        PURCHASE_REFERENCE, ENTITLEMENT,
+    ):
         if not required.exists():
             errors.append(f"required privacy/release file missing: {required.relative_to(ROOT)}")
     if errors:
@@ -101,11 +106,13 @@ def main() -> int:
     export_text = EXPORT.read_text(encoding="utf-8")
     policy_text = POLICY.read_text(encoding="utf-8")
     verifier_text = VERIFIER_CLIENT.read_text(encoding="utf-8")
+    reference_text = PURCHASE_REFERENCE.read_text(encoding="utf-8")
+    entitlement_text = ENTITLEMENT.read_text(encoding="utf-8")
 
     if privacy.get("roadmap_step") != "12.3":
         errors.append("privacy manifest must identify roadmap_step 12.3")
-    if int(privacy.get("schema_version", 0)) < 2:
-        errors.append("privacy manifest schema must include the runtime billing network boundary")
+    if int(privacy.get("schema_version", 0)) < 4:
+        errors.append("privacy manifest schema must include Billing network plus hashed local/server persistence boundaries")
     if billing.get("roadmap_step") != "12.4":
         errors.append("billing contract must identify roadmap_step 12.4")
 
@@ -200,6 +207,32 @@ def main() -> int:
         if fragment not in verifier_text:
             errors.append(f"billing network privacy boundary missing client fragment: {fragment}")
 
+    commercial_behavior = privacy.get("commercial_behavior", {})
+    local_cache = commercial_behavior.get("local_entitlement_cache", {}) if isinstance(commercial_behavior, dict) else {}
+    if not isinstance(local_cache, dict):
+        errors.append("local entitlement cache privacy section missing")
+        local_cache = {}
+    if local_cache.get("schema_version") != 2:
+        errors.append("local entitlement cache privacy schema must match EntitlementEngine schema 2")
+    if local_cache.get("raw_purchase_token_at_rest") is not False:
+        errors.append("raw purchase token at rest is forbidden in local entitlement cache")
+    if local_cache.get("purchase_token_sha256_reference_at_rest") is not True:
+        errors.append("local entitlement cache must retain only a SHA-256 purchase reference")
+    if str(local_cache.get("reference_format", "")) != "sha256:<64 lowercase hexadecimal characters>":
+        errors.append("local purchase-reference format drifted")
+    if int(local_cache.get("schema_version", 0)) != 2 or "const SCHEMA_VERSION := 2" not in entitlement_text:
+        errors.append("privacy/local EntitlementEngine schema mismatch")
+    if "purchase_token" in entitlement_text:
+        errors.append("EntitlementEngine must not know or persist raw purchase tokens")
+    for fragment in [
+        'const PREFIX := "sha256:"',
+        "HashingContext.HASH_SHA256",
+        "digest.hex_encode()",
+        "static func normalize_persisted",
+    ]:
+        if fragment not in reference_text:
+            errors.append(f"local purchase-reference privacy implementation missing: {fragment}")
+
     account_creation = bool(behavior.get("account_creation", False)) if isinstance(behavior, dict) else False
     if account_creation:
         deletion = privacy.get("account_deletion", {})
@@ -216,9 +249,8 @@ def main() -> int:
 
     data_safety = privacy.get("data_safety_candidate", {})
     production_verification = (
-        privacy.get("commercial_behavior", {})
-        .get("production_purchase_verification", {})
-        if isinstance(privacy.get("commercial_behavior", {}), dict)
+        commercial_behavior.get("production_purchase_verification", {})
+        if isinstance(commercial_behavior, dict)
         else {}
     )
     policy = privacy.get("privacy_policy", {})
@@ -234,6 +266,18 @@ def main() -> int:
     excluded = production_verification.get("explicitly_excluded_from_billing_verification", [])
     if not isinstance(excluded, list) or "gameplay profile" not in excluded or "save data" not in excluded:
         errors.append("billing verification privacy boundary must explicitly exclude gameplay profile and save data")
+    backend_persistence = production_verification.get("reference_backend_persistence", {})
+    if not isinstance(backend_persistence, dict):
+        errors.append("backend persistence privacy declaration missing")
+        backend_persistence = {}
+    if backend_persistence.get("raw_purchase_token_at_rest") is not False:
+        errors.append("raw purchase token at rest is forbidden in reference backend")
+    if backend_persistence.get("purchase_token_hash_at_rest") is not True:
+        errors.append("reference backend must persist only purchase-token hash/minimum state")
+    if backend_persistence.get("order_id_at_rest") is not False:
+        errors.append("order id persistence is outside the minimized backend contract")
+    if backend_persistence.get("durable_record_required_before_owned_response") is not True:
+        errors.append("privacy/backend contract must require durable final persistence before owned response")
 
     if args.release:
         if pending:
@@ -259,7 +303,7 @@ def main() -> int:
 
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "PRIVACY_DATA_SAFETY %s: network_hits=%d allowlisted=%d sdk_hits=%d pending=%d errors=%d warnings=%d billing_network_only=1"
+        "PRIVACY_DATA_SAFETY %s: network_hits=%d allowlisted=%d sdk_hits=%d pending=%d errors=%d warnings=%d billing_network_only=1 raw_token_local_at_rest=0 raw_token_backend_at_rest=0"
         % (
             mode,
             len(network_hits),
@@ -277,7 +321,7 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    print("PRIVACY_DATA_SAFETY PASS: declared app behavior and billing-only network boundary are internally consistent")
+    print("PRIVACY_DATA_SAFETY PASS: declared app behavior and minimized Billing data boundaries are internally consistent")
     return 0
 
 
