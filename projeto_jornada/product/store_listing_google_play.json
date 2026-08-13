@@ -5,10 +5,7 @@
   "updated_on": "2026-08-13",
   "application_id": "com.pmartins87.veredasdatrama",
   "default_store_locale": "pt-BR",
-  "launch_locale_mapping": {
-    "pt_BR": "pt-BR",
-    "en": "en-US"
-  },
+  "launch_locale_mapping": {"pt_BR":"pt-BR","en":"en-US"},
   "google_play_policy_baseline": {
     "checked_on": "2026-08-13",
     "official_help_scope": "Play Console store listing and preview asset requirements",
@@ -27,26 +24,24 @@
     "finalizer": "tools/finalize_store_capture_manifest.py",
     "all_final_screenshots_must_share_one_certified_11_10_rc": true
   },
+  "commercial_consistency": {
+    "gate": "tools/store_commercial_consistency_gate.py",
+    "commercial_model": "product/commercial_model.json",
+    "billing_contract": "mobile/play_billing_contract.json",
+    "terms": "docs/TERMS_OF_USE_DRAFT.md"
+  },
   "listings": {
     "pt-BR": {
       "title": "Veredas da Trama",
       "short_description": "Um livro-jogo de fantasia em que cada escolha transforma sua jornada",
       "full_description": "Entre em uma jornada de fantasia construída como um livro-jogo vivo. Em Veredas da Trama, decisões, riscos e descobertas deixam marcas que mudam o caminho adiante.\n\nExplore 12 Domínios com identidades próprias, atravesse localidades repletas de histórias e conduza diferentes andarilhos por jornadas em que recursos, relações e consequências importam.\n\n• Faça escolhas que alteram eventos, caminhos e desfechos.\n• Enfrente combates táticos com personagens, criaturas e chefes de estilos distintos.\n• Descubra itens, Marcas, Dívidas, ecos e segredos que reaparecem ao longo da trama.\n• Acompanhe seu progresso no códice e revele novas possibilidades entre jornadas.\n• Ajuste tamanho de texto, contraste, movimento, flashes, rótulos de ícones e outros recursos de acessibilidade.\n• Jogue a experiência principal sem depender de conexão constante.\n\nUma parte inicial do jogo pode ser explorada gratuitamente. O acesso completo é planejado como uma compra única e não consumível. Também poderá ser oferecido o Selo de Apoiador, compra opcional e não consumível que adiciona apenas um ornamento visual ao Nó de Vigília, sem efeito sobre combate, progressão, atributos, moeda ou recompensas. Não há anúncios, assinaturas, loot boxes nem venda de poder de combate.\n\nCada jornada termina. A trama que você deixa para trás, não.",
-      "character_counts": {
-        "title": 16,
-        "short_description": 68,
-        "full_description": 1319
-      }
+      "character_counts": {"title":16,"short_description":68,"full_description":1319}
     },
     "en-US": {
       "title": "Veredas da Trama",
       "short_description": "A fantasy gamebook where every choice reshapes your journey",
       "full_description": "Enter a fantasy journey built like a living gamebook. In Veredas da Trama, decisions, risks, and discoveries leave marks that reshape the road ahead.\n\nExplore 12 distinct Domains, cross story-rich locations, and guide different wanderers through journeys where resources, relationships, and consequences matter.\n\n• Make choices that change events, routes, and endings.\n• Face tactical battles with characters, creatures, and bosses built around different styles.\n• Discover items, Marks, Debts, echoes, and secrets that can return later in the story.\n• Follow your progress in the codex and uncover new possibilities between journeys.\n• Adjust text size, contrast, motion, flashes, icon labels, and other accessibility options.\n• Play the core experience without relying on a constant internet connection.\n\nAn opening portion of the game can be explored for free. Full access is planned as a single non-consumable purchase. The optional non-consumable Supporter Seal adds only a visual ornament to the Vigil Knot, with no effect on combat, progression, stats, currency, or rewards. There are no ads, subscriptions, loot boxes, or paid combat power.\n\nEvery journey ends. The thread you leave behind does not.",
-      "character_counts": {
-        "title": 16,
-        "short_description": 59,
-        "full_description": 1207
-      }
+      "character_counts": {"title":16,"short_description":59,"full_description":1207}
     }
   },
   "assets": {
@@ -68,7 +63,10 @@
       "height": 500,
       "format": "PNG",
       "alpha_allowed": false,
-      "alt_text": "Arte de capa de Veredas da Trama com atmosfera de livro-jogo de fantasia e caminhos que se entrelaçam."
+      "alt_text_by_locale": {
+        "pt-BR": "Arte de capa de Veredas da Trama com atmosfera de livro-jogo de fantasia e caminhos que se entrelaçam.",
+        "en-US": "Veredas da Trama cover art evoking a fantasy gamebook and branching paths woven together."
+      }
     },
     "phone_screenshots": {
       "required_for_release_per_locale": 6,
@@ -113,7 +111,8 @@
     "avoid_misleading_feature_claims": true,
     "localized_copy_must_match_same_product_behavior": true,
     "commercial_model_must_match_billing_products": true,
-    "graphic_alt_text_max_chars": 140
+    "graphic_alt_text_max_chars": 140,
+    "feature_graphic_alt_text_must_cover_all_store_locales": true
   },
   "dependencies": [
     "7.3 final Domain/location art",
@@ -126,10 +125,11 @@
   ],
   "completion_requirements": [
     "freeze final PT-BR and en-US copy against the release candidate and final Billing product set",
-    "produce final icon and feature graphic from original Veredas da Trama art",
+    "prove commercial model, Billing products, Terms and store copy remain aligned",
+    "produce final icon and feature graphic from original Veredas da Trama art with localized alt text",
     "capture all localized screenshots from the certified Android release candidate",
     "bind every screenshot to the exact certified 11.10 RC commit, version and release-input fingerprint with SHA-256 evidence",
-    "validate dimensions, file formats, alpha policy, file sizes and alt text",
+    "validate dimensions, file formats, alpha policy, file sizes and localized alt text",
     "perform human review for misleading/promotional metadata and store policy compliance",
     "upload listing to Play Console and verify preview on phone form factor",
     "persist final listing revision and exact RC capture commit"
