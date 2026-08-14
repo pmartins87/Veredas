@@ -3,7 +3,7 @@ name: Veredas 11.6 Localization Pack Export Filter
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/tools/ensure_localization_pack_export_filter.py'
       - 'projeto_jornada/export_presets.cfg'
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: projeto-jornada-snapshots
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -46,4 +46,4 @@ jobs:
             exit 0
           fi
           git commit -m 'build(android): include compact localization packs in exports'
-          git push origin HEAD:projeto-jornada-snapshots
+          git push origin HEAD:main
