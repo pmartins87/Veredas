@@ -76,6 +76,7 @@ def main() -> int:
     fallback_locale = str(manifest.get("fallback_locale", ""))
     launch_locales = [str(v) for v in manifest.get("launch_locales", []) if isinstance(v, str)]
     target_locales = [v for v in launch_locales if v != source_locale]
+    deferred_locales = ["es_419"]
     locale_meta = manifest.get("locales", {}) if isinstance(manifest.get("locales", {}), dict) else {}
     required_keys = [str(v) for v in manifest.get("ui_required_keys", []) if isinstance(v, str)]
     overlay_fields = {str(v) for v in manifest.get("content_overlay_fields", []) if isinstance(v, str)}
@@ -83,11 +84,15 @@ def main() -> int:
 
     if source_locale != "pt_BR" or fallback_locale != source_locale:
         errors.append("11.5 requires pt_BR as source and fallback locale")
-    if launch_locales != ["pt_BR", "en", "es_419"]:
+    if launch_locales != ["pt_BR", "en"]:
         errors.append(f"unexpected launch locale set/order: {launch_locales}")
-    if len(set(launch_locales)) != 3:
-        errors.append("launch locales must be unique")
-    for locale_id in launch_locales:
+    if len(set(launch_locales)) != 2:
+        errors.append("launch locales must contain exactly two unique entries")
+    if "es_419" in launch_locales:
+        errors.append("deferred es_419 must not be exposed as a launch locale")
+    if "es_419" not in locale_meta:
+        errors.append("deferred es_419 catalog metadata must remain preserved")
+    for locale_id in launch_locales + deferred_locales:
         meta = locale_meta.get(locale_id, {})
         if not isinstance(meta, dict) or not str(meta.get("native_name", "")).strip():
             errors.append(f"missing native locale name: {locale_id}")
@@ -210,18 +215,17 @@ def main() -> int:
                         nested_overlay_entries += 1
                         nested_by_locale[locale_id] += 1
 
-    # The original 11.5 bootstrap used exactly two translations per target as an
-    # architecture probe. Production localization grows continuously, so the
-    # invariant is now monotonic: never regress below the bootstrap and retain
-    # nested-path coverage while every overlay remains validated against source.
+    # The original 11.5 bootstrap used two translated overlays per target as an
+    # architecture probe. Production localization grows monotonically; with one
+    # launch target (en), preserve that per-target floor and nested-path coverage.
     for locale_id in target_locales:
         if overlay_entries_by_locale[locale_id] < 2:
             errors.append(f"target overlay coverage regressed below architecture bootstrap: {locale_id}:{overlay_entries_by_locale[locale_id]}")
         if nested_by_locale[locale_id] < 1:
             errors.append(f"target lost nested overlay coverage: {locale_id}")
-    if overlay_entries < 4:
+    if overlay_entries < 2:
         errors.append(f"target overlay total regressed below architecture bootstrap: {overlay_entries}")
-    if nested_overlay_entries < 2:
+    if nested_overlay_entries < 1:
         errors.append(f"nested overlay total regressed below architecture bootstrap: {nested_overlay_entries}")
 
     aliases = manifest.get("aliases", {}) if isinstance(manifest.get("aliases", {}), dict) else {}
@@ -236,7 +240,7 @@ def main() -> int:
         return 1
 
     print(
-        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=3 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d per_target=%s"
+        "LOCALIZATION_INVENTORY PASS: 11.5 records=5160 source_strings=%d launch_locales=2 deferred=es_419 ui_required=%d translated_required=%d overlay_entries=%d nested_overlays=%d per_target=%s"
         % (len(source_strings), len(required_keys), translated_required, overlay_entries, nested_overlay_entries, str(overlay_entries_by_locale))
     )
     return 0
