@@ -3,7 +3,7 @@ name: Veredas da Trama Android Build
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/project.godot'
       - 'projeto_jornada/export_presets.cfg'
