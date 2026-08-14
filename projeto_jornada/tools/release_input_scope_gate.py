@@ -20,6 +20,7 @@ FORBIDDEN_EVIDENCE_FILES = {
     "product/release_candidate_final_contract.json",
     "product/release_completion_record_schema.json",
     "product/release_provenance.json",
+    "product/release_signing_identity.json",
     "product/store_listing_google_play.json",
     "product/software_sbom.json",
     "product/android_dependency_inventory.json",
@@ -66,6 +67,10 @@ def runtime_product_references(input_roots: list[Path], single_files: list[Path]
     return found
 
 
+def relative_root(path: Path) -> str:
+    return path.resolve().relative_to(ROOT.resolve()).as_posix()
+
+
 def main() -> int:
     errors: list[str] = []
     try:
@@ -75,12 +80,16 @@ def main() -> int:
         return 1
 
     runtime_files_raw = getattr(module, "RUNTIME_PRODUCT_FILES", None)
+    control_files_raw = getattr(module, "CONTROL_FILES", None)
     input_roots_raw = getattr(module, "INPUT_ROOTS", None)
     single_files_raw = getattr(module, "SINGLE_FILES", None)
     collect = getattr(module, "collect", None)
     if not isinstance(runtime_files_raw, list):
         errors.append("release fingerprint must expose RUNTIME_PRODUCT_FILES as an explicit list")
         runtime_files_raw = []
+    if not isinstance(control_files_raw, list):
+        errors.append("release fingerprint must expose CONTROL_FILES as an explicit list")
+        control_files_raw = []
     if not isinstance(input_roots_raw, list):
         errors.append("release fingerprint must expose INPUT_ROOTS as an explicit list")
         input_roots_raw = []
@@ -96,9 +105,9 @@ def main() -> int:
             errors.append(f"RUNTIME_PRODUCT_FILES contains non-Path value: {path!r}")
             continue
         try:
-            relative = path.resolve().relative_to(ROOT.resolve()).as_posix()
+            relative = relative_root(path)
         except ValueError:
-            errors.append(f"runtime product file escapes repository root: {path}")
+            errors.append(f"runtime product file escapes project root: {path}")
             continue
         if not relative.startswith("product/"):
             errors.append(f"runtime product file must live under product/: {relative}")
@@ -106,6 +115,25 @@ def main() -> int:
         declared_runtime_product_files.add(relative)
         if not path.is_file():
             errors.append(f"declared runtime product file missing: {relative}")
+
+    declared_control_files: set[str] = set()
+    for path in control_files_raw:
+        if not isinstance(path, Path):
+            errors.append(f"CONTROL_FILES contains non-Path value: {path!r}")
+            continue
+        try:
+            relative = relative_root(path)
+        except ValueError:
+            errors.append(f"control file escapes project root: {path}")
+            continue
+        if not relative.startswith("tools/"):
+            errors.append(f"critical release control file must live under tools/: {relative}")
+            continue
+        if relative in declared_control_files:
+            errors.append(f"duplicate critical control file: {relative}")
+        declared_control_files.add(relative)
+        if not path.is_file():
+            errors.append(f"declared critical control file missing: {relative}")
 
     observed_runtime_product_files = runtime_product_references(input_roots_raw, single_files_raw)
     if observed_runtime_product_files != declared_runtime_product_files:
@@ -126,15 +154,18 @@ def main() -> int:
         if not isinstance(path, Path):
             continue
         try:
-            single_file_relatives.add(path.resolve().relative_to(ROOT.resolve()).as_posix())
+            single_file_relatives.add(relative_root(path))
         except ValueError:
-            errors.append(f"SINGLE_FILES value escapes repository root: {path}")
+            errors.append(f"SINGLE_FILES value escapes project root: {path}")
     product_single_files = {path for path in single_file_relatives if path.startswith("product/")}
     if product_single_files != declared_runtime_product_files:
         errors.append(
             "product/ SINGLE_FILES must exactly equal RUNTIME_PRODUCT_FILES: declared=%s single=%s"
             % (sorted(declared_runtime_product_files), sorted(product_single_files))
         )
+    missing_controls_from_single = sorted(declared_control_files - single_file_relatives)
+    if missing_controls_from_single:
+        errors.append(f"CONTROL_FILES absent from SINGLE_FILES fingerprint scope: {missing_controls_from_single}")
 
     collected_paths: set[str] = set()
     if callable(collect):
@@ -149,6 +180,9 @@ def main() -> int:
     missing_runtime = sorted(declared_runtime_product_files - collected_paths)
     if missing_runtime:
         errors.append(f"declared runtime product file(s) absent from collected release inputs: {missing_runtime}")
+    missing_controls = sorted(declared_control_files - collected_paths)
+    if missing_controls:
+        errors.append(f"critical release control file(s) absent from collected release inputs: {missing_controls}")
 
     forbidden_collected = sorted(FORBIDDEN_EVIDENCE_FILES & collected_paths)
     if forbidden_collected:
@@ -164,8 +198,11 @@ def main() -> int:
         return 1
 
     print(
-        "RELEASE_INPUT_SCOPE PASS: runtime_product_refs=%d collected_inputs=%d scan_roots=%d forbidden_evidence=0 self_reference=0"
-        % (len(observed_runtime_product_files), len(collected_paths), len(input_roots_raw))
+        "RELEASE_INPUT_SCOPE PASS: runtime_product_refs=%d control_files=%d collected_inputs=%d scan_roots=%d forbidden_evidence=0 self_reference=0"
+        % (
+            len(observed_runtime_product_files), len(declared_control_files),
+            len(collected_paths), len(input_roots_raw),
+        )
     )
     return 0
 
