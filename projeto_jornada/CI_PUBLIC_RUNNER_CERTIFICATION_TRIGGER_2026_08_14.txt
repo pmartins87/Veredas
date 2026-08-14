@@ -1,0 +1,2 @@
+Public GitHub-hosted runner recovery certification trigger.
+This file is non-runtime evidence only and may be removed after 11.6/11.9 certification.
