@@ -288,13 +288,13 @@ func _on_verification_completed(result: Dictionary) -> void:
         if purchase_reference.is_empty():
             purchase_failed.emit(product_id, "purchase_reference_hash_failed")
             return
-        var applied := _entitlement_engine().apply_purchase_result({
+        var applied: bool = bool(_entitlement_engine().apply_purchase_result({
             "ok": true,
             "product_id": product_id,
             "source": SOURCE_ID,
             "transaction_id": purchase_reference,
-        })
-        if not bool(applied):
+        }))
+        if not applied:
             purchase_failed.emit(product_id, "entitlement_apply_failed")
             return
         entitlement_granted.emit(product_id)
