@@ -3,7 +3,7 @@ name: Veredas 11.6 Reproducible Pack Build
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/tools/build_launch_localization_packs.py'
       - 'projeto_jornada/tools/seed_structured_narrative_localization.py'
@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: projeto-jornada-snapshots
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -59,7 +59,7 @@ jobs:
             exit 0
           fi
           git commit -m 'i18n: persist reproducible complete launch content packs'
-          git push origin HEAD:projeto-jornada-snapshots
+          git push origin HEAD:main
       - name: Upload pack certification report
         if: always()
         uses: actions/upload-artifact@v4
