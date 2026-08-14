@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.2",
   "formal_status": "in_progress",
   "product_name": "Veredas da Trama",
@@ -9,6 +9,14 @@
     "current_version_code": 1,
     "target_first_public_version_name": "1.0.0",
     "versioning_policy": "semantic version name; monotonically increasing integer version code",
+    "version_freeze": {
+      "public_release_version_frozen": false,
+      "freeze_must_happen_before_11_10_certification": true,
+      "any_version_change_after_11_10_requires_new_11_10_certification": true,
+      "current_version_name_must_equal_target_when_frozen": true,
+      "version_code_must_be_confirmed_unused_in_play_console": true,
+      "play_console_version_code_confirmation": "pending"
+    },
     "play_distribution_format": "AAB",
     "release_toolchain": {
       "godot_version": "4.7.1-stable",
@@ -34,7 +42,8 @@
         "keystore_alias": "VEREDAS_ANDROID_KEY_ALIAS",
         "keystore_password": "VEREDAS_ANDROID_KEYSTORE_PASSWORD"
       },
-      "play_app_signing_expected": true
+      "play_app_signing_expected": true,
+      "signing_identity_contract": "product/release_signing_identity.json"
     }
   },
   "completion_requirements": [
@@ -42,8 +51,9 @@
     "release toolchain and target API rechecked against Google Play policy immediately before public release",
     "release keystore generated and backed up outside repository",
     "protected CI secrets configured",
-    "signed release AAB produced and signature verified",
-    "version code/name frozen for RC"
+    "Google Play App Signing and upload-certificate identities frozen by SHA-256",
+    "freeze version name/code before the exact 11.10 RC certification and confirm version code is unused in Play Console",
+    "signed release AAB produced from that exact 11.10 commit and signer identity verified"
   ],
-  "note": "The stable application id and Android toolchain baseline are persisted early because changing package identity after store publication creates a different Android application and relying on implicit SDK defaults creates avoidable release drift. 12.2 remains in progress until real release signing, policy recheck, artifact inspection and console acceptance are proven."
+  "note": "The stable application id and Android toolchain baseline are persisted early because changing package identity after store publication creates a different Android application and relying on implicit SDK defaults creates avoidable release drift. The public version freeze must occur before 11.10 so the final QA certificate covers the exact version shipped. 12.2 remains in progress until real release signing, policy recheck, artifact inspection and console acceptance are proven."
 }
