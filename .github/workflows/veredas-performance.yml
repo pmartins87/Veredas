@@ -3,7 +3,7 @@ name: Veredas Performance Profile
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/tests/PerformanceProfileCertification.gd'
       - 'projeto_jornada/tests/performance_profile_certification.tscn'
