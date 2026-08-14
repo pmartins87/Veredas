@@ -3,7 +3,7 @@ name: Veredas Responsive Accessibility
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/scenes/**'
       - 'projeto_jornada/ui/**'
