@@ -5,7 +5,7 @@ name: Veredas Enemy Balance 10.3
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/tools/refine_enemy_balance.py'
       - 'projeto_jornada/tools/refine_item_economy.py'
