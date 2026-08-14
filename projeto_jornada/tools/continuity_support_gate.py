@@ -95,7 +95,7 @@ def main() -> int:
         print(f"CONTINUITY_SUPPORT FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 4 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 5 or contract.get("roadmap_step") != "12.9":
         errors.append("12.9 contract schema/roadmap_step invalid")
     if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 3000:
         errors.append("continuity/support runbook is missing or unexpectedly small")
@@ -120,10 +120,12 @@ def main() -> int:
                 errors.append(f"{label} detail: {output.splitlines()[-1][:500]}")
 
     source = contract.get("source_of_truth", {})
-    if not isinstance(source, dict) or source.get("repository") != "pmartins87/desktop-tutorial":
-        errors.append("source_of_truth.repository changed unexpectedly")
-    if not isinstance(source, dict) or source.get("development_branch") != "projeto-jornada-snapshots":
-        errors.append("source_of_truth.development_branch changed unexpectedly")
+    if not isinstance(source, dict) or source.get("repository") != "pmartins87/Veredas":
+        errors.append("source_of_truth.repository must be pmartins87/Veredas")
+    if not isinstance(source, dict) or source.get("development_branch") != "main":
+        errors.append("source_of_truth.development_branch must be main")
+    if not isinstance(source, dict) or source.get("history_preservation_required") is not True:
+        errors.append("source_of_truth must require preserved Git history during repository rename")
 
     support = contract.get("support_policy", {})
     targets = support.get("initial_triage_target_hours", {}) if isinstance(support, dict) else {}
@@ -274,10 +276,12 @@ def main() -> int:
                     warnings.append(f"{section_name}.{key} not configured yet")
 
     report = {
-        "schema_version": 5,
+        "schema_version": 6,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "head_sha": head_sha,
+        "canonical_repository": "pmartins87/Veredas",
+        "canonical_branch": "main",
         "provenance_gate_bound": True,
         "backend_dependency_evidence_gate_bound": True,
         "android_dependency_inventory_gate_bound": True,
@@ -300,7 +304,7 @@ def main() -> int:
     if args.release:
         print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/dependencies/provenance/notices/recovery/support certified")
     else:
-        print("CONTINUITY_SUPPORT PREFLIGHT PASS: warnings=%d component_gates=7" % len(warnings))
+        print("CONTINUITY_SUPPORT PREFLIGHT PASS: warnings=%d component_gates=7 repo=pmartins87/Veredas branch=main" % len(warnings))
     return 0
 
 
