@@ -201,7 +201,7 @@ def main() -> int:
         "upload_certificate": cert_info,
         "expected_upload_certificate_sha256": normalized_fingerprint(contract.get("upload_key", {}).get("certificate_sha256", "")),
         "expected_play_app_signing_certificate_sha256": normalized_fingerprint(contract.get("play_app_signing", {}).get("app_signing_certificate_sha256", "")),
-        "private_key_material_recorded": false,
+        "private_key_material_recorded": False,
         "errors": errors,
     }
     if args.evidence_output is not None:
