@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "formal_status": "in_progress",
+  "updated_on": "2026-08-13",
+  "policy": {
+    "private_keys_passwords_tokens_recovery_codes_forbidden": true,
+    "evidence_references_must_be_non_secret": true,
+    "two_authorized_people_required_for_final_handoff": true,
+    "restore_test_must_prove_usability_not_merely_backup_existence": true,
+    "production_credentials_must_not_be_exposed_during_drill": true
+  },
+  "systems": {
+    "github_repository": {
+      "required": true,
+      "recovery_verified": false,
+      "primary_owner": "PENDING_12_9_PRIMARY_RELEASE_OWNER",
+      "secondary_recovery_contact": "PENDING_12_9_SECONDARY_RECOVERY_CONTACT",
+      "evidence_reference": "PENDING_12_9_GITHUB_RECOVERY_EVIDENCE"
+    },
+    "google_play_console": {
+      "required": true,
+      "recovery_verified": false,
+      "primary_owner": "PENDING_12_9_PRIMARY_RELEASE_OWNER",
+      "secondary_recovery_contact": "PENDING_12_9_SECONDARY_RECOVERY_CONTACT",
+      "evidence_reference": "PENDING_12_9_PLAY_RECOVERY_EVIDENCE"
+    },
+    "billing_backend": {
+      "required": true,
+      "recovery_verified": false,
+      "service_identity_recovery_verified": false,
+      "firestore_access_recovery_verified": false,
+      "evidence_reference": "PENDING_12_9_BACKEND_RECOVERY_EVIDENCE"
+    },
+    "android_upload_keystore": {
+      "required": true,
+      "encrypted_backup_locations_verified": 0,
+      "minimum_independent_backup_locations": 2,
+      "restore_tested": false,
+      "public_certificate_sha256": "PENDING_12_9_UPLOAD_CERT_SHA256",
+      "evidence_reference": "PENDING_12_9_KEYSTORE_RESTORE_EVIDENCE",
+      "private_key_material_recorded": false
+    },
+    "ci_release_secrets": {
+      "required": true,
+      "external_backup_verified": false,
+      "reconfiguration_tested": false,
+      "evidence_reference": "PENDING_12_9_CI_SECRET_RECOVERY_EVIDENCE",
+      "secret_values_recorded": false
+    }
+  },
+  "drill": {
+    "status": "pending",
+    "performed_at_utc": "PENDING_12_9_DRILL_TIMESTAMP",
+    "primary_operator": "PENDING_12_9_PRIMARY_RELEASE_OWNER",
+    "secondary_observer": "PENDING_12_9_SECONDARY_RECOVERY_CONTACT",
+    "scenarios": [
+      {"id": "repository_access_recovery", "status": "pending", "evidence_reference": "PENDING_12_9_REPO_DRILL_EVIDENCE"},
+      {"id": "play_console_access_recovery", "status": "pending", "evidence_reference": "PENDING_12_9_PLAY_DRILL_EVIDENCE"},
+      {"id": "billing_backend_access_recovery", "status": "pending", "evidence_reference": "PENDING_12_9_BACKEND_DRILL_EVIDENCE"},
+      {"id": "upload_keystore_backup_restore", "status": "pending", "evidence_reference": "PENDING_12_9_KEYSTORE_DRILL_EVIDENCE"},
+      {"id": "ci_secret_reconfiguration", "status": "pending", "evidence_reference": "PENDING_12_9_CI_DRILL_EVIDENCE"},
+      {"id": "clean_rebuild_from_source_of_truth", "status": "pending", "evidence_reference": "PENDING_12_9_REBUILD_DRILL_EVIDENCE"}
+    ],
+    "all_scenarios_passed": false,
+    "evidence_archive": "PENDING_12_9_RECOVERY_DRILL_ARCHIVE",
+    "secret_material_persisted": false
+  },
+  "completion_requirements": [
+    "all required systems have real non-placeholder owners/recovery evidence",
+    "repository, Play Console and Billing backend recovery are verified",
+    "upload keystore has at least two independent encrypted backup locations and a successful restore test",
+    "CI release secrets have an external recovery method and successful reconfiguration test without recording values",
+    "all six recovery scenarios pass",
+    "a second authorized recovery contact observes/reviews the drill",
+    "the drill record contains no private keys, passwords, tokens, recovery codes or secret values",
+    "tools/recovery_backup_drill_gate.py --release passes"
+  ],
+  "pass_recorded": false
+}
