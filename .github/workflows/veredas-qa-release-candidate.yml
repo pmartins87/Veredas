@@ -25,6 +25,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  GODOT_VERSION: '4.7.1-stable'
+  GODOT_LINUX_X86_64_SHA256: 'c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba'
+
 jobs:
   qa-freeze-11-10:
     runs-on: ubuntu-latest
@@ -54,11 +58,16 @@ jobs:
           python tools/localization_pack_certification.py
           python tools/localization_quality_gate.py --require-complete --require-terminology
           python tools/localization_full_linguistic_sanity.py
-      - name: Download Godot
+      - name: Install pinned Godot 4.7.1 stable
         run: |
-          curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          set -euo pipefail
+          curl -fL \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v4.7.1-stable_linux.x86_64.zip" \
+            -o /tmp/godot.zip
+          printf '%s  %s\n' "$GODOT_LINUX_X86_64_SHA256" /tmp/godot.zip | sha256sum -c -
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version | grep -q '^4.7.1.stable'
       - name: Import project headless
         run: |
           set -o pipefail
