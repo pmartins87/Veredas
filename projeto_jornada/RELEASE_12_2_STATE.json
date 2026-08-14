@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.2",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
@@ -55,6 +55,8 @@
     "upload_key_role": "developer-held key signs AAB uploaded to Play",
     "play_app_signing_key_role": "Google Play-held key signs delivered APKs",
     "upload_key_minimum": "RSA >= 2048 bits",
+    "upload_certificate_minimum_validity_years": 25,
+    "app_signing_certificate_required_expiry_after_utc": "2033-10-22T00:00:00Z",
     "upload_and_app_signing_certificates_must_differ": true,
     "upload_certificate_sha256": "PENDING_PLAY_UPLOAD_CERT_SHA256",
     "app_signing_certificate_sha256": "PENDING_PLAY_APP_SIGNING_CERT_SHA256",
@@ -64,9 +66,12 @@
     "private_keys_as_release_evidence_forbidden": true
   },
   "release_binding": {
-    "exact_11_10_completion_required": true,
-    "exact_11_10_certified_head_must_equal_release_head": true,
+    "11_10_certified_head_must_be_ancestor_of_release_head": true,
+    "11_10_release_input_manifest_required": true,
+    "11_10_release_input_aggregate_must_equal_release_aggregate": true,
     "explicit_11_10_workflow_run_id_required": true,
+    "evidence_only_commits_after_11_10_allowed_if_fingerprint_unchanged": true,
+    "runtime_build_or_version_change_after_11_10_requires_new_11_10": true,
     "rc_binding_gate": "tools/release_rc_binding_gate.py",
     "aab_signer_certificate_extracted_from_artifact": true,
     "aab_signer_must_match_frozen_upload_certificate_sha256": true
@@ -76,6 +81,7 @@
     "tools/release_version_identity_gate.py",
     "tools/release_signing_identity_gate.py",
     "tools/release_rc_binding_gate.py",
+    "tools/release_input_fingerprint.py",
     "tools/platform_compliance_gate.py",
     "tools/roadmap_state_consistency.py",
     "tools/qa_release_candidate_gate.py",
@@ -84,14 +90,15 @@
   "preflight_workflow": ".github/workflows/veredas-release-contract-preflight.yml",
   "completion_requirements": [
     "recheck target API and Android toolchain policy immediately before public release",
-    "create a dedicated RSA >=2048 upload keystore and store redundant encrypted backups outside the repository",
+    "create a dedicated RSA >=2048 upload keystore with at least 25 years certificate validity and store redundant encrypted backups outside the repository",
     "configure protected release environment secrets",
     "confirm application id acceptance in Play Console",
-    "enroll in Google Play App Signing and register the distinct upload certificate",
-    "freeze and record SHA-256 fingerprints/expiry for upload and app-signing certificates",
     "freeze current version to 1.0.0 with a Play-confirmed unused monotonically increasing version code before 11.10",
-    "obtain a new 11.10 PASS on that exact frozen version/head",
-    "produce signed AAB from that exact 11.10 commit and prove the signer extracted from the AAB matches the frozen upload certificate",
+    "obtain 11.10 PASS with that frozen version and persist its release-input fingerprint",
+    "enroll in Google Play App Signing and register a distinct upload certificate",
+    "freeze and record SHA-256 fingerprints/validity evidence for upload and app-signing certificates; app-signing certificate must exceed 2033-10-22",
+    "allow later signing/console evidence commits only while the 11.10-certified runtime/build fingerprint remains identical",
+    "produce signed AAB from unchanged certified inputs and prove the signer extracted from the AAB matches the frozen upload certificate",
     "record Play App Signing configuration and delivered-app certificate identity"
   ],
   "pass_recorded": false
