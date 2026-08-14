@@ -3,7 +3,7 @@ name: Veredas QA Triage 11.8
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/qa/**'
       - 'projeto_jornada/tools/qa_triage_gate.py'
