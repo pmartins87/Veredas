@@ -22,7 +22,10 @@ on:
       - 'projeto_jornada/tools/write_qa_release_candidate_completion.py'
       - 'projeto_jornada/tools/release_version_identity_gate.py'
       - 'projeto_jornada/tools/release_input_fingerprint.py'
+      - 'projeto_jornada/tools/release_input_scope_gate.py'
+      - 'projeto_jornada/tools/release_workflow_integrity_gate.py'
       - '.github/workflows/veredas-qa-release-candidate.yml'
+      - '.github/workflows/veredas-release-aab.yml'
 
 concurrency:
   group: veredas-qa-release-candidate-${{ github.ref }}
@@ -46,6 +49,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Require release workflow control surface is pinned
+        working-directory: projeto_jornada
+        run: python tools/release_workflow_integrity_gate.py
       - name: Require certified Phase 11 prerequisites
         working-directory: projeto_jornada
         run: python tools/qa_release_candidate_gate.py
