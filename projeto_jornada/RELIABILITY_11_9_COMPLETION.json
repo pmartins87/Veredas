@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.9",
+  "status": "pass",
+  "certified_on": "2026-08-14",
+  "certified_against_head": "8672a3e055c4a616aebfd5ccdbc5e08940eb985e",
+  "workflow": ".github/workflows/veredas-reliability-soak.yml",
+  "workflow_run_id": 31850297926,
+  "workflow_job_id": 94924689348,
+  "result": {
+    "canonical_fixture_rebuilt_and_validated": true,
+    "godot_import_passed": true,
+    "mobile_lifecycle_baseline_8_2_passed": true,
+    "save_fuzz_baseline_11_2_passed": true,
+    "run_state_integrity_baseline_11_2_passed": true,
+    "reliability_soak_passed": true,
+    "lifecycle_cycles": 128,
+    "restart_rounds": 24,
+    "reloads": 153,
+    "integrity_audits": 155
+  },
+  "certification_note": "The public GitHub-hosted runner executed the complete 11.9 reliability workflow on the exact certified head. The later main ancestry preserves this successful runtime evidence; no runnerless job was treated as PASS."
+}
