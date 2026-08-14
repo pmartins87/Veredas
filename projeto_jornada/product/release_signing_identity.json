@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_steps": ["12.2", "12.6"],
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
@@ -9,6 +9,7 @@
     "app_signing_key_managed_by": "Google Play",
     "app_signing_certificate_sha256": "PENDING_PLAY_APP_SIGNING_CERT_SHA256",
     "app_signing_certificate_not_after_utc": "PENDING_PLAY_APP_SIGNING_CERT_EXPIRY",
+    "required_certificate_expiry_after_utc": "2033-10-22T00:00:00Z",
     "certificate_source": "Google Play Console > App integrity > App signing",
     "private_key_in_repository": false,
     "private_key_in_ci_secrets": false
@@ -18,7 +19,9 @@
     "private_key_managed_by": "developer",
     "algorithm": "RSA",
     "minimum_key_size_bits": 2048,
+    "minimum_certificate_validity_years": 25,
     "certificate_sha256": "PENDING_PLAY_UPLOAD_CERT_SHA256",
+    "certificate_not_before_utc": "PENDING_PLAY_UPLOAD_CERT_START",
     "certificate_not_after_utc": "PENDING_PLAY_UPLOAD_CERT_EXPIRY",
     "registered_in_play_console": false,
     "keystore_committed": false,
@@ -36,13 +39,14 @@
     "private_keys_must_never_be_persisted_as_release_evidence": true,
     "release_aab_must_match_pinned_upload_certificate_sha256": true,
     "play_delivered_apk_identity_must_match_pinned_app_signing_certificate_sha256": true,
-    "certificate_expiry_must_be_after": "2033-10-22T00:00:00Z",
-    "recommended_key_validity_years": 25,
+    "app_signing_expiry_requirement_is_play_update_compatibility_boundary": true,
+    "upload_certificate_25_year_validity_is_generation_policy": true,
     "upload_key_reset_does_not_change_app_signing_identity": true
   },
   "release_evidence": {
     "upload_certificate_der_or_pem_public_export_allowed": true,
     "upload_certificate_sha256_record_required": true,
+    "upload_certificate_validity_window_record_required": true,
     "app_signing_certificate_sha256_record_required": true,
     "play_console_app_signing_enrollment_evidence_required": true,
     "play_console_upload_certificate_registration_evidence_required": true,
@@ -50,12 +54,13 @@
     "same_release_commit_binding_required": true
   },
   "completion_requirements": [
-    "generate a dedicated RSA upload key of at least 2048 bits and keep the private key outside the repository",
+    "generate a dedicated RSA upload key of at least 2048 bits with a certificate validity window of at least 25 years and keep the private key outside the repository",
     "store redundant encrypted upload-keystore backups outside the repository",
     "configure protected CI signing secrets",
     "enroll the app in Google Play App Signing",
     "register the upload certificate in Play Console",
-    "replace both PENDING certificate SHA-256 fingerprints and expiry fields with exact Play/keystore evidence",
+    "replace both PENDING certificate SHA-256 fingerprints and validity fields with exact Play/keystore evidence",
+    "prove the Google Play app-signing certificate expires after 2033-10-22",
     "prove upload and app-signing certificates are different",
     "prove the signed AAB uses the pinned upload certificate",
     "record the Google-held app-signing certificate fingerprint used for delivered APK identity",
