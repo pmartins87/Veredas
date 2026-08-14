@@ -17,6 +17,7 @@ ARTIFACT_CONTRACT = ROOT / "mobile" / "release_artifact_contract.json"
 PROVENANCE = ROOT / "product" / "release_provenance.json"
 INPUT_SCOPE_GATE = ROOT / "tools" / "release_input_scope_gate.py"
 NOTICES_GATE = ROOT / "tools" / "third_party_notices_gate.py"
+RECOVERY_GATE = ROOT / "tools" / "recovery_backup_drill_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
@@ -114,6 +115,12 @@ def main() -> int:
         errors.append("third-party notices gate failed in matching mode")
         if notices_output:
             errors.append("third-party notices detail: " + notices_output.splitlines()[-1][:500])
+
+    recovery_ok, recovery_output = run_gate(RECOVERY_GATE, release=args.release)
+    if not recovery_ok:
+        errors.append("recovery/backup drill gate failed in matching mode")
+        if recovery_output:
+            errors.append("recovery/backup drill detail: " + recovery_output.splitlines()[-1][:500])
 
     if manifest.get("schema_version") != 2 or manifest.get("roadmap_step") != "12.9":
         errors.append("release archive manifest schema/roadmap_step invalid")
@@ -237,13 +244,14 @@ def main() -> int:
             warnings.append("release provenance remains in progress, expected before final assets/dependency evidence")
 
     report = {
-        "schema_version": 3,
+        "schema_version": 4,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "archive_item_count": len(items),
         "placeholder_count": len(pending),
         "release_input_scope_verified": scope_ok,
         "third_party_notice_coverage_verified": notices_ok,
+        "recovery_backup_drill_semantics_verified": recovery_ok,
         "errors": errors,
         "warnings": warnings,
     }
@@ -258,7 +266,7 @@ def main() -> int:
         return 1
     mode = "RELEASE" if args.release else "PREFLIGHT"
     print(
-        "RELEASE_ARCHIVE %s PASS: items=%d placeholders=%d warnings=%d input_scope=1 notices=1"
+        "RELEASE_ARCHIVE %s PASS: items=%d placeholders=%d warnings=%d input_scope=1 notices=1 recovery=1"
         % (mode, len(items), len(pending), len(warnings))
     )
     for warning in warnings:
