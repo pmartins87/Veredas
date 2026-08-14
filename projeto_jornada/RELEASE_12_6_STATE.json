@@ -1,8 +1,10 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-13",
+  "updated_on": "2026-08-14",
+  "canonical_repository": "pmartins87/Veredas",
+  "canonical_branch": "main",
   "contract": "mobile/release_artifact_contract.json",
   "input_fingerprint_tool": "tools/release_input_fingerprint.py",
   "input_scope_gate": "tools/release_input_scope_gate.py",
@@ -45,11 +47,12 @@
     "bundletool_pinned_by_official_sha256": true,
     "godot_engine_pinned_by_official_sha256_in_11_10_and_12_6": true,
     "godot_export_templates_pinned_by_official_sha256_in_12_6": true,
-    "release_gate_python_compile_preflight": true
+    "release_gate_python_compile_preflight": true,
+    "canonical_repository_migrated_with_history_preserved": true
   },
   "control_surface": {
     "fingerprinted_control_files": 14,
-    "qa_11_10_workflow_git_blob_sha": "c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+    "qa_11_10_workflow_git_blob_sha": "d00e8662067cc3d5f1f139fcf964e54484c6c133",
     "signed_release_aab_workflow_git_blob_sha": "c43206c3eedf0af592aa238a90504c16e2d6b896",
     "workflow_change_requires_contract_update_and_new_11_10": true,
     "signing_identity_json_can_be_finalized_after_11_10_if_fingerprint_remains_identical": true
