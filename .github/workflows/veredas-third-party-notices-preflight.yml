@@ -1,0 +1,40 @@
+name: Veredas Third-Party Notices Preflight 12.9
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/veredas-third-party-notices-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notices-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit exact persisted backend SBOM notice coverage
+        id: audit
+        continue-on-error: true
+        working-directory: projeto_jornada
+        run: |
+          python tools/third_party_notices_gate.py \
+            --output /tmp/third-party-notices-preflight.json
+      - name: Upload exact preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-third-party-notices-preflight
+          path: /tmp/third-party-notices-preflight.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve fail-closed gate result
+        if: always()
+        run: test '${{ steps.audit.outcome }}' = 'success'
