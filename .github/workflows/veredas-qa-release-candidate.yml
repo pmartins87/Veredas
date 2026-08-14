@@ -11,11 +11,17 @@ on:
       - 'projeto_jornada/AUDIOVISUAL_11_7_COMPLETION.json'
       - 'projeto_jornada/QA_11_8_COMPLETION.json'
       - 'projeto_jornada/RELIABILITY_11_9_COMPLETION.json'
+      - 'projeto_jornada/mobile/**'
+      - 'projeto_jornada/export_presets.cfg'
+      - 'projeto_jornada/product/commercial_model.json'
+      - 'projeto_jornada/product/legal_documents.json'
       - 'projeto_jornada/ROADMAP_STATE.md'
       - 'projeto_jornada/qa/**'
       - 'projeto_jornada/tests/**'
       - 'projeto_jornada/tools/qa_release_candidate_gate.py'
       - 'projeto_jornada/tools/write_qa_release_candidate_completion.py'
+      - 'projeto_jornada/tools/release_version_identity_gate.py'
+      - 'projeto_jornada/tools/release_input_fingerprint.py'
       - '.github/workflows/veredas-qa-release-candidate.yml'
 
 concurrency:
@@ -43,6 +49,9 @@ jobs:
       - name: Require certified Phase 11 prerequisites
         working-directory: projeto_jornada
         run: python tools/qa_release_candidate_gate.py
+      - name: Require public Android version frozen before RC certification
+        working-directory: projeto_jornada
+        run: python tools/release_version_identity_gate.py --release
       - name: Preserve balance freeze 10.10
         working-directory: projeto_jornada
         run: python tools/verify_balance_freeze.py
@@ -113,15 +122,24 @@ jobs:
             'RELIABILITY_SOAK_CERTIFICATION PASS: 11.9'
       - name: Require repository remains clean
         run: git diff --exit-code
+      - name: Freeze exact release input fingerprint for this RC
+        working-directory: projeto_jornada
+        run: |
+          python tools/release_input_scope_gate.py
+          python tools/release_input_fingerprint.py \
+            --output /tmp/QA_11_10_RELEASE_INPUT_MANIFEST.json
       - name: Write 11.10 completion evidence after all gates pass
         run: |
           python projeto_jornada/tools/write_qa_release_candidate_completion.py \
             --output /tmp/QA_11_10_COMPLETION.json \
-            --workflow-run-id '${{ github.run_id }}'
+            --workflow-run-id '${{ github.run_id }}' \
+            --release-input-manifest /tmp/QA_11_10_RELEASE_INPUT_MANIFEST.json
       - name: Upload 11.10 completion evidence
         uses: actions/upload-artifact@v4
         with:
-          name: veredas-qa-11-10-completion-${{ github.sha }}
-          path: /tmp/QA_11_10_COMPLETION.json
+          name: veredas-qa-11-10-completion
+          path: |
+            /tmp/QA_11_10_COMPLETION.json
+            /tmp/QA_11_10_RELEASE_INPUT_MANIFEST.json
           if-no-files-found: error
           retention-days: 30
