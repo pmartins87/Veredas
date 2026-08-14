@@ -1,11 +1,14 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
   "source_of_truth": {
-    "repository": "pmartins87/desktop-tutorial",
-    "development_branch": "projeto-jornada-snapshots",
+    "repository": "pmartins87/Veredas",
+    "development_branch": "main",
+    "legacy_repository_before_rename": "pmartins87/desktop-tutorial",
+    "legacy_project_branch": "projeto-jornada-snapshots",
+    "history_preservation_required": true,
     "roadmap": "projeto_jornada/ROADMAP_STATE.md",
     "release_tag_pattern": "veredas-v<semver>",
     "final_release_tag": "PENDING_12_9_RELEASE_TAG"
