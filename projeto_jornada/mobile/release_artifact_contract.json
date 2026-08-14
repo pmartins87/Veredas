@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
@@ -25,14 +25,23 @@
     "signing_identity_gate": "tools/release_signing_identity_gate.py",
     "rc_binding_gate": "tools/release_rc_binding_gate.py",
     "aab_identity_gate": "tools/release_aab_identity_gate.py",
+    "workflow_integrity_gate": "tools/release_workflow_integrity_gate.py",
     "export_preset": "Android Play AAB (Unsigned CI Template)",
     "signed_workflow": ".github/workflows/veredas-release-aab.yml",
+    "qa_11_10_workflow": ".github/workflows/veredas-qa-release-candidate.yml",
     "billing_plugin_contract": "mobile/play_billing_contract.json",
     "release_input_fingerprint": "tools/release_input_fingerprint.py",
     "release_input_scope_gate": "tools/release_input_scope_gate.py",
     "canonical_validation": "tools/validate_canonical.py",
     "release_candidate_gate": "tools/qa_release_candidate_gate.py",
     "privacy_release_gate": "tools/privacy_data_safety_gate.py"
+  },
+  "workflow_integrity": {
+    "qa_11_10_git_blob_sha": "c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+    "signed_release_aab_git_blob_sha": "c43206c3eedf0af592aa238a90504c16e2d6b896",
+    "hash_algorithm": "Git blob SHA-1 via git hash-object",
+    "both_workflows_must_match_pinned_blob_before_11_10_and_release": true,
+    "workflow_change_requires_contract_update_and_new_11_10": true
   },
   "toolchain_supply_chain": {
     "godot_release": "4.7.1-stable",
@@ -65,11 +74,12 @@
     "evidence_file": "aab-identity-evidence.json"
   },
   "release_input_scope": {
-    "policy": "fingerprint runtime/build inputs, not mutable release-evidence records that store or describe that fingerprint",
+    "policy": "fingerprint runtime/build inputs plus critical release-control scripts, not mutable console/signing evidence or archive metadata",
     "runtime_product_files": [
       "product/commercial_model.json",
       "product/legal_documents.json"
     ],
+    "critical_release_control_scripts_fingerprinted": true,
     "whole_product_directory_forbidden": true,
     "runtime_product_reference_scan_required": true,
     "release_archive_manifest_excluded_from_fingerprint": true,
@@ -83,14 +93,15 @@
     "certified_11_10_source_workflow_run_id_required": true,
     "later_evidence_only_commits_allowed": true,
     "later_commit_allowed_only_if_release_input_aggregate_sha256_is_identical": true,
-    "runtime_build_input_change_requires_new_11_10": true,
+    "runtime_build_or_critical_control_input_change_requires_new_11_10": true,
     "version_or_export_preset_change_requires_new_11_10": true,
+    "critical_workflow_blob_change_requires_new_11_10": true,
     "clean_worktree_required_at_11_10": true,
     "release_input_manifest_sha256_required": true,
     "release_input_manifest_rechecked_before_and_after_export": true,
     "same_input_rebuild_must_match_release_input_manifest": true,
     "signed_container_byte_identity_required": false,
-    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; certified source/input fingerprint, package/version, effective bundle manifest, upload-certificate identity and signature validity are authoritative",
+    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; certified runtime/build/control fingerprint, package/version, effective bundle manifest, upload-certificate identity and signature validity are authoritative",
     "canonical_game_data_must_remain_frozen": true,
     "fingerprint_self_reference_forbidden": true
   },
@@ -119,11 +130,12 @@
     "12.3 privacy/Data Safety certified",
     "12.4 production billing certified",
     "12.5 final store assets/copy certified",
-    "release input scope is acyclic and covers every runtime product resource",
+    "release input scope is acyclic and covers every runtime product resource and critical release-control script",
+    "both critical GitHub Actions workflow blobs match the identities pinned inside the fingerprinted artifact contract",
     "Godot engine, Godot export templates and bundletool match the pinned official SHA-256 digests before release execution",
     "prove the downloaded 11.10 completion/manifest came from the explicit successful run and the certified head is an ancestor of the release head",
     "prove current release-input aggregate SHA-256 exactly matches the 11.10-certified aggregate before export and after import/export",
-    "produce signed AAB from those unchanged certified runtime/build inputs",
+    "produce signed AAB from those unchanged certified runtime/build/control inputs",
     "verify the signer certificate extracted from the AAB matches the frozen upload certificate SHA-256",
     "inspect the exact AAB with pinned bundletool and verify package/version/minSdk/targetSdk/debuggable/effective permissions",
     "persist AAB SHA-256, certified/current release-input manifests, 11.10 completion and signing/AAB identity evidence",
