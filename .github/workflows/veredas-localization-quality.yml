@@ -53,3 +53,5 @@ jobs:
           path: /tmp/veredas-localization-quality.json
           if-no-files-found: ignore
           retention-days: 7
+
+# Recertify after reproducible pack rebuild: 2026-08-14

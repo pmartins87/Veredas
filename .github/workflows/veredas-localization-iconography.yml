@@ -67,3 +67,5 @@ jobs:
             res://tests/responsive_accessibility_certification.tscn \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
+
+# Recertify after reproducible pack rebuild: 2026-08-14
