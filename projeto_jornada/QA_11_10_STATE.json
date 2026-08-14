@@ -1,13 +1,18 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "11.10",
   "formal_status": "in_progress",
-  "goal": "freeze a single canonical build as the Release Candidate only after all Phase 11 release gates are certified",
+  "goal": "freeze the canonical runtime/build/control input identity as the Release Candidate only after all Phase 11 gates and the public Android version are certified",
   "gate": "tools/qa_release_candidate_gate.py",
+  "version_gate": "tools/release_version_identity_gate.py --release",
+  "input_scope_gate": "tools/release_input_scope_gate.py",
+  "input_fingerprint_tool": "tools/release_input_fingerprint.py",
+  "workflow_integrity_gate": "tools/release_workflow_integrity_gate.py",
   "completion_writer": "tools/write_qa_release_candidate_completion.py",
   "workflow": ".github/workflows/veredas-qa-release-candidate.yml",
-  "completion_artifact_name_pattern": "veredas-qa-11-10-completion-<github.sha>",
+  "completion_artifact_name": "veredas-qa-11-10-completion",
   "completion_file": "QA_11_10_COMPLETION.json",
+  "certified_release_input_manifest": "QA_11_10_RELEASE_INPUT_MANIFEST.json",
   "required_completion_artifacts": {
     "11.3": {"file":"PERFORMANCE_11_3_COMPLETION.json","status":"pending"},
     "11.6": {"file":"LOCALIZATION_11_6_COMPLETION.json","status":"pending"},
@@ -16,9 +21,10 @@
     "11.9": {"file":"RELIABILITY_11_9_COMPLETION.json","status":"pending"}
   },
   "freeze_contract": [
-    "each completion artifact must report status=pass and the correct roadmap_step",
-    "each certified commit must exist in full git history and be an ancestor of the candidate HEAD",
+    "each prerequisite completion artifact must report status=pass and the correct roadmap_step",
+    "each prerequisite certified commit must exist in full git history and be an ancestor of the candidate HEAD",
     "ROADMAP_STATE must mark 11.1 through 11.9 complete",
+    "public Android version name/code must be frozen and pass release_version_identity_gate.py --release before 11.10 can pass",
     "10.10 balance freeze must remain valid",
     "11.8 zero blocker/critical gate must still pass",
     "canonical data validation must pass",
@@ -27,8 +33,13 @@
     "11.6 overflow and iconography gates must pass on the candidate HEAD",
     "11.7 audiovisual context must pass on the candidate HEAD",
     "11.9 reliability soak must pass on the candidate HEAD",
+    "Godot 4.7.1 Linux binary must match its pinned official SHA-256 before execution",
+    "critical 11.10 and signed-AAB workflow Git blobs must match the fingerprinted release artifact contract",
+    "critical release-control scripts must participate in the release-input fingerprint",
     "the workflow must finish with no repository diff",
-    "only after all preceding gates pass, write_qa_release_candidate_completion.py may emit status=pass for the exact HEAD",
+    "after all preceding gates pass, generate QA_11_10_RELEASE_INPUT_MANIFEST.json and record its aggregate SHA-256 in QA_11_10_COMPLETION.json",
+    "later evidence-only commits are acceptable downstream only if the certified head remains an ancestor and the complete runtime/build/control input fingerprint remains identical",
+    "any runtime, content, version, export preset, mobile contract, critical release-control script or pinned critical workflow change requires a new 11.10",
     "a runnerless/unexecuted job cannot emit or justify QA_11_10_COMPLETION.json"
   ],
   "completion_evidence_contract": {
@@ -37,14 +48,20 @@
     "certified_against_head": "full 40-character commit SHA",
     "certified_at_utc": "UTC timestamp",
     "source_workflow_run_id": "GitHub Actions run id",
+    "release_input_evidence": {
+      "manifest_filename": "QA_11_10_RELEASE_INPUT_MANIFEST.json",
+      "manifest_sha256": "SHA-256 of exact artifact file",
+      "aggregate_sha256": "SHA-256 aggregate of certified runtime/build/control inputs",
+      "file_count": "positive integer"
+    },
     "artifact_first_then_reviewed_persistence": true,
     "precreate_completion_file_forbidden": true
   },
   "downstream_consumers": [
     "12.5 store screenshot capture provenance",
-    "12.6 release artifact build prerequisites",
+    "12.6 signed release artifact lineage and fingerprint binding",
     "12.8 final RC identity"
   ],
   "pass_recorded": false,
-  "note": "This infrastructure is intentionally fail-closed. Preparing 11.10 or its completion writer does not promote the roadmap step before its prerequisites and same-HEAD runtime gates are green."
+  "note": "This infrastructure is intentionally fail-closed. Preparing 11.10, freezing workflows or writing evidence tooling does not promote the roadmap step. The identity certified by 11.10 is the frozen public-version runtime/build/control fingerprint, not a mutable Play Console evidence commit."
 }
