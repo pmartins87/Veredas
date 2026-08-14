@@ -188,10 +188,14 @@ def main() -> int:
     launch_locales = [str(value) for value in manifest.get("launch_locales", [])]
     targets = [locale for locale in launch_locales if locale != source_locale]
 
+    non_launch_probe_keys = {"ui.architecture.source_only_probe"}
     source_units = {
         str(row["key"]): str(row["source"])
         for row in catalog.get("units", [])
-        if isinstance(row, dict) and isinstance(row.get("key"), str) and isinstance(row.get("source"), str)
+        if isinstance(row, dict)
+        and isinstance(row.get("key"), str)
+        and isinstance(row.get("source"), str)
+        and str(row["key"]) not in non_launch_probe_keys
     }
     glossary_terms = glossary.get("terms", {})
     if not isinstance(glossary_terms, dict):
