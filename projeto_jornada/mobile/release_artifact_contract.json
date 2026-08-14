@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
@@ -31,6 +31,19 @@
     "canonical_validation": "tools/validate_canonical.py",
     "release_candidate_gate": "tools/qa_release_candidate_gate.py",
     "privacy_release_gate": "tools/privacy_data_safety_gate.py"
+  },
+  "toolchain_supply_chain": {
+    "godot_release": "4.7.1-stable",
+    "godot_release_source": "godotengine/godot-builds official GitHub release",
+    "godot_linux_x86_64_asset": "Godot_v4.7.1-stable_linux.x86_64.zip",
+    "godot_linux_x86_64_sha256": "c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba",
+    "godot_export_templates_asset": "Godot_v4.7.1-stable_export_templates.tpz",
+    "godot_export_templates_sha256": "86409db6200b6f8fd3230989c2d2002851f3dd18acf11d7bdbafddf5a0dd0f72",
+    "godot_engine_digest_required_in_11_10": true,
+    "godot_engine_and_templates_digests_required_in_12_6": true,
+    "bundletool_version": "1.18.3",
+    "bundletool_official_release_sha256": "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29",
+    "downloaded_release_tools_must_match_pinned_digests_before_execution": true
   },
   "artifact_inspection": {
     "bundletool_version": "1.18.3",
@@ -99,7 +112,8 @@
     "12.3 privacy/Data Safety certified",
     "12.4 production billing certified",
     "12.5 final store assets/copy certified",
-    "release_input_scope_gate.py proves every runtime product resource is fingerprinted and no release-evidence/self-referential file is fingerprinted",
+    "release input scope is acyclic and covers every runtime product resource",
+    "Godot engine, Godot export templates and bundletool match the pinned official SHA-256 digests before release execution",
     "produce and persist release-input manifest before export and prove the same manifest after import/export",
     "produce signed AAB from the exact 11.10 certified commit",
     "verify the signer certificate extracted from the AAB matches the frozen upload certificate SHA-256",
