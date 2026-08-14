@@ -1,11 +1,12 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
   "contract": "product/continuity_support_contract.json",
   "runbook": "docs/CONTINUITY_AND_SUPPORT.md",
   "provenance_contract": "product/release_provenance.json",
+  "recovery_drill_record": "product/recovery_backup_drill.json",
   "third_party_notices_manifest": "product/third_party_notices.json",
   "release_archive_manifest": "product/release_archive_manifest.json",
   "gate": "tools/continuity_support_gate.py",
@@ -16,6 +17,7 @@
   "android_dependency_inventory_generator": "tools/gradle_dependency_inventory.init.gradle",
   "android_dependency_inventory_gate": "tools/android_dependency_inventory_gate.py",
   "third_party_notices_gate": "tools/third_party_notices_gate.py",
+  "recovery_backup_drill_gate": "tools/recovery_backup_drill_gate.py",
   "release_archive_gate": "tools/release_archive_gate.py",
   "release_input_scope_gate": "tools/release_input_scope_gate.py",
   "implemented": {
@@ -29,6 +31,10 @@
     "runtime_product_reference_fingerprint_gate": true,
     "signing_and_secret_backup_policy": true,
     "account_recovery_contract": true,
+    "canonical_recovery_backup_drill_record": true,
+    "recovery_backup_drill_fail_closed_gate": true,
+    "recovery_drill_scenarios": 6,
+    "minimum_independent_encrypted_keystore_backups": 2,
     "save_and_entitlement_compatibility_policy": true,
     "privacy_and_data_safety_continuity": true,
     "asset_provenance_contract": true,
@@ -59,6 +65,12 @@
     "support_severity_and_triage_policy": true,
     "incident_hotfix_runbook": true,
     "handoff_bus_factor_checklist": true,
+    "continuity_gate_schema_4_alignment": true,
+    "continuity_composite_gate_component_count": 7,
+    "continuity_composite_binds_android_inventory": true,
+    "continuity_composite_binds_third_party_notices": true,
+    "continuity_composite_binds_recovery_drill": true,
+    "continuity_composite_binds_release_input_scope": true,
     "fail_closed_release_gate": true
   },
   "current_preflight": {
@@ -79,6 +91,10 @@
     "canonical_release_archive_required_items": 12,
     "known_third_party_notice_rows": 7,
     "runtime_product_fingerprint_files": 2,
+    "recovery_required_systems": 5,
+    "recovery_required_scenarios": 6,
+    "recovery_scenarios_passed": 0,
+    "recovery_private_secret_material_allowed_in_repository": false,
     "backend_dependency_evidence_pipeline": "implemented_execution_pending_runner",
     "backend_dependency_evidence_expected_environment": "Python 3.12/Linux runtime resolver with no evidence-only package installed into the frozen runtime environment",
     "backend_dependency_evidence_proves": [
@@ -99,7 +115,8 @@
     "third_party_notice_backend_transitive_coverage": "pending_final_sbom",
     "third_party_notice_android_coverage": "pending_final_gradle_inventory",
     "license_notice_archive": "pending_final_review",
-    "release_archive_identity": "pending_final_12_6_12_8_artifact"
+    "release_archive_identity": "pending_final_12_6_12_8_artifact",
+    "recovery_backup_drill": "contract_and_gate_ready_real_owners_backups_accounts_and_drill_pending"
   },
   "pending": {
     "12_8_certified": false,
@@ -112,6 +129,7 @@
     "third_party_notices_backend_coverage_complete": false,
     "third_party_notices_android_coverage_complete": false,
     "third_party_notices_review_and_archive_complete": false,
+    "recovery_backup_drill_gate_passed": false,
     "release_archive_manifest_frozen": false,
     "release_archive_required_item_hashes_verified": false,
     "release_archive_identity_matches_12_6_12_8": false,
@@ -147,6 +165,7 @@
     "all 12 required archive items exist and their SHA-256 values are verified",
     "real ownership, recovery, support and privacy channels are configured",
     "Play/repository/Billing recovery paths and secret backup restore are verified",
+    "the canonical six-scenario recovery/backup drill passes with a distinct second authorized observer and no secret material recorded",
     "the four current SVG atlases and every later final art/audio/font asset have current-blob + introduction-commit provenance, explicit final rights review and no prohibited source",
     "all redistributed/runtime software has reviewed license/source evidence and archived notices",
     "production external-service terms/data-role review is archived",
