@@ -3,7 +3,7 @@ name: Veredas Regression Matrix
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
   workflow_dispatch:
 
 concurrency:
