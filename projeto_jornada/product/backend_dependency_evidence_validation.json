@@ -1,0 +1,10 @@
+{
+  "schema_version": 3,
+  "roadmap_step": "12.9",
+  "mode": "required_evidence",
+  "evidence_present": true,
+  "direct_requirement_count": 5,
+  "locked_component_count": 29,
+  "errors": [],
+  "warnings": []
+}

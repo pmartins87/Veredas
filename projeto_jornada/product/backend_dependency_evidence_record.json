@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "status": "pass",
+  "source_workflow_run_id": 31851792108,
+  "source_workflow_job_id": 94928810551,
+  "source_head_sha": "f5937a95d4de1495436325bf8e5b1423e9bad994",
+  "source_artifact_id": 9237746247,
+  "source_artifact_digest": "sha256:e7ec5b28c393482dbeb0a3f34ccc895f767bee3a713f480b7d1a2d0a38077e03",
+  "environment": {
+    "python": "3.12.13",
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "direct_requirement_count": 5,
+  "locked_component_count": 29,
+  "requirements_lock_sha256": "32632ae1ce714af4f55e4c63102909cec85fc19cee7329656b9082e259fbab47",
+  "software_sbom_sha256": "fcf33fc9dab2650b1c239390ddf5fbeab5dbcfc8f0b4e68207d77d9d5199e818",
+  "validation_report_sha256": "2fc434ad2c4f2843aa190b518e1db680e42a175db218aedb48933f1a949b170a",
+  "resolved_freeze_sha256": "a33fc1a1a6d7ac2952896dfdbf60553f203e50204ffaa8f0e452e4ef6df9bf0f",
+  "offline_require_hashes_reinstall_passed": true,
+  "pip_check_passed_before_and_after_reinstall": true,
+  "resolved_vs_reinstalled_freeze_equal": true,
+  "backend_imports_passed": true
+}
