@@ -40,10 +40,10 @@
 - 11.7 🟡 — QA audiovisual real; faltam assets finais, incluindo 38 referências de áudio.
 - 11.8 ✅ — zero blocker/critical ativo; `BILL-124-001` descoberto depois foi corrigido e permanece resolved.
 - 11.9 🟡 — 128 pause/resume + 24 restart rounds preparados; execução real pendente.
-- 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9. O workflow agora só emite `QA_11_10_COMPLETION.json` **depois** de todos os gates passarem e a árvore estar limpa; o completion nasce como artifact da execução, com `status=pass` e `certified_against_head` exato, portanto job runnerless não consegue fabricar evidência.
+- 11.10 🟡 — freeze RC depende de 11.3/11.6/11.7/11.9. O workflow exige versão pública congelada antes do PASS, usa Godot 4.7.1 cujo binário Linux é verificado pelo SHA-256 oficial e só emite evidência após todos os gates + árvore limpa. O artifact contém `QA_11_10_COMPLETION.json` **e** `QA_11_10_RELEASE_INPUT_MANIFEST.json`: o completion registra o HEAD certificado e o aggregate SHA-256 de todos os inputs runtime/build. Mudança posterior de código, conteúdo, versão, preset ou qualquer input fingerprintado exige novo 11.10; commits posteriores somente de evidência/console são aceitos se o fingerprint continuar byte-identical.
 
 ### Infraestrutura de execução
-GitHub Actions continua apresentando falha anterior ao primeiro step: `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. O workflow novo de 12.5 repetiu esse padrão; não gastar interações rerodando executor inexistente sem indício de recuperação.
+GitHub Actions continua apresentando falha anterior ao primeiro step: último probe observado com `runner_id=0`, `steps=[]`, nome/grupo de runner vazios. Isso **não é PASS nem FAIL do código**. Não gastar interações rerodando executor inexistente sem indício de recuperação.
 
 ## Fase 12 — Publicação e release
 Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 seguem 🟡**.
@@ -52,9 +52,13 @@ Nenhum passo da Fase 12 está formalmente concluído; **12.1–12.10 seguem 🟡
 Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não encontraram colisão exata indexada relevante, mas isso não é clearance jurídico. INPI/WIPO interativos, domínios/handles e decisão final de marca seguem pendentes.
 
 ### 12.2 🟡 — package/versionamento/assinatura/toolchain
-- Godot 4.7.1; minSdk 24; compile/target API 36; Build Tools 36.1.0.
-- `INTERNET` explícito e backend excluído dos dois presets Android.
-- Faltam keystore/backup, secrets, Play Console, freeze de versão e artefato assinado real.
+- Application ID congelado em `com.pmartins87.veredasdatrama`; Godot 4.7.1, minSdk 24, compile/target API 36 e Build Tools 36.1.0.
+- `mobile/release_identity.json` agora contém contrato explícito de **freeze de versão pública**: `0.1.0-dev`/code 1 continuam desenvolvimento; alvo inicial é `1.0.0`. O gate `tools/release_version_identity_gate.py --release` recusa RC/release enquanto a versão não estiver congelada em semver estável e o versionCode não tiver confirmação de estar livre no Play Console. Qualquer mudança de versão depois de 11.10 muda o fingerprint e exige novo 11.10.
+- `product/release_signing_identity.json` separa **upload key** e **Play app-signing key**. Upload: RSA >=2048, certificado com janela de validade >=25 anos, keystore/segredos fora do Git e backups criptografados redundantes. App signing: chave gerenciada pelo Google Play, fingerprint SHA-256 público e validade além de 2033-10-22. Os dois certificados devem ser distintos.
+- `tools/release_signing_identity_gate.py` inspeciona certificado público real, tamanho/algoritmo, janela de validade e SHA-256; material privado nunca vira evidência.
+- O signer é posteriormente extraído **do próprio AAB** e precisa coincidir com o fingerprint congelado da upload key.
+- `INTERNET` permanece explícito e backend excluído dos dois presets Android.
+- Faltam: keystore real + backups, protected secrets, Play App Signing/registro do upload cert, fingerprints/validades reais, confirmação do versionCode livre, freeze `1.0.0`, política final e evidência de Play Console.
 
 ### 12.3 🟡 — privacidade, Data Safety, termos, classificação e plataforma
 - Runtime legal PT-BR/en e drafts bilíngues implementados.
@@ -78,24 +82,27 @@ Candidato **Veredas da Trama**. Duas rodadas de reconnaissance pública não enc
 ### 12.5 🟡 — store listing/ASO/assets
 - Copy PT-BR/en-US pronta e coerente com desbloqueio integral + Selo de Apoiador visual-only; contagens atuais: **1319 PT-BR / 1207 en-US** na descrição completa.
 - Baseline oficial Google Play rechecado em 2026-08-13. Mantemos 6 screenshots retrato 1080×1920 por idioma, excedendo a recomendação de jogos de pelo menos 3 imagens 9:16 nessa resolução mínima.
-- `product/store_capture_manifest.json` define **12 capturas reais do Android RC**, todas obrigatoriamente do mesmo `QA_11_10_COMPLETION`/commit/versão/fingerprint; cada PNG recebe SHA-256, timestamp UTC e identidade do device/emulador.
-- `tools/finalize_store_capture_manifest.py` somente vincula metadados/hashes a PNGs já capturados e não edita pixels. `tools/store_capture_provenance_gate.py` valida o caminho inverso e rejeita mockup, RC divergente, hash divergente ou completion 11.10 sem `status=pass`/SHA completo.
-- `tools/store_listing_gate.py` também deixou de aceitar mera existência de `QA_11_10_COMPLETION.json`: no release valida o conteúdo do certificado.
+- `product/store_capture_manifest.json` define **12 capturas reais do Android RC**, todas obrigatoriamente do mesmo conteúdo/build certificado; cada PNG recebe SHA-256, timestamp UTC e identidade do device/emulador.
+- `tools/finalize_store_capture_manifest.py` somente vincula metadados/hashes a PNGs já capturados e não edita pixels. `tools/store_capture_provenance_gate.py` valida o caminho inverso e rejeita mockup, RC/fingerprint divergente, hash divergente ou completion 11.10 inválido.
+- `tools/store_listing_gate.py` também deixou de aceitar mera existência de completion; no release valida seu conteúdo.
 - `tools/store_commercial_consistency_gate.py` prova que **listing ↔ `commercial_model.json` ↔ Billing ↔ Termos** descrevem os mesmos dois produtos não consumíveis: desbloqueio integral content-only e Selo de Apoiador `supporter_badge` visual-only, sem anúncios, assinaturas, loot boxes ou poder pago.
 - Feature graphic mantém alt text padrão PT-BR e variante localizada en-US no contrato; arte final ainda não existe.
-- Workflow `.github/workflows/veredas-store-listing-12-5.yml` executará os três gates quando houver runner. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
+- Workflow `.github/workflows/veredas-store-listing-12-5.yml` executará os gates quando houver runner. Ainda faltam arte final do ícone/feature graphic, as 12 capturas do RC real, 12.1/12.4 finais, execução dos gates e inspeção/upload no Play Console.
 
 ### 12.6 🟡 — AAB/APK final assinado/reproduzível
-- Fingerprint de inputs é acíclico: só recursos runtime reais entram; evidência de release fica fora.
-- Workflow exige equivalência pre/post export.
-- Inventário Android final é extraído do `releaseRuntimeClasspath` no mesmo Gradle do AAB, com SHA-256 de AAR/JAR/local e cross-check da versão Billing.
-- Faltam pré-requisitos certificados, addon/template Gradle real, AAB assinado, inventário persistido, rebuild equivalence e Play acceptance.
+- O vínculo 11.10 → AAB não depende mais de “mesmo commit literal”. O critério é **HEAD 11.10 ancestral + `QA_11_10_RELEASE_INPUT_MANIFEST.json` idêntico**. Isso permite commits administrativos posteriores de assinatura/Play sem reexecutar QA, mas qualquer mudança em código, conteúdo, versão, presets, `mobile/` ou demais inputs fingerprintados bloqueia o AAB e exige novo 11.10.
+- `tools/release_rc_binding_gate.py` verifica ancestry, run ID, integridade do completion e SHA-256 do manifesto certificado. O workflow compara os inputs atuais com esse manifesto antes e depois do import/export.
+- Godot Linux 4.7.1 e export templates são baixados dos releases oficiais e verificados por SHA-256; `bundletool 1.18.3` também está pinado por digest oficial.
+- `tools/release_aab_identity_gate.py` lê o **manifest efetivo do AAB** com bundletool e valida applicationId, versionName/code, minSdk, targetSdk, `debuggable=false`, `INTERNET` e inventário de permissões; permissões incompatíveis com o baseline de privacidade falham fechado.
+- A assinatura usa protected secrets temporários; `jarsigner -strict` valida o AAB e `keytool -printcert -jarfile` extrai o certificado do artefato, que precisa coincidir com o SHA-256 da upload key congelada.
+- Fingerprint de inputs permanece acíclico; evidência de release fica fora. Inventário Android final continua previsto sobre `releaseRuntimeClasspath` no mesmo Gradle do AAB.
+- Faltam: pré-requisitos 11.10/12.2–12.5 reais, addon/template Gradle final, AAB assinado real, execução dos novos gates, inventário Android persistido, rebuild equivalence, auditoria de payload e aceitação no Play Console.
 
 ### 12.7 🟡 — teste interno/fechado
 Baseline: interno + fechado, >=12 testers por >=14 dias contínuos. Evidência real pendente.
 
 ### 12.8 🟡 — RC final/go-no-go/rollback
-Exige 11.10 + 12.1–12.7 certificados, mesma identidade de artefato, zero blockers, dry run e decisão go/no-go.
+Exige 11.10 + 12.1–12.7 certificados, mesma identidade de inputs/artefato, zero blockers, dry run e decisão go/no-go.
 
 ### 12.9 🟡 — continuidade/suporte/proveniência/licenças
 - 4 SVGs atuais têm blob Git + commit de introdução; revisão final de direitos pendente.
@@ -113,13 +120,14 @@ Somente PASS quando 12.8/12.9 e toda identidade tag/commit/version/AAB/signing/a
 1. Aparelho físico para 11.3.
 2. Executor funcional para gates reais 11.6/11.9/11.10 e suítes 12.x.
 3. Assets finais de arte/áudio para Fase 7, 11.7, classificação visual/audiovisual e store assets.
-4. Play Console, assinatura, addon Billing e AAB real.
-5. Backend de produção: endpoint HTTPS, identidade/Play API, Firestore, **TTL `expires_at` habilitado/verificado**, rate limit e auditoria real.
-6. Classificação/público-alvo: revisão do corpus/arte/áudio finais, faixas-alvo decididas, IARC real e eventuais revisões Famílias/menores.
-7. Test track real 12.7.
-8. Store 12.5: completion real de 11.10 + 12 screenshots Android do mesmo RC + icon/feature graphic finais.
-9. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
-10. Due diligence final do nome e documentação pública/legal.
+4. 12.2: upload keystore + backups, protected secrets, Play App Signing, fingerprints/validades, versionCode livre e freeze público `1.0.0` antes do 11.10 final.
+5. Play Console, addon Billing e AAB real.
+6. Backend de produção: endpoint HTTPS, identidade/Play API, Firestore, **TTL `expires_at` habilitado/verificado**, rate limit e auditoria real.
+7. Classificação/público-alvo: revisão do corpus/arte/áudio finais, faixas-alvo decididas, IARC real e eventuais revisões Famílias/menores.
+8. Test track real 12.7.
+9. Store 12.5: completion/fingerprint real de 11.10 + 12 screenshots Android do conteúdo certificado + icon/feature graphic finais.
+10. Continuidade final: lock/SBOM, inventário Android, notices/licenças, direitos dos assets, 12 itens do arquivo, owners/recovery/handoff.
+11. Due diligence final do nome e documentação pública/legal.
 
 ## Regra de avanço
 - Não repetir diagnóstico de blocker conhecido sem nova evidência.
