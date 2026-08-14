@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/PERFORMANCE_11_3_COMPLETION.json'
       - 'projeto_jornada/LOCALIZATION_11_6_COMPLETION.json'
