@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
@@ -10,11 +10,19 @@
     "signed": true,
     "sha256_required": true,
     "signature_verification_required": true,
-    "play_upload_artifact": true
+    "play_upload_artifact": true,
+    "exact_11_10_completion_binding_required": true,
+    "upload_certificate_identity_binding_required": true,
+    "effective_manifest_inspection_required": true
   },
   "build_recipe": {
     "engine": "Godot 4.7.1 stable",
     "android_application_id_source": "mobile/release_identity.json",
+    "version_identity_gate": "tools/release_version_identity_gate.py",
+    "signing_identity_contract": "product/release_signing_identity.json",
+    "signing_identity_gate": "tools/release_signing_identity_gate.py",
+    "rc_binding_gate": "tools/release_rc_binding_gate.py",
+    "aab_identity_gate": "tools/release_aab_identity_gate.py",
     "export_preset": "Android Play AAB (Unsigned CI Template)",
     "signed_workflow": ".github/workflows/veredas-release-aab.yml",
     "billing_plugin_contract": "mobile/play_billing_contract.json",
@@ -23,6 +31,23 @@
     "canonical_validation": "tools/validate_canonical.py",
     "release_candidate_gate": "tools/qa_release_candidate_gate.py",
     "privacy_release_gate": "tools/privacy_data_safety_gate.py"
+  },
+  "artifact_inspection": {
+    "bundletool_version": "1.18.3",
+    "bundletool_official_release_sha256": "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29",
+    "bundletool_release_source": "google/bundletool 1.18.3 official GitHub release asset",
+    "manifest_fields_verified_from_exact_aab": [
+      "application_id",
+      "version_name",
+      "version_code",
+      "min_sdk",
+      "target_sdk",
+      "debuggable",
+      "effective_permissions"
+    ],
+    "privacy_sensitive_permissions_fail_closed": true,
+    "internet_permission_required_for_billing_verification": true,
+    "evidence_file": "aab-identity-evidence.json"
   },
   "release_input_scope": {
     "policy": "fingerprint runtime/build inputs, not mutable release-evidence records that store or describe that fingerprint",
@@ -38,15 +63,26 @@
   },
   "reproducibility_policy": {
     "exact_source_commit_required": true,
+    "exact_11_10_completion_artifact_required": true,
+    "exact_11_10_source_workflow_run_id_required": true,
     "clean_worktree_required": true,
     "release_input_manifest_sha256_required": true,
     "release_input_manifest_generated_before_export": true,
     "release_input_manifest_rechecked_after_export": true,
     "same_commit_rebuild_must_match_release_input_manifest": true,
     "signed_container_byte_identity_required": false,
-    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; source/input fingerprint, package/version, bundle contents and signature validity are authoritative",
+    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; source/input fingerprint, package/version, effective bundle manifest, upload-certificate identity and signature validity are authoritative",
     "canonical_game_data_must_remain_frozen": true,
     "fingerprint_self_reference_forbidden": true
+  },
+  "signing_policy": {
+    "play_app_signing_required": true,
+    "aab_signed_with_upload_key": true,
+    "delivered_apks_signed_by_google_play_app_signing_key": true,
+    "upload_and_app_signing_certificates_must_differ": true,
+    "aab_signer_certificate_extracted_from_artifact": true,
+    "aab_signer_sha256_must_match_frozen_upload_certificate": true,
+    "private_keys_in_release_evidence_forbidden": true
   },
   "forbidden_release_payload_roots": [
     "docs/",
@@ -58,16 +94,17 @@
     "build/"
   ],
   "completion_requirements": [
-    "11.10 Release Candidate certified",
-    "12.2 signing identity and version frozen",
+    "11.10 Release Candidate certified and its completion artifact downloaded from the explicit successful workflow run",
+    "12.2 package, public version, upload key and Google Play app-signing identities frozen before 11.10",
     "12.3 privacy/Data Safety certified",
     "12.4 production billing certified",
     "12.5 final store assets/copy certified",
     "release_input_scope_gate.py proves every runtime product resource is fingerprinted and no release-evidence/self-referential file is fingerprinted",
     "produce and persist release-input manifest before export and prove the same manifest after import/export",
-    "produce signed AAB from exact RC commit",
-    "verify signing, application id, version code/name and SHA-256",
-    "persist release-input fingerprint and artifact evidence",
+    "produce signed AAB from the exact 11.10 certified commit",
+    "verify the signer certificate extracted from the AAB matches the frozen upload certificate SHA-256",
+    "inspect the exact AAB with pinned bundletool and verify package/version/minSdk/targetSdk/debuggable/effective permissions",
+    "persist AAB SHA-256, release-input fingerprint, exact 11.10 completion and signing/AAB identity evidence",
     "repeat build from same commit and prove identical release-input fingerprint and equivalent package/version/content contract",
     "inspect final bundle for forbidden internal payload roots including backend sources",
     "record final artifact size and Play Console acceptance"
