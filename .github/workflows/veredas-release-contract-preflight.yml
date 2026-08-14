@@ -3,7 +3,7 @@ name: Veredas Release Identity Preflight 12.2-12.6
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/mobile/release_identity.json'
       - 'projeto_jornada/mobile/release_artifact_contract.json'
