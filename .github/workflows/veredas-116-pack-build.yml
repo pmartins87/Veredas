@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build-certify-persist:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +31,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Rebuild integrated canonical fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
       - name: Build complete compact launch localization packs
         working-directory: projeto_jornada
         run: python tools/build_launch_localization_packs.py --build
