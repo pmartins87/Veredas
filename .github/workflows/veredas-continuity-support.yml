@@ -9,6 +9,7 @@ on:
       - 'projeto_jornada/RELEASE_12_9_STATE.json'
       - 'projeto_jornada/mobile/release_artifact_contract.json'
       - 'projeto_jornada/product/continuity_support_contract.json'
+      - 'projeto_jornada/product/recovery_backup_drill.json'
       - 'projeto_jornada/product/release_provenance.json'
       - 'projeto_jornada/product/release_archive_manifest.json'
       - 'projeto_jornada/product/third_party_notices.json'
@@ -22,9 +23,11 @@ on:
       - 'projeto_jornada/tools/release_input_scope_gate.py'
       - 'projeto_jornada/tools/build_backend_dependency_evidence.py'
       - 'projeto_jornada/tools/backend_dependency_evidence_gate.py'
+      - 'projeto_jornada/tools/android_dependency_inventory_gate.py'
       - 'projeto_jornada/tools/third_party_notices_gate.py'
       - 'projeto_jornada/tools/provenance_license_gate.py'
       - 'projeto_jornada/tools/release_archive_gate.py'
+      - 'projeto_jornada/tools/recovery_backup_drill_gate.py'
       - 'projeto_jornada/tools/continuity_support_gate.py'
       - '.github/workflows/veredas-backend-dependency-evidence.yml'
       - '.github/workflows/veredas-continuity-support.yml'
@@ -54,6 +57,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Compile 12.9 gates
+        working-directory: projeto_jornada
+        run: |
+          python -m py_compile \
+            tools/backend_dependency_evidence_gate.py \
+            tools/android_dependency_inventory_gate.py \
+            tools/third_party_notices_gate.py \
+            tools/provenance_license_gate.py \
+            tools/release_archive_gate.py \
+            tools/recovery_backup_drill_gate.py \
+            tools/continuity_support_gate.py
       - name: Validate acyclic runtime/build fingerprint scope
         working-directory: projeto_jornada
         run: |
@@ -62,12 +76,18 @@ jobs:
       - name: Validate backend dependency evidence state
         working-directory: projeto_jornada
         run: python tools/backend_dependency_evidence_gate.py --output /tmp/veredas-12-9-backend-dependencies-preflight.json
+      - name: Validate Android release dependency inventory state
+        working-directory: projeto_jornada
+        run: python tools/android_dependency_inventory_gate.py --output /tmp/veredas-12-9-android-dependencies-preflight.json
       - name: Validate third-party notice coverage state
         working-directory: projeto_jornada
         run: python tools/third_party_notices_gate.py --output /tmp/veredas-12-9-third-party-notices-preflight.json
       - name: Validate asset provenance, third-party software and service inventory
         working-directory: projeto_jornada
         run: python tools/provenance_license_gate.py --output /tmp/veredas-12-9-provenance-preflight.json
+      - name: Validate recovery and backup drill contract
+        working-directory: projeto_jornada
+        run: python tools/recovery_backup_drill_gate.py --output /tmp/veredas-12-9-recovery-preflight.json
       - name: Validate canonical release archive identity and required evidence set
         working-directory: projeto_jornada
         run: python tools/release_archive_gate.py --output /tmp/veredas-12-9-archive-preflight.json
@@ -81,6 +101,10 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
         run: python tools/backend_dependency_evidence_gate.py --release --output /tmp/veredas-12-9-backend-dependencies-release.json
+      - name: Run final Android dependency inventory certification
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/android_dependency_inventory_gate.py --release --output /tmp/veredas-12-9-android-dependencies-release.json
       - name: Run final third-party notice certification
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
@@ -89,6 +113,10 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
         run: python tools/provenance_license_gate.py --release --output /tmp/veredas-12-9-provenance-release.json
+      - name: Run final recovery/backup drill certification
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
+        working-directory: projeto_jornada
+        run: python tools/recovery_backup_drill_gate.py --release --output /tmp/veredas-12-9-recovery-release.json
       - name: Run final canonical archive certification
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.certify_release }}
         working-directory: projeto_jornada
@@ -105,13 +133,17 @@ jobs:
           path: |
             /tmp/veredas-12-9-release-input-preflight.json
             /tmp/veredas-12-9-backend-dependencies-preflight.json
+            /tmp/veredas-12-9-android-dependencies-preflight.json
             /tmp/veredas-12-9-third-party-notices-preflight.json
             /tmp/veredas-12-9-provenance-preflight.json
+            /tmp/veredas-12-9-recovery-preflight.json
             /tmp/veredas-12-9-archive-preflight.json
             /tmp/veredas-12-9-preflight.json
             /tmp/veredas-12-9-backend-dependencies-release.json
+            /tmp/veredas-12-9-android-dependencies-release.json
             /tmp/veredas-12-9-third-party-notices-release.json
             /tmp/veredas-12-9-provenance-release.json
+            /tmp/veredas-12-9-recovery-release.json
             /tmp/veredas-12-9-archive-release.json
             /tmp/veredas-12-9-release.json
           if-no-files-found: ignore
