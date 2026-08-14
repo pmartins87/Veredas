@@ -428,10 +428,13 @@ def translate_unit(unit: dict[str, Any], locale: str, overlay: dict[str, Any]) -
         threat_t = translated(THREAT, m.group(3), locale)
         if not parsed or not stake_t or not threat_t:
             return None
-        personal, _ = parsed
+        personal, source_location = parsed
+        loc_t = location(source_location, locale)
+        if not loc_t:
+            return None
         if locale == "en":
-            return f"{personal} wants to {stake_t} before the place becomes unlivable because of {threat_t}."
-        return f"{personal} quiere {stake_t} antes de que el lugar se vuelva inhabitable por {threat_t}."
+            return f"At {loc_t}, {personal} wants to {stake_t} before the place becomes unlivable because of {threat_t}."
+        return f"En {loc_t}, {personal} quiere {stake_t} antes de que el lugar se vuelva inhabitable por {threat_t}."
 
     if kind == "npc" and path == "pressure":
         m = re.fullmatch(r"Sabe que (.+) e teme perder (.+) se falar\. Em (.+), precisa (.+) antes que (.+)\.", source)
