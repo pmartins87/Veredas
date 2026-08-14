@@ -31,6 +31,8 @@
     "secondary_recovery_contact": "PENDING_12_9_SECONDARY_RECOVERY_CONTACT",
     "support_channel": "PENDING_12_9_PUBLIC_SUPPORT_CHANNEL",
     "privacy_contact": "PENDING_12_9_PRIVACY_CONTACT",
+    "recovery_drill_record": "product/recovery_backup_drill.json",
+    "recovery_drill_gate": "tools/recovery_backup_drill_gate.py",
     "play_console_recovery_verified": false,
     "repository_recovery_verified": false,
     "billing_backend_recovery_verified": false
@@ -123,6 +125,7 @@
     "backend_dependency_evidence_gate_passed": false,
     "android_dependency_inventory_gate_passed": false,
     "third_party_notices_gate_passed": false,
+    "recovery_backup_drill_gate_passed": false,
     "continuity_runbook_reviewed": false,
     "support_channel_tested": false,
     "account_recovery_drill_recorded": false,
@@ -139,7 +142,7 @@
     "every required archive item exists and its SHA-256 is verified",
     "primary and secondary ownership plus support/privacy channels are real non-placeholder values",
     "Play Console, repository and Billing backend recovery are verified",
-    "keystore/secrets external backups exist and a restore drill is recorded without committing private material",
+    "keystore/secrets external backups exist and the canonical recovery/backup drill passes without committing private material",
     "every versioned release art/audio/font asset has blob+introduction-commit provenance and final rights evidence with no reference-game/unlicensed source",
     "backend dependency evidence resolves on a clean Python 3.12/Linux runtime environment, records pip/input identity and parses wheel METADATA with Python stdlib only",
     "generated backend lock installs offline with --require-hashes and reconstructs the exact resolved package set; final SBOM is archived",
@@ -148,7 +151,7 @@
     "production external-service terms/data roles are reviewed and archived",
     "privacy policy, terms, store listing and release notes are archived",
     "continuity runbook is reviewed and support channel is tested",
-    "all 12.9 component gates and continuity_support_gate.py --release pass on the exact release ancestry"
+    "all 12.9 component gates, recovery_backup_drill_gate.py --release and continuity_support_gate.py --release pass on the exact release ancestry"
   ],
   "pass_recorded": false
 }
