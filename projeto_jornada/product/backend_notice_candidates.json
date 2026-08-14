@@ -1,0 +1,550 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "12.9",
+  "source": {
+    "sbom": "product/software_sbom.json",
+    "notices": "product/third_party_notices.json",
+    "sbom_component_count": 29
+  },
+  "policy": {
+    "wheel_metadata_is_candidate_evidence_not_final_legal_review": true,
+    "package_name_only_inference_forbidden": true,
+    "primary_source_review_required_before_notice_row_is_final": true,
+    "archived_license_notice_file_hash_required_before_release": true
+  },
+  "missing_notice_candidate_count": 24,
+  "candidate_status_counts": {
+    "spdx_expression_from_wheel_metadata": 12,
+    "spdxish_license_field_requires_primary_review": 4,
+    "freeform_license_field_requires_primary_review": 5,
+    "no_license_identity_in_wheel_metadata": 3
+  },
+  "candidates": [
+    {
+      "component_key": "pypi:blinker@1.9.0",
+      "name": "blinker",
+      "normalized_name": "blinker",
+      "version": "1.9.0",
+      "direct": false,
+      "wheel_filename": "blinker-1.9.0-py3-none-any.whl",
+      "wheel_sha256": "ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "",
+        "license_files": [],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "no_license_identity_in_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:certifi@2026.7.22",
+      "name": "certifi",
+      "normalized_name": "certifi",
+      "version": "2026.7.22",
+      "direct": false,
+      "wheel_filename": "certifi-2026.7.22-py3-none-any.whl",
+      "wheel_sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "MPL-2.0",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": "https://github.com/certifi/python-certifi"
+      },
+      "candidate_license_id": "MPL-2.0",
+      "candidate_status": "spdxish_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:cffi@2.1.1",
+      "name": "cffi",
+      "normalized_name": "cffi",
+      "version": "2.1.1",
+      "direct": false,
+      "wheel_filename": "cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "wheel_sha256": "c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf",
+      "wheel_metadata": {
+        "license_expression": "MIT-0",
+        "license": "",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "MIT-0",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:charset-normalizer@3.5.0",
+      "name": "charset-normalizer",
+      "normalized_name": "charset-normalizer",
+      "version": "3.5.0",
+      "direct": false,
+      "wheel_filename": "charset_normalizer-3.5.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "wheel_sha256": "14f6904a3cf870abf044df3a8c4924ac6c8ef77e9896586fd37e73ae96cff2af",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "MIT",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "MIT",
+      "candidate_status": "spdxish_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:click@8.4.2",
+      "name": "click",
+      "normalized_name": "click",
+      "version": "8.4.2",
+      "direct": false,
+      "wheel_filename": "click-8.4.2-py3-none-any.whl",
+      "wheel_sha256": "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76",
+      "wheel_metadata": {
+        "license_expression": "BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:cryptography@50.0.0",
+      "name": "cryptography",
+      "normalized_name": "cryptography",
+      "version": "50.0.0",
+      "direct": false,
+      "wheel_filename": "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl",
+      "wheel_sha256": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+      "wheel_metadata": {
+        "license_expression": "Apache-2.0 OR BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE",
+          "LICENSE.APACHE",
+          "LICENSE.BSD"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "Apache-2.0 OR BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:google-api-core@2.34.0",
+      "name": "google-api-core",
+      "normalized_name": "google-api-core",
+      "version": "2.34.0",
+      "direct": false,
+      "wheel_filename": "google_api_core-2.34.0-py3-none-any.whl",
+      "wheel_sha256": "cdf9c67e7ca2402d86ccbfde5f2503fc83e3cc3f58cc78456ae96cad24a6d2de",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "Apache 2.0",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "freeform_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:google-cloud-core@2.6.1",
+      "name": "google-cloud-core",
+      "normalized_name": "google-cloud-core",
+      "version": "2.6.1",
+      "direct": false,
+      "wheel_filename": "google_cloud_core-2.6.1-py3-none-any.whl",
+      "wheel_sha256": "2682a8a4474a32f56292fb4bca7fa7e4fb0b4af958f6abfe4bca8d195747fd45",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "Apache 2.0",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": "https://github.com/googleapis/google-cloud-python/tree/main/packages/google-cloud-core"
+      },
+      "candidate_license_id": "",
+      "candidate_status": "freeform_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:googleapis-common-protos@1.75.1",
+      "name": "googleapis-common-protos",
+      "normalized_name": "googleapis-common-protos",
+      "version": "1.75.1",
+      "direct": false,
+      "wheel_filename": "googleapis_common_protos-1.75.1-py3-none-any.whl",
+      "wheel_sha256": "28a1934bcd33b9c9da66ac301a0a4227e3367f095a17d0375cb98f0a09d93b79",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "Apache 2.0",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "freeform_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:grpcio-status@1.83.0",
+      "name": "grpcio-status",
+      "normalized_name": "grpcio-status",
+      "version": "1.83.0",
+      "direct": false,
+      "wheel_filename": "grpcio_status-1.83.0-py3-none-any.whl",
+      "wheel_sha256": "f6a838a7c5fb84ae98833ec0ef81ed438c26e11e54b2ddb8e92ad328c861de69",
+      "wheel_metadata": {
+        "license_expression": "Apache-2.0",
+        "license": "",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "Apache-2.0",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:grpcio@1.83.0",
+      "name": "grpcio",
+      "normalized_name": "grpcio",
+      "version": "1.83.0",
+      "direct": false,
+      "wheel_filename": "grpcio-1.83.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "wheel_sha256": "aeb339838db07600481ef869507279b75326c75eac6d10f7afa62a0da1d2bcdd",
+      "wheel_metadata": {
+        "license_expression": "Apache-2.0",
+        "license": "",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "Apache-2.0",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:idna@3.18",
+      "name": "idna",
+      "normalized_name": "idna",
+      "version": "3.18",
+      "direct": false,
+      "wheel_filename": "idna-3.18-py3-none-any.whl",
+      "wheel_sha256": "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2",
+      "wheel_metadata": {
+        "license_expression": "BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE.md"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:itsdangerous@2.2.0",
+      "name": "itsdangerous",
+      "normalized_name": "itsdangerous",
+      "version": "2.2.0",
+      "direct": false,
+      "wheel_filename": "itsdangerous-2.2.0-py3-none-any.whl",
+      "wheel_sha256": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "",
+        "license_files": [],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "no_license_identity_in_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:jinja2@3.1.6",
+      "name": "Jinja2",
+      "normalized_name": "jinja2",
+      "version": "3.1.6",
+      "direct": false,
+      "wheel_filename": "jinja2-3.1.6-py3-none-any.whl",
+      "wheel_sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "no_license_identity_in_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:markupsafe@3.0.3",
+      "name": "MarkupSafe",
+      "normalized_name": "markupsafe",
+      "version": "3.0.3",
+      "direct": false,
+      "wheel_filename": "markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "wheel_sha256": "d6dd0be5b5b189d31db7cda48b91d7e0a9795f31430b7f271219ab30f1d3ac9d",
+      "wheel_metadata": {
+        "license_expression": "BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:packaging@26.3",
+      "name": "packaging",
+      "normalized_name": "packaging",
+      "version": "26.3",
+      "direct": false,
+      "wheel_filename": "packaging-26.3-py3-none-any.whl",
+      "wheel_sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "wheel_metadata": {
+        "license_expression": "Apache-2.0 OR BSD-2-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE",
+          "LICENSE.APACHE",
+          "LICENSE.BSD"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "Apache-2.0 OR BSD-2-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:proto-plus@1.28.3",
+      "name": "proto-plus",
+      "normalized_name": "proto-plus",
+      "version": "1.28.3",
+      "direct": false,
+      "wheel_filename": "proto_plus-1.28.3-py3-none-any.whl",
+      "wheel_sha256": "dc76880b8ee951cca002098574376cf71e055f9f16d9ba6570fb8a06f726d281",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "Apache 2.0",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "",
+      "candidate_status": "freeform_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:protobuf@7.35.1",
+      "name": "protobuf",
+      "normalized_name": "protobuf",
+      "version": "7.35.1",
+      "direct": false,
+      "wheel_filename": "protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl",
+      "wheel_sha256": "74758715c53d7158fb76caf4f0cfdacc5329a4b1bb994f865d6cf302d413a1c4",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "3-Clause BSD License",
+        "license_files": [],
+        "home_page": "https://developers.google.com/protocol-buffers/"
+      },
+      "candidate_license_id": "",
+      "candidate_status": "freeform_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:pyasn1-modules@0.4.2",
+      "name": "pyasn1_modules",
+      "normalized_name": "pyasn1-modules",
+      "version": "0.4.2",
+      "direct": false,
+      "wheel_filename": "pyasn1_modules-0.4.2-py3-none-any.whl",
+      "wheel_sha256": "29253a9207ce32b64c3ac6600edc75368f98473906e8fd1043bd6b5b1de2c14a",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "BSD",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": "https://github.com/pyasn1/pyasn1-modules"
+      },
+      "candidate_license_id": "BSD",
+      "candidate_status": "spdxish_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:pyasn1@0.6.4",
+      "name": "pyasn1",
+      "normalized_name": "pyasn1",
+      "version": "0.6.4",
+      "direct": false,
+      "wheel_filename": "pyasn1-0.6.4-py3-none-any.whl",
+      "wheel_sha256": "deda9277cfd454080ec40b207fb6df82206a3a2688735233cdcd8d3d565f088b",
+      "wheel_metadata": {
+        "license_expression": "",
+        "license": "BSD-2-Clause",
+        "license_files": [
+          "LICENSE.rst"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-2-Clause",
+      "candidate_status": "spdxish_license_field_requires_primary_review",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:pycparser@3.0",
+      "name": "pycparser",
+      "normalized_name": "pycparser",
+      "version": "3.0",
+      "direct": false,
+      "wheel_filename": "pycparser-3.0-py3-none-any.whl",
+      "wheel_sha256": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+      "wheel_metadata": {
+        "license_expression": "BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:typing-extensions@4.16.0",
+      "name": "typing_extensions",
+      "normalized_name": "typing-extensions",
+      "version": "4.16.0",
+      "direct": false,
+      "wheel_filename": "typing_extensions-4.16.0-py3-none-any.whl",
+      "wheel_sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "wheel_metadata": {
+        "license_expression": "PSF-2.0",
+        "license": "",
+        "license_files": [
+          "LICENSE"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "PSF-2.0",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:urllib3@2.7.0",
+      "name": "urllib3",
+      "normalized_name": "urllib3",
+      "version": "2.7.0",
+      "direct": false,
+      "wheel_filename": "urllib3-2.7.0-py3-none-any.whl",
+      "wheel_sha256": "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897",
+      "wheel_metadata": {
+        "license_expression": "MIT",
+        "license": "",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "MIT",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    },
+    {
+      "component_key": "pypi:werkzeug@3.1.8",
+      "name": "Werkzeug",
+      "normalized_name": "werkzeug",
+      "version": "3.1.8",
+      "direct": false,
+      "wheel_filename": "werkzeug-3.1.8-py3-none-any.whl",
+      "wheel_sha256": "63a77fb8892bf28ebc3178683445222aa500e48ebad5ec77b0ad80f8726b1f50",
+      "wheel_metadata": {
+        "license_expression": "BSD-3-Clause",
+        "license": "",
+        "license_files": [
+          "LICENSE.txt"
+        ],
+        "home_page": ""
+      },
+      "candidate_license_id": "BSD-3-Clause",
+      "candidate_status": "spdx_expression_from_wheel_metadata",
+      "requires_primary_source_review": true,
+      "reviewed": false,
+      "eligible_for_final_notice_manifest_without_review": false
+    }
+  ]
+}
