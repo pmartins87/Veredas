@@ -18,6 +18,9 @@ concurrency:
 
 env:
   VEREDAS_ANDROID_PACKAGE_ID: com.pmartins87.veredasdatrama
+  GODOT_VERSION: '4.7.1-stable'
+  GODOT_LINUX_X86_64_SHA256: 'c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba'
+  GODOT_EXPORT_TEMPLATES_SHA256: '86409db6200b6f8fd3230989c2d2002851f3dd18acf11d7bdbafddf5a0dd0f72'
   BUNDLETOOL_VERSION: '1.18.3'
   BUNDLETOOL_SHA256: 'a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29'
 
@@ -123,17 +126,24 @@ jobs:
           python projeto_jornada/tools/release_signing_identity_gate.py \
             --upload-cert /tmp/veredas-release/upload-cert.der
 
-      - name: Download Godot 4.7.1 stable
+      - name: Install pinned Godot 4.7.1 stable
         run: |
           set -euo pipefail
-          curl -fL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          curl -fL \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v4.7.1-stable_linux.x86_64.zip" \
+            -o /tmp/godot.zip
+          printf '%s  %s\n' "$GODOT_LINUX_X86_64_SHA256" /tmp/godot.zip | sha256sum -c -
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version | grep -q '^4.7.1.stable'
 
-      - name: Install Godot 4.7.1 export templates
+      - name: Install pinned Godot 4.7.1 export templates
         run: |
           set -euo pipefail
-          curl -fL 'https://github.com/godotengine/godot-builds/releases/download/4.7.1-stable/Godot_v4.7.1-stable_export_templates.tpz' -o /tmp/templates.tpz
+          curl -fL \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v4.7.1-stable_export_templates.tpz" \
+            -o /tmp/templates.tpz
+          printf '%s  %s\n' "$GODOT_EXPORT_TEMPLATES_SHA256" /tmp/templates.tpz | sha256sum -c -
           rm -rf /tmp/godot-templates
           mkdir -p /tmp/godot-templates "$HOME/.local/share/godot/export_templates/4.7.1.stable"
           unzip -q /tmp/templates.tpz -d /tmp/godot-templates
@@ -219,8 +229,11 @@ jobs:
           printf '%s\n' "target_sdk=36" >> build/android-release/release-metadata.txt
           printf '%s\n' "compile_sdk=36" >> build/android-release/release-metadata.txt
           printf '%s\n' "android_build_tools=36.1.0" >> build/android-release/release-metadata.txt
-          printf '%s\n' "godot_version=4.7.1-stable" >> build/android-release/release-metadata.txt
+          printf '%s\n' "godot_version=$GODOT_VERSION" >> build/android-release/release-metadata.txt
+          printf '%s\n' "godot_linux_x86_64_sha256=$GODOT_LINUX_X86_64_SHA256" >> build/android-release/release-metadata.txt
+          printf '%s\n' "godot_export_templates_sha256=$GODOT_EXPORT_TEMPLATES_SHA256" >> build/android-release/release-metadata.txt
           printf '%s\n' "bundletool_version=$BUNDLETOOL_VERSION" >> build/android-release/release-metadata.txt
+          printf '%s\n' "bundletool_sha256=$BUNDLETOOL_SHA256" >> build/android-release/release-metadata.txt
           sha256sum build/android-release/QA_11_10_COMPLETION.json \
             | tee build/android-release/QA_11_10_COMPLETION.json.sha256
           sha256sum build/android-release/veredas-da-trama.aab \
@@ -236,7 +249,7 @@ jobs:
 
       - name: Destroy temporary keystore and public scratch certificates
         if: always()
-        run: rm -rf /tmp/veredas-release /tmp/veredas-qa-11-10
+        run: rm -rf /tmp/veredas-release /tmp/veredas-qa-11-10 /tmp/godot /tmp/godot.zip /tmp/templates.tpz /tmp/godot-templates /tmp/bundletool.jar
 
       - name: Upload signed release artifact and provenance evidence
         if: success()
