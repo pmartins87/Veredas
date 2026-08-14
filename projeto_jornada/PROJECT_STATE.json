@@ -1,6 +1,17 @@
 {
-  "schema_version": 9,
+  "schema_version": 10,
   "source_of_truth": "ROADMAP_STATE.md",
+  "repository_identity": {
+    "canonical_repository": "pmartins87/Veredas",
+    "canonical_branch": "main",
+    "repository_id": 850138775,
+    "visibility": "private",
+    "history_preserving_rename_complete": true,
+    "migration_state": "REPOSITORY_MIGRATION_STATE.json",
+    "legacy_repository_name": "pmartins87/desktop-tutorial",
+    "legacy_branch": "projeto-jornada-snapshots",
+    "legacy_branch_operational": false
+  },
   "roadmap_total_steps": 130,
   "completed_steps": 110,
   "current_phase": 11,
@@ -50,7 +61,7 @@
       "certified_input_manifest_artifact":"QA_11_10_RELEASE_INPUT_MANIFEST.json",
       "release_input_fingerprint_certified":true,
       "critical_release_control_files_fingerprinted":14,
-      "qa_workflow_git_blob_sha":"c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+      "qa_workflow_git_blob_sha":"d00e8662067cc3d5f1f139fcf964e54484c6c133",
       "signed_aab_workflow_git_blob_sha":"c43206c3eedf0af592aa238a90504c16e2d6b896",
       "workflow_integrity_gate":"tools/release_workflow_integrity_gate.py",
       "godot_linux_x86_64_sha256":"c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba",
@@ -179,7 +190,7 @@
       "certified_head_must_be_release_ancestor":true,
       "later_evidence_only_commits_allowed_if_fingerprint_identical":true,
       "runtime_build_version_preset_control_or_pinned_workflow_change_requires_new_11_10":true,
-      "qa_workflow_git_blob_sha":"c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+      "qa_workflow_git_blob_sha":"d00e8662067cc3d5f1f139fcf964e54484c6c133",
       "signed_aab_workflow_git_blob_sha":"c43206c3eedf0af592aa238a90504c16e2d6b896",
       "pre_post_export_certified_fingerprint_equivalence_required":true,
       "godot_linux_x86_64_sha256":"c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba",
@@ -223,7 +234,9 @@
   },
   "execution_infrastructure": {
     "github_actions_status":"no_executor",
-    "last_observed_signature":{"steps":[],"runner_id":0,"runner_name":"","runner_group_id":0},
+    "post_rename_probe":{"run_id":31814703055,"job_id":94813474002,"repository":"pmartins87/Veredas","branch":"main","steps":[],"runner_id":0,"runner_name":"","runner_group_id":0},
+    "rename_resolved_executor_problem":false,
+    "actions_permissions_api_access_for_integration":"forbidden_403",
     "policy":"no PASS or FAIL is inferred from a job that never receives a runner"
   },
   "release_triage": {
