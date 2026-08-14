@@ -9,6 +9,7 @@ Este é o runbook operacional do passo **12.9**. Ele não contém segredos e nã
 - Contrato 12.9: `product/continuity_support_contract.json`.
 - Proveniência: `product/release_provenance.json`.
 - Notices: `product/third_party_notices.json`.
+- Recovery/backup drill: `product/recovery_backup_drill.json`.
 - Arquivo final: `product/release_archive_manifest.json`.
 
 Um release público é identificado por **tag + commit + versionName/versionCode + SHA-256 do AAB + fingerprint de assinatura + fingerprint dos inputs**.
@@ -34,7 +35,7 @@ O workflow assinado gera o manifesto de inputs antes do export e exige equivalê
 9. store listing final;
 10. release notes;
 11. registro público da identidade de assinatura;
-12. registro de recovery/backup drill.
+12. registro de recovery/backup drill (`product/recovery_backup_drill.json`).
 
 O AAB não precisa ser cometido ao Git; sua identidade/hash e evidência externa permanecem referenciados sem material secreto.
 
@@ -97,9 +98,21 @@ O backend persiste apenas SHA-256 do token + estado mínimo. A política de rete
 Produção ainda precisa habilitar e verificar TTL no Firestore antes do release.
 
 ## 9. Assinatura, segredos e recuperação
-Nunca versionar keystore privada, senha, chave JSON de service account, token ou credencial de recuperação.
+Nunca versionar keystore privada, senha, chave JSON de service account, token, recovery code ou qualquer credencial.
 
-12.9 exige backup externo de assinatura/segredos, restore drill, recuperação do Play Console, repositório e backend de Billing, registrando apenas identificadores/fingerprints não secretos no Git.
+A evidência canônica é `product/recovery_backup_drill.json`, validada por `tools/recovery_backup_drill_gate.py`. Ela registra apenas status, fingerprints públicos e referências não secretas.
+
+O drill final exige seis cenários:
+1. recuperar acesso ao repositório;
+2. recuperar acesso ao Play Console;
+3. recuperar o backend de Billing, sua service identity e o acesso ao Firestore;
+4. restaurar a upload keystore a partir de backup criptografado;
+5. reconfigurar os secrets de release sem registrar seus valores;
+6. reconstruir o release a partir da fonte de verdade.
+
+A upload keystore precisa de **pelo menos dois locais independentes de backup criptografado**, e um deles deve ser restaurado/testado. A mera existência do arquivo não prova recuperação.
+
+O drill final precisa de owner primário e um segundo contato autorizado distinto. Nenhum valor secreto é aceito como evidência no Git.
 
 ## 10. Owners, suporte e privacidade
 Antes de PASS precisam existir valores reais para owner de release, contato secundário de recuperação, suporte público e contato de privacidade; o canal de suporte deve ser testado.
@@ -120,7 +133,8 @@ Na ancestry exata do release:
 4. `android_dependency_inventory_gate.py --release`;
 5. `third_party_notices_gate.py --release`;
 6. `provenance_license_gate.py --release`;
-7. `release_archive_gate.py --release`;
-8. `continuity_support_gate.py --release`.
+7. `recovery_backup_drill_gate.py --release`;
+8. `release_archive_gate.py --release`;
+9. `continuity_support_gate.py --release`.
 
 Enquanto runner, assets finais, addon/Gradle, AAB real, owners, recuperação e documentação final não existirem, **12.9 permanece em progresso**.
