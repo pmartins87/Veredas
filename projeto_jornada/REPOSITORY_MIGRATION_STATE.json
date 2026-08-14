@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "project": "Veredas da Trama",
   "migration_status": "complete",
   "completed_on": "2026-08-14",
@@ -7,7 +7,7 @@
     "repository": "pmartins87/Veredas",
     "repository_id": 850138775,
     "branch": "main",
-    "visibility": "private",
+    "visibility": "public",
     "default_branch_verified": true
   },
   "legacy_identity": {
@@ -37,32 +37,33 @@
     "writeback_workflows_checkout_and_push_main": true,
     "dispatch_only_release_workflows_left_branch_agnostic": true,
     "qa_11_10_workflow_blob_re_pinned_after_branch_migration": true,
-    "critical_release_gate_checks_canonical_repository_and_branch_in_actions": true
+    "critical_release_gate_checks_canonical_repository_and_branch_in_actions": true,
+    "repository_visibility_changed_to_public_by_owner": true,
+    "public_hosted_runner_allocation_verified": true
   },
   "github_actions": {
-    "first_post_rename_probe_run_id": 31814703055,
-    "first_post_rename_probe_job_id": 94813474002,
-    "action_free_runner_probe": {
-      "run_id": 31817505319,
-      "job_id": 94822612274,
-      "workflow_used_external_actions": false,
-      "permissions_object_empty": true,
-      "only_step_was_shell_echo": true,
-      "job_steps_observed": [],
+    "historical_private_runner_failure": {
+      "first_post_rename_probe_run_id": 31814703055,
+      "action_free_probe_run_id": 31817505319,
+      "action_free_probe_job_id": 94822612274,
       "runner_id": 0,
-      "runner_name": "",
-      "result": "failed_before_runner_allocation"
+      "job_steps": [],
+      "classification": "infrastructure_non_execution"
     },
-    "classification": "infrastructure_non_execution",
-    "rename_resolved_executor_problem": false,
-    "individual_action_allowlist_is_root_cause": false,
-    "remaining_primary_hypotheses": [
-      "GitHub Actions metered usage/budget/billing prevents hosted-runner allocation",
-      "GitHub-controlled account/repository Actions disabled state prevents hosted-runner allocation"
-    ],
-    "next_human_check": "personal account Billing & Licensing > Budgets and alerts / Actions usage; if normal, inspect repository Settings > Actions > General for a GitHub-controlled disabled-state banner",
-    "policy": "no code PASS or FAIL is inferred from a job that never receives a runner"
+    "public_runner_recovery": {
+      "repository_visibility": "public",
+      "action_free_probe_rerun_received_hosted_runner": true,
+      "runner_allocation_restored": true,
+      "11_6_certification_run_id": 31851261636,
+      "11_6_certification_passed": true,
+      "11_9_certification_run_id": 31850297926,
+      "11_9_certification_passed": true
+    },
+    "individual_action_allowlist_was_root_cause": false,
+    "private_usage_exhaustion_was_consistent_with_observed_high_workflow_fanout": true,
+    "ci_fanout_reduction_required": true,
+    "policy": "historical jobs without runner are infrastructure non-execution; only jobs that receive a runner and execute gates can produce PASS/FAIL evidence"
   },
-  "formal_roadmap_count_changes": false,
-  "formal_completed_steps": 110
+  "formal_roadmap_count_changes": true,
+  "formal_completed_steps": 112
 }
