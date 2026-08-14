@@ -53,3 +53,5 @@ jobs:
             res://tests/responsive_accessibility_certification.tscn \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
+
+# Public-runner recertification trigger: 2026-08-14

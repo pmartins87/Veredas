@@ -84,3 +84,5 @@ jobs:
             res://tests/reliability_soak_certification.tscn \
             'RELIABILITY_SOAK_CERTIFICATION FAIL' \
             'RELIABILITY_SOAK_CERTIFICATION PASS: 11.9'
+
+# Public-runner recertification trigger: 2026-08-14
