@@ -3,7 +3,7 @@ name: Veredas Reliability Soak 11.9
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/core/**'
       - 'projeto_jornada/mobile/**'
