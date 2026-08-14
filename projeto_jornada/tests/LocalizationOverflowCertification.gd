@@ -27,9 +27,9 @@ func _ready() -> void:
 func _run() -> void:
     OS.set_environment("VEREDAS_BILLING_UI_TEST", "1")
     await get_tree().process_frame
-    var localization := get_node_or_null("/root/LocalizationService")
-    _expect(localization != null, "LocalizationService autoload missing")
-    if localization == null:
+    var localization := LocalizationService.new()
+    _expect(localization.is_ready(), "LocalizationService failed to load: %s" % str(localization.errors()))
+    if not localization.is_ready():
         _finish()
         return
 
@@ -48,7 +48,7 @@ func _run() -> void:
     _finish()
 
 
-func _select_locale(service: Node, locale_id: String) -> bool:
+func _select_locale(service: Object, locale_id: String) -> bool:
     for method_name in ["set_locale", "set_current_locale", "select_locale", "apply_locale"]:
         if service.has_method(method_name):
             var result = service.call(method_name, locale_id)
