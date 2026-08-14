@@ -5,34 +5,67 @@ on:
     branches:
       - main
     paths:
+      - 'projeto_jornada/product/software_sbom.json'
+      - 'projeto_jornada/product/third_party_notices.json'
+      - 'projeto_jornada/product/android_dependency_inventory.json'
+      - 'projeto_jornada/tools/third_party_notices_gate.py'
+      - 'projeto_jornada/tools/build_backend_notice_candidates.py'
       - '.github/workflows/veredas-third-party-notices-preflight.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: veredas-third-party-notices-preflight-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   notices-preflight:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Audit exact persisted backend SBOM notice coverage
+      - name: Audit exact persisted dependency notice coverage
         id: audit
         continue-on-error: true
         working-directory: projeto_jornada
         run: |
           python tools/third_party_notices_gate.py \
-            --output /tmp/third-party-notices-preflight.json
-      - name: Upload exact preflight report
+            --output product/third_party_notices_preflight.json
+      - name: Build wheel-derived backend notice review candidates
+        working-directory: projeto_jornada
+        run: |
+          python tools/build_backend_notice_candidates.py \
+            --output product/backend_notice_candidates.json
+      - name: Persist diagnostic evidence without certifying reviews
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            projeto_jornada/product/third_party_notices_preflight.json \
+            projeto_jornada/product/backend_notice_candidates.json
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'Notice preflight diagnostics already current.'
+          else
+            git commit -m 'release: persist third-party notice coverage preflight'
+            git push origin HEAD:main
+          fi
+      - name: Upload exact preflight reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: veredas-third-party-notices-preflight
-          path: /tmp/third-party-notices-preflight.json
+          path: |
+            projeto_jornada/product/third_party_notices_preflight.json
+            projeto_jornada/product/backend_notice_candidates.json
           if-no-files-found: error
           retention-days: 14
       - name: Preserve fail-closed gate result
