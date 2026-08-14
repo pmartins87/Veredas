@@ -3,7 +3,7 @@ name: Veredas Balance Freeze
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
   workflow_dispatch:
 
 concurrency:
