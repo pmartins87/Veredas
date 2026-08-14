@@ -318,11 +318,13 @@
       "known_software_components": 7,
       "primary_source_license_ids_identified": 7,
       "backend_direct_dependencies_pinned_and_inventoried": 5,
-      "backend_transitive_hash_lock": "pending_certified_execution",
-      "backend_final_sbom": "pending_certified_execution",
+      "backend_transitive_hash_lock": "persisted_gate_pass_29_components",
+      "backend_final_sbom": "persisted_gate_pass_29_components",
       "android_final_dependency_inventory": "pending_final_gradle_plugin_build_execution",
       "canonical_archive_required_items": 12,
-      "status": "provenance_dependency_android_notice_archive_controls_implemented_final_evidence_recovery_ownership_handoff_pending"
+      "status": "provenance_dependency_android_notice_archive_controls_implemented_final_evidence_recovery_ownership_handoff_pending",
+      "backend_dependency_evidence_run_id": 31851792108,
+      "backend_dependency_evidence_persisted": true
     },
     "12.10": {
       "state_file": "RELEASE_12_10_STATE.json",
