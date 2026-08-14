@@ -24,12 +24,23 @@ permissions:
 jobs:
   full-corpus-linguistic-11-6:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Rebuild integrated canonical fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
       - name: Certify complete compact packs first
         working-directory: projeto_jornada
         run: |
@@ -50,5 +61,3 @@ jobs:
             /tmp/veredas-full-linguistic-sanity.json
           if-no-files-found: ignore
           retention-days: 7
-
-# Public-runner recertification trigger: 2026-08-14

@@ -22,12 +22,23 @@ concurrency:
 jobs:
   linguistic-quality-11-6:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Rebuild integrated canonical fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
       - name: Validate localization tokens and terminology
         working-directory: projeto_jornada
         run: |
@@ -42,5 +53,3 @@ jobs:
           path: /tmp/veredas-localization-quality.json
           if-no-files-found: ignore
           retention-days: 7
-
-# Public-runner recertification trigger: 2026-08-14

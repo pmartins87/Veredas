@@ -23,9 +23,23 @@ permissions:
 jobs:
   iconography-accessibility-11-6:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild integrated canonical fixture
+        working-directory: projeto_jornada
+        run: |
+          python tools/rebuild_content.py >/dev/null
+          python tools/refine_npc_authenticity.py >/dev/null
+          python tools/refine_character_balance.py >/dev/null
+          python tools/enforce_character_horizontal_budget.py >/dev/null
+          python tools/refine_enemy_balance.py >/dev/null
+          python tools/refine_item_economy.py >/dev/null
+          python tools/refine_narrative_balance.py >/dev/null
+          python tools/validate_canonical.py >/dev/null
       - name: Download Godot
         run: |
           curl -fsSL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
@@ -53,5 +67,3 @@ jobs:
             res://tests/responsive_accessibility_certification.tscn \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
-
-# Public-runner recertification trigger: 2026-08-14
