@@ -1,14 +1,15 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "roadmap_step": "12.1",
   "formal_status": "in_progress",
   "candidate_name": "Veredas da Trama",
-  "checked_on": "2026-08-13",
+  "checked_on": "2026-08-14",
   "scope": "commercial name, public discoverability, game-store collision reconnaissance, trademark and domain preflight",
   "public_reconnaissance": {
     "rounds": [
       {"date": "2026-08-12", "result": "no exact game/app collision surfaced in indexed web/store reconnaissance"},
-      {"date": "2026-08-13", "queries": ["exact phrase plus game/app/software", "exact phrase scoped to public INPI-indexed pages", "exact phrase scoped to WIPO-indexed pages"], "result": "no exact indexed game/app/software collision or exact official indexed registry result surfaced; returned pages used the words veredas/trama in unrelated generic or literary contexts"}
+      {"date": "2026-08-13", "queries": ["exact phrase plus game/app/software", "exact phrase scoped to public INPI-indexed pages", "exact phrase scoped to WIPO-indexed pages"], "result": "no exact indexed game/app/software collision or exact official indexed registry result surfaced; returned pages used the words veredas/trama in unrelated generic or literary contexts"},
+      {"date": "2026-08-14", "result": "official Nice Classification scope frozen for the final human registry search; no new legal-clearance claim made"}
     ],
     "game_store_exact_collision_found": false,
     "indexed_exact_trademark_collision_found": false,
@@ -16,23 +17,38 @@
     "note": "Search-engine/store reconnaissance is only an early collision screen. It cannot exclude confusingly similar marks, unindexed records, figurative marks or records visible only through interactive registries."
   },
   "official_methodology_evidence": {
-    "inpi": "A final decision requires an interactive exact/similar search in the relevant Brazilian trademark classes and review of material candidates.",
-    "wipo": "A final decision requires a human Global Brand Database/national-regional cross-check; no automated result is represented as an official registry clearance.",
+    "nice_classification_checked_on": "2026-08-14",
+    "primary_classes": {
+      "9": {
+        "reason": "downloadable computer game/software product",
+        "wipo_basic_indication": "computer game software, downloadable",
+        "wipo_basic_number": "090829"
+      },
+      "41": {
+        "reason": "game/entertainment service coverage relevant to online game services and entertainment",
+        "wipo_basic_indication": "game services provided online from a computer network",
+        "wipo_basic_number": "410094"
+      }
+    },
+    "inpi": "A final decision requires an interactive exact/similar search in Brazilian trademark classes 9 and 41 at minimum, plus review of any materially adjacent goods/services identified by the final filing strategy.",
+    "wipo": "A final decision requires a human Global Brand Database/national-regional cross-check in the same relevant goods/services scope; no automated result is represented as an official registry clearance.",
     "automation_boundary": "No claim of INPI/WIPO clearance is made from public search-engine indexing."
   },
   "authoritative_checks": {
-    "inpi_brazil_exact_and_similar_mark_search": "pending_interactive_registry_search_in_relevant_nice_classes",
-    "wipo_global_brand_database_exact_and_similar_search": "pending_interactive_human_registry_search",
+    "inpi_brazil_exact_and_similar_mark_search": "pending_interactive_registry_search_classes_9_and_41",
+    "wipo_global_brand_database_exact_and_similar_search": "pending_interactive_human_registry_search_classes_9_and_41",
     "domain_veredasdatrama_com": "pending_authoritative_registration_check",
     "domain_veredasdatrama_com_br": "pending_authoritative_registration_check",
     "social_handles": "pending_authoritative_platform_checks"
   },
   "identity_dependencies": {
     "android_application_id": "com.pmartins87.veredasdatrama",
-    "application_id_is_not_legal_name_clearance": true
+    "canonical_repository": "pmartins87/Veredas",
+    "application_id_is_not_legal_name_clearance": true,
+    "repository_name_is_not_legal_name_clearance": true
   },
   "completion_requirements": [
-    "complete exact and confusingly-similar human search in INPI classes relevant to downloadable game software and entertainment services",
+    "complete exact and confusingly-similar human search in INPI classes 9 and 41 and review material adjacent goods/services if the final filing specification requires them",
     "complete WIPO/global human cross-check and record material candidates if any",
     "confirm desired domains/social handles or explicitly accept alternatives",
     "record final name decision and trademark filing strategy or explicit no-filing decision",
