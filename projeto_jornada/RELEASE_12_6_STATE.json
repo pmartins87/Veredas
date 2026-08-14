@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
@@ -23,17 +23,18 @@
     "release_evidence_excluded_from_runtime_fingerprint": true,
     "fingerprint_self_reference_prevented": true,
     "runtime_product_reference_scope_gate": true,
-    "pre_export_release_input_manifest": true,
-    "post_export_input_manifest_equivalence_check": true,
+    "11_10_certifies_release_input_manifest": true,
+    "11_10_completion_records_input_aggregate_sha256": true,
+    "11_10_certified_head_must_be_release_ancestor": true,
+    "later_evidence_only_commits_allowed_if_release_input_fingerprint_identical": true,
+    "runtime_build_version_or_preset_change_requires_new_11_10": true,
+    "pre_export_certified_input_equivalence_check": true,
+    "post_export_certified_input_equivalence_check": true,
     "privacy_release_gate_dependency": true,
-    "exact_11_10_completion_artifact_required": true,
-    "exact_11_10_source_workflow_run_id_required": true,
-    "exact_11_10_head_equals_release_head_required": true,
     "aab_signer_certificate_extracted_from_artifact": true,
     "aab_signer_sha256_matches_frozen_upload_identity_required": true,
     "play_upload_and_app_signing_identity_separation": true,
     "public_version_freeze_before_11_10_required": true,
-    "post_11_10_version_change_requires_new_11_10": true,
     "effective_aab_manifest_inspection": true,
     "effective_aab_permissions_inventory": true,
     "privacy_sensitive_permission_fail_closed": true,
@@ -61,7 +62,9 @@
       "aab-identity-evidence.json",
       "release-metadata.txt",
       "QA_11_10_COMPLETION.json",
-      "QA_11_10_COMPLETION.json.sha256"
+      "QA_11_10_COMPLETION.json.sha256",
+      "QA_11_10_RELEASE_INPUT_MANIFEST.json",
+      "QA_11_10_RELEASE_INPUT_MANIFEST.json.sha256"
     ],
     "aab_manifest_fields_from_artifact": [
       "application_id",
@@ -73,7 +76,8 @@
       "effective_permissions"
     ],
     "signed_container_byte_identity_required": false,
-    "source_input_and_effective_artifact_identity_authoritative": true
+    "certified_runtime_build_fingerprint_authoritative": true,
+    "effective_artifact_identity_authoritative": true
   },
   "current_preflight": {
     "runtime_product_files": [
@@ -81,6 +85,7 @@
       "product/legal_documents.json"
     ],
     "release_archive_manifest_in_fingerprint": false,
+    "release_signing_identity_in_fingerprint": false,
     "whole_product_directory_in_fingerprint": false,
     "current_version_name": "0.1.0-dev",
     "target_public_version_name": "1.0.0",
@@ -89,7 +94,7 @@
     "scope_gate_execution_on_current_head": "pending_runner"
   },
   "pending": {
-    "11_10_release_candidate_certified": false,
+    "11_10_release_candidate_certified_with_input_manifest": false,
     "12_2_signing_identity_frozen": false,
     "12_2_public_version_frozen": false,
     "12_2_play_version_code_unused_confirmed": false,
@@ -104,23 +109,26 @@
     "aab_upload_signer_identity_verified": false,
     "artifact_sha256_persisted": false,
     "release_input_manifest_persisted": false,
+    "certified_vs_release_input_equivalence_proven": false,
     "pre_post_export_input_equivalence_proven": false,
-    "same_commit_rebuild_equivalence_proven": false,
+    "same_input_rebuild_equivalence_proven": false,
     "forbidden_internal_payload_audited": false,
     "play_console_artifact_accepted": false
   },
   "completion_requirements": [
     "satisfy all 11.10/12.2/12.3/12.4/12.5 prerequisites",
-    "freeze public version and distinct upload/app-signing certificate identities before exact 11.10 certification",
+    "freeze public version before 11.10 and obtain 11.10 completion plus certified release-input manifest",
+    "allow later signing/console evidence commits only when the certified runtime/build aggregate SHA-256 remains identical",
+    "freeze distinct upload/app-signing identities with correct validity evidence",
     "prove release input scope is acyclic and covers every runtime product resource",
     "verify official Godot engine/export-template and bundletool SHA-256 digests before execution",
-    "persist release-input manifest before export and prove it is unchanged after import/export",
-    "download and validate the exact QA_11_10_COMPLETION artifact from its explicit successful workflow run",
-    "produce signed release AAB from that exact RC commit",
+    "download the exact successful 11.10 artifact by workflow run id and prove its certified head is an ancestor of the release head",
+    "prove current release inputs equal the 11.10-certified fingerprint before export and after import/export",
+    "produce signed release AAB from those unchanged certified inputs",
     "verify AAB signer extracted from the artifact equals the frozen upload certificate SHA-256",
     "verify application id, public version, minSdk, targetSdk, debuggable=false and effective permissions from the exact AAB",
     "persist all AAB/signing/RC/fingerprint evidence",
-    "repeat build from same commit and compare release-input fingerprint and package/content contract",
+    "repeat build from the same certified inputs and compare release-input fingerprint and package/content contract",
     "inspect final bundle for internal-only payload including backend sources",
     "obtain Play Console acceptance evidence"
   ],
