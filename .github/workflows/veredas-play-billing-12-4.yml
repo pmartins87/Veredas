@@ -3,7 +3,7 @@ name: Veredas Play Billing 12.4
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/mobile/play_billing_contract.json'
       - 'projeto_jornada/mobile/GooglePlayBillingStoreAdapter.gd'
