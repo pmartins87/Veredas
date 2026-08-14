@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
@@ -11,7 +11,9 @@
     "sha256_required": true,
     "signature_verification_required": true,
     "play_upload_artifact": true,
-    "exact_11_10_completion_binding_required": true,
+    "certified_11_10_completion_and_input_manifest_required": true,
+    "certified_11_10_head_must_be_release_ancestor": true,
+    "certified_runtime_build_fingerprint_must_match_release": true,
     "upload_certificate_identity_binding_required": true,
     "effective_manifest_inspection_required": true
   },
@@ -71,20 +73,24 @@
     "whole_product_directory_forbidden": true,
     "runtime_product_reference_scan_required": true,
     "release_archive_manifest_excluded_from_fingerprint": true,
+    "release_signing_identity_evidence_excluded_from_fingerprint": true,
     "release_provenance_and_continuity_metadata_excluded_from_fingerprint": true,
-    "scope_gate_must_pass_before_and_after_export": true
+    "scope_gate_must_pass_at_11_10_and_before_and_after_export": true
   },
   "reproducibility_policy": {
-    "exact_source_commit_required": true,
-    "exact_11_10_completion_artifact_required": true,
-    "exact_11_10_source_workflow_run_id_required": true,
-    "clean_worktree_required": true,
+    "certified_11_10_head_must_be_ancestor_of_release_head": true,
+    "certified_11_10_release_input_manifest_required": true,
+    "certified_11_10_source_workflow_run_id_required": true,
+    "later_evidence_only_commits_allowed": true,
+    "later_commit_allowed_only_if_release_input_aggregate_sha256_is_identical": true,
+    "runtime_build_input_change_requires_new_11_10": true,
+    "version_or_export_preset_change_requires_new_11_10": true,
+    "clean_worktree_required_at_11_10": true,
     "release_input_manifest_sha256_required": true,
-    "release_input_manifest_generated_before_export": true,
-    "release_input_manifest_rechecked_after_export": true,
-    "same_commit_rebuild_must_match_release_input_manifest": true,
+    "release_input_manifest_rechecked_before_and_after_export": true,
+    "same_input_rebuild_must_match_release_input_manifest": true,
     "signed_container_byte_identity_required": false,
-    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; source/input fingerprint, package/version, effective bundle manifest, upload-certificate identity and signature validity are authoritative",
+    "reason_signed_container_byte_identity_not_authoritative": "signature/build container metadata may vary; certified source/input fingerprint, package/version, effective bundle manifest, upload-certificate identity and signature validity are authoritative",
     "canonical_game_data_must_remain_frozen": true,
     "fingerprint_self_reference_forbidden": true
   },
@@ -95,7 +101,8 @@
     "upload_and_app_signing_certificates_must_differ": true,
     "aab_signer_certificate_extracted_from_artifact": true,
     "aab_signer_sha256_must_match_frozen_upload_certificate": true,
-    "private_keys_in_release_evidence_forbidden": true
+    "private_keys_in_release_evidence_forbidden": true,
+    "signing_identity_metadata_may_be_finalized_after_11_10_without_recertification_only_because_it_is_outside_release_input_fingerprint": true
   },
   "forbidden_release_payload_roots": [
     "docs/",
@@ -107,19 +114,20 @@
     "build/"
   ],
   "completion_requirements": [
-    "11.10 Release Candidate certified and its completion artifact downloaded from the explicit successful workflow run",
-    "12.2 package, public version, upload key and Google Play app-signing identities frozen before 11.10",
+    "11.10 Release Candidate certified with frozen public version and a persisted release-input manifest",
+    "12.2 package, upload key and Google Play app-signing identities finalized; later evidence-only commits must not change the certified release-input fingerprint",
     "12.3 privacy/Data Safety certified",
     "12.4 production billing certified",
     "12.5 final store assets/copy certified",
     "release input scope is acyclic and covers every runtime product resource",
     "Godot engine, Godot export templates and bundletool match the pinned official SHA-256 digests before release execution",
-    "produce and persist release-input manifest before export and prove the same manifest after import/export",
-    "produce signed AAB from the exact 11.10 certified commit",
+    "prove the downloaded 11.10 completion/manifest came from the explicit successful run and the certified head is an ancestor of the release head",
+    "prove current release-input aggregate SHA-256 exactly matches the 11.10-certified aggregate before export and after import/export",
+    "produce signed AAB from those unchanged certified runtime/build inputs",
     "verify the signer certificate extracted from the AAB matches the frozen upload certificate SHA-256",
     "inspect the exact AAB with pinned bundletool and verify package/version/minSdk/targetSdk/debuggable/effective permissions",
-    "persist AAB SHA-256, release-input fingerprint, exact 11.10 completion and signing/AAB identity evidence",
-    "repeat build from same commit and prove identical release-input fingerprint and equivalent package/version/content contract",
+    "persist AAB SHA-256, certified/current release-input manifests, 11.10 completion and signing/AAB identity evidence",
+    "repeat build with the same certified inputs and prove equivalent package/version/content contract",
     "inspect final bundle for forbidden internal payload roots including backend sources",
     "record final artifact size and Play Console acceptance"
   ],
