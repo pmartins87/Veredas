@@ -16,6 +16,10 @@ on:
       - 'projeto_jornada/tools/release_signing_identity_gate.py'
       - 'projeto_jornada/tools/release_rc_binding_gate.py'
       - 'projeto_jornada/tools/release_aab_identity_gate.py'
+      - 'projeto_jornada/tools/release_input_fingerprint.py'
+      - 'projeto_jornada/tools/release_input_scope_gate.py'
+      - 'projeto_jornada/tools/release_workflow_integrity_gate.py'
+      - '.github/workflows/veredas-qa-release-candidate.yml'
       - '.github/workflows/veredas-release-aab.yml'
       - '.github/workflows/veredas-release-contract-preflight.yml'
   workflow_dispatch:
@@ -47,17 +51,24 @@ jobs:
       - name: Validate Play signing identity contract
         working-directory: projeto_jornada
         run: python tools/release_signing_identity_gate.py
-      - name: Validate release input scope remains acyclic
+      - name: Validate critical workflow blobs are pinned
+        working-directory: projeto_jornada
+        run: python tools/release_workflow_integrity_gate.py
+      - name: Validate release input scope remains acyclic and control-complete
         working-directory: projeto_jornada
         run: python tools/release_input_scope_gate.py
       - name: Compile release gates
         working-directory: projeto_jornada
         run: |
           python -m py_compile \
+            tools/release_input_fingerprint.py \
+            tools/release_input_scope_gate.py \
             tools/release_version_identity_gate.py \
             tools/release_signing_identity_gate.py \
             tools/release_rc_binding_gate.py \
-            tools/release_aab_identity_gate.py
+            tools/release_aab_identity_gate.py \
+            tools/release_workflow_integrity_gate.py \
+            tools/write_qa_release_candidate_completion.py
       - name: Preserve canonical content
         working-directory: projeto_jornada
         run: python tools/validate_canonical.py
