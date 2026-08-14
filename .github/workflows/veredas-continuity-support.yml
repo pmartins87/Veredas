@@ -3,7 +3,7 @@ name: Veredas Continuity and Support 12.9
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/RELEASE_12_6_STATE.json'
       - 'projeto_jornada/RELEASE_12_9_STATE.json'
