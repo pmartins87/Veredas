@@ -12,7 +12,28 @@ RUNTIME_PRODUCT_FILES = [
     ROOT / "product" / "commercial_model.json",
     ROOT / "product" / "legal_documents.json",
 ]
-SINGLE_FILES = [ROOT / "project.godot", ROOT / "export_presets.cfg", *RUNTIME_PRODUCT_FILES]
+CONTROL_FILES = [
+    ROOT / "tools" / "release_input_fingerprint.py",
+    ROOT / "tools" / "release_input_scope_gate.py",
+    ROOT / "tools" / "release_version_identity_gate.py",
+    ROOT / "tools" / "release_signing_identity_gate.py",
+    ROOT / "tools" / "release_rc_binding_gate.py",
+    ROOT / "tools" / "release_aab_identity_gate.py",
+    ROOT / "tools" / "release_workflow_integrity_gate.py",
+    ROOT / "tools" / "validate_android_export.py",
+    ROOT / "tools" / "qa_release_candidate_gate.py",
+    ROOT / "tools" / "write_qa_release_candidate_completion.py",
+    ROOT / "tools" / "privacy_data_safety_gate.py",
+    ROOT / "tools" / "platform_compliance_gate.py",
+    ROOT / "tools" / "legal_surface_gate.py",
+    ROOT / "tools" / "validate_canonical.py",
+]
+SINGLE_FILES = [
+    ROOT / "project.godot",
+    ROOT / "export_presets.cfg",
+    *RUNTIME_PRODUCT_FILES,
+    *CONTROL_FILES,
+]
 INPUT_ROOTS = [
     ROOT / "core",
     ROOT / "ui",
@@ -79,7 +100,7 @@ def read_json(path: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create or compare a deterministic fingerprint of Veredas runtime/release build inputs.")
+    parser = argparse.ArgumentParser(description="Create or compare a deterministic fingerprint of Veredas runtime/build and critical release-control inputs.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--compare", type=Path, default=None)
     args = parser.parse_args()
@@ -89,9 +110,10 @@ def main() -> int:
         print("RELEASE_INPUT_FINGERPRINT FAIL: no release inputs found")
         return 1
     report = {
-        "schema_version": 2,
-        "scope_policy": "runtime/build inputs only; release evidence and archive metadata are intentionally excluded to avoid self-reference",
+        "schema_version": 3,
+        "scope_policy": "runtime/build plus critical release-control inputs; mutable console/signing evidence and archive metadata are excluded to avoid self-reference and permit evidence-only commits",
         "runtime_product_files": [path.relative_to(ROOT).as_posix() for path in RUNTIME_PRODUCT_FILES],
+        "control_files": [path.relative_to(ROOT).as_posix() for path in CONTROL_FILES],
         "file_count": len(rows),
         "total_bytes": sum(int(row["bytes"]) for row in rows),
         "aggregate_sha256": aggregate(rows),
@@ -125,8 +147,11 @@ def main() -> int:
         args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(
-        "RELEASE_INPUT_FINGERPRINT PASS: files=%d bytes=%d sha256=%s runtime_product_files=%d"
-        % (report["file_count"], report["total_bytes"], report["aggregate_sha256"], len(RUNTIME_PRODUCT_FILES))
+        "RELEASE_INPUT_FINGERPRINT PASS: files=%d bytes=%d sha256=%s runtime_product_files=%d control_files=%d"
+        % (
+            report["file_count"], report["total_bytes"], report["aggregate_sha256"],
+            len(RUNTIME_PRODUCT_FILES), len(CONTROL_FILES),
+        )
     )
     return 0
 
