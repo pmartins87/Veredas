@@ -1,2 +1,0 @@
-Target workflows: localization-pack, localization-quality, localization-full-linguistic, localization-overflow, localization-iconography, reliability-soak.
-Execution target: pmartins87/Veredas main.
