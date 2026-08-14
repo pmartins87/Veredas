@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.6",
+  "status": "pass",
+  "certified_on": "2026-08-14",
+  "certified_against_head": "ec6f002735bee9e8a42e28ac91eba4cfa70e3aa0",
+  "workflow": ".github/workflows/veredas-localization-certification.yml",
+  "workflow_run_id": 31851261636,
+  "launch_locales": [
+    "pt_BR",
+    "en"
+  ],
+  "deferred_locales": [
+    "es_419"
+  ],
+  "result": {
+    "english_covered_units": 19100,
+    "english_total_launch_units": 19100,
+    "english_missing_units": 0,
+    "token_parity_errors": 0,
+    "terminology_errors": 0,
+    "pack_certification_errors": 0,
+    "linguistic_sanity_errors": 0,
+    "architecture_fallback_preserved": true,
+    "overflow_gate_passed": true,
+    "iconography_gate_passed": true,
+    "responsive_accessibility_regression_passed": true
+  },
+  "certification_note": "All launch-localization gates executed on one exact Veredas/main HEAD. The source-only architecture fallback probe remains intentionally untranslated and is excluded only from public launch coverage."
+}
