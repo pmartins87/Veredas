@@ -3,7 +3,7 @@ name: Veredas Backend Dependency Evidence 12.9
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/backend/play_purchase_verifier/requirements.txt'
       - 'projeto_jornada/product/release_provenance.json'
