@@ -37,7 +37,7 @@
     "privacy_release_gate": "tools/privacy_data_safety_gate.py"
   },
   "workflow_integrity": {
-    "qa_11_10_git_blob_sha": "c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+    "qa_11_10_git_blob_sha": "d00e8662067cc3d5f1f139fcf964e54484c6c133",
     "signed_release_aab_git_blob_sha": "c43206c3eedf0af592aa238a90504c16e2d6b896",
     "hash_algorithm": "Git blob SHA-1 via git hash-object",
     "both_workflows_must_match_pinned_blob_before_11_10_and_release": true,
