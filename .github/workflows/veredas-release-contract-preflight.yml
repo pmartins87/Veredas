@@ -1,0 +1,63 @@
+name: Veredas Release Identity Preflight 12.2-12.6
+
+on:
+  push:
+    branches:
+      - projeto-jornada-snapshots
+    paths:
+      - 'projeto_jornada/mobile/release_identity.json'
+      - 'projeto_jornada/mobile/release_artifact_contract.json'
+      - 'projeto_jornada/product/release_signing_identity.json'
+      - 'projeto_jornada/RELEASE_12_2_STATE.json'
+      - 'projeto_jornada/RELEASE_12_6_STATE.json'
+      - 'projeto_jornada/export_presets.cfg'
+      - 'projeto_jornada/tools/validate_android_export.py'
+      - 'projeto_jornada/tools/release_version_identity_gate.py'
+      - 'projeto_jornada/tools/release_signing_identity_gate.py'
+      - 'projeto_jornada/tools/release_rc_binding_gate.py'
+      - 'projeto_jornada/tools/release_aab_identity_gate.py'
+      - '.github/workflows/veredas-release-aab.yml'
+      - '.github/workflows/veredas-release-contract-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veredas-release-contract-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-contract-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Android export identity
+        working-directory: projeto_jornada
+        run: python tools/validate_android_export.py
+      - name: Validate public version freeze contract
+        working-directory: projeto_jornada
+        run: python tools/release_version_identity_gate.py
+      - name: Validate Play signing identity contract
+        working-directory: projeto_jornada
+        run: python tools/release_signing_identity_gate.py
+      - name: Validate release input scope remains acyclic
+        working-directory: projeto_jornada
+        run: python tools/release_input_scope_gate.py
+      - name: Compile release gates
+        working-directory: projeto_jornada
+        run: |
+          python -m py_compile \
+            tools/release_version_identity_gate.py \
+            tools/release_signing_identity_gate.py \
+            tools/release_rc_binding_gate.py \
+            tools/release_aab_identity_gate.py
+      - name: Preserve canonical content
+        working-directory: projeto_jornada
+        run: python tools/validate_canonical.py
