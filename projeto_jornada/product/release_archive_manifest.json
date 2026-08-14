@@ -2,7 +2,7 @@
   "schema_version": 2,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-13",
   "product": "Veredas da Trama",
   "application_id": "com.pmartins87.veredasdatrama",
   "target_public_version_name": "1.0.0",
@@ -32,7 +32,7 @@
     {"id": "store_listing_final", "path": "product/store_listing_google_play.json", "sha256": "PENDING_12_9_STORE_LISTING_SHA256", "required": true},
     {"id": "release_notes", "path": "PENDING_12_9_RELEASE_NOTES_ARCHIVE", "sha256": "PENDING_12_9_RELEASE_NOTES_SHA256", "required": true},
     {"id": "public_signing_identity_record", "path": "PENDING_12_9_SIGNING_IDENTITY_RECORD", "sha256": "PENDING_12_9_SIGNING_IDENTITY_RECORD_SHA256", "required": true},
-    {"id": "recovery_and_backup_drill_record", "path": "PENDING_12_9_RECOVERY_DRILL_RECORD", "sha256": "PENDING_12_9_RECOVERY_DRILL_RECORD_SHA256", "required": true}
+    {"id": "recovery_and_backup_drill_record", "path": "product/recovery_backup_drill.json", "sha256": "PENDING_12_9_RECOVERY_DRILL_RECORD_SHA256", "required": true}
   ],
   "external_evidence": {
     "play_console_release_record": "PENDING_12_9_PLAY_RELEASE_RECORD",
