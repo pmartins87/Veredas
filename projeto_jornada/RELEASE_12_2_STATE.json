@@ -1,14 +1,16 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "roadmap_step": "12.2",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-13",
   "android": {
     "application_id": "com.pmartins87.veredasdatrama",
     "application_id_status": "persisted_in_debug_and_play_presets",
     "version_name": "0.1.0-dev",
     "version_code": 1,
     "target_public_version": "1.0.0",
+    "public_release_version_frozen": false,
+    "play_console_version_code_unused_confirmed": false,
     "distribution_format": "AAB",
     "debug_emulator_architectures": ["arm64-v8a", "x86_64"],
     "play_release_architectures": ["arm64-v8a"],
@@ -26,9 +28,18 @@
   "versioning": {
     "name_policy": "semantic versioning",
     "code_policy": "strictly monotonically increasing integer",
+    "identity_contract": "mobile/release_identity.json",
+    "gate": "tools/release_version_identity_gate.py",
+    "public_release_must_be_stable_semver": true,
+    "target_first_public_version": "1.0.0",
+    "freeze_must_happen_before_11_10": true,
+    "version_change_after_11_10_requires_new_11_10": true,
+    "play_console_unused_version_code_confirmation_required": true,
     "rc_freeze_pending": true
   },
   "signing": {
+    "identity_contract": "product/release_signing_identity.json",
+    "gate": "tools/release_signing_identity_gate.py",
     "release_keystore_committed": false,
     "release_credentials_committed": false,
     "protected_secret_names": [
@@ -39,31 +50,49 @@
     "temporary_keystore_path_in_ci": "/tmp/veredas-release/upload.keystore",
     "temporary_keystore_destroyed_after_job": true,
     "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
-    "signature_verification": "jarsigner -verify -verbose -certs",
-    "play_app_signing_expected": true
+    "signature_verification": "jarsigner -verify -strict -verbose -certs",
+    "play_app_signing_required": true,
+    "upload_key_role": "developer-held key signs AAB uploaded to Play",
+    "play_app_signing_key_role": "Google Play-held key signs delivered APKs",
+    "upload_key_minimum": "RSA >= 2048 bits",
+    "upload_and_app_signing_certificates_must_differ": true,
+    "upload_certificate_sha256": "PENDING_PLAY_UPLOAD_CERT_SHA256",
+    "app_signing_certificate_sha256": "PENDING_PLAY_APP_SIGNING_CERT_SHA256",
+    "upload_certificate_registered_in_play_console": false,
+    "play_app_signing_configured": false,
+    "redundant_encrypted_upload_keystore_backups_verified": false,
+    "private_keys_as_release_evidence_forbidden": true
+  },
+  "release_binding": {
+    "exact_11_10_completion_required": true,
+    "exact_11_10_certified_head_must_equal_release_head": true,
+    "explicit_11_10_workflow_run_id_required": true,
+    "rc_binding_gate": "tools/release_rc_binding_gate.py",
+    "aab_signer_certificate_extracted_from_artifact": true,
+    "aab_signer_must_match_frozen_upload_certificate_sha256": true
   },
   "guards": [
     "tools/validate_android_export.py",
+    "tools/release_version_identity_gate.py",
+    "tools/release_signing_identity_gate.py",
+    "tools/release_rc_binding_gate.py",
     "tools/platform_compliance_gate.py",
     "tools/roadmap_state_consistency.py",
     "tools/qa_release_candidate_gate.py",
     "tools/validate_canonical.py"
   ],
-  "implemented_commits": {
-    "stable_application_id": "dd47261c9a6761e677ffb92ee77d7f3c207f5f0c",
-    "identity_contract": "8a4a8851024bab324d5d54ed8604f1c0313813bc",
-    "android_36_presets": "ffca83a24b45da7da6962fc9818569e78db58278",
-    "export_validator": "051171eeb95e9f5bd12e8b233e8eea7e24aa9878",
-    "signed_aab_pipeline": "625bdd297d1ec818f32e503b9653d9f3ec66943e"
-  },
+  "preflight_workflow": ".github/workflows/veredas-release-contract-preflight.yml",
   "completion_requirements": [
     "recheck target API and Android toolchain policy immediately before public release",
-    "create real release/upload keystore and store redundant encrypted backups outside the repository",
+    "create a dedicated RSA >=2048 upload keystore and store redundant encrypted backups outside the repository",
     "configure protected release environment secrets",
     "confirm application id acceptance in Play Console",
-    "freeze RC version name and version code",
-    "produce signed AAB after 11.10 and verify effective targetSdk, signature and SHA-256",
-    "record Play App Signing configuration"
+    "enroll in Google Play App Signing and register the distinct upload certificate",
+    "freeze and record SHA-256 fingerprints/expiry for upload and app-signing certificates",
+    "freeze current version to 1.0.0 with a Play-confirmed unused monotonically increasing version code before 11.10",
+    "obtain a new 11.10 PASS on that exact frozen version/head",
+    "produce signed AAB from that exact 11.10 commit and prove the signer extracted from the AAB matches the frozen upload certificate",
+    "record Play App Signing configuration and delivered-app certificate identity"
   ],
   "pass_recorded": false
 }
