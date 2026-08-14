@@ -1,0 +1,1 @@
+11.6/11.9 public-runner certification is intentionally triggered through the workflow files themselves so path filters remain explicit.
