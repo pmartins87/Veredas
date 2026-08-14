@@ -40,6 +40,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Require release workflow control surface is pinned
+        working-directory: projeto_jornada
+        run: python tools/release_workflow_integrity_gate.py
+
       - name: Download certified 11.10 completion and runtime input manifest
         uses: actions/download-artifact@v4
         with:
@@ -249,6 +253,7 @@ jobs:
         working-directory: projeto_jornada
         run: |
           set -euo pipefail
+          python tools/release_workflow_integrity_gate.py
           python tools/release_input_scope_gate.py
           python tools/release_input_fingerprint.py \
             --compare "$GITHUB_WORKSPACE/build/android-release/QA_11_10_RELEASE_INPUT_MANIFEST.json"
