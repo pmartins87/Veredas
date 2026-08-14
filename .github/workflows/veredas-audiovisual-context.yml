@@ -3,7 +3,7 @@ name: Veredas Audiovisual Context 11.7
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/audio/**'
       - 'projeto_jornada/project.godot'
