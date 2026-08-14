@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "roadmap_step": "12.6",
   "formal_status": "in_progress",
   "updated_on": "2026-08-13",
@@ -10,8 +10,10 @@
   "signing_identity_gate": "tools/release_signing_identity_gate.py",
   "rc_binding_gate": "tools/release_rc_binding_gate.py",
   "aab_identity_gate": "tools/release_aab_identity_gate.py",
+  "workflow_integrity_gate": "tools/release_workflow_integrity_gate.py",
   "signing_identity_contract": "product/release_signing_identity.json",
   "signed_aab_workflow": ".github/workflows/veredas-release-aab.yml",
+  "qa_11_10_workflow": ".github/workflows/veredas-qa-release-candidate.yml",
   "preflight_workflow": ".github/workflows/veredas-release-contract-preflight.yml",
   "implemented": {
     "stable_application_id": true,
@@ -20,14 +22,16 @@
     "sha256_recipe": true,
     "release_input_fingerprint": true,
     "runtime_product_fingerprint_scope_explicit": true,
-    "release_evidence_excluded_from_runtime_fingerprint": true,
+    "critical_release_control_scripts_fingerprinted": true,
+    "critical_workflow_git_blobs_pinned_in_fingerprinted_contract": true,
+    "release_console_and_signing_evidence_excluded_from_runtime_control_fingerprint": true,
     "fingerprint_self_reference_prevented": true,
     "runtime_product_reference_scope_gate": true,
     "11_10_certifies_release_input_manifest": true,
     "11_10_completion_records_input_aggregate_sha256": true,
     "11_10_certified_head_must_be_release_ancestor": true,
     "later_evidence_only_commits_allowed_if_release_input_fingerprint_identical": true,
-    "runtime_build_version_or_preset_change_requires_new_11_10": true,
+    "runtime_build_version_preset_control_or_workflow_change_requires_new_11_10": true,
     "pre_export_certified_input_equivalence_check": true,
     "post_export_certified_input_equivalence_check": true,
     "privacy_release_gate_dependency": true,
@@ -42,6 +46,13 @@
     "godot_engine_pinned_by_official_sha256_in_11_10_and_12_6": true,
     "godot_export_templates_pinned_by_official_sha256_in_12_6": true,
     "release_gate_python_compile_preflight": true
+  },
+  "control_surface": {
+    "fingerprinted_control_files": 14,
+    "qa_11_10_workflow_git_blob_sha": "c8bea82050514c5a7a4060e1a164bc9090d9e67b",
+    "signed_release_aab_workflow_git_blob_sha": "c43206c3eedf0af592aa238a90504c16e2d6b896",
+    "workflow_change_requires_contract_update_and_new_11_10": true,
+    "signing_identity_json_can_be_finalized_after_11_10_if_fingerprint_remains_identical": true
   },
   "toolchain_supply_chain": {
     "godot_release": "4.7.1-stable",
@@ -76,7 +87,7 @@
       "effective_permissions"
     ],
     "signed_container_byte_identity_required": false,
-    "certified_runtime_build_fingerprint_authoritative": true,
+    "certified_runtime_build_control_fingerprint_authoritative": true,
     "effective_artifact_identity_authoritative": true
   },
   "current_preflight": {
@@ -102,6 +113,7 @@
     "12_4_billing_certified": false,
     "12_5_store_listing_certified": false,
     "release_input_scope_gate_executed_on_candidate": false,
+    "workflow_integrity_gate_executed_on_candidate": false,
     "real_signed_aab_produced": false,
     "aab_effective_manifest_verified": false,
     "aab_effective_permissions_verified": false,
@@ -118,9 +130,11 @@
   "completion_requirements": [
     "satisfy all 11.10/12.2/12.3/12.4/12.5 prerequisites",
     "freeze public version before 11.10 and obtain 11.10 completion plus certified release-input manifest",
-    "allow later signing/console evidence commits only when the certified runtime/build aggregate SHA-256 remains identical",
+    "freeze critical release-control scripts and critical workflow blob identities at 11.10",
+    "allow later signing/console evidence commits only when the certified runtime/build/control aggregate SHA-256 remains identical",
     "freeze distinct upload/app-signing identities with correct validity evidence",
-    "prove release input scope is acyclic and covers every runtime product resource",
+    "prove release input scope is acyclic and covers every runtime product resource and critical control script",
+    "verify critical QA/release workflow Git blobs match the identities pinned in the fingerprinted contract",
     "verify official Godot engine/export-template and bundletool SHA-256 digests before execution",
     "download the exact successful 11.10 artifact by workflow run id and prove its certified head is an ancestor of the release head",
     "prove current release inputs equal the 11.10-certified fingerprint before export and after import/export",
