@@ -17,6 +17,7 @@ IDENTITY = ROOT / "mobile" / "release_identity.json"
 ARTIFACT = ROOT / "mobile" / "release_artifact_contract.json"
 HEX64 = re.compile(r"^[0-9A-F]{64}$")
 PENDING_PREFIX = "PENDING_"
+SECONDS_PER_DAY = 24 * 60 * 60
 
 
 def read_object(path: Path) -> dict[str, Any]:
@@ -44,6 +45,19 @@ def cert_der(path: Path) -> tuple[bytes, str]:
     return raw, "DER"
 
 
+def openssl_cert_date(path: Path, fmt: str, option: str, prefix: str) -> datetime:
+    line = subprocess.run(
+        ["openssl", "x509", "-inform", fmt, "-in", str(path), option, "-noout"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if not line.startswith(prefix):
+        fail(f"could not determine certificate {prefix.rstrip('=')}")
+    raw = line.split("=", 1)[1]
+    return datetime.strptime(raw, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
+
+
 def inspect_public_certificate(path: Path) -> dict[str, Any]:
     der, fmt = cert_der(path)
     if not der:
@@ -69,21 +83,16 @@ def inspect_public_certificate(path: Path) -> dict[str, Any]:
     bits = int(match.group(1))
     algorithm = "RSA" if "modulus:" in key_text.lower() or "rsa" in key_text.lower() else "UNKNOWN"
 
-    end_line = subprocess.run(
-        ["openssl", "x509", "-inform", fmt, "-in", str(path), "-enddate", "-noout"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    if not end_line.startswith("notAfter="):
-        fail("could not determine upload certificate expiry")
-    expiry_raw = end_line.split("=", 1)[1]
-    expiry = datetime.strptime(expiry_raw, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
+    not_before = openssl_cert_date(path, fmt, "-startdate", "notBefore=")
+    not_after = openssl_cert_date(path, fmt, "-enddate", "notAfter=")
+    validity_days = (not_after - not_before).total_seconds() / SECONDS_PER_DAY
     return {
         "sha256": sha256,
         "algorithm": algorithm,
         "key_size_bits": bits,
-        "not_after_utc": expiry.isoformat().replace("+00:00", "Z"),
+        "not_before_utc": not_before.isoformat().replace("+00:00", "Z"),
+        "not_after_utc": not_after.isoformat().replace("+00:00", "Z"),
+        "validity_days": validity_days,
     }
 
 
@@ -119,6 +128,8 @@ def validate_static(contract: dict[str, Any], identity: dict[str, Any], artifact
             fail("Google-held app-signing private key must not be represented as locally stored")
         if str(upload.get("algorithm")) != "RSA" or int(upload.get("minimum_key_size_bits", 0)) < 2048:
             fail("upload key policy must require RSA >= 2048 bits")
+        if int(upload.get("minimum_certificate_validity_years", 0)) < 25:
+            fail("upload certificate generation policy must require at least 25 years validity")
         if upload.get("keystore_committed") is not False or upload.get("credentials_committed") is not False:
             fail("upload keystore/credentials must not be committed")
         if policy.get("upload_and_app_signing_certificates_must_differ") is not True:
@@ -144,11 +155,18 @@ def validate_static(contract: dict[str, Any], identity: dict[str, Any], artifact
                 fail("redundant encrypted upload-keystore backups are not verified")
             if not HEX64.fullmatch(upload_fp) or not HEX64.fullmatch(app_fp):
                 fail("both signing certificate SHA-256 fingerprints must be frozen for release")
-            cutoff = parse_contract_datetime(str(policy.get("certificate_expiry_must_be_after", "")), "certificate cutoff")
-            upload_expiry = parse_contract_datetime(str(upload.get("certificate_not_after_utc", "")), "upload certificate expiry")
-            app_expiry = parse_contract_datetime(str(play.get("app_signing_certificate_not_after_utc", "")), "app-signing certificate expiry")
-            if upload_expiry <= cutoff or app_expiry <= cutoff:
-                fail("signing certificate expiry does not exceed required cutoff")
+            app_cutoff = parse_contract_datetime(
+                str(play.get("required_certificate_expiry_after_utc", "")),
+                "app-signing required expiry cutoff",
+            )
+            app_expiry = parse_contract_datetime(
+                str(play.get("app_signing_certificate_not_after_utc", "")),
+                "app-signing certificate expiry",
+            )
+            if app_expiry <= app_cutoff:
+                fail("Google Play app-signing certificate does not exceed the required update-compatibility cutoff")
+            parse_contract_datetime(str(upload.get("certificate_not_before_utc", "")), "upload certificate start")
+            parse_contract_datetime(str(upload.get("certificate_not_after_utc", "")), "upload certificate expiry")
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
     return errors
@@ -157,7 +175,7 @@ def validate_static(contract: dict[str, Any], identity: dict[str, Any], artifact
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate Play upload/app-signing identity without persisting private keys.")
     parser.add_argument("--release", action="store_true")
-    parser.add_argument("--upload-cert", type=Path, default=None, help="Public upload certificate (DER or PEM) exported from the CI keystore.")
+    parser.add_argument("--upload-cert", type=Path, default=None, help="Public upload certificate (DER or PEM) exported from the CI keystore/AAB.")
     parser.add_argument("--evidence-output", type=Path, default=None)
     args = parser.parse_args()
 
@@ -179,23 +197,28 @@ def main() -> int:
             if args.release and not HEX64.fullmatch(expected):
                 fail("release contract does not contain a frozen upload certificate SHA-256")
             if HEX64.fullmatch(expected) and cert_info["sha256"] != expected:
-                fail("CI upload certificate SHA-256 does not match the frozen release identity")
+                fail("AAB/CI upload certificate SHA-256 does not match the frozen release identity")
             if cert_info["algorithm"] != str(upload.get("algorithm")):
-                fail("CI upload certificate public-key algorithm does not match contract")
+                fail("upload certificate public-key algorithm does not match contract")
             if int(cert_info["key_size_bits"]) < int(upload.get("minimum_key_size_bits", 0)):
-                fail("CI upload certificate key size is below the contract minimum")
+                fail("upload certificate key size is below the contract minimum")
+            minimum_years = int(upload.get("minimum_certificate_validity_years", 0))
+            if float(cert_info["validity_days"]) < minimum_years * 365.0:
+                fail("upload certificate validity window is shorter than the generation policy")
             if args.release:
+                contract_start = parse_contract_datetime(str(upload.get("certificate_not_before_utc", "")), "upload certificate start")
                 contract_expiry = parse_contract_datetime(str(upload.get("certificate_not_after_utc", "")), "upload certificate expiry")
+                actual_start = parse_contract_datetime(str(cert_info["not_before_utc"]), "actual upload certificate start")
                 actual_expiry = parse_contract_datetime(str(cert_info["not_after_utc"]), "actual upload certificate expiry")
-                if actual_expiry != contract_expiry:
-                    fail("CI upload certificate expiry does not match frozen contract")
+                if actual_start != contract_start or actual_expiry != contract_expiry:
+                    fail("AAB/CI upload certificate validity window does not match frozen contract")
         except (OSError, ValueError, subprocess.CalledProcessError) as exc:
             errors.append(str(exc))
     elif args.release:
         errors.append("--release requires --upload-cert public certificate evidence")
 
     evidence = {
-        "schema_version": 1,
+        "schema_version": 2,
         "application_id": contract.get("application_id"),
         "release_mode": args.release,
         "upload_certificate": cert_info,
@@ -213,7 +236,7 @@ def main() -> int:
         for error in errors:
             print("ERROR:", error)
         return 1
-    print("RELEASE_SIGNING_IDENTITY PASS: upload/app-signing identities separated; private-key evidence forbidden")
+    print("RELEASE_SIGNING_IDENTITY PASS: separate upload/app-signing identities and validity policies; private-key evidence forbidden")
     return 0
 
 
