@@ -1,0 +1,89 @@
+name: Veredas Maintenance — Sync 12.9 Backend Evidence
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/veredas-maintenance-sync-129-backend-evidence.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synchronize executed backend evidence fail-closed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state_path = Path('projeto_jornada/RELEASE_12_9_STATE.json')
+          state = json.loads(state_path.read_text(encoding='utf-8'))
+          assert state['roadmap_step'] == '12.9'
+          assert state['formal_status'] == 'in_progress'
+          assert state['pending']['backend_dependency_evidence_workflow_executed'] is False
+          assert state['pending']['backend_dependency_evidence_gate_passed_on_persisted_evidence'] is False
+          assert state['pending']['backend_transitive_hash_lock_generated'] is False
+          assert state['pending']['backend_final_sbom_archived'] is False
+
+          state['schema_version'] = 8
+          state['updated_on'] = '2026-08-14'
+          state['implemented']['backend_dependency_evidence_real_runner_execution'] = True
+          state['implemented']['backend_dependency_evidence_persisted_and_revalidated'] = True
+          state['implemented']['backend_dependency_component_count'] = 29
+
+          pre = state['current_preflight']
+          pre['backend_dependency_evidence_pipeline'] = 'executed_pass_persisted'
+          pre['backend_dependency_evidence_source_run_id'] = 31851792108
+          pre['backend_dependency_evidence_source_job_id'] = 94928810551
+          pre['backend_dependency_evidence_source_head'] = 'f5937a95d4de1495436325bf8e5b1423e9bad994'
+          pre['backend_dependency_evidence_persistence_commit'] = '7312aebeef42e672b8ec99cfb8e858d923986215'
+          pre['backend_locked_component_count'] = 29
+          pre['backend_transitive_dependency_lock'] = 'persisted_gate_pass'
+          pre['backend_final_sbom'] = 'persisted_gate_pass'
+          pre['backend_requirements_lock_sha256'] = '32632ae1ce714af4f55e4c63102909cec85fc19cee7329656b9082e259fbab47'
+          pre['backend_software_sbom_sha256'] = 'fcf33fc9dab2650b1c239390ddf5fbeab5dbcfc8f0b4e68207d77d9d5199e818'
+          pre['backend_offline_require_hashes_reinstall'] = 'pass'
+          pre['backend_resolved_vs_reinstalled_freeze'] = 'equal'
+          pre['third_party_notice_backend_transitive_coverage'] = 'pending_gate_against_persisted_29_component_sbom'
+
+          pending = state['pending']
+          pending['backend_dependency_evidence_workflow_executed'] = True
+          pending['backend_dependency_evidence_gate_passed_on_persisted_evidence'] = True
+          pending['backend_transitive_hash_lock_generated'] = True
+          pending['backend_final_sbom_archived'] = True
+
+          state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          project_path = Path('projeto_jornada/PROJECT_STATE.json')
+          project = json.loads(project_path.read_text(encoding='utf-8'))
+          assert project['completed_steps'] == 112
+          p129 = project['phase12_preflight']['12.9']
+          p129['backend_transitive_hash_lock'] = 'persisted_gate_pass_29_components'
+          p129['backend_final_sbom'] = 'persisted_gate_pass_29_components'
+          p129['backend_dependency_evidence_run_id'] = 31851792108
+          p129['backend_dependency_evidence_persisted'] = True
+          project_path.write_text(json.dumps(project, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+          python -m json.tool projeto_jornada/RELEASE_12_9_STATE.json >/dev/null
+          python -m json.tool projeto_jornada/PROJECT_STATE.json >/dev/null
+          git diff --check
+      - name: Persist synchronized 12.9 state
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add projeto_jornada/RELEASE_12_9_STATE.json projeto_jornada/PROJECT_STATE.json
+          git diff --cached --check
+          git commit -m 'state: record persisted backend dependency evidence 12.9'
+          git push origin HEAD:main
