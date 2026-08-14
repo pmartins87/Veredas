@@ -18,6 +18,8 @@ concurrency:
 
 env:
   VEREDAS_ANDROID_PACKAGE_ID: com.pmartins87.veredasdatrama
+  BUNDLETOOL_VERSION: '1.18.3'
+  BUNDLETOOL_SHA256: 'a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29'
 
 jobs:
   signed-release-aab:
@@ -80,6 +82,7 @@ jobs:
           python tools/roadmap_state_consistency.py
           python tools/release_input_scope_gate.py
           python tools/validate_android_export.py
+          python tools/release_version_identity_gate.py --release
           python tools/release_signing_identity_gate.py
           python tools/privacy_data_safety_gate.py --release
           python tools/platform_compliance_gate.py --release
@@ -141,6 +144,15 @@ jobs:
           fi
           test -f "$HOME/.local/share/godot/export_templates/4.7.1.stable/android_release.apk"
 
+      - name: Install pinned official bundletool
+        run: |
+          set -euo pipefail
+          curl -fL \
+            "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar" \
+            -o /tmp/bundletool.jar
+          printf '%s  %s\n' "$BUNDLETOOL_SHA256" /tmp/bundletool.jar | sha256sum -c -
+          test "$(java -jar /tmp/bundletool.jar version)" = "$BUNDLETOOL_VERSION"
+
       - name: Configure Android SDK paths
         run: |
           set -euo pipefail
@@ -181,6 +193,14 @@ jobs:
             exit 1
           fi
 
+      - name: Inspect exact AAB manifest and effective permissions
+        run: |
+          set -euo pipefail
+          python projeto_jornada/tools/release_aab_identity_gate.py \
+            --aab build/android-release/veredas-da-trama.aab \
+            --bundletool /tmp/bundletool.jar \
+            --evidence-output build/android-release/aab-identity-evidence.json
+
       - name: Verify exact AAB signer identity and fingerprint artifact
         run: |
           set -euo pipefail
@@ -200,6 +220,7 @@ jobs:
           printf '%s\n' "compile_sdk=36" >> build/android-release/release-metadata.txt
           printf '%s\n' "android_build_tools=36.1.0" >> build/android-release/release-metadata.txt
           printf '%s\n' "godot_version=4.7.1-stable" >> build/android-release/release-metadata.txt
+          printf '%s\n' "bundletool_version=$BUNDLETOOL_VERSION" >> build/android-release/release-metadata.txt
           sha256sum build/android-release/QA_11_10_COMPLETION.json \
             | tee build/android-release/QA_11_10_COMPLETION.json.sha256
           sha256sum build/android-release/veredas-da-trama.aab \
@@ -228,6 +249,7 @@ jobs:
             build/android-release/release-input-manifest.json
             build/android-release/signature-verification.txt
             build/android-release/signing-identity-evidence.json
+            build/android-release/aab-identity-evidence.json
             build/android-release/release-metadata.txt
             build/android-release/QA_11_10_COMPLETION.json
             build/android-release/QA_11_10_COMPLETION.json.sha256
