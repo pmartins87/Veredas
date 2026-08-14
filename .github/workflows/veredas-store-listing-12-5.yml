@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/RELEASE_12_5_STATE.json'
       - 'projeto_jornada/RELEASE_12_1_NAME_STATE.json'
