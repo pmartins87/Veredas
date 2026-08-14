@@ -3,8 +3,11 @@
 Este é o runbook operacional do passo **12.9**. Ele não contém segredos e não equivale a evidência de conclusão. O release só é certificado quando os artefatos reais, hashes, owners, recuperação e gates correspondentes existem na mesma ancestry.
 
 ## 1. Fontes de verdade
-- Repositório: `pmartins87/desktop-tutorial`.
-- Branch de desenvolvimento: `projeto-jornada-snapshots`.
+- Repositório canônico após a migração/rename: `pmartins87/Veredas`.
+- Branch canônico: `main`.
+- Repositório/nome legado anterior ao rename: `pmartins87/desktop-tutorial`.
+- Branch legado de desenvolvimento: `projeto-jornada-snapshots`.
+- A migração **preserva todo o histórico Git**; SHAs históricos continuam válidos depois do rename e não devem ser reescritos.
 - Estado formal: `ROADMAP_STATE.md` e `PROJECT_STATE.json`.
 - Contrato 12.9: `product/continuity_support_contract.json`.
 - Proveniência: `product/release_provenance.json`.
@@ -103,12 +106,12 @@ Nunca versionar keystore privada, senha, chave JSON de service account, token, r
 A evidência canônica é `product/recovery_backup_drill.json`, validada por `tools/recovery_backup_drill_gate.py`. Ela registra apenas status, fingerprints públicos e referências não secretas.
 
 O drill final exige seis cenários:
-1. recuperar acesso ao repositório;
+1. recuperar acesso ao repositório `pmartins87/Veredas`;
 2. recuperar acesso ao Play Console;
 3. recuperar o backend de Billing, sua service identity e o acesso ao Firestore;
 4. restaurar a upload keystore a partir de backup criptografado;
 5. reconfigurar os secrets de release sem registrar seus valores;
-6. reconstruir o release a partir da fonte de verdade.
+6. reconstruir o release a partir de `Veredas/main`.
 
 A upload keystore precisa de **pelo menos dois locais independentes de backup criptografado**, e um deles deve ser restaurado/testado. A mera existência do arquivo não prova recuperação.
 
