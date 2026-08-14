@@ -138,6 +138,32 @@ def same_visible_text(source: str, target: str) -> bool:
     return normalized_phrase(source) == normalized_phrase(target)
 
 
+def exact_proper_title(
+    source: str,
+    target: str,
+    glossary_terms: dict[str, Any],
+    source_locale: str,
+    locale_id: str,
+) -> tuple[str, str] | None:
+    """Return the matched proper-title id/target when the whole source is a title.
+
+    Proper titles are indivisible glossary units. Once the exact title matches,
+    nested lore terms (for example "Trama" inside "Veredas da Trama") must not
+    be reinterpreted as independently translatable terminology.
+    """
+    for term_id, entry in glossary_terms.items():
+        if not isinstance(entry, dict) or str(entry.get("class", "")) != "proper_title":
+            continue
+        source_term = entry.get(source_locale)
+        target_term = entry.get(locale_id)
+        if not isinstance(source_term, str) or not isinstance(target_term, str):
+            continue
+        if normalized_phrase(source) != normalized_phrase(source_term):
+            continue
+        return str(term_id), target_term
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate localization token parity, glossary terminology and UI expansion risks."
@@ -203,25 +229,40 @@ def main() -> int:
                         "target": dict(target_sig[family]),
                     })
 
-            for term_id, entry in glossary_terms.items():
-                if not isinstance(entry, dict):
-                    continue
-                source_term = entry.get(source_locale)
-                target_term = entry.get(locale_id)
-                term_class = str(entry.get("class", ""))
-                if not isinstance(source_term, str) or not isinstance(target_term, str):
-                    continue
-                if not contains_phrase(source, source_term):
-                    continue
-                if source_term == target_term:
-                    continue
-                if not contains_phrase(target, target_term):
+            proper_title = exact_proper_title(source, target, glossary_terms, source_locale, locale_id)
+            if proper_title is not None:
+                term_id, expected_title = proper_title
+                if normalized_phrase(target) != normalized_phrase(expected_title):
                     terminology_errors.append({
                         "key": key,
-                        "term_id": str(term_id),
-                        "class": term_class,
-                        "expected": target_term,
+                        "term_id": term_id,
+                        "class": "proper_title",
+                        "expected": expected_title,
+                        "source_text": source,
+                        "target_text": target,
                     })
+            else:
+                for term_id, entry in glossary_terms.items():
+                    if not isinstance(entry, dict):
+                        continue
+                    source_term = entry.get(source_locale)
+                    target_term = entry.get(locale_id)
+                    term_class = str(entry.get("class", ""))
+                    if not isinstance(source_term, str) or not isinstance(target_term, str):
+                        continue
+                    if not contains_phrase(source, source_term):
+                        continue
+                    if source_term == target_term:
+                        continue
+                    if not contains_phrase(target, target_term):
+                        terminology_errors.append({
+                            "key": key,
+                            "term_id": str(term_id),
+                            "class": term_class,
+                            "expected": target_term,
+                            "source_text": source,
+                            "target_text": target,
+                        })
 
             if same_visible_text(source, target) and any(ch.isalpha() for ch in source) and len(source.strip()) >= 4:
                 sanctioned_same = any(
@@ -275,12 +316,13 @@ def main() -> int:
         }
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "source_locale": source_locale,
         "targets": targets,
         "source_units": len(source_units),
         "require_terminology": args.require_terminology,
         "require_complete": args.require_complete,
+        "proper_title_nested_term_masking": True,
         "locales": locale_reports,
         "errors": errors,
         "warnings": warnings,
