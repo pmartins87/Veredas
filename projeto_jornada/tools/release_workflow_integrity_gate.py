@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -40,11 +41,45 @@ def git_blob(path: Path) -> str:
     return value
 
 
+def validate_actions_identity(contract: dict[str, Any], errors: list[str]) -> tuple[str, str]:
+    identity = contract.get("source_control_identity", {})
+    if not isinstance(identity, dict):
+        errors.append("release artifact contract has no source_control_identity object")
+        return "", ""
+
+    canonical_repository = str(identity.get("canonical_repository", "")).strip()
+    canonical_branch = str(identity.get("canonical_branch", "")).strip()
+    if canonical_repository != "pmartins87/Veredas":
+        errors.append("canonical repository must be pmartins87/Veredas")
+    if canonical_branch != "main":
+        errors.append("canonical branch must be main")
+    if identity.get("github_actions_context_must_match_for_11_10_and_signed_release") is not True:
+        errors.append("GitHub Actions source-control identity binding must remain enabled")
+    if identity.get("noncanonical_repository_or_branch_must_fail_closed") is not True:
+        errors.append("noncanonical source-control contexts must fail closed")
+
+    if os.environ.get("GITHUB_ACTIONS", "").lower() == "true":
+        actual_repository = os.environ.get("GITHUB_REPOSITORY", "").strip()
+        actual_branch = os.environ.get("GITHUB_REF_NAME", "").strip()
+        if actual_repository != canonical_repository:
+            errors.append(
+                f"noncanonical GitHub Actions repository: expected={canonical_repository} actual={actual_repository or '<empty>'}"
+            )
+        if actual_branch != canonical_branch:
+            errors.append(
+                f"noncanonical GitHub Actions branch: expected={canonical_branch} actual={actual_branch or '<empty>'}"
+            )
+    return canonical_repository, canonical_branch
+
+
 def main() -> int:
     errors: list[str] = []
     actual: dict[str, str] = {}
+    canonical_repository = ""
+    canonical_branch = ""
     try:
         contract = read_object(CONTRACT)
+        canonical_repository, canonical_branch = validate_actions_identity(contract, errors)
         expected = contract.get("workflow_integrity", {})
         if not isinstance(expected, dict):
             raise ValueError("release artifact contract has no workflow_integrity object")
@@ -70,8 +105,13 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     print(
-        "RELEASE_WORKFLOW_INTEGRITY PASS: qa_11_10=%s signed_aab=%s"
-        % (actual["qa_11_10"][:12], actual["signed_release_aab"][:12])
+        "RELEASE_WORKFLOW_INTEGRITY PASS: repo=%s branch=%s qa_11_10=%s signed_aab=%s"
+        % (
+            canonical_repository,
+            canonical_branch,
+            actual["qa_11_10"][:12],
+            actual["signed_release_aab"][:12],
+        )
     )
     return 0
 
