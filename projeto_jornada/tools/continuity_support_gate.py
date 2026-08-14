@@ -15,7 +15,11 @@ RUNBOOK = ROOT / "docs" / "CONTINUITY_AND_SUPPORT.md"
 RC_COMPLETION = ROOT / "RELEASE_12_8_COMPLETION.json"
 PROVENANCE_GATE = ROOT / "tools" / "provenance_license_gate.py"
 DEPENDENCY_GATE = ROOT / "tools" / "backend_dependency_evidence_gate.py"
+ANDROID_GATE = ROOT / "tools" / "android_dependency_inventory_gate.py"
+NOTICES_GATE = ROOT / "tools" / "third_party_notices_gate.py"
 ARCHIVE_GATE = ROOT / "tools" / "release_archive_gate.py"
+INPUT_SCOPE_GATE = ROOT / "tools" / "release_input_scope_gate.py"
+RECOVERY_GATE = ROOT / "tools" / "recovery_backup_drill_gate.py"
 PLACEHOLDER_RE = re.compile(r"^(?:PENDING_|TODO|TBD|CHANGEME)", re.IGNORECASE)
 
 
@@ -57,9 +61,9 @@ def completion_commit(row: dict[str, Any]) -> str:
     return ""
 
 
-def run_component_gate(path: Path, release: bool) -> tuple[bool, str]:
+def run_component_gate(path: Path, release: bool, supports_release_flag: bool = True) -> tuple[bool, str]:
     command = [sys.executable, str(path)]
-    if release:
+    if release and supports_release_flag:
         command.append("--release")
     result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
     output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
@@ -76,7 +80,9 @@ def require_true_flags(section: Any, keys: tuple[str, ...], label: str, errors: 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Veredas 12.9 continuity, archive, dependency evidence, provenance and support readiness.")
+    parser = argparse.ArgumentParser(
+        description="Validate Veredas 12.9 continuity, archive, dependency evidence, provenance, recovery and support readiness."
+    )
     parser.add_argument("--release", action="store_true", help="Require final real continuity evidence.")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
@@ -89,21 +95,25 @@ def main() -> int:
         print(f"CONTINUITY_SUPPORT FAIL: {exc}")
         return 1
 
-    if contract.get("schema_version") != 3 or contract.get("roadmap_step") != "12.9":
+    if contract.get("schema_version") != 4 or contract.get("roadmap_step") != "12.9":
         errors.append("12.9 contract schema/roadmap_step invalid")
     if not RUNBOOK.exists() or RUNBOOK.stat().st_size < 3000:
         errors.append("continuity/support runbook is missing or unexpectedly small")
 
     component_gates = (
-        (PROVENANCE_GATE, "provenance/license"),
-        (DEPENDENCY_GATE, "backend dependency evidence"),
-        (ARCHIVE_GATE, "release archive"),
+        (PROVENANCE_GATE, "provenance/license", True),
+        (DEPENDENCY_GATE, "backend dependency evidence", True),
+        (ANDROID_GATE, "Android dependency inventory", True),
+        (NOTICES_GATE, "third-party notices", True),
+        (ARCHIVE_GATE, "release archive", True),
+        (INPUT_SCOPE_GATE, "release input scope", False),
+        (RECOVERY_GATE, "recovery/backup drill", True),
     )
-    for gate, label in component_gates:
+    for gate, label, supports_release in component_gates:
         if not gate.exists():
             errors.append(f"12.9 {label} gate missing")
             continue
-        ok, output = run_component_gate(gate, args.release)
+        ok, output = run_component_gate(gate, args.release, supports_release)
         if not ok:
             errors.append(f"{label} gate failed in matching mode")
             if output:
@@ -143,6 +153,7 @@ def main() -> int:
             "backend_transitive_hash_lock_required",
             "backend_final_sbom_required",
             "android_final_gradle_dependency_inventory_required",
+            "third_party_notice_coverage_required_for_backend_and_android",
         ),
         "provenance_and_dependency_evidence",
         errors,
@@ -154,6 +165,7 @@ def main() -> int:
         (
             "identity_cross_check_with_12_6_and_12_8_required",
             "required_item_hash_verification",
+            "acyclic_runtime_build_fingerprint_required",
             "external_evidence_references_separate_from_repository_secrets",
         ),
         "release_archive",
@@ -183,11 +195,17 @@ def main() -> int:
         for section_name, keys in {
             "source_of_truth": ("final_release_tag",),
             "release_archive": (
-                "rc_commit_sha", "aab_sha256", "release_input_fingerprint",
-                "signing_certificate_sha256", "store_version_name",
+                "rc_commit_sha",
+                "aab_sha256",
+                "release_input_fingerprint",
+                "signing_certificate_sha256",
+                "store_version_name",
             ),
             "ownership_and_recovery": (
-                "primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact",
+                "primary_release_owner",
+                "secondary_recovery_contact",
+                "support_channel",
+                "privacy_contact",
             ),
         }.items():
             section = contract.get(section_name, {})
@@ -217,8 +235,10 @@ def main() -> int:
         require_true_flags(
             secret_policy,
             (
-                "external_keystore_backup_verified", "external_secret_backup_verified",
-                "backup_restore_drill_recorded", "signing_identity_documented_without_private_material",
+                "external_keystore_backup_verified",
+                "external_secret_backup_verified",
+                "backup_restore_drill_recorded",
+                "signing_identity_documented_without_private_material",
             ),
             "secret_and_signing_policy",
             errors,
@@ -241,7 +261,12 @@ def main() -> int:
             warnings.append("provenance/dependency evidence remains open until final assets/dependency reports exist")
         for section_name, keys in {
             "source_of_truth": ("final_release_tag",),
-            "ownership_and_recovery": ("primary_release_owner", "secondary_recovery_contact", "support_channel", "privacy_contact"),
+            "ownership_and_recovery": (
+                "primary_release_owner",
+                "secondary_recovery_contact",
+                "support_channel",
+                "privacy_contact",
+            ),
         }.items():
             section = contract.get(section_name, {})
             for key in keys:
@@ -249,13 +274,17 @@ def main() -> int:
                     warnings.append(f"{section_name}.{key} not configured yet")
 
     report = {
-        "schema_version": 4,
+        "schema_version": 5,
         "roadmap_step": "12.9",
         "mode": "release" if args.release else "preflight",
         "head_sha": head_sha,
         "provenance_gate_bound": True,
         "backend_dependency_evidence_gate_bound": True,
+        "android_dependency_inventory_gate_bound": True,
+        "third_party_notices_gate_bound": True,
         "release_archive_gate_bound": True,
+        "release_input_scope_gate_bound": True,
+        "recovery_backup_drill_gate_bound": True,
         "errors": errors,
         "warnings": warnings,
     }
@@ -269,12 +298,9 @@ def main() -> int:
             print("ERROR:", error)
         return 1
     if args.release:
-        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/dependencies/provenance/support certified")
+        print("CONTINUITY_SUPPORT PASS: 12.9 continuity/archive/dependencies/provenance/notices/recovery/support certified")
     else:
-        print(
-            "CONTINUITY_SUPPORT PREFLIGHT PASS: warnings=%d provenance_gate=1 dependency_gate=1 archive_gate=1"
-            % len(warnings)
-        )
+        print("CONTINUITY_SUPPORT PREFLIGHT PASS: warnings=%d component_gates=7" % len(warnings))
     return 0
 
 
