@@ -4,6 +4,12 @@
   "formal_status": "in_progress",
   "application_id": "com.pmartins87.veredasdatrama",
   "target_public_version_name": "1.0.0",
+  "source_control_identity": {
+    "canonical_repository": "pmartins87/Veredas",
+    "canonical_branch": "main",
+    "github_actions_context_must_match_for_11_10_and_signed_release": true,
+    "noncanonical_repository_or_branch_must_fail_closed": true
+  },
   "artifact": {
     "primary": "AAB",
     "expected_path": "build/android-release/veredas-da-trama.aab",
@@ -126,6 +132,7 @@
   ],
   "completion_requirements": [
     "11.10 Release Candidate certified with frozen public version and a persisted release-input manifest",
+    "11.10 and signed-release workflows execute only from the canonical pmartins87/Veredas repository on main",
     "12.2 package, upload key and Google Play app-signing identities finalized; later evidence-only commits must not change the certified release-input fingerprint",
     "12.3 privacy/Data Safety certified",
     "12.4 production billing certified",
