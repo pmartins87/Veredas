@@ -1,35 +1,53 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "project": "Veredas da Trama",
-  "migration_status": "awaiting_repository_rename",
+  "migration_status": "complete",
+  "completed_on": "2026-08-14",
   "canonical_target": {
     "repository": "pmartins87/Veredas",
+    "repository_id": 850138775,
     "branch": "main",
-    "visibility": "private"
+    "visibility": "private",
+    "default_branch_verified": true
   },
   "legacy_identity": {
-    "repository": "pmartins87/desktop-tutorial",
-    "project_branch": "projeto-jornada-snapshots"
+    "repository_before_rename": "pmartins87/desktop-tutorial",
+    "project_branch": "projeto-jornada-snapshots",
+    "legacy_name_redirects_to_canonical_repository": true,
+    "legacy_branch_is_historical_only": true,
+    "operational_workflow_dependency_on_legacy_branch": false
   },
   "history_policy": {
     "preserve_entire_git_history": true,
     "snapshot_reimport_forbidden": true,
     "rewrite_historical_commit_shas": false,
-    "repository_rename_is_required_method": true
+    "repository_rename_was_used": true,
+    "repository_id_preserved": true
   },
-  "prepared_state": {
-    "main_fast_forwarded_to_project_history": true,
-    "legacy_project_branch_aligned_with_main": true,
+  "verified_state": {
+    "main_fast_forwarded_to_full_project_history_before_rename": true,
+    "legacy_project_branch_aligned_with_main_before_rename": true,
+    "repository_rename_preserved_history": true,
     "source_of_truth_contract_points_to_veredas_main": true,
     "continuity_gate_points_to_veredas_main": true,
     "continuity_runbook_points_to_veredas_main": true,
-    "project_readme_replaced": true
+    "project_readme_replaced": true,
+    "phase_11_workflows_migrated_to_main": true,
+    "phase_12_push_workflows_migrated_to_main": true,
+    "writeback_workflows_checkout_and_push_main": true,
+    "dispatch_only_release_workflows_left_branch_agnostic": true,
+    "qa_11_10_workflow_blob_re_pinned_after_branch_migration": true
   },
-  "manual_transition_required": {
-    "reason": "GitHub connector does not expose repository rename/delete mutation",
-    "temporary_empty_repository": "pmartins87/Veredas",
-    "temporary_empty_repository_must_be_removed_or_renamed_out_of_the_way": true,
-    "then_rename_legacy_repository_to": "Veredas"
+  "github_actions": {
+    "post_rename_probe_run_id": 31814703055,
+    "post_rename_probe_job_id": 94813474002,
+    "head_branch": "main",
+    "job_steps": [],
+    "runner_id": 0,
+    "runner_name": "",
+    "classification": "infrastructure_non_execution",
+    "rename_resolved_executor_problem": false,
+    "policy": "no code PASS or FAIL is inferred from a job that never receives a runner"
   },
   "formal_roadmap_count_changes": false,
   "formal_completed_steps": 110
