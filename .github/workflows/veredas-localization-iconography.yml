@@ -3,7 +3,7 @@ name: Veredas Localization Iconography 11.6
 on:
   push:
     branches:
-      - projeto-jornada-snapshots
+      - main
     paths:
       - 'projeto_jornada/localization/**'
       - 'projeto_jornada/scenes/**'
