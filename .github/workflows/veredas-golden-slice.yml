@@ -92,15 +92,29 @@ jobs:
           fi
 
       - name: Run authored golden slice smoke
+        id: smoke
+        shell: bash
         run: |
-          set -euo pipefail
-          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/golden_slice_smoke.tscn 2>&1)
-          printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|GOLDEN_SLICE_SMOKE FAIL'; then
+          set +e
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/golden_slice_smoke.tscn > golden-slice-smoke.txt 2>&1
+          code=$?
+          cat golden-slice-smoke.txt
+          if grep -E 'SCRIPT ERROR|Parse Error|GOLDEN_SLICE_SMOKE FAIL' golden-slice-smoke.txt; then
             exit 1
           fi
-          printf '%s\n' "$output" | grep -q 'GOLDEN_SLICE_SMOKE PASS'
+          grep -q 'GOLDEN_SLICE_SMOKE PASS' golden-slice-smoke.txt || exit 1
+          exit "$code"
+
+      - name: Upload golden slice smoke diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-slice-smoke-diagnostic
+          path: golden-slice-smoke.txt
+          if-no-files-found: warn
+          retention-days: 2
 
       - name: Verify roadmap stop-ship consistency
+        if: steps.smoke.outcome == 'success'
         working-directory: projeto_jornada
         run: python tools/roadmap_state_consistency.py
