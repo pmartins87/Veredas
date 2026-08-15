@@ -1,5 +1,5 @@
 [application]
-config/name="Veredas da Trama"
+config/name="Sem título — build interna"
 config/quit_on_go_back=false
 run/main_scene="res://scenes/Hub.tscn"
 
