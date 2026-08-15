@@ -38,12 +38,15 @@ jobs:
           test "$actual" = "$expected"
           python - <<'PY'
           from pathlib import Path
-          for name in (
-              'projeto_jornada/tools/android_physical_soak_windows.ps1',
-              'projeto_jornada/tools/INICIAR_TESTE_11_3.bat',
-          ):
-              data = Path(name).read_bytes()
-              assert data and all(b < 128 for b in data), f'{name} must remain ASCII-only'
+          collector = Path('projeto_jornada/tools/android_physical_soak_windows.ps1')
+          launcher = Path('projeto_jornada/tools/INICIAR_TESTE_11_3.bat')
+          for path in (collector, launcher):
+              data = path.read_bytes()
+              assert data and all(b < 128 for b in data), f'{path} must remain ASCII-only'
+          text = collector.read_text(encoding='ascii')
+          assert '$Args' not in text, 'PowerShell automatic variable $Args must not be used by collector helpers'
+          assert 'function AdbText([string[]]$AdbArgs)' in text
+          assert '& adb @AdbArgs' in text
           PY
           cp projeto_jornada/tools/android_physical_soak_windows.ps1 kit/android_physical_soak_windows.ps1
           cp projeto_jornada/tools/INICIAR_TESTE_11_3.bat kit/INICIAR_TESTE_11_3.bat
@@ -52,12 +55,12 @@ jobs:
         shell: bash
         run: |
           cat > kit/LEIA_ME.txt <<'TXT'
-          VEREDAS DA TRAMA - TESTE FISICO ANDROID 11.3 - KIT V3
+          VEREDAS DA TRAMA - TESTE FISICO ANDROID 11.3 - KIT V4
 
           1. Deixe a Depuracao USB ativa e o aparelho autorizado no ADB.
           2. Confirme antes, se quiser: adb devices
           3. Execute INICIAR_TESTE_11_3.bat.
-          4. O launcher e o script ja foram validados em Windows PowerShell 5.1 e cmd.exe no CI.
+          4. O launcher, o parser PowerShell 5.1 e o encaminhamento real de argumentos ADB foram validados em Windows no CI.
           5. O launcher faz uma nova validacao local do parser antes de iniciar.
           6. Aguarde as medicoes automaticas iniciais.
           7. Quando aparecer PLAY NORMALLY NOW, jogue normalmente por 30 minutos.
@@ -84,7 +87,7 @@ jobs:
       - name: Upload validated physical soak kit
         uses: actions/upload-artifact@v4
         with:
-          name: Veredas-11-3-Soak-Fisico-Windows-v3
+          name: Veredas-11-3-Soak-Fisico-Windows-v4
           path: kit/*
           if-no-files-found: error
           retention-days: 14
