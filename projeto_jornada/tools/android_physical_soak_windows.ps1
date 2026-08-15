@@ -24,16 +24,16 @@ function Fail([string]$Message) {
     throw "11.3 PHYSICAL SOAK: $Message"
 }
 
-function AdbText([string[]]$Args) {
-    return (& adb @Args 2>&1 | Out-String)
+function AdbText([string[]]$AdbArgs) {
+    return (& adb @AdbArgs 2>&1 | Out-String)
 }
 
 function SaveText([string]$Path, [string]$Text) {
     [IO.File]::WriteAllText($Path, $Text, (New-Object Text.UTF8Encoding($false)))
 }
 
-function Capture([string[]]$Args, [string]$Path) {
-    $text = AdbText $Args
+function Capture([string[]]$AdbArgs, [string]$Path) {
+    $text = AdbText -AdbArgs $AdbArgs
     SaveText $Path $text
     return $text
 }
