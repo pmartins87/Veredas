@@ -2,25 +2,25 @@
   "schema": 1,
   "freeze_step": "10.10",
   "freeze_title": "Freeze de balanceamento com gates estatísticos aprovados",
-  "baseline_commit": "39a811cab7418fcfdb3d53ebf49076fc87dc2254",
-  "policy": "Qualquer alteração em protected_paths exige reexecução explícita dos gates 10.1–10.9 e atualização deliberada deste manifesto. Arte, UX, áudio, localização, documentação e QA fora da superfície protegida não exigem re-freeze.",
-  "rebaseline_reason": "11.2 adicionou validação transacional de integridade de saves/run states em core. A mudança foi re-certificada contra toda a CI histórica, regressão ampla, playtests adversariais e fuzzing de saves antes deste re-freeze.",
+  "baseline_commit": "0ff32d51f06cc7284f73842d1f4694a13e608889",
+  "policy": "Qualquer alteração em protected_paths exige reexecução explícita dos gates 10.1–10.9 e atualização deliberada deste manifesto. Arte, UX, áudio, localização, documentação, evidência física e QA fora da superfície protegida não exigem re-freeze.",
+  "rebaseline_reason": "Desde o freeze anterior, mudanças legítimas pós-10.10 atingiram a superfície protegida: evolução de Billing/entitlements e PurchaseReference, ajustes de project.godot e evolução dos workflows CI/adversarial. Em 2026-08-14, a superfície atual foi deliberadamente recertificada no mesmo HEAD 0ff32d51f06cc7284f73842d1f4694a13e608889 por CI completa, playtests adversariais, matriz de regressão e save-fuzz, todos PASS. Este re-freeze não altera thresholds nem resultados de balanceamento; apenas move a baseline para a superfície realmente recertificada.",
   "certification": {
     "phase10_certified_through": "10.9",
-    "main_ci_run_id": 31349296775,
+    "main_ci_run_id": 31856138637,
     "main_ci_result": "PASS",
-    "main_ci_scope": "1.x-10.8 incluindo 9.1-9.10 e 10.1-10.8",
-    "adversarial_run_id": 31349296777,
+    "main_ci_scope": "1.x-10.8 incluindo toda a superfície estatística/balanceamento atualmente protegida",
+    "adversarial_run_id": 31856138631,
     "adversarial_result": "PASS",
-    "adversarial_scope": "10.9",
-    "regression_run_id": 31349296779,
+    "adversarial_scope": "10.9; mínimo de 9 cenários adversariais preservado",
+    "regression_run_id": 31856138661,
     "regression_result": "PASS",
-    "regression_scope": "11.1",
-    "save_fuzz_run_id": 31349296790,
+    "regression_scope": "regressão ampla pós-freeze sobre a superfície atual",
+    "save_fuzz_run_id": 31856138662,
     "save_fuzz_result": "PASS",
-    "save_fuzz_scope": "11.2",
+    "save_fuzz_scope": "integridade transacional/migração/corrupção de saves preservada",
     "same_head": true,
-    "certified_head": "39a811cab7418fcfdb3d53ebf49076fc87dc2254"
+    "certified_head": "0ff32d51f06cc7284f73842d1f4694a13e608889"
   },
   "statistical_evidence": {
     "character_balance_runs": 1296,
@@ -86,6 +86,6 @@
   ],
   "self_protected_files": {
     "projeto_jornada/tools/verify_balance_freeze.py": "b84745c1f8715942e5a83db5de00bdaf8dfcebd0",
-    ".github/workflows/veredas-balance-freeze.yml": "6029e957f0e39585df61ad2853be99c66dbeccb1"
+    ".github/workflows/veredas-balance-freeze.yml": "bfba88983aff10ef327573446e489c2bf6be8789"
   }
 }
