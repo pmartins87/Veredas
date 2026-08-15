@@ -1,5 +1,5 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
   "updated_on": "2026-08-14",
@@ -74,7 +74,13 @@
     "fail_closed_release_gate": true,
     "backend_dependency_evidence_real_runner_execution": true,
     "backend_dependency_evidence_persisted_and_revalidated": true,
-    "backend_dependency_component_count": 29
+    "backend_dependency_component_count": 29,
+    "backend_exact_wheel_license_archive_builder": true,
+    "backend_exact_wheel_license_archive_real_runner_execution": true,
+    "backend_exact_wheel_license_archive_component_count": 29,
+    "backend_notice_identity_exact_text_completion": true,
+    "backend_notice_identity_component_count": 29,
+    "backend_notice_preflight_gate_passed": true
   },
   "current_preflight": {
     "versioned_art_audio_font_assets": 4,
@@ -92,7 +98,7 @@
     "backend_direct_primary_wheel_hashes_recorded": 5,
     "known_external_services": 4,
     "canonical_release_archive_required_items": 12,
-    "known_third_party_notice_rows": 7,
+    "known_third_party_notice_rows": 31,
     "runtime_product_fingerprint_files": 2,
     "recovery_required_systems": 5,
     "recovery_required_scenarios": 6,
@@ -115,9 +121,9 @@
     "android_dependency_inventory_pipeline": "implemented_in_signed_aab_workflow_final_gradle_plugin_build_pending",
     "android_dependency_inventory_scope": "releaseRuntimeClasspath",
     "android_final_gradle_dependency_inventory": "pending_final_plugin_gradle_build_and_execution",
-    "third_party_notice_backend_transitive_coverage": "pending_gate_against_persisted_29_component_sbom",
+    "third_party_notice_backend_transitive_coverage": "identity_and_sha_bound_archive_29_of_29_preflight_pass_final_review_pending",
     "third_party_notice_android_coverage": "pending_final_gradle_inventory",
-    "license_notice_archive": "pending_final_review",
+    "license_notice_archive": "backend_exact_wheels_29_of_29_archived; Godot/plugin/Android and final reviews remain pending",
     "release_archive_identity": "pending_final_12_6_12_8_artifact",
     "recovery_backup_drill": "contract_and_gate_ready_real_owners_backups_accounts_and_drill_pending",
     "backend_dependency_evidence_source_run_id": 31851792108,
@@ -128,7 +134,14 @@
     "backend_requirements_lock_sha256": "32632ae1ce714af4f55e4c63102909cec85fc19cee7329656b9082e259fbab47",
     "backend_software_sbom_sha256": "fcf33fc9dab2650b1c239390ddf5fbeab5dbcfc8f0b4e68207d77d9d5199e818",
     "backend_offline_require_hashes_reinstall": "pass",
-    "backend_resolved_vs_reinstalled_freeze": "equal"
+    "backend_resolved_vs_reinstalled_freeze": "equal",
+    "backend_exact_wheel_license_archive": "pass_29_of_29",
+    "backend_exact_wheel_license_archive_run_id": 31852389945,
+    "backend_notice_identity_coverage": "pass_29_of_29",
+    "backend_notice_identity_run_id": 31852773619,
+    "backend_notice_identity_commit": "476735679a84832b6b5ad63914574ff511b1003e",
+    "backend_notice_rows_missing": 0,
+    "backend_notice_rows_finally_reviewed": 0
   },
   "pending": {
     "12_8_certified": false,
@@ -138,7 +151,7 @@
     "backend_dependency_evidence_gate_passed_on_persisted_evidence": true,
     "android_dependency_inventory_generated_from_signed_aab_build": false,
     "android_dependency_inventory_gate_passed_on_persisted_evidence": false,
-    "third_party_notices_backend_coverage_complete": false,
+    "third_party_notices_backend_coverage_complete": true,
     "third_party_notices_android_coverage_complete": false,
     "third_party_notices_review_and_archive_complete": false,
     "recovery_backup_drill_gate_passed": false,

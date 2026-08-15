@@ -324,7 +324,11 @@
       "canonical_archive_required_items": 12,
       "status": "provenance_dependency_android_notice_archive_controls_implemented_final_evidence_recovery_ownership_handoff_pending",
       "backend_dependency_evidence_run_id": 31851792108,
-      "backend_dependency_evidence_persisted": true
+      "backend_dependency_evidence_persisted": true,
+      "backend_exact_wheel_license_archive": "pass_29_of_29",
+      "backend_notice_identity_coverage": "pass_29_of_29_final_review_pending",
+      "backend_notice_identity_run_id": 31852773619,
+      "third_party_notices_backend_missing_rows": 0
     },
     "12.10": {
       "state_file": "RELEASE_12_10_STATE.json",
