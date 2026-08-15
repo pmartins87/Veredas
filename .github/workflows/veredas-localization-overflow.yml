@@ -1,16 +1,6 @@
 name: Veredas Localization Overflow 11.6
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'projeto_jornada/localization/**'
-      - 'projeto_jornada/scenes/**'
-      - 'projeto_jornada/ui/**'
-      - 'projeto_jornada/tests/LocalizationOverflowCertification.gd'
-      - 'projeto_jornada/tests/localization_overflow_certification.tscn'
-      - '.github/workflows/veredas-localization-overflow.yml'
   workflow_dispatch:
 
 concurrency:
@@ -68,4 +58,4 @@ jobs:
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION FAIL' \
             'RESPONSIVE_ACCESSIBILITY_CERTIFICATION PASS: 11.4'
 
-# Recertify after reproducible pack rebuild: 2026-08-14
+# Standalone diagnostic retained for manual use; composite certification is canonical.
