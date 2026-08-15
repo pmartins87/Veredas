@@ -7,17 +7,26 @@ API_LEVEL="$3"
 EXPECTED_SEED=881001
 EXPECTED_SCHEMA=3
 DIAG_ROOT="${GITHUB_WORKSPACE:-.}/android-emulator-diagnostics/api-${API_LEVEL}"
-mkdir -p "$DIAG_ROOT"
+MEM_ROOT="$DIAG_ROOT/memory-checkpoints"
+mkdir -p "$DIAG_ROOT" "$MEM_ROOT"
 STEPS="$DIAG_ROOT/steps.log"
 
 step() {
   printf '%s\n' "$1" | tee -a "$STEPS"
 }
 
+capture_memory() {
+  label="$1"
+  adb shell dumpsys meminfo "$PACKAGE" > "$MEM_ROOT/${label}-app.txt" 2>&1 || true
+  adb shell cat /proc/meminfo > "$MEM_ROOT/${label}-system.txt" 2>&1 || true
+  adb shell dumpsys activity processes > "$MEM_ROOT/${label}-processes.txt" 2>&1 || true
+}
+
 capture_on_exit() {
   status=$?
   trap - 0
   printf 'exit_status=%s\n' "$status" >> "$STEPS"
+  capture_memory final
   adb logcat -d > "$DIAG_ROOT/logcat.txt" 2>&1 || true
   adb shell dumpsys activity top > "$DIAG_ROOT/activity-top.txt" 2>&1 || true
   adb shell dumpsys package "$PACKAGE" > "$DIAG_ROOT/package.txt" 2>&1 || true
@@ -106,12 +115,14 @@ adb shell run-as "$PACKAGE" mkdir -p files
 adb shell run-as "$PACKAGE" rm -f files/android_ci_ready files/veredas_save.json
 adb shell run-as "$PACKAGE" touch files/android_ci_autostart
 adb shell run-as "$PACKAGE" ls -l files/android_ci_autostart | tee "$DIAG_ROOT/marker.txt"
+capture_memory prelaunch
 
 step '03 first launch and wait for application readiness'
 adb logcat -c
 adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 | tee "$DIAG_ROOT/launch-1.txt"
 wait_for_pid 60 | tee "$DIAG_ROOT/pid-1.txt"
 wait_for_ready started 90 | tee "$DIAG_ROOT/ready-started.txt"
+capture_memory first-ready
 wait_for_file files/veredas_save.json 30
 adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-initial-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-initial.json"
@@ -125,6 +136,7 @@ if file_exists files/veredas_save.json; then
 fi
 adb shell input keyevent KEYCODE_HOME
 wait_for_file files/veredas_save.json 45
+capture_memory after-pause-autosave
 adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-pause-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-before.json"
 validate_save "$DIAG_ROOT/save-before.json" 'SAVE_AFTER_PAUSE'
@@ -133,9 +145,14 @@ step '05 force-stop and relaunch the persisted active journey'
 adb shell run-as "$PACKAGE" rm -f files/android_ci_ready
 adb shell am force-stop "$PACKAGE"
 sleep 2
+capture_memory after-force-stop
 adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1 | tee "$DIAG_ROOT/launch-2.txt"
 wait_for_pid 60 | tee "$DIAG_ROOT/pid-2.txt"
+capture_memory relaunch-pid
+sleep 2
+capture_memory relaunch-plus-2s
 wait_for_ready resumed 90 | tee "$DIAG_ROOT/ready-resumed.txt"
+capture_memory resumed-ready
 
 step '06 prove resumed in-memory journey can autosave again'
 adb shell run-as "$PACKAGE" rm -f files/veredas_save.json
@@ -145,6 +162,7 @@ if file_exists files/veredas_save.json; then
 fi
 adb shell input keyevent KEYCODE_HOME
 wait_for_file files/veredas_save.json 45
+capture_memory after-resume-autosave
 adb shell run-as "$PACKAGE" ls -l files/veredas_save.json | tee "$DIAG_ROOT/save-resume-stat.txt"
 adb exec-out run-as "$PACKAGE" cat files/veredas_save.json > "$DIAG_ROOT/save-after.json"
 validate_save "$DIAG_ROOT/save-after.json" 'SAVE_AFTER_RELAUNCH_PAUSE'
@@ -159,10 +177,19 @@ assert before['run']['world_id'] == after['run']['world_id']
 print('PERSISTENCE_MATCH seed=881001 schema=3 character=', after['run']['character_id'], 'world=', after['run']['world_id'])
 PY
 
-step '07 inspect runtime logcat'
+step '07 inspect runtime logcat and distinguish emulator renderer warnings from app failures'
 adb logcat -d > "$DIAG_ROOT/logcat-final.txt"
-if grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION.*com\.veredasdatrama\.preview' "$DIAG_ROOT/logcat-final.txt"; then
-  echo 'Runtime error found in Android logcat'
+grep -E 'SceneShaderGLES3: Program linking failed|CanvasShaderGLES3: Program linking failed|GL_MAX_FRAGMENT_UNIFORM_VECTORS' "$DIAG_ROOT/logcat-final.txt" > "$DIAG_ROOT/emulator-renderer-warnings.txt" 2>/dev/null || true
+if grep -E 'SCRIPT ERROR|Parse Error|FATAL EXCEPTION' "$DIAG_ROOT/logcat-final.txt"; then
+  echo 'Runtime script/FATAL error found in Android logcat'
+  exit 1
+fi
+if grep -E "lowmemorykiller: Kill '$PACKAGE'|lmkd.*Kill.*$PACKAGE" "$DIAG_ROOT/logcat-final.txt"; then
+  echo 'Android low-memory killer terminated the game process'
+  exit 1
+fi
+if grep -E "ANR in $PACKAGE|am_anr.*$PACKAGE" "$DIAG_ROOT/logcat-final.txt"; then
+  echo 'Android ANR found for game process'
   exit 1
 fi
 
