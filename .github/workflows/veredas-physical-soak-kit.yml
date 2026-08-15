@@ -1,0 +1,113 @@
+name: Veredas Physical Soak Kit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/tools/android_physical_soak_windows.ps1'
+      - '.github/workflows/veredas-physical-soak-kit.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-physical-soak-kit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download exact certified candidate APK
+        uses: actions/download-artifact@v4
+        with:
+          name: veredas-debug-apk
+          path: kit
+          github-token: ${{ github.token }}
+          run-id: 31856094548
+
+      - name: Verify candidate APK and collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected='d01119c949ecd72b20f1af9b56dac8a359452ae71503612f4e898a173c5ff879'
+          actual="$(sha256sum kit/veredas-debug.apk | awk '{print $1}')"
+          test "$actual" = "$expected"
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('projeto_jornada/tools/android_physical_soak_windows.ps1')
+          data = p.read_bytes()
+          assert data and all(b < 128 for b in data), 'collector must remain ASCII-only for Windows PowerShell 5.1'
+          PY
+          cp projeto_jornada/tools/android_physical_soak_windows.ps1 kit/android_physical_soak_windows.ps1
+
+      - name: Write Windows launcher and instructions
+        shell: bash
+        run: |
+          cat > kit/INICIAR_TESTE_11_3.bat <<'BAT'
+          @echo off
+          setlocal
+          cd /d "%~dp0"
+          echo ============================================================
+          echo Veredas da Trama - Teste fisico Android 11.3 - KIT V2
+          echo ============================================================
+          echo.
+          echo Primeiro sera validado o script no Windows PowerShell 5.1.
+          echo O teste de 30 minutos so comeca depois das medicoes iniciais.
+          echo Mantenha o celular conectado por USB durante todo o processo.
+          echo.
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$tokens=$null; $errors=$null; [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path '.\android_physical_soak_windows.ps1').Path,[ref]$tokens,[ref]$errors); if($errors.Count -ne 0){$errors ^| Format-List *; exit 17}; Write-Host 'PowerShell 5.1 parser: PASS'"
+          if errorlevel 1 (
+            echo.
+            echo VALIDACAO DO SCRIPT FALHOU. Nao inicie o soak.
+            pause
+            exit /b 17
+          )
+          echo.
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\android_physical_soak_windows.ps1" -Apk ".\veredas-debug.apk" -SoakSeconds 1800
+          set code=%ERRORLEVEL%
+          echo.
+          echo Script finalizado com codigo %code%.
+          if not "%code%"=="0" echo Envie ao ChatGPT a mensagem de erro acima.
+          if "%code%"=="0" echo Envie ao ChatGPT physical_device_evidence.json e veredas-physical-soak-raw.zip.
+          pause
+          exit /b %code%
+          BAT
+          cat > kit/LEIA_ME.txt <<'TXT'
+          VEREDAS DA TRAMA - TESTE FISICO ANDROID 11.3 - KIT V2
+
+          1. Deixe a Depuracao USB ativa e o aparelho autorizado no ADB.
+          2. Confirme antes, se quiser: adb devices
+          3. Execute INICIAR_TESTE_11_3.bat.
+          4. O launcher valida o parser do PowerShell 5.1 antes de qualquer teste.
+          5. Aguarde as medicoes automaticas iniciais.
+          6. Quando aparecer PLAY NORMALLY NOW, jogue normalmente por 30 minutos.
+          7. Mantenha USB conectado e a janela aberta.
+          8. No final, responda as quatro perguntas conforme o que realmente ocorreu.
+          9. Envie ao ChatGPT:
+             - veredas-physical-soak-11-3\physical_device_evidence.json
+             - veredas-physical-soak-11-3\veredas-physical-soak-raw.zip
+
+          APK SHA-256 esperado:
+          d01119c949ecd72b20f1af9b56dac8a359452ae71503612f4e898a173c5ff879
+          TXT
+
+      - name: Verify kit integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s kit/veredas-debug.apk
+          test -s kit/android_physical_soak_windows.ps1
+          test -s kit/INICIAR_TESTE_11_3.bat
+          test -s kit/LEIA_ME.txt
+          test "$(sha256sum kit/veredas-debug.apk | awk '{print $1}')" = 'd01119c949ecd72b20f1af9b56dac8a359452ae71503612f4e898a173c5ff879'
+
+      - name: Upload validated physical soak kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Veredas-11-3-Soak-Fisico-Windows-v2
+          path: kit/*
+          if-no-files-found: error
+          retention-days: 14
