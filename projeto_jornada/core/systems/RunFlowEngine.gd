@@ -173,7 +173,7 @@ func resume_story() -> void:
         GameState.run.mode = "story"
 
 func debrief() -> Dictionary:
-    return {
+    var report := {
         "result": GameState.run.get("result", "in_progress"),
         "ending_id": GameState.run.get("ending_id", ""),
         "turns": int(GameState.run.get("turn", 0)),
@@ -184,6 +184,10 @@ func debrief() -> Dictionary:
         "marks": GameState.run.get("marks", {}).duplicate(true),
         "echoes": EchoConsequenceEngine.summary(),
     }
+    var authored := AuthoredStoryDirector.debrief()
+    if not authored.is_empty():
+        report["authored_debrief"] = authored
+    return report
 
 func _close_combat(state: Dictionary) -> void:
     var result := str(state.get("result", ""))
