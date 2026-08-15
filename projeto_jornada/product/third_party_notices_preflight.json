@@ -2,14 +2,14 @@
   "schema_version": 1,
   "roadmap_step": "12.9",
   "mode": "preflight",
-  "known_notice_rows": 7,
-  "backend_missing_notice_rows": 24,
+  "known_notice_rows": 22,
+  "backend_missing_notice_rows": 9,
   "android_missing_notice_rows": 0,
   "errors": [
-    "backend SBOM component(s) lack notice coverage: ['pypi:blinker@1.9.0', 'pypi:certifi@2026.7.22', 'pypi:cffi@2.1.1', 'pypi:charset-normalizer@3.5.0', 'pypi:click@8.4.2', 'pypi:cryptography@50.0.0', 'pypi:google-api-core@2.34.0', 'pypi:google-cloud-core@2.6.1', 'pypi:googleapis-common-protos@1.75.1', 'pypi:grpcio@1.83.0', 'pypi:grpcio-status@1.83.0', 'pypi:idna@3.18', 'pypi:itsdangerous@2.2.0', 'pypi:jinja2@3.1.6', 'pypi:markupsafe@3.0.3', 'pypi:packaging@26.3', 'pypi:proto-plus@1.28.3', 'pypi:protobuf@7.35.1', 'pypi:pyasn1@0.6.4', 'pypi:pyasn1-modules@0.4.2', 'pypi:pycparser@3.0', 'pypi:typing-extensions@4.16.0', 'pypi:urllib3@2.7.0', 'pypi:werkzeug@3.1.8']"
+    "backend SBOM component(s) lack notice coverage: ['pypi:blinker@1.9.0', 'pypi:google-api-core@2.34.0', 'pypi:google-cloud-core@2.6.1', 'pypi:googleapis-common-protos@1.75.1', 'pypi:itsdangerous@2.2.0', 'pypi:jinja2@3.1.6', 'pypi:proto-plus@1.28.3', 'pypi:protobuf@7.35.1', 'pypi:pyasn1-modules@0.4.2']"
   ],
   "warnings": [
     "final Android dependency inventory absent; Android notice coverage cannot yet be frozen",
-    "7 known notice component review(s) pending"
+    "22 known notice component review(s) pending"
   ]
 }
