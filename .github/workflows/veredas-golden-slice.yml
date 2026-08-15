@@ -1,0 +1,106 @@
+name: Veredas Golden Slice Runtime
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/content_authored/**'
+      - 'projeto_jornada/core/systems/AuthoredStoryDirector.gd'
+      - 'projeto_jornada/core/systems/RunFlowEngine.gd'
+      - 'projeto_jornada/scenes/Main.gd'
+      - 'projeto_jornada/project.godot'
+      - 'projeto_jornada/localization/ui/pt_BR.json'
+      - 'projeto_jornada/localization/ui/en.json'
+      - 'projeto_jornada/tests/GoldenSliceSmoke.gd'
+      - 'projeto_jornada/tests/golden_slice_smoke.tscn'
+      - '.github/workflows/veredas-golden-slice.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-golden-slice-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  authored-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Rebuild canonical mechanical fixtures
+        working-directory: projeto_jornada
+        run: |
+          set -euo pipefail
+          python tools/rebuild_content.py
+          python tools/refine_npc_authenticity.py
+          python tools/refine_character_balance.py
+          python tools/enforce_character_horizontal_budget.py
+          python tools/refine_enemy_balance.py
+          python tools/refine_item_economy.py
+          python tools/validate_canonical.py
+
+      - name: Validate authored arc JSON
+        working-directory: projeto_jornada
+        run: |
+          set -euo pipefail
+          python -m json.tool content_authored/mata_fio_verde_golden_slice.json >/dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          arc = json.loads(Path('content_authored/mata_fio_verde_golden_slice.json').read_text(encoding='utf-8'))
+          assert arc['schema_version'] == 1
+          assert arc['arc_id'] == 'golden_slice.mata_fio_verde.01'
+          assert len(arc['scenes']) >= 7
+          assert len(arc['endings']) == 3
+          for scene_id, scene in arc['scenes'].items():
+              assert len(scene['choices']) == 3, scene_id
+              for locale in ('pt_BR', 'en'):
+                  copy = scene['copy'][locale]
+                  assert copy['title'].strip(), (scene_id, locale)
+                  assert len(copy['text']) >= 120, (scene_id, locale)
+                  assert len(copy['choices']) == 3, (scene_id, locale)
+              for choice in scene['choices']:
+                  if 'next' in choice:
+                      assert choice['next'] in arc['scenes'], (scene_id, choice['next'])
+                  if 'end' in choice:
+                      assert choice['end'] in arc['endings'], (scene_id, choice['end'])
+          print('AUTHORED_ARC_STATIC PASS')
+          PY
+
+      - name: Download pinned Godot 4.7.1
+        run: |
+          set -euo pipefail
+          curl -fL 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.1' -o /tmp/godot.zip
+          echo 'c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba  /tmp/godot.zip' | sha256sum -c -
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7.1-stable_linux.x86_64
+          /tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --version
+
+      - name: Import project with Godot 4.7.1
+        run: |
+          set -euo pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada --editor --quit 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|Failed to load script'; then
+            echo 'Godot import contained script/parser errors.'
+            exit 1
+          fi
+
+      - name: Run authored golden slice smoke
+        run: |
+          set -euo pipefail
+          output=$(/tmp/godot/Godot_v4.7.1-stable_linux.x86_64 --headless --path projeto_jornada res://tests/golden_slice_smoke.tscn 2>&1)
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E 'SCRIPT ERROR|Parse Error|GOLDEN_SLICE_SMOKE FAIL'; then
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -q 'GOLDEN_SLICE_SMOKE PASS'
+
+      - name: Verify roadmap stop-ship consistency
+        working-directory: projeto_jornada
+        run: python tools/roadmap_state_consistency.py
