@@ -1,2 +1,4 @@
-phase9-final-baseline=fa1e6b8cb1194aca7064b244f396adf96f6598e3
-purpose=final-android10-android14-resume-certification
+phase11-physical-soak-candidate=true
+source_runtime_head=a0093b2ddc106f57b9e8ab4e407ccc1a4901fb63
+purpose=android10-android14-emulator-recertification-before-physical-soak-11.3
+minimum_physical_soak_seconds=1800
