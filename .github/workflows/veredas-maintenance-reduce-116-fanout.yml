@@ -61,3 +61,5 @@ jobs:
           git diff --cached --check
           git commit -m 'ci: make standalone 11.6 diagnostics manual-only'
           git push origin HEAD:main
+
+# Second-touch trigger after workflow creation: 2026-08-14
