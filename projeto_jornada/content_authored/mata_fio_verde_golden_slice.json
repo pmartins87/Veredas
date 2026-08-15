@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "arc_id": "golden_slice.mata_fio_verde.01",
+  "world_id": "world.mata_fio_verde",
+  "character_id": "character.mata_fio_verde.01",
+  "start_scene": "opening",
+  "scenes": {
+    "opening": {
+      "id": "authored.mata.opening",
+      "location_id": "location.mata_fio_verde.01",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Catedral de Samaúma · ao cair da tarde",
+          "title": "A árvore que sabe seu nome",
+          "text": "A Catedral não deveria sangrar. Ainda assim, uma linha de seiva negra escorre pelo tronco central e corta o piso de raízes como tinta fresca. No meio dela está Tori, uma jovem cartógrafa com a perna presa entre duas placas de casca viva.\n\nEla não pede socorro. Aponta para o tronco.\n\n— Não leia em voz alta.\n\nSeu nome está gravado ali. Não o título que os Guardadores usam. O nome que só sua família conhecia antes de você se tornar um Rastreador de Nós. E, abaixo dele, a madeira continua escrevendo: **ENTREGUE-O ANTES DA TERCEIRA BADALADA.**\n\nAo longe, alguma coisa bate três vezes dentro da árvore. A primeira badalada já passou.",
+          "choices": [
+            "Libertar Tori primeiro. Se ela sabe o que aconteceu, você precisa dela viva.",
+            "Ignorar a dor de Tori por alguns instantes e examinar quem escreveu seu nome.",
+            "Cortar o sulco de seiva antes que a árvore termine a mensagem."
+          ]
+        },
+        "en": {
+          "kicker": "Samauma Cathedral · late afternoon",
+          "title": "The tree that knows your name",
+          "text": "The Cathedral should not bleed. Yet a line of black sap runs down the central trunk and crosses the root-floor like fresh ink. Tori, a young cartographer, is pinned where two plates of living bark have closed around her leg.\n\nShe does not ask for help. She points at the trunk.\n\n— Do not read it aloud.\n\nYour name is carved there. Not the title the Keepers use. The name only your family knew before you became a Knot Tracker. Beneath it, the wood is still writing: **DELIVER HIM BEFORE THE THIRD TOLL.**\n\nFar inside the tree, something strikes three times. The first toll has already passed.",
+          "choices": [
+            "Free Tori first. If she knows what happened, you need her alive.",
+            "Ignore Tori's pain for a moment and examine who wrote your name.",
+            "Cut through the sap-groove before the tree finishes the message."
+          ]
+        }
+      },
+      "choices": [
+        {
+          "next": "tori_warning",
+          "effects": {"flags": {"slice.tori_trust": true}, "vigor_delta": -1}
+        },
+        {
+          "next": "name_trace",
+          "effects": {"flags": {"slice.read_name_first": true, "slice.tori_hurt": true}}
+        },
+        {
+          "next": "broken_groove",
+          "effects": {"flags": {"slice.cut_message": true}, "mark": "marca.casca_interrompida", "health_delta": -1}
+        }
+      ]
+    },
+    "tori_warning": {
+      "id": "authored.mata.tori_warning",
+      "location_id": "location.mata_fio_verde.01",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Tori · cartógrafa de casca",
+          "title": "O mapa que não foi desenhado",
+          "text": "Você força a casca com o ombro até Tori conseguir arrancar a perna. Ela morde o próprio punho para não gritar. Quando fica de pé, entrega a você um pedaço de mapa que parece vazio.\n\n— Roubaram uma rota da Catedral — diz ela. — Não fecharam a passagem. Fizeram pior: convenceram a árvore de que ela nunca existiu.\n\nTori passa o polegar sobre o mapa. Linhas verdes surgem sob a pele do papel e convergem para as **Ruínas de Iramã**. Uma delas leva seu nome.\n\n— O Cartógrafo Enraizado está reescrevendo os registros vivos. Se a terceira badalada vier antes de chegarmos à Câmara dos Nomes, a Mata vai aceitar a mentira como memória.\n\nTori olha para a inscrição no tronco.\n\n— E alguém quer que você seja a prova.",
+          "choices": [
+            "Confiar em Tori e seguir a linha que leva às Ruínas de Iramã.",
+            "Pedir que ela explique por que seu nome aparece no mapa antes de dar um passo.",
+            "Mandar Tori voltar ao Nó de Vigília e seguir sozinho."
+          ]
+        },
+        "en": {
+          "kicker": "Tori · bark cartographer",
+          "title": "The map that was never drawn",
+          "text": "You drive your shoulder into the bark until Tori can wrench her leg free. She bites her own fist rather than scream. Once standing, she hands you a piece of map that appears blank.\n\n— Someone stole a route from the Cathedral, she says. — They did not close it. They did something worse: convinced the tree it never existed.\n\nTori rubs a thumb across the map. Green lines bloom beneath the paper's skin and converge on the **Ruins of Irama**. One of them bears your name.\n\n— The Rooted Cartographer is rewriting the living records. If the third toll comes before we reach the Chamber of Names, the Forest will accept the lie as memory.\n\nTori looks at the carving on the trunk.\n\n— And someone wants you to be the proof.",
+          "choices": [
+            "Trust Tori and follow the line toward the Ruins of Irama.",
+            "Make her explain why your name is on the map before taking another step.",
+            "Send Tori back to the Vigil Knot and continue alone."
+          ]
+        }
+      },
+      "choices": [
+        {"next": "root_bridge", "effects": {"flags": {"slice.tori_companion": true, "slice.knows_stolen_route": true}}},
+        {"next": "name_trace", "effects": {"flags": {"slice.tori_companion": true, "slice.demands_truth": true}}},
+        {"next": "root_bridge", "effects": {"flags": {"slice.sent_tori_away": true}}}
+      ]
+    },
+    "name_trace": {
+      "id": "authored.mata.name_trace",
+      "location_id": "location.mata_fio_verde.01",
+      "copy": {
+        "pt_BR": {
+          "kicker": "A inscrição viva",
+          "title": "Uma mentira escrita com a sua mão",
+          "text": "Você aproxima os dedos do nome sem tocá-lo. O corte é recente, mas a caligrafia não pertence a uma lâmina. Pertence a uma pessoa.\n\nA sua pessoa.\n\nO último traço da assinatura repete um vício que você tinha quando criança: uma pequena volta para a esquerda, ensinada por seu pai e abandonada há anos.\n\nTori percebe seu silêncio.\n\n— Eu vi você entrar nas Ruínas ontem — diz ela. — Só que você chegou à Catedral esta manhã.\n\nA segunda badalada vibra dentro do tronco. Pássaros levantam voo de uma copa que não se move com o vento.\n\nHá uma versão de você à frente. E ela chegou primeiro.",
+          "choices": [
+            "Contar a Tori sobre o traço da assinatura e seguir com ela.",
+            "Guardar a descoberta. Se existe outro você, ninguém precisa saber ainda.",
+            "Raspar uma amostra da inscrição para provar depois que ela existiu."
+          ]
+        },
+        "en": {
+          "kicker": "The living inscription",
+          "title": "A lie written in your hand",
+          "text": "You bring your fingers close to the name without touching it. The cut is fresh, but the handwriting does not belong to a blade. It belongs to a person.\n\nTo you.\n\nThe final stroke repeats a habit from your childhood: a tiny curl to the left, taught by your father and abandoned years ago.\n\nTori notices your silence.\n\n— I saw you enter the Ruins yesterday, she says. — But you reached the Cathedral this morning.\n\nThe second toll shudders inside the trunk. Birds burst from a canopy untouched by wind.\n\nA version of you is ahead. And it arrived first.",
+          "choices": [
+            "Tell Tori about the signature and continue with her.",
+            "Keep the discovery to yourself. If there is another you, no one needs to know yet.",
+            "Scrape off a sample of the inscription so you can prove it existed."
+          ]
+        }
+      },
+      "choices": [
+        {"next": "root_bridge", "effects": {"flags": {"slice.tori_companion": true, "slice.shared_signature": true}}},
+        {"next": "root_bridge", "effects": {"flags": {"slice.hid_signature": true}}},
+        {"next": "root_bridge", "effects": {"flags": {"slice.has_bark_sample": true}, "fragments_delta": 1}}
+      ]
+    },
+    "broken_groove": {
+      "id": "authored.mata.broken_groove",
+      "location_id": "location.mata_fio_verde.01",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Seiva negra",
+          "title": "A frase que termina dentro de você",
+          "text": "A lâmina entra no sulco e a seiva reage como músculo ferido. O corte se fecha sobre seus dedos. Quando você os arranca, leva pele junto.\n\nA mensagem para de crescer — mas não desaparece. As letras migram para o dorso da sua mão, uma a uma, até formarem apenas três palavras: **VOCÊ JÁ ENTREGOU.**\n\nAtrás de você, Tori consegue se libertar sozinha. O modo como evita seu olhar diz que viu tudo.\n\n— Agora ele sabe que você chegou — diz ela. — E a Mata também.\n\nA segunda badalada começa.",
+          "choices": [
+            "Aceitar a ajuda de Tori e ir às Ruínas antes da terceira badalada.",
+            "Perguntar quem é 'ele'. Você não dará outro passo no escuro.",
+            "Esconder a mão marcada e seguir sozinho pelo caminho mais curto."
+          ]
+        },
+        "en": {
+          "kicker": "Black sap",
+          "title": "The sentence that ends inside you",
+          "text": "The blade enters the groove and the sap reacts like wounded muscle. The cut closes over your fingers. When you wrench them free, skin comes with them.\n\nThe message stops growing — but does not vanish. The letters migrate onto the back of your hand, one by one, until only three words remain: **YOU ALREADY DID.**\n\nBehind you, Tori frees herself without help. The way she avoids your eyes tells you she saw everything.\n\n— Now he knows you are here, she says. — And so does the Forest.\n\nThe second toll begins.",
+          "choices": [
+            "Accept Tori's help and reach the Ruins before the third toll.",
+            "Ask who 'he' is. You will not take another step blind.",
+            "Hide the marked hand and take the shortest path alone."
+          ]
+        }
+      },
+      "choices": [
+        {"next": "root_bridge", "effects": {"flags": {"slice.tori_companion": true, "slice.mark_revealed": true}}},
+        {"next": "root_bridge", "effects": {"flags": {"slice.tori_companion": true, "slice.knows_cartographer": true}}},
+        {"next": "root_bridge", "effects": {"flags": {"slice.shortcut_alone": true}}}
+      ]
+    },
+    "root_bridge": {
+      "id": "authored.mata.root_bridge",
+      "location_id": "location.mata_fio_verde.05",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Ponte de Cipós · segunda badalada",
+          "title": "O guardião sem dono",
+          "text": "A Ponte de Cipós deveria balançar sobre um desfiladeiro. Hoje ela está imóvel. Raízes grossas subiram das paredes e costuraram o vão, formando uma garganta de madeira.\n\nNo centro dela, um Cão de Casca fareja o ar. Não é um animal de caça comum. Alguém gravou no focinho dele o mesmo nome que apareceu na Catedral. O seu.\n\nQuando você avança, a criatura não rosna. Abaixa a cabeça como se reconhecesse um dono — e então as raízes em seu dorso se abrem, mostrando dentes onde não deveria haver boca.\n\nO caminho para as Ruínas passa por ele.",
+          "choices": [
+            "Chamar a criatura pelo seu próprio nome e arriscar descobrir quem ela reconhece.",
+            "Usar a amostra, a marca ou o mapa como distração e atravessar antes que ela ataque.",
+            "Enfrentar o Cão de Casca. Se alguém o preparou para você, quer impedir sua chegada."
+          ]
+        },
+        "en": {
+          "kicker": "Vine Bridge · second toll",
+          "title": "The masterless guardian",
+          "text": "The Vine Bridge should sway above a ravine. Today it is motionless. Thick roots have climbed the walls and stitched the gap shut, forming a wooden throat.\n\nAt its center, a Bark Hound scents the air. This is no ordinary hunting beast. Someone carved into its muzzle the same name that appeared in the Cathedral. Yours.\n\nWhen you step forward, the creature does not growl. It lowers its head as if recognizing a master — then the roots along its back open, revealing teeth where no mouth should be.\n\nThe road to the Ruins goes through it.",
+          "choices": [
+            "Call the creature by your own name and risk learning whom it recognizes.",
+            "Use the sample, mark, or map as a distraction and cross before it attacks.",
+            "Fight the Bark Hound. If someone prepared it for you, they want you kept away."
+          ]
+        }
+      },
+      "choices": [
+        {"next": "after_hound", "effects": {"flags": {"slice.hound_recognized_name": true}, "vigor_delta": -2}},
+        {"next": "after_hound", "effects": {"flags": {"slice.evaded_hound": true}, "fragments_delta": -1}},
+        {"next": "after_hound", "effects": {"flags": {"slice.fought_hound": true}, "transition": {"type": "combat", "enemy_id": "monster.mata_fio_verde.01"}}}
+      ]
+    },
+    "after_hound": {
+      "id": "authored.mata.after_hound",
+      "location_id": "location.mata_fio_verde.07",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Ruínas de Iramã",
+          "title": "O homem preso no mapa",
+          "text": "As Ruínas não são ruínas. São uma sala inteira escondida dentro de uma raiz. Paredes de casca sustentam centenas de mapas vivos, cada um respirando devagar. No centro está o Cartógrafo Enraizado.\n\nMetade do corpo dele desaparece dentro da madeira. A outra metade segura uma pena feita de osso branco.\n\n— Finalmente — diz ele, olhando para você como quem reencontra um velho amigo. — Um de vocês resolveu chegar na ordem certa.\n\nAtrás dele há dois mapas da Mata. No primeiro, a Catedral existe e Tori está viva. No segundo, a Catedral nunca foi construída. Seu nome aparece no lugar dela.\n\n— Eu não criei sua cópia — continua o Cartógrafo. — Eu a encontrei numa Vereda que ainda não aconteceu. Foi ela quem me ensinou a apagar lugares. E foi ela quem pediu que eu lhe entregasse isto.\n\nEle coloca sobre a mesa uma pequena caixa de madeira. Dentro, você ouve a voz do seu pai dizer uma frase que ele nunca disse em vida.\n\nA terceira badalada começa a se formar nas raízes.",
+          "choices": [
+            "Abrir a caixa. Se a outra versão de você deixou uma mensagem, você quer ouvi-la.",
+            "Salvar primeiro o mapa em que a Catedral existe. A verdade pode esperar; pessoas não.",
+            "Obrigar o Cartógrafo a mostrar o mapa da Vereda de onde veio sua cópia."
+          ]
+        },
+        "en": {
+          "kicker": "Ruins of Irama",
+          "title": "The man trapped in the map",
+          "text": "The Ruins are not ruins. They are a whole room hidden inside a root. Bark walls hold hundreds of living maps, each breathing slowly. At the center waits the Rooted Cartographer.\n\nHalf his body vanishes into the wood. The other half holds a pen made from white bone.\n\n— At last, he says, looking at you like an old friend. — One of you arrived in the right order.\n\nBehind him are two maps of the Forest. In the first, the Cathedral exists and Tori is alive. In the second, the Cathedral was never built. Your name stands where it should be.\n\n— I did not create your copy, the Cartographer continues. — I found it on a Path that has not happened yet. It taught me how to erase places. And it asked me to give you this.\n\nHe places a small wooden box on the table. Inside, you hear your father's voice speak a sentence he never said while alive.\n\nThe third toll begins to gather in the roots.",
+          "choices": [
+            "Open the box. If another version of you left a message, you want to hear it.",
+            "Save the map where the Cathedral exists first. Truth can wait; people cannot.",
+            "Force the Cartographer to show the Path-map where your copy came from."
+          ]
+        }
+      },
+      "choices": [
+        {"next": "final_choice", "effects": {"flags": {"slice.opened_box": true}}},
+        {"next": "final_choice", "effects": {"flags": {"slice.saved_cathedral_first": true, "slice.tori_trust": true}}},
+        {"next": "final_choice", "effects": {"flags": {"slice.saw_future_path": true}, "vigor_delta": -1}}
+      ]
+    },
+    "final_choice": {
+      "id": "authored.mata.final_choice",
+      "location_id": "location.mata_fio_verde.07",
+      "copy": {
+        "pt_BR": {
+          "kicker": "Terceira badalada",
+          "title": "O que a Mata vai lembrar",
+          "text": "A badalada não vem de um sino. Vem de todos os troncos ao mesmo tempo. Os mapas começam a perder cor. A versão falsa da Mata está prestes a se tornar a única.\n\nVocê não pode salvar tudo. O Cartógrafo amarrou a mentira a uma coisa que a árvore considera verdadeira: **você**. Para preservar a Catedral, alguém precisa arrancar seu nome do registro vivo. Para preservar seu nome, a Catedral terá de desaparecer da memória da Mata.\n\nTori segura o mapa com as duas mãos. O Cartógrafo espera. E, por um instante, você escuta sua própria voz vindo de algum lugar além da raiz:\n\n— Escolha diferente desta vez.",
+          "choices": [
+            "Apagar seu nome do registro e salvar a Catedral — mesmo que a Mata deixe de reconhecê-lo.",
+            "Preservar seu nome e aceitar a perda da Catedral para seguir a pista da sua outra versão.",
+            "Recusar a escolha e rasgar os dois mapas, deixando a Mata lembrar as contradições."
+          ]
+        },
+        "en": {
+          "kicker": "Third toll",
+          "title": "What the Forest will remember",
+          "text": "The toll does not come from a bell. It comes from every trunk at once. The maps begin to lose their color. The false version of the Forest is about to become the only one.\n\nYou cannot save everything. The Cartographer tied the lie to something the tree believes is true: **you**. To preserve the Cathedral, someone must tear your name from the living record. To preserve your name, the Cathedral must disappear from the Forest's memory.\n\nTori holds the map with both hands. The Cartographer waits. And for a moment, you hear your own voice from somewhere beyond the root:\n\n— Choose differently this time.",
+          "choices": [
+            "Erase your name from the record and save the Cathedral, even if the Forest stops recognizing you.",
+            "Preserve your name and accept the Cathedral's loss so you can follow your other self's trail.",
+            "Refuse the choice and tear both maps, forcing the Forest to remember the contradiction."
+          ]
+        }
+      },
+      "choices": [
+        {"end": "nameless_guardian", "effects": {"flags": {"slice.saved_cathedral": true}, "mark": "marca.sem_nome_da_mata"}},
+        {"end": "future_trail", "effects": {"flags": {"slice.lost_cathedral": true, "slice.follow_other_self": true}}},
+        {"end": "living_contradiction", "effects": {"flags": {"slice.kept_contradiction": true}, "health_delta": -2, "mark": "marca.contradicao_viva"}}
+      ]
+    }
+  },
+  "endings": {
+    "nameless_guardian": {
+      "pt_BR": {
+        "title": "A Mata esquece você",
+        "text": "A terceira badalada termina. A Catedral permanece. Tori permanece. Seu nome, não.\n\nQuando vocês voltam pela Ponte de Cipós, o Cão de Casca ergue a cabeça e não demonstra reconhecimento. Na entrada do Nó de Vigília, a madeira que registrava suas passagens está lisa.\n\nTori guarda o único mapa onde seu nome ainda existe.\n\n— Eu lembro — diz ela.\n\nÉ pouco. Por enquanto, basta. Ao longe, numa Vereda que não deveria tocar esta, alguém com a sua voz ri pela primeira vez."
+      },
+      "en": {
+        "title": "The Forest forgets you",
+        "text": "The third toll ends. The Cathedral remains. Tori remains. Your name does not.\n\nWhen you cross the Vine Bridge again, the Bark Hound raises its head without recognition. At the Vigil Knot, the wood that once recorded your passages is smooth.\n\nTori keeps the only map on which your name still exists.\n\n— I remember, she says.\n\nIt is little. For now, it is enough. Far away, on a Path that should not touch this one, someone with your voice laughs for the first time."
+      }
+    },
+    "future_trail": {
+      "pt_BR": {
+        "title": "Uma Catedral que nunca existiu",
+        "text": "A terceira badalada apaga a Catedral. Não a destrói: apaga a possibilidade de que algum dia tenha existido.\n\nVocê ainda se lembra de Tori por alguns segundos. Depois resta apenas um espaço dolorido na memória e um mapa cuja margem aponta para uma Vereda sem data.\n\nSeu nome continua gravado na Mata. Ao lado dele surge outro, com a mesma letra: **VOLTE QUANDO ESTIVER PRONTO PARA ME LEMBRAR.**\n\nVocê salvou a pista. O preço foi uma pessoa que agora só você suspeita ter conhecido."
+      },
+      "en": {
+        "title": "A Cathedral that never existed",
+        "text": "The third toll erases the Cathedral. It does not destroy it; it erases the possibility that it ever existed.\n\nYou remember Tori for a few seconds. Then only a painful gap remains, along with a map whose edge points toward a Path with no date.\n\nYour name remains carved into the Forest. Beside it, the same handwriting adds: **COME BACK WHEN YOU ARE READY TO REMEMBER ME.**\n\nYou saved the trail. The price was a person you can now only suspect you once knew."
+      }
+    },
+    "living_contradiction": {
+      "pt_BR": {
+        "title": "Duas verdades na mesma raiz",
+        "text": "Você rasga os dois mapas. A Mata grita. Por um instante existem duas Catedrais, duas Toris, dois de você — e nenhuma versão consegue apagar a outra.\n\nQuando o som cessa, a floresta está cheia de pequenas impossibilidades: trilhas que levam ao mesmo lugar por passados diferentes, árvores com cicatrizes de feridas que nunca receberam, pessoas que lembram de duas despedidas.\n\nO Cartógrafo sorri antes de desaparecer na raiz.\n\n— Era isso que você fez da primeira vez.\n\nVocê não venceu a contradição. Deu a ela um lugar para viver. E agora precisa descobrir por que já tomou essa decisão antes."
+      },
+      "en": {
+        "title": "Two truths in the same root",
+        "text": "You tear both maps. The Forest screams. For an instant there are two Cathedrals, two Toris, two of you, and neither version can erase the other.\n\nWhen the sound stops, the forest is filled with small impossibilities: trails that reach the same place through different pasts, trees bearing scars from wounds they never received, people who remember two farewells.\n\nThe Cartographer smiles before vanishing into the root.\n\n— That is what you did the first time.\n\nYou did not defeat the contradiction. You gave it somewhere to live. Now you must learn why you have already made this choice before."
+      }
+    }
+  }
+}
