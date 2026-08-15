@@ -109,18 +109,6 @@ if version_code >= 1:
         errors.append(
             f"version code must match identity in both presets: expected=2 got={version_code_occurrences}"
         )
-if min_sdk >= 1:
-    min_sdk_occurrences = text.count(f'gradle_build/min_sdk="{min_sdk}"')
-    if min_sdk_occurrences != 2:
-        errors.append(
-            f"min SDK must be explicit and match identity in both presets: expected=2 got={min_sdk_occurrences}"
-        )
-if target_sdk >= 1:
-    target_sdk_occurrences = text.count(f'gradle_build/target_sdk="{target_sdk}"')
-    if target_sdk_occurrences != 2:
-        errors.append(
-            f"target SDK must be explicit and match identity in both presets: expected=2 got={target_sdk_occurrences}"
-        )
 
 internet_occurrences = text.count("permissions/internet=true")
 if internet_occurrences != 2:
@@ -156,10 +144,21 @@ if 'architectures/arm64-v8a=true' not in text:
 
 if "[preset.0.options]" in text and "[preset.1]" in text:
     debug = text.split("[preset.0.options]", 1)[1].split("[preset.1]", 1)[0]
-    if "architectures/x86_64=true" not in debug:
-        errors.append("debug APK must retain x86_64 for emulator certification")
-    if "permissions/internet=true" not in debug:
-        errors.append("debug APK must retain INTERNET for billing verification testing")
+    for expected in [
+        "gradle_build/use_gradle_build=false",
+        "gradle_build/export_format=0",
+        "architectures/arm64-v8a=true",
+        "architectures/x86_64=true",
+        "permissions/internet=true",
+    ]:
+        if expected not in debug:
+            errors.append(f"debug APK preset missing {expected}")
+    # Godot 4.7.1 rejects min/target SDK overrides on the pre-built APK path.
+    # Those release SDK values belong to the Gradle AAB preset below.
+    if "gradle_build/min_sdk=" in debug:
+        errors.append("debug non-Gradle APK must not override gradle_build/min_sdk")
+    if "gradle_build/target_sdk=" in debug:
+        errors.append("debug non-Gradle APK must not override gradle_build/target_sdk")
 
 if "[preset.1.options]" in text:
     aab = text.split("[preset.1.options]", 1)[-1]
@@ -175,6 +174,19 @@ if "[preset.1.options]" in text:
     ]:
         if expected not in aab:
             errors.append(f"AAB preset missing {expected}")
+
+if min_sdk >= 1:
+    min_sdk_occurrences = text.count(f'gradle_build/min_sdk="{min_sdk}"')
+    if min_sdk_occurrences != 1:
+        errors.append(
+            f"release min SDK override must exist only in the Gradle AAB preset: expected=1 got={min_sdk_occurrences}"
+        )
+if target_sdk >= 1:
+    target_sdk_occurrences = text.count(f'gradle_build/target_sdk="{target_sdk}"')
+    if target_sdk_occurrences != 1:
+        errors.append(
+            f"release target SDK override must exist only in the Gradle AAB preset: expected=1 got={target_sdk_occurrences}"
+        )
 
 signing = android.get("release_signing", {}) if isinstance(android, dict) else {}
 if isinstance(signing, dict):
@@ -192,7 +204,7 @@ if errors:
     sys.exit(1)
 
 print(
-    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) minSdk=%d targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; INTERNET=explicit; backend=excluded; debug APK + arm64 Gradle AAB; no release credentials/custom sensitive permissions committed"
+    "ANDROID_EXPORT_CONFIG PASS: package=%s version=%s(%d) release_minSdk=%d release_targetSdk=%d compileSdk=%d Godot=%s buildTools=%s; INTERNET=explicit; backend=excluded; prebuilt debug APK + arm64 Gradle AAB; invalid non-Gradle SDK overrides forbidden; no release credentials/custom sensitive permissions committed"
     % (
         package_id,
         version_name,
