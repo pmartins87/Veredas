@@ -1,5 +1,6 @@
 name: Veredas Sync Experience Stop-Ship
 
+# rerun after correcting the pre-existing 12.1 pass_recorded field
 on:
   push:
     branches: [main]
