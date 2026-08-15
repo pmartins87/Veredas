@@ -1,0 +1,53 @@
+name: Veredas Physical Android Soak 11.3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/qa/physical_android_soak_11_3.json'
+      - 'projeto_jornada/tools/physical_android_soak_gate.py'
+      - '.github/workflows/veredas-physical-android-soak.yml'
+  workflow_dispatch:
+    inputs:
+      certify:
+        description: 'Require complete >=1800s physical-device evidence and formal PASS'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: veredas-physical-android-soak-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  physical-soak-evidence-11-3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate physical Android soak evidence
+        working-directory: projeto_jornada
+        env:
+          CERTIFY: ${{ github.event_name == 'workflow_dispatch' && inputs.certify && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          args=(--output /tmp/veredas-physical-android-soak-11-3.json)
+          if [ "$CERTIFY" = true ]; then
+            args+=(--certify)
+          fi
+          python tools/physical_android_soak_gate.py "${args[@]}"
+      - name: Upload physical soak gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-physical-android-soak-11-3
+          path: /tmp/veredas-physical-android-soak-11-3.json
+          if-no-files-found: warn
+          retention-days: 30
