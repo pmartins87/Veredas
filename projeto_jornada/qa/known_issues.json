@@ -7,6 +7,33 @@
   },
   "issues": [
     {
+      "id": "EXP-001",
+      "kind": "product_defect",
+      "severity": "blocker",
+      "status": "open",
+      "area": "product_experience",
+      "title": "Physical playtest exposes a functional shell instead of a compelling authored game experience",
+      "detected_on": "2026-08-14",
+      "evidence": [
+        "First real-device human playtest screenshots show a mostly flat beige interface without the final illustrated gamebook presentation promised by the art direction.",
+        "Mata do Fio Verde event text and choices read as slot-composed fragments rather than a coherent scene with characters, causality, stakes and narrative payoff.",
+        "Brazilian Portuguese runtime visibly leaks internal/English labels including 'Hazard' and 'Resultado: defeat'.",
+        "The accessibility surface is visually weak in context, with low-contrast-looking text and a modal presentation that does not meet the intended polished gamebook experience.",
+        "The end-of-journey screen reports counters and an untranslated result token instead of delivering a narrative conclusion or emotional payoff.",
+        "The shared content/localization generators use fixed category leads and templated choice verbs across thousands of event units, allowing structural and coverage gates to pass without proving semantic or dramatic quality.",
+        "Final art for domains/locations, characters/NPCs and enemies/bosses remains pending under 7.3-7.5, and the 38 final audio references remain pending under 7.8/11.7."
+      ],
+      "impact": "Current Android builds are useful as technical harnesses but must not be treated as a release candidate or representative game build. Release work and the 11.3 physical soak are stop-shipped until a genuinely authored and audiovisually representative vertical slice is accepted in human playtest.",
+      "exit_criteria": [
+        "Mata do Fio Verde vertical slice contains a coherent authored arc from opening hook through at least one named character encounter, exploration decision, gameplay conflict, consequence/callback and narrative ending.",
+        "Player-facing choices express distinct intentions and consequences instead of mechanically recombining nouns from the scene text.",
+        "Brazilian Portuguese vertical slice contains zero internal taxonomy labels or untranslated runtime tokens such as Hazard/defeat.",
+        "Representative final-style domain/location art, character/NPC art, enemy art, UI ornamentation, music/ambience and UI/combat SFX are integrated in the vertical slice in accordance with the approved art direction.",
+        "A human playtest on a physical Android device judges the vertical slice coherent, legible, visually alive, understandable and curiosity-generating, with no blocker/critical experience defect.",
+        "Only after that acceptance may full-scale content production and the 11.3 physical soak resume on a new candidate build."
+      ]
+    },
+    {
       "id": "LOC-116-001",
       "kind": "product_defect",
       "severity": "blocker",
@@ -60,7 +87,7 @@
       "area": "performance",
       "roadmap": "11.3",
       "status": "pending",
-      "description": "Physical-device 1800-second thermal/battery/performance soak remains required."
+      "description": "Physical-device 1800-second thermal/battery/performance soak remains required, but is suspended until EXP-001 is resolved and a new representative candidate exists."
     },
     {
       "id": "DEP-078-AUDIO",
