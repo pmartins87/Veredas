@@ -1,0 +1,63 @@
+name: Veredas Maintenance — Reduce 11.6 CI Fanout
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/veredas-maintenance-reduce-116-fanout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  reduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Convert standalone 11.6 diagnostics to manual-only
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          files = [
+              '.github/workflows/veredas-localization-pack.yml',
+              '.github/workflows/veredas-localization-quality.yml',
+              '.github/workflows/veredas-localization-full-linguistic.yml',
+              '.github/workflows/veredas-localization-overflow.yml',
+              '.github/workflows/veredas-localization-iconography.yml',
+          ]
+          pattern = re.compile(r'(?s)^on:\n.*?\n\n(?=(?:concurrency|permissions):)')
+          replacement = 'on:\n  workflow_dispatch:\n\n'
+          for name in files:
+              path = Path(name)
+              text = path.read_text(encoding='utf-8')
+              updated, count = pattern.subn(replacement, text, count=1)
+              if count != 1:
+                  raise SystemExit(f'expected one on-block in {name}, got {count}')
+              if 'push:' in updated.split('\n\n', 2)[1]:
+                  raise SystemExit(f'push trigger survived in {name}')
+              path.write_text(updated, encoding='utf-8')
+          PY
+          git diff --check -- .github/workflows/veredas-localization-*.yml
+      - name: Persist fanout reduction
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            .github/workflows/veredas-localization-pack.yml \
+            .github/workflows/veredas-localization-quality.yml \
+            .github/workflows/veredas-localization-full-linguistic.yml \
+            .github/workflows/veredas-localization-overflow.yml \
+            .github/workflows/veredas-localization-iconography.yml
+          git diff --cached --check
+          git commit -m 'ci: make standalone 11.6 diagnostics manual-only'
+          git push origin HEAD:main
