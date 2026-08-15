@@ -1,0 +1,75 @@
+name: Veredas Backend Notice Identity 12.9
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/product/software_sbom.json'
+      - 'projeto_jornada/product/backend_license_archive.json'
+      - 'projeto_jornada/product/third_party_licenses/backend/**'
+      - 'projeto_jornada/product/third_party_notices.json'
+      - 'projeto_jornada/tools/complete_backend_notice_identity.py'
+      - '.github/workflows/veredas-backend-notice-identity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-backend-notice-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Complete backend notice identity from exact wheel evidence
+        working-directory: projeto_jornada
+        run: python tools/complete_backend_notice_identity.py
+      - name: Rebuild remaining notice candidates
+        working-directory: projeto_jornada
+        run: python tools/build_backend_notice_candidates.py --output product/backend_notice_candidates.json
+      - name: Require backend notice preflight coverage 29 of 29
+        working-directory: projeto_jornada
+        run: |
+          python tools/third_party_notices_gate.py --output product/third_party_notices_preflight.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('product/third_party_notices_preflight.json').read_text(encoding='utf-8'))
+          assert report['backend_missing_notice_rows'] == 0, report
+          assert report['android_missing_notice_rows'] == 0, report
+          candidates = json.loads(Path('product/backend_notice_candidates.json').read_text(encoding='utf-8'))
+          assert candidates['missing_notice_candidate_count'] == 0, candidates
+          notices = json.loads(Path('product/third_party_notices.json').read_text(encoding='utf-8'))
+          backend = notices['backend_transitive_coverage']
+          assert backend['covered_component_count'] == 29, backend
+          assert backend['missing_component_count'] == 0, backend
+          assert backend['all_rows_have_sha_bound_archived_license_evidence'] is True, backend
+          assert backend['all_rows_finally_reviewed'] is False, backend
+          print('BACKEND_NOTICE_IDENTITY PASS: 29/29 identities+archives; final reviews intentionally pending')
+          PY
+      - name: Persist backend notice identity evidence
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            projeto_jornada/product/third_party_notices.json \
+            projeto_jornada/product/backend_notice_candidates.json \
+            projeto_jornada/product/third_party_notices_preflight.json
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'Backend notice identity evidence already current.'
+          else
+            git commit -m 'release: complete backend notice identity coverage 29 of 29'
+            git push origin HEAD:main
+          fi
