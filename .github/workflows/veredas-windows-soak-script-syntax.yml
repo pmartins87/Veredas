@@ -48,6 +48,61 @@ jobs:
             throw "PowerShell 5.1 parser reported $($errors.Count) error(s)"
           }
           Write-Host 'WINDOWS_POWERSHELL_5_1_PARSE PASS'
+      - name: Functionally validate ADB argument forwarding
+        shell: powershell
+        run: |
+          $collectorPath = 'projeto_jornada/tools/android_physical_soak_windows.ps1'
+          $source = [IO.File]::ReadAllText((Resolve-Path $collectorPath).Path)
+          $start = $source.IndexOf('function Fail')
+          $end = $source.IndexOf('if ($SoakSeconds -lt $MinSoak)')
+          if ($start -lt 0 -or $end -le $start) {
+            throw 'Could not isolate collector helper functions'
+          }
+
+          $mockDir = Join-Path $env:RUNNER_TEMP 'veredas-mock-adb'
+          New-Item -ItemType Directory -Force -Path $mockDir | Out-Null
+          $adbLog = Join-Path $mockDir 'adb-args.log'
+          $mock = @"
+          @echo off
+          echo %*>>"$adbLog"
+          if "%1 %2 %3"=="shell getprop ro.build.version.sdk" (
+            echo 34
+            exit /b 0
+          )
+          if "%1 %2 %3"=="shell dumpsys battery" (
+            echo level: 77
+            exit /b 0
+          )
+          echo UNEXPECTED:%*
+          exit /b 9
+          "@
+          [IO.File]::WriteAllText((Join-Path $mockDir 'adb.cmd'), $mock, [Text.Encoding]::ASCII)
+          $env:PATH = "$mockDir;$env:PATH"
+
+          Invoke-Expression $source.Substring($start, $end - $start)
+
+          $api = Prop 'ro.build.version.sdk'
+          if ($api -ne '34') {
+            throw "Prop forwarding failed; expected API 34, got: $api"
+          }
+
+          $capturePath = Join-Path $mockDir 'battery.txt'
+          $battery = Capture @('shell', 'dumpsys', 'battery') $capturePath
+          if ($battery -notmatch 'level:\s*77') {
+            throw "Capture forwarding failed; output: $battery"
+          }
+          if (-not (Test-Path -LiteralPath $capturePath)) {
+            throw 'Capture did not persist output file'
+          }
+
+          $calls = Get-Content -LiteralPath $adbLog
+          if ($calls -notcontains 'shell getprop ro.build.version.sdk') {
+            throw "Missing exact getprop call; calls=$($calls -join ' | ')"
+          }
+          if ($calls -notcontains 'shell dumpsys battery') {
+            throw "Missing exact dumpsys call; calls=$($calls -join ' | ')"
+          }
+          Write-Host 'WINDOWS_ADB_ARGUMENT_FORWARDING PASS'
       - name: Validate launcher through cmd.exe
         shell: cmd
         env:
