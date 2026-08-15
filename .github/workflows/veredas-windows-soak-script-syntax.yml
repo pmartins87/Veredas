@@ -1,0 +1,44 @@
+name: Veredas Windows Soak Script Syntax
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/tools/android_physical_soak_windows.ps1'
+      - '.github/workflows/veredas-windows-soak-script-syntax.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: veredas-windows-soak-script-syntax-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  powershell-5-1-parser:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert collector is ASCII-only
+        shell: powershell
+        run: |
+          $bytes = [IO.File]::ReadAllBytes('projeto_jornada/tools/android_physical_soak_windows.ps1')
+          $nonAscii = @($bytes | Where-Object { $_ -gt 127 })
+          if ($nonAscii.Count -ne 0) {
+            throw "Collector contains $($nonAscii.Count) non-ASCII byte(s)"
+          }
+      - name: Parse with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'projeto_jornada/tools/android_physical_soak_windows.ps1').Path,
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if ($errors.Count -ne 0) {
+            $errors | Format-List *
+            throw "PowerShell 5.1 parser reported $($errors.Count) error(s)"
+          }
+          Write-Host 'WINDOWS_POWERSHELL_5_1_PARSE PASS'
