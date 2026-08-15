@@ -1,58 +1,13 @@
-name: Veredas Backend Notice Staging 12.9
+name: Veredas Backend Notice Staging 12.9 (Superseded)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/veredas-backend-notice-stage.yml'
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
-  stage:
+  superseded:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Merge only unambiguous exact-wheel license identities
-        working-directory: projeto_jornada
-        run: python tools/merge_unambiguous_backend_notices.py
-      - name: Rebuild remaining review candidates
-        working-directory: projeto_jornada
-        run: python tools/build_backend_notice_candidates.py --output product/backend_notice_candidates.json
-      - name: Audit expected remaining notice gap
-        working-directory: projeto_jornada
-        run: |
-          set +e
-          python tools/third_party_notices_gate.py --output product/third_party_notices_preflight.json
-          rc=$?
-          set -e
-          test "$rc" -ne 0
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          report = json.loads(Path('product/third_party_notices_preflight.json').read_text(encoding='utf-8'))
-          assert report['backend_missing_notice_rows'] == 9, report
-          assert report['android_missing_notice_rows'] == 0, report
-          print('BACKEND_NOTICE_STAGING EXPECTED_GAP: 9 primary-identification rows remain')
-          PY
-      - name: Persist conservative backend notice staging
-        run: |
-          git config user.name 'Veredas CI'
-          git config user.email 'actions@users.noreply.github.com'
-          git add \
-            projeto_jornada/product/third_party_notices.json \
-            projeto_jornada/product/backend_notice_candidates.json \
-            projeto_jornada/product/third_party_notices_preflight.json
-          git diff --cached --check
-          git commit -m 'release: stage unambiguous backend notice coverage'
-          git push origin HEAD:main
+      - name: Superseded workflow marker
+        run: echo 'Superseded by veredas-backend-notice-identity.yml; no staging action required.'
