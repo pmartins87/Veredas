@@ -2,7 +2,7 @@
   "schema_version": 1,
   "roadmap_step": "12.9",
   "formal_status": "in_progress",
-  "updated_on": "2026-08-12",
+  "updated_on": "2026-08-14",
   "coverage_sources": {
     "known_software": "product/release_provenance.json",
     "backend_runtime_sbom": "product/software_sbom.json",
@@ -16,6 +16,577 @@
     "final_notice_bundle_must_match_exact_release_dependency_inventories": true
   },
   "components": [
+    {
+      "component_key": "pypi:blinker@1.9.0",
+      "provenance_id": "",
+      "name": "blinker",
+      "version": "1.9.0",
+      "scope": "backend_runtime_transitive",
+      "license_id": "MIT",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/blinker@1.9.0/LICENSE.txt",
+          "sha256": "9eb73a1f38597a4aa17025d2ae1be3839624c795e985d4f0e9769ce29faca467"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:certifi@2026.7.22",
+      "provenance_id": "",
+      "name": "certifi",
+      "version": "2026.7.22",
+      "license_id": "MPL-2.0",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/certifi@2026.7.22/LICENSE",
+          "sha256": "e93716da6b9c0d5a4a1df60fe695b370f0695603d21f6f83f053e42cfc10caf7"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:cffi@2.1.1",
+      "provenance_id": "",
+      "name": "cffi",
+      "version": "2.1.1",
+      "license_id": "MIT-0",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/cffi@2.1.1/LICENSE",
+          "sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:charset-normalizer@3.5.0",
+      "provenance_id": "",
+      "name": "charset-normalizer",
+      "version": "3.5.0",
+      "license_id": "MIT",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/charset-normalizer@3.5.0/LICENSE",
+          "sha256": "6d0d41bfe170ac6c7dc248c9a63e254d0fb45a60d50a8257d0af92c6e249b887"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:click@8.4.2",
+      "provenance_id": "",
+      "name": "click",
+      "version": "8.4.2",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/click@8.4.2/LICENSE.txt",
+          "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:cryptography@50.0.0",
+      "provenance_id": "",
+      "name": "cryptography",
+      "version": "50.0.0",
+      "license_id": "Apache-2.0 OR BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE",
+          "sha256": "3e0c7c091a948b82533ba98fd7cbb40432d6f1a9acbf85f5922d2f99a93ae6bb"
+        },
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE.APACHE",
+          "sha256": "aac73b3148f6d1d7111dbca32099f68d26c644c6813ae1e4f05f6579aa2663fe"
+        },
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE.BSD",
+          "sha256": "602c4c7482de6479dd2e9793cda275e5e63d773dacd1eca689232ab7008fb4fb"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:flask@3.1.3",
+      "provenance_id": "Flask",
+      "name": "Flask",
+      "version": "3.1.3",
+      "scope": "backend_runtime_direct",
+      "license_id": "BSD-3-Clause",
+      "reviewed": false,
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/flask@3.1.3/LICENSE.txt",
+          "sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
+        }
+      ],
+      "coverage_status": "archived_pending_primary_review",
+      "evidence": "product/backend_license_archive.json"
+    },
+    {
+      "component_key": "pypi:google-api-core@2.34.0",
+      "provenance_id": "",
+      "name": "google-api-core",
+      "version": "2.34.0",
+      "scope": "backend_runtime_transitive",
+      "license_id": "Apache-2.0",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/google-api-core@2.34.0/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:google-auth@2.56.3",
+      "provenance_id": "google-auth",
+      "name": "google-auth",
+      "version": "2.56.3",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/google-auth@2.56.3/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ],
+      "coverage_status": "archived_pending_primary_review",
+      "evidence": "product/backend_license_archive.json"
+    },
+    {
+      "component_key": "pypi:google-cloud-core@2.6.1",
+      "provenance_id": "",
+      "name": "google-cloud-core",
+      "version": "2.6.1",
+      "scope": "backend_runtime_transitive",
+      "license_id": "Apache-2.0",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/google-cloud-core@2.6.1/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:google-cloud-firestore@2.28.0",
+      "provenance_id": "google-cloud-firestore",
+      "name": "google-cloud-firestore",
+      "version": "2.28.0",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/google-cloud-firestore@2.28.0/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ],
+      "coverage_status": "archived_pending_primary_review",
+      "evidence": "product/backend_license_archive.json"
+    },
+    {
+      "component_key": "pypi:googleapis-common-protos@1.75.1",
+      "provenance_id": "",
+      "name": "googleapis-common-protos",
+      "version": "1.75.1",
+      "scope": "backend_runtime_transitive",
+      "license_id": "Apache-2.0",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/googleapis-common-protos@1.75.1/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:grpcio-status@1.83.0",
+      "provenance_id": "",
+      "name": "grpcio-status",
+      "version": "1.83.0",
+      "license_id": "Apache-2.0",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/grpcio-status@1.83.0/LICENSE",
+          "sha256": "58c86a3f2b5cca0ebdf9ed3e7f4e6dc38e3b38796d8c3dc92064c62a4e39d0dd"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:grpcio@1.83.0",
+      "provenance_id": "",
+      "name": "grpcio",
+      "version": "1.83.0",
+      "license_id": "Apache-2.0",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/grpcio@1.83.0/LICENSE",
+          "sha256": "58c86a3f2b5cca0ebdf9ed3e7f4e6dc38e3b38796d8c3dc92064c62a4e39d0dd"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:gunicorn@26.0.0",
+      "provenance_id": "gunicorn",
+      "name": "gunicorn",
+      "version": "26.0.0",
+      "scope": "backend_runtime_direct",
+      "license_id": "MIT",
+      "reviewed": false,
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/gunicorn@26.0.0/LICENSE",
+          "sha256": "1457e30a8f71334f34f241b9f267e7f5556544937bc2c1751bc58b52250c0543"
+        }
+      ],
+      "coverage_status": "archived_pending_primary_review",
+      "evidence": "product/backend_license_archive.json"
+    },
+    {
+      "component_key": "pypi:idna@3.18",
+      "provenance_id": "",
+      "name": "idna",
+      "version": "3.18",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/idna@3.18/LICENSE.md",
+          "sha256": "1a9a4f0e3d479a27240ddd59a9137a66ab4a0f9dfdc8ca6188cc0bfd85187f04"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:itsdangerous@2.2.0",
+      "provenance_id": "",
+      "name": "itsdangerous",
+      "version": "2.2.0",
+      "scope": "backend_runtime_transitive",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/itsdangerous@2.2.0/LICENSE.txt",
+          "sha256": "63af09891b6be8ad1a4252ed43af0f4efba7fc948e228367bed7f3c5ae0b09d7"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:jinja2@3.1.6",
+      "provenance_id": "",
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "scope": "backend_runtime_transitive",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/jinja2@3.1.6/LICENSE.txt",
+          "sha256": "3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:markupsafe@3.0.3",
+      "provenance_id": "",
+      "name": "MarkupSafe",
+      "version": "3.0.3",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/markupsafe@3.0.3/LICENSE.txt",
+          "sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:packaging@26.3",
+      "provenance_id": "",
+      "name": "packaging",
+      "version": "26.3",
+      "license_id": "Apache-2.0 OR BSD-2-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE",
+          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48"
+        },
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE.APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE.BSD",
+          "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:proto-plus@1.28.3",
+      "provenance_id": "",
+      "name": "proto-plus",
+      "version": "1.28.3",
+      "scope": "backend_runtime_transitive",
+      "license_id": "Apache-2.0",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/proto-plus@1.28.3/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:protobuf@7.35.1",
+      "provenance_id": "",
+      "name": "protobuf",
+      "version": "7.35.1",
+      "scope": "backend_runtime_transitive",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/protobuf@7.35.1/LICENSE",
+          "sha256": "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:pyasn1-modules@0.4.2",
+      "provenance_id": "",
+      "name": "pyasn1_modules",
+      "version": "0.4.2",
+      "scope": "backend_runtime_transitive",
+      "license_id": "BSD-2-Clause",
+      "license_source": "exact hash-bound wheel-embedded license text; primary-source/final legal review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/pyasn1-modules@0.4.2/LICENSE.txt",
+          "sha256": "2aad5fc00f705c4a1addb83eed10a6a75d286a3779f0cf8519d87e62bc4735fd"
+        }
+      ]
+    },
+    {
+      "component_key": "pypi:pyasn1@0.6.4",
+      "provenance_id": "",
+      "name": "pyasn1",
+      "version": "0.6.4",
+      "license_id": "BSD-2-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/pyasn1@0.6.4/LICENSE.rst",
+          "sha256": "2aad5fc00f705c4a1addb83eed10a6a75d286a3779f0cf8519d87e62bc4735fd"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:pycparser@3.0",
+      "provenance_id": "",
+      "name": "pycparser",
+      "version": "3.0",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/pycparser@3.0/LICENSE",
+          "sha256": "0c846399369ea76ddd7b5c44fe6d16497415fcf015f5cbb508c24bf98b81c5b1"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:requests@2.34.2",
+      "provenance_id": "requests",
+      "name": "requests",
+      "version": "2.34.2",
+      "scope": "backend_runtime_direct",
+      "license_id": "Apache-2.0",
+      "reviewed": false,
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/requests@2.34.2/LICENSE",
+          "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"
+        },
+        {
+          "kind": "notice",
+          "path": "product/third_party_licenses/backend/requests@2.34.2/NOTICE",
+          "sha256": "f5110972dedad2b4e9d314518daf3b7d72d6e02e499acd802181de6f74571dcc"
+        }
+      ],
+      "coverage_status": "archived_pending_primary_review",
+      "evidence": "product/backend_license_archive.json"
+    },
+    {
+      "component_key": "pypi:typing-extensions@4.16.0",
+      "provenance_id": "",
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "license_id": "PSF-2.0",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/typing-extensions@4.16.0/LICENSE",
+          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:urllib3@2.7.0",
+      "provenance_id": "",
+      "name": "urllib3",
+      "version": "2.7.0",
+      "license_id": "MIT",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/urllib3@2.7.0/LICENSE.txt",
+          "sha256": "130e3a64d5fdd5d096a752694634a7d9df284469de86e5732100268041e3d686"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
+    {
+      "component_key": "pypi:werkzeug@3.1.8",
+      "provenance_id": "",
+      "name": "Werkzeug",
+      "version": "3.1.8",
+      "license_id": "BSD-3-Clause",
+      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
+      "evidence": "product/backend_license_archive.json",
+      "reviewed": false,
+      "coverage_status": "archived_pending_primary_review",
+      "archived_files": [
+        {
+          "kind": "license",
+          "path": "product/third_party_licenses/backend/werkzeug@3.1.8/LICENSE.txt",
+          "sha256": "3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b"
+        }
+      ],
+      "scope": "backend_runtime_transitive"
+    },
     {
       "component_key": "source:godot-engine@4.7.1",
       "provenance_id": "godot-engine",
@@ -37,371 +608,17 @@
       "reviewed": false,
       "archived_files": [],
       "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:flask@3.1.3",
-      "provenance_id": "Flask",
-      "name": "Flask",
-      "version": "3.1.3",
-      "scope": "backend_runtime_direct",
-      "license_id": "BSD-3-Clause",
-      "reviewed": false,
-      "archived_files": [],
-      "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:google-auth@2.56.3",
-      "provenance_id": "google-auth",
-      "name": "google-auth",
-      "version": "2.56.3",
-      "scope": "backend_runtime_direct",
-      "license_id": "Apache-2.0",
-      "reviewed": false,
-      "archived_files": [],
-      "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:google-cloud-firestore@2.28.0",
-      "provenance_id": "google-cloud-firestore",
-      "name": "google-cloud-firestore",
-      "version": "2.28.0",
-      "scope": "backend_runtime_direct",
-      "license_id": "Apache-2.0",
-      "reviewed": false,
-      "archived_files": [],
-      "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:gunicorn@26.0.0",
-      "provenance_id": "gunicorn",
-      "name": "gunicorn",
-      "version": "26.0.0",
-      "scope": "backend_runtime_direct",
-      "license_id": "MIT",
-      "reviewed": false,
-      "archived_files": [],
-      "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:requests@2.34.2",
-      "provenance_id": "requests",
-      "name": "requests",
-      "version": "2.34.2",
-      "scope": "backend_runtime_direct",
-      "license_id": "Apache-2.0",
-      "reviewed": false,
-      "archived_files": [],
-      "coverage_status": "license_identified_not_archived"
-    },
-    {
-      "component_key": "pypi:certifi@2026.7.22",
-      "provenance_id": "",
-      "name": "certifi",
-      "version": "2026.7.22",
-      "license_id": "MPL-2.0",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/certifi@2026.7.22/LICENSE",
-          "sha256": "e93716da6b9c0d5a4a1df60fe695b370f0695603d21f6f83f053e42cfc10caf7"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:cffi@2.1.1",
-      "provenance_id": "",
-      "name": "cffi",
-      "version": "2.1.1",
-      "license_id": "MIT-0",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/cffi@2.1.1/LICENSE",
-          "sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:charset-normalizer@3.5.0",
-      "provenance_id": "",
-      "name": "charset-normalizer",
-      "version": "3.5.0",
-      "license_id": "MIT",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/charset-normalizer@3.5.0/LICENSE",
-          "sha256": "6d0d41bfe170ac6c7dc248c9a63e254d0fb45a60d50a8257d0af92c6e249b887"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:click@8.4.2",
-      "provenance_id": "",
-      "name": "click",
-      "version": "8.4.2",
-      "license_id": "BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/click@8.4.2/LICENSE.txt",
-          "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:cryptography@50.0.0",
-      "provenance_id": "",
-      "name": "cryptography",
-      "version": "50.0.0",
-      "license_id": "Apache-2.0 OR BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE",
-          "sha256": "3e0c7c091a948b82533ba98fd7cbb40432d6f1a9acbf85f5922d2f99a93ae6bb"
-        },
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE.APACHE",
-          "sha256": "aac73b3148f6d1d7111dbca32099f68d26c644c6813ae1e4f05f6579aa2663fe"
-        },
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/cryptography@50.0.0/LICENSE.BSD",
-          "sha256": "602c4c7482de6479dd2e9793cda275e5e63d773dacd1eca689232ab7008fb4fb"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:grpcio-status@1.83.0",
-      "provenance_id": "",
-      "name": "grpcio-status",
-      "version": "1.83.0",
-      "license_id": "Apache-2.0",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/grpcio-status@1.83.0/LICENSE",
-          "sha256": "58c86a3f2b5cca0ebdf9ed3e7f4e6dc38e3b38796d8c3dc92064c62a4e39d0dd"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:grpcio@1.83.0",
-      "provenance_id": "",
-      "name": "grpcio",
-      "version": "1.83.0",
-      "license_id": "Apache-2.0",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/grpcio@1.83.0/LICENSE",
-          "sha256": "58c86a3f2b5cca0ebdf9ed3e7f4e6dc38e3b38796d8c3dc92064c62a4e39d0dd"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:idna@3.18",
-      "provenance_id": "",
-      "name": "idna",
-      "version": "3.18",
-      "license_id": "BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/idna@3.18/LICENSE.md",
-          "sha256": "1a9a4f0e3d479a27240ddd59a9137a66ab4a0f9dfdc8ca6188cc0bfd85187f04"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:markupsafe@3.0.3",
-      "provenance_id": "",
-      "name": "MarkupSafe",
-      "version": "3.0.3",
-      "license_id": "BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/markupsafe@3.0.3/LICENSE.txt",
-          "sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:packaging@26.3",
-      "provenance_id": "",
-      "name": "packaging",
-      "version": "26.3",
-      "license_id": "Apache-2.0 OR BSD-2-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE",
-          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48"
-        },
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE.APACHE",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
-        },
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/packaging@26.3/LICENSE.BSD",
-          "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:pyasn1@0.6.4",
-      "provenance_id": "",
-      "name": "pyasn1",
-      "version": "0.6.4",
-      "license_id": "BSD-2-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/pyasn1@0.6.4/LICENSE.rst",
-          "sha256": "2aad5fc00f705c4a1addb83eed10a6a75d286a3779f0cf8519d87e62bc4735fd"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:pycparser@3.0",
-      "provenance_id": "",
-      "name": "pycparser",
-      "version": "3.0",
-      "license_id": "BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/pycparser@3.0/LICENSE",
-          "sha256": "0c846399369ea76ddd7b5c44fe6d16497415fcf015f5cbb508c24bf98b81c5b1"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:typing-extensions@4.16.0",
-      "provenance_id": "",
-      "name": "typing_extensions",
-      "version": "4.16.0",
-      "license_id": "PSF-2.0",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/typing-extensions@4.16.0/LICENSE",
-          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:urllib3@2.7.0",
-      "provenance_id": "",
-      "name": "urllib3",
-      "version": "2.7.0",
-      "license_id": "MIT",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/urllib3@2.7.0/LICENSE.txt",
-          "sha256": "130e3a64d5fdd5d096a752694634a7d9df284469de86e5732100268041e3d686"
-        }
-      ]
-    },
-    {
-      "component_key": "pypi:werkzeug@3.1.8",
-      "provenance_id": "",
-      "name": "Werkzeug",
-      "version": "3.1.8",
-      "license_id": "BSD-3-Clause",
-      "license_source": "exact wheel METADATA from the hash-bound backend SBOM; primary-source review still required",
-      "evidence": "product/backend_notice_candidates.json + product/backend_license_archive.json",
-      "reviewed": false,
-      "coverage_status": "archived_pending_primary_review",
-      "archived_files": [
-        {
-          "kind": "license",
-          "path": "product/third_party_licenses/backend/werkzeug@3.1.8/LICENSE.txt",
-          "sha256": "3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b"
-        }
-      ]
     }
   ],
   "backend_transitive_coverage": {
-    "status": "partial_pending_primary_review",
+    "status": "identity_complete_pending_primary_review",
     "source_sbom": "product/software_sbom.json",
     "source_license_archive": "product/backend_license_archive.json",
     "component_count": 29,
-    "covered_component_count": 20,
-    "missing_component_count": 9,
-    "missing_component_keys": [
-      "pypi:blinker@1.9.0",
-      "pypi:google-api-core@2.34.0",
-      "pypi:google-cloud-core@2.6.1",
-      "pypi:googleapis-common-protos@1.75.1",
-      "pypi:itsdangerous@2.2.0",
-      "pypi:jinja2@3.1.6",
-      "pypi:proto-plus@1.28.3",
-      "pypi:protobuf@7.35.1",
-      "pypi:pyasn1-modules@0.4.2"
-    ],
+    "covered_component_count": 29,
+    "missing_component_count": 0,
+    "missing_component_keys": [],
+    "all_rows_have_sha_bound_archived_license_evidence": true,
     "all_rows_finally_reviewed": false
   },
   "android_dependency_coverage": {

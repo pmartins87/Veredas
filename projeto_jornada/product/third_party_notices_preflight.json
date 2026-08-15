@@ -2,14 +2,12 @@
   "schema_version": 1,
   "roadmap_step": "12.9",
   "mode": "preflight",
-  "known_notice_rows": 22,
-  "backend_missing_notice_rows": 9,
+  "known_notice_rows": 31,
+  "backend_missing_notice_rows": 0,
   "android_missing_notice_rows": 0,
-  "errors": [
-    "backend SBOM component(s) lack notice coverage: ['pypi:blinker@1.9.0', 'pypi:google-api-core@2.34.0', 'pypi:google-cloud-core@2.6.1', 'pypi:googleapis-common-protos@1.75.1', 'pypi:itsdangerous@2.2.0', 'pypi:jinja2@3.1.6', 'pypi:proto-plus@1.28.3', 'pypi:protobuf@7.35.1', 'pypi:pyasn1-modules@0.4.2']"
-  ],
+  "errors": [],
   "warnings": [
     "final Android dependency inventory absent; Android notice coverage cannot yet be frozen",
-    "22 known notice component review(s) pending"
+    "31 known notice component review(s) pending"
   ]
 }
