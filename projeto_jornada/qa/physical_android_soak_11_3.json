@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "roadmap_step": "11.3",
+  "formal_status": "in_progress",
+  "application_id": "com.pmartins87.veredasdatrama",
+  "candidate": {
+    "source_head": "bb6b1e70a5c880582b9f33c8f7b4e62bb2f89817",
+    "workflow_run_id": 31856094548,
+    "apk_artifact_id": 9239079052,
+    "apk_sha256": "d01119c949ecd72b20f1af9b56dac8a359452ae71503612f4e898a173c5ff879",
+    "apk_size_bytes": 57979445,
+    "candidate_relation_to_current_main": "ancestor; subsequent 0ff32d51f06cc7284f73842d1f4694a13e608889 only added the physical evidence gate and did not change runtime/build inputs"
+  },
+  "emulator_preflight": {
+    "is_physical_evidence": false,
+    "workflow_run_id": 31856094548,
+    "api_29": {
+      "status": "pass",
+      "android_release": "10",
+      "api_level": 29,
+      "emulator_ram_mb": 4096,
+      "renderer": "software",
+      "cold_launch_ms": 1520,
+      "resume_samples": 12,
+      "resume_p95_ms": 369,
+      "max_pss_kb": 248616,
+      "max_pss_mb": 242.79,
+      "soak_samples": 12,
+      "soak_pss_drift_kb": 16,
+      "low_memory_kill_detected": false,
+      "crash_or_anr_detected": false,
+      "failures": [],
+      "diagnostics_artifact_id": 9239127979,
+      "compatibility_artifact_id": 9239128096
+    },
+    "api_34": {
+      "status": "pass",
+      "android_release": "14",
+      "api_level": 34,
+      "emulator_ram_mb": 2048,
+      "renderer": "software",
+      "cold_launch_ms": 695,
+      "resume_samples": 12,
+      "resume_p95_ms": 295,
+      "max_pss_kb": 266288,
+      "max_pss_mb": 260.05,
+      "soak_samples": 12,
+      "soak_pss_drift_kb": -63,
+      "low_memory_kill_detected": false,
+      "crash_or_anr_detected": false,
+      "failures": [],
+      "diagnostics_artifact_id": 9239127566,
+      "compatibility_artifact_id": 9239127780
+    }
+  },
+  "physical_device": {
+    "source": "pending_physical",
+    "manufacturer": "",
+    "model": "",
+    "android_release": "",
+    "api_level": 0,
+    "started_at": "",
+    "ended_at": "",
+    "soak_seconds": 0,
+    "tested_apk_sha256": "",
+    "operator": "",
+    "metrics": {
+      "cold_launch_ms": -1,
+      "resume_samples": 0,
+      "resume_p95_ms": -1,
+      "max_pss_kb": -1,
+      "soak_pss_drift_kb": -1,
+      "failures": [],
+      "crash_or_anr_count": -1
+    },
+    "raw_evidence": {
+      "battery_before_captured": false,
+      "battery_after_captured": false,
+      "thermal_before_captured": false,
+      "thermal_after_captured": false,
+      "logcat_captured": false,
+      "archive_sha256": ""
+    },
+    "operator_observations": {
+      "no_crash": false,
+      "no_unusable_thermal_condition": false,
+      "no_visual_corruption": false,
+      "input_remained_responsive": false
+    }
+  },
+  "thresholds": {
+    "minimum_physical_soak_seconds": 1800,
+    "maximum_cold_launch_ms": 3000,
+    "required_resume_samples": 12,
+    "maximum_resume_p95_ms": 1500,
+    "maximum_pss_kb": 430080,
+    "maximum_soak_pss_drift_kb": 98304
+  },
+  "notes": [
+    "Emulator evidence is preflight only and cannot satisfy the physical-device requirement.",
+    "API29 uses 4096 MB AVD RAM only to isolate Android-10/SwiftShader system-image pressure; the game process remains subject to the same 420 MB hard PSS budget.",
+    "The physical run must test this exact APK SHA-256 for at least 1800 seconds and preserve raw diagnostic evidence."
+  ],
+  "pass_recorded": false
+}
