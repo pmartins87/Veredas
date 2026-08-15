@@ -1,20 +1,6 @@
 name: Veredas Localization Pack 11.6
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'projeto_jornada/localization/content/**'
-      - 'projeto_jornada/localization/content_packs/**'
-      - 'projeto_jornada/localization/manifest.json'
-      - 'projeto_jornada/localization/glossary.json'
-      - 'projeto_jornada/data/**'
-      - 'projeto_jornada/ui/LocalizationService.gd'
-      - 'projeto_jornada/tools/export_localization_catalog.py'
-      - 'projeto_jornada/tools/localization_quality_gate.py'
-      - 'projeto_jornada/tools/localization_pack_certification.py'
-      - '.github/workflows/veredas-localization-pack.yml'
   workflow_dispatch:
 
 concurrency:
@@ -81,4 +67,4 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-# Recertify after reproducible pack rebuild: 2026-08-14
+# Standalone diagnostic retained for manual use; composite certification is canonical.
