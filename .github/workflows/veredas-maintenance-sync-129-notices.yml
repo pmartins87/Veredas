@@ -1,103 +1,13 @@
-name: Veredas Maintenance — Sync 12.9 Notice Evidence
+name: Veredas Maintenance — 12.9 Notice State Sync (Completed)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/veredas-maintenance-sync-129-notices.yml'
+  workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
-  sync:
+  completed:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Synchronize exact backend notice evidence fail-closed
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          notices = json.loads(Path('projeto_jornada/product/third_party_notices_preflight.json').read_text(encoding='utf-8'))
-          assert notices['backend_missing_notice_rows'] == 0, notices
-          assert notices['errors'] == [], notices
-          assert notices['known_notice_rows'] == 31, notices
-
-          manifest = json.loads(Path('projeto_jornada/product/third_party_notices.json').read_text(encoding='utf-8'))
-          backend = manifest['backend_transitive_coverage']
-          assert backend['component_count'] == 29, backend
-          assert backend['covered_component_count'] == 29, backend
-          assert backend['missing_component_count'] == 0, backend
-          assert backend['all_rows_have_sha_bound_archived_license_evidence'] is True, backend
-          assert backend['all_rows_finally_reviewed'] is False, backend
-
-          archive = json.loads(Path('projeto_jornada/product/backend_license_archive.json').read_text(encoding='utf-8'))
-          assert archive['verified_exact_wheel_count'] == 29, archive
-          assert archive['components_with_archived_files'] == 29, archive
-          assert archive['components_without_archived_files'] == 0, archive
-
-          state_path = Path('projeto_jornada/RELEASE_12_9_STATE.json')
-          state = json.loads(state_path.read_text(encoding='utf-8'))
-          assert state['schema_version'] == 8, state['schema_version']
-          assert state['formal_status'] == 'in_progress'
-          assert state['pass_recorded'] is False
-          state['schema_version'] = 9
-          state['updated_on'] = '2026-08-14'
-          imp = state['implemented']
-          imp['backend_exact_wheel_license_archive_builder'] = True
-          imp['backend_exact_wheel_license_archive_real_runner_execution'] = True
-          imp['backend_exact_wheel_license_archive_component_count'] = 29
-          imp['backend_notice_identity_exact_text_completion'] = True
-          imp['backend_notice_identity_component_count'] = 29
-          imp['backend_notice_preflight_gate_passed'] = True
-
-          pre = state['current_preflight']
-          pre['known_third_party_notice_rows'] = 31
-          pre['backend_exact_wheel_license_archive'] = 'pass_29_of_29'
-          pre['backend_exact_wheel_license_archive_run_id'] = 31852389945
-          pre['backend_notice_identity_coverage'] = 'pass_29_of_29'
-          pre['backend_notice_identity_run_id'] = 31852773619
-          pre['backend_notice_identity_commit'] = '476735679a84832b6b5ad63914574ff511b1003e'
-          pre['backend_notice_rows_missing'] = 0
-          pre['backend_notice_rows_finally_reviewed'] = 0
-          pre['third_party_notice_backend_transitive_coverage'] = 'identity_and_sha_bound_archive_29_of_29_preflight_pass_final_review_pending'
-          pre['license_notice_archive'] = 'backend_exact_wheels_29_of_29_archived; Godot/plugin/Android and final reviews remain pending'
-
-          pending = state['pending']
-          pending['third_party_notices_backend_coverage_complete'] = True
-          pending['third_party_notices_review_and_archive_complete'] = False
-          pending['third_party_license_notices_archived'] = False
-
-          state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-
-          project_path = Path('projeto_jornada/PROJECT_STATE.json')
-          project = json.loads(project_path.read_text(encoding='utf-8'))
-          assert project['completed_steps'] == 112
-          p129 = project['phase12_preflight']['12.9']
-          p129['backend_exact_wheel_license_archive'] = 'pass_29_of_29'
-          p129['backend_notice_identity_coverage'] = 'pass_29_of_29_final_review_pending'
-          p129['backend_notice_identity_run_id'] = 31852773619
-          p129['third_party_notices_backend_missing_rows'] = 0
-          project_path.write_text(json.dumps(project, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          PY
-          python -m json.tool projeto_jornada/RELEASE_12_9_STATE.json >/dev/null
-          python -m json.tool projeto_jornada/PROJECT_STATE.json >/dev/null
-          git diff --check
-      - name: Persist synchronized 12.9 notice state
-        run: |
-          git config user.name 'Veredas CI'
-          git config user.email 'actions@users.noreply.github.com'
-          git add projeto_jornada/RELEASE_12_9_STATE.json projeto_jornada/PROJECT_STATE.json
-          git diff --cached --check
-          git commit -m 'state: record backend notice identity coverage 29 of 29'
-          git push origin HEAD:main
+      - name: Completed maintenance marker
+        run: echo '12.9 backend notice state sync already completed; no maintenance action required.'
