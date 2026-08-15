@@ -35,7 +35,7 @@ jobs:
               '.github/workflows/veredas-localization-overflow.yml',
               '.github/workflows/veredas-localization-iconography.yml',
           ]
-          pattern = re.compile(r'(?s)^on:\n.*?\n\n(?=(?:concurrency|permissions):)')
+          pattern = re.compile(r'^on:\n.*?\n\n(?=(?:concurrency|permissions):)', re.MULTILINE | re.DOTALL)
           replacement = 'on:\n  workflow_dispatch:\n\n'
           for name in files:
               path = Path(name)
@@ -43,7 +43,8 @@ jobs:
               updated, count = pattern.subn(replacement, text, count=1)
               if count != 1:
                   raise SystemExit(f'expected one on-block in {name}, got {count}')
-              if 'push:' in updated.split('\n\n', 2)[1]:
+              header = updated[updated.index('on:'):].split('\n\n', 1)[0]
+              if 'push:' in header:
                   raise SystemExit(f'push trigger survived in {name}')
               path.write_text(updated, encoding='utf-8')
           PY
@@ -62,4 +63,4 @@ jobs:
           git commit -m 'ci: make standalone 11.6 diagnostics manual-only'
           git push origin HEAD:main
 
-# Second-touch trigger after workflow creation: 2026-08-14
+# Corrected fail-closed multiline trigger patch: 2026-08-14
