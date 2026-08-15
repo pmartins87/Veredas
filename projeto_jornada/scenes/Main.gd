@@ -215,7 +215,11 @@ func _render_story() -> void:
         return
     var title_size := AccessibilityService.font_size(25)
     var event_view := localization.localize_record(current_event)
-    story.text = "[font_size=%d][b]%s[/b][/font_size]\n\n%s" % [title_size, event_view.get("title",localization.text("main.story.default_title")), event_view.get("text","")]
+    var kicker := str(event_view.get("kicker", ""))
+    var kicker_block := ""
+    if kicker != "":
+        kicker_block = "[i]%s[/i]\n\n" % kicker
+    story.text = "%s[font_size=%d][b]%s[/b][/font_size]\n\n%s" % [kicker_block, title_size, event_view.get("title",localization.text("main.story.default_title")), event_view.get("text","")]
     var localized_choices: Array = event_view.get("choices", []) as Array
     var available := EventDirector.available_choices(current_event)
     for entry in available:
@@ -228,9 +232,22 @@ func _render_story() -> void:
 
 func _choose_story(index: int) -> void:
     var pool := str(current_event.get("pool", ""))
+    var authored := AuthoredStoryDirector.is_authored_event(current_event)
     if not RunFlowEngine.choose(current_event, index):
         return
     current_event = {}
+    if authored:
+        var transition := AuthoredStoryDirector.consume_transition()
+        if str(transition.get("type", "")) == "combat":
+            var enemy_id := str(transition.get("enemy_id", ""))
+            if enemy_id != "" and not ContentRegistry.get_record(enemy_id).is_empty():
+                RunFlowEngine.start_combat(enemy_id)
+            else:
+                RunFlowEngine.resume_story()
+        else:
+            RunFlowEngine.resume_story()
+        _refresh()
+        return
     match pool:
         "creature":
             var monsters := RunFlowEngine.local_monsters()
@@ -333,9 +350,18 @@ func _render_finals() -> void:
 
 func _render_debrief() -> void:
     var report := RunFlowEngine.debrief()
+    var authored: Dictionary = report.get("authored_debrief", {}) as Dictionary
+    if not authored.is_empty():
+        story.text = "[font_size=%d][b]%s[/b][/font_size]\n\n%s\n\n[i]%s[/i]" % [AccessibilityService.font_size(25), str(authored.get("title", "Fim da jornada")), str(authored.get("text", "")), localization.text("main.debrief.authored_epilogue")]
+        _add_action_button(localization.text("main.debrief.restart"), func(): RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff); current_event = {}; _refresh(), true)
+        return
     var ending := ContentRegistry.get_record(str(report.get("ending_id","")))
     var ending_view := localization.localize_record(ending)
-    story.text = localization.text("main.debrief.body") % [AccessibilityService.font_size(25), report.get("result",""), ending_view.get("name","—"), report.get("turns",0), report.get("visited_locations",[]).size(), report.get("defeated_enemies",[]).size(), report.get("purchases",[]).size(), report.get("marks",{}).size()]
+    var result_key := "main.debrief.result.%s" % str(report.get("result", "in_progress"))
+    var result_label := localization.text(result_key)
+    if result_label == result_key:
+        result_label = localization.text("main.debrief.result.unknown")
+    story.text = localization.text("main.debrief.body") % [AccessibilityService.font_size(25), result_label, ending_view.get("name","—"), report.get("turns",0), report.get("visited_locations",[]).size(), report.get("defeated_enemies",[]).size(), report.get("purchases",[]).size(), report.get("marks",{}).size()]
     _add_action_button(localization.text("main.debrief.restart"), func(): RunFlowEngine.start_journey("character.mata_fio_verde.01", int(Time.get_unix_time_from_system()) & 0x7fffffff); current_event = {}; _refresh(), true)
 
 func _clear_choices() -> void:

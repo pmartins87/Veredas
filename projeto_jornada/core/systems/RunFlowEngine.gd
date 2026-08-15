@@ -29,11 +29,15 @@ func start_journey(character_id: String, seed_value: int, difficulty_id: String 
         MetaUnlockEngine.discover(str(GameState.run.get("world_id", "")))
         MetaUnlockEngine.discover(str(GameState.run.get("location_id", "")))
         EchoConsequenceEngine.apply_to_run()
+        AuthoredStoryDirector.activate_for_new_run()
     return true
 
 func story_event() -> Dictionary:
     GameState.run.mode = "story"
-    var event: Dictionary = EventDirector.choose_event(str(GameState.run.get("world_id", "")), str(GameState.run.get("location_id", "")))
+    var event: Dictionary = AuthoredStoryDirector.current_event()
+    if not event.is_empty():
+        return event
+    event = EventDirector.choose_event(str(GameState.run.get("world_id", "")), str(GameState.run.get("location_id", "")))
     if not event.is_empty() and not _simulation_no_persist():
         MetaUnlockEngine.discover(str(event.get("id", "")))
     return event
@@ -42,6 +46,8 @@ func choose(event: Dictionary, option: int) -> bool:
     var choices: Array = event.get("choices", [])
     if option < 0 or option >= choices.size():
         return false
+    if AuthoredStoryDirector.is_authored_event(event):
+        return AuthoredStoryDirector.apply_choice(event, option)
     if not _simulation_no_persist():
         MetaUnlockEngine.discover(str(event.get("id", "")))
     return EventDirector.apply_choice(event, option)
