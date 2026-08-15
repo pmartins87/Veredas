@@ -56,7 +56,10 @@ jobs:
           git add \
             projeto_jornada/product/backend_license_archive.json \
             projeto_jornada/product/third_party_licenses/backend
-          git diff --cached --check
+          # License files are preserved byte-for-byte from the exact wheels.
+          # Whitespace normalization would corrupt the evidence, so style
+          # checking applies only to the generated JSON control record.
+          git diff --cached --check -- projeto_jornada/product/backend_license_archive.json
           if git diff --cached --quiet; then
             echo 'Backend license archive already current.'
           else
