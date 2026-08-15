@@ -1,0 +1,73 @@
+name: Veredas Backend License Archive 12.9
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'projeto_jornada/backend/play_purchase_verifier/requirements.lock'
+      - 'projeto_jornada/product/software_sbom.json'
+      - 'projeto_jornada/tools/archive_backend_wheel_licenses.py'
+      - '.github/workflows/veredas-backend-license-archive.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veredas-backend-license-archive-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download exact hash-locked backend wheels
+        working-directory: projeto_jornada
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/veredas-notice-wheels
+          mkdir -p /tmp/veredas-notice-wheels
+          python -m pip download \
+            --disable-pip-version-check \
+            --only-binary=:all: \
+            --no-deps \
+            --require-hashes \
+            --dest /tmp/veredas-notice-wheels \
+            -r backend/play_purchase_verifier/requirements.lock
+      - name: Verify wheels against SBOM and archive embedded license evidence
+        working-directory: projeto_jornada
+        run: |
+          python tools/archive_backend_wheel_licenses.py \
+            --wheel-dir /tmp/veredas-notice-wheels \
+            --output product/backend_license_archive.json
+      - name: Persist exact-wheel license archive
+        run: |
+          git config user.name 'Veredas CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            projeto_jornada/product/backend_license_archive.json \
+            projeto_jornada/product/third_party_licenses/backend
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'Backend license archive already current.'
+          else
+            git commit -m 'release: archive exact backend wheel license evidence'
+            git push origin HEAD:main
+          fi
+      - name: Upload backend license archive report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veredas-backend-license-archive
+          path: projeto_jornada/product/backend_license_archive.json
+          if-no-files-found: error
+          retention-days: 30
