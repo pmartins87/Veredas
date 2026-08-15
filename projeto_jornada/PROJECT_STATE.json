@@ -13,10 +13,10 @@
     "legacy_branch_operational": false
   },
   "roadmap_total_steps": 130,
-  "completed_steps": 112,
-  "current_phase": 11,
-  "current_step": "11.7",
-  "current_step_title": "QA audiovisual final e integração dos assets finais",
+  "completed_steps": 107,
+  "current_phase": 6,
+  "current_step": "6.1",
+  "current_step_title": "Reautoria da Golden Vertical Slice da Mata do Fio Verde",
   "launch_scope": {
     "source_locale": "pt_BR",
     "fallback_locale": "pt_BR",
@@ -43,12 +43,12 @@
   "phase11": {
     "11.1": "certified",
     "11.2": "certified",
-    "11.3": "in_progress_physical_device_required",
-    "11.4": "certified",
+    "11.3": "in_progress_suspended_until_EXP-001_resolved",
+    "11.4": "in_progress_reopened_by_physical_playtest",
     "11.5": "certified",
-    "11.6": "certified",
+    "11.6": "in_progress_reopened_semantic_and_source_locale_quality",
     "11.7": "in_progress_assets_and_execution_pending",
-    "11.8": "certified",
+    "11.8": "in_progress_active_blocker_EXP-001",
     "11.9": "certified",
     "11.10": "in_progress_prerequisites_version_freeze_and_execution_pending"
   },
@@ -65,7 +65,9 @@
     },
     "11.4": {
       "commit": "c988448e2546b0b684a3f048fd8b28fe0f3ed11e",
-      "run_id": 31421360688
+      "run_id": 31421360688,
+      "superseded_by": "EXP-001",
+      "evidence_class": "historical_technical_pass_not_current_product_acceptance"
     },
     "11.5": {
       "commit": "37878d119d429544bc83e12986acd09e720d47e0",
@@ -78,7 +80,9 @@
     "11.8": {
       "completion_file": "QA_11_8_COMPLETION.json",
       "status": "pass",
-      "active_blocker_critical": 0
+      "active_blocker_critical": 0,
+      "superseded_by": "EXP-001",
+      "evidence_class": "historical_technical_pass_not_current_product_acceptance"
     },
     "11.6": {
       "completion_file": "LOCALIZATION_11_6_COMPLETION.json",
@@ -95,7 +99,9 @@
       "token_parity_errors": 0,
       "terminology_errors": 0,
       "overflow_gate_passed": true,
-      "iconography_gate_passed": true
+      "iconography_gate_passed": true,
+      "superseded_by": "EXP-001",
+      "evidence_class": "historical_technical_pass_not_current_product_acceptance"
     },
     "11.9": {
       "completion_file": "RELIABILITY_11_9_COMPLETION.json",
@@ -110,8 +116,9 @@
   },
   "phase11_in_progress": {
     "11.3": {
-      "physical_device": "required_pending",
-      "minimum_soak_seconds": 1800
+      "physical_device": "suspended_until_EXP-001_resolved",
+      "minimum_soak_seconds": 1800,
+      "resume_only_on_new_representative_candidate": true
     },
     "11.7": {
       "required_final_audio_references": 38,
@@ -140,6 +147,18 @@
       "completion_emitted_only_after_full_green_workflow_and_clean_tree": true,
       "later_evidence_only_commit_requires_identical_certified_input_fingerprint": true,
       "runnerless_job_cannot_emit_completion": true
+    },
+    "11.4": {
+      "status": "reopened_by_physical_playtest",
+      "reason": "automated responsive geometry did not prove acceptable real-device presentation or accessibility context"
+    },
+    "11.6": {
+      "status": "reopened_by_physical_playtest",
+      "reason": "PT-BR leaked internal/English labels and structural coverage did not prove semantic/dramatic coherence"
+    },
+    "11.8": {
+      "status": "blocked",
+      "active_blocker": "EXP-001"
     }
   },
   "phase12": {
@@ -370,5 +389,25 @@
     "manifest": "BALANCE_FREEZE.json",
     "verification_tool": "tools/verify_balance_freeze.py"
   },
-  "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar."
+  "completion_definition": "12.10 — projeto e build completos, testados e prontos para jogar, divulgar e publicar.",
+  "product_experience_stop_ship": {
+    "active": true,
+    "blocker_id": "EXP-001",
+    "detected_on": "2026-08-14",
+    "trigger": "first_human_physical_android_playtest",
+    "formal_count_before": 112,
+    "formal_count_after": 107,
+    "invalidated_steps": [
+      "6.1",
+      "6.10",
+      "11.4",
+      "11.6",
+      "11.8"
+    ],
+    "release_work_suspended": true,
+    "physical_soak_suspended": true,
+    "current_build_classification": "technical_harness_not_representative_game_build",
+    "recovery_plan": "PRODUCT_EXPERIENCE_RECOVERY.md",
+    "next_product_gate": "authored_audiovisual_Mata_do_Fio_Verde_vertical_slice_human_acceptance"
+  }
 }
