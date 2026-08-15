@@ -1,0 +1,53 @@
+name: Veredas Fix PowerShell ADB Args
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/veredas-fix-powershell-adb-args.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-adb-args:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply exact fail-closed patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('projeto_jornada/tools/android_physical_soak_windows.ps1')
+          s = p.read_text(encoding='utf-8')
+          replacements = [
+              ('function AdbText([string[]]$Args) {', 'function AdbText([string[]]$AdbArgs) {'),
+              ('return (& adb @Args 2>&1 | Out-String)', 'return (& adb @AdbArgs 2>&1 | Out-String)'),
+              ('function Capture([string[]]$Args, [string]$Path) {', 'function Capture([string[]]$AdbArgs, [string]$Path) {'),
+              ('$text = AdbText $Args', '$text = AdbText -AdbArgs $AdbArgs'),
+          ]
+          for old, new in replacements:
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected exactly one occurrence of {old!r}, found {count}')
+              s = s.replace(old, new)
+          if '$Args' in s:
+              raise SystemExit('automatic variable $Args remains in collector')
+          if any(ord(ch) > 127 for ch in s):
+              raise SystemExit('collector must remain ASCII-only')
+          p.write_text(s, encoding='utf-8', newline='\n')
+      - name: Commit corrected collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check -- projeto_jornada/tools/android_physical_soak_windows.ps1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add projeto_jornada/tools/android_physical_soak_windows.ps1
+          git commit -m 'fix: forward adb arguments correctly in PowerShell 5.1 collector'
+          git push origin HEAD:main
