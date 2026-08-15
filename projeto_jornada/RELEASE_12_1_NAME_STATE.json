@@ -1,21 +1,30 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "roadmap_step": "12.1",
   "formal_status": "in_progress",
   "pass_recorded": false,
-  "candidate_name": "Veredas da Trama",
+  "candidate_name": null,
   "checked_on": "2026-08-14",
   "scope": "commercial name, public discoverability, game-store collision reconnaissance, trademark and domain preflight",
-  "public_reconnaissance": {
-    "rounds": [
-      {"date": "2026-08-12", "result": "no exact game/app collision surfaced in indexed web/store reconnaissance"},
-      {"date": "2026-08-13", "queries": ["exact phrase plus game/app/software", "exact phrase scoped to public INPI-indexed pages", "exact phrase scoped to WIPO-indexed pages"], "result": "no exact indexed game/app/software collision or exact official indexed registry result surfaced; returned pages used the words veredas/trama in unrelated generic or literary contexts"},
-      {"date": "2026-08-14", "result": "official Nice Classification scope frozen for the final human registry search; no new legal-clearance claim made"}
-    ],
-    "game_store_exact_collision_found": false,
-    "indexed_exact_trademark_collision_found": false,
+  "naming_reset": {
+    "active": true,
+    "trigger": "physical_android_playtest_and_product_owner_review",
+    "reason": "The previous naming system produced vague pseudo-poetic fantasy compounds without enough semantic, cultural or narrative grounding.",
+    "rule": "No previous title, Domain, location, faction, character or UI proper noun is considered approved merely because it exists in content, code, localization, artwork plans, package identifiers or prior QA evidence.",
+    "final_name_must_be_selected_before_authoritative_clearance": true
+  },
+  "rejected_candidates": [
+    {
+      "name": "Veredas da Trama",
+      "rejected_on": "2026-08-14",
+      "status": "rejected_not_to_be_used_as_final_product_name",
+      "reason": "Rejected by the product owner as vague, artificial and disconnected from a convincing world identity."
+    }
+  ],
+  "historical_reconnaissance": {
+    "candidate": "Veredas da Trama",
     "legal_clearance": false,
-    "note": "Search-engine/store reconnaissance is only an early collision screen. It cannot exclude confusingly similar marks, unindexed records, figurative marks or records visible only through interactive registries."
+    "note": "All previous public/store/trademark reconnaissance for the rejected title is historical only and must not be reused as clearance for the replacement title."
   },
   "official_methodology_evidence": {
     "nice_classification_checked_on": "2026-08-14",
@@ -31,29 +40,33 @@
         "wipo_basic_number": "410094"
       }
     },
-    "inpi": "A final decision requires an interactive exact/similar search in Brazilian trademark classes 9 and 41 at minimum, plus review of any materially adjacent goods/services identified by the final filing strategy.",
-    "wipo": "A final decision requires a human Global Brand Database/national-regional cross-check in the same relevant goods/services scope; no automated result is represented as an official registry clearance.",
-    "automation_boundary": "No claim of INPI/WIPO clearance is made from public search-engine indexing."
+    "reuse_boundary": "Class methodology may be reused; candidate-specific searches, domains and handles may not."
   },
   "authoritative_checks": {
-    "inpi_brazil_exact_and_similar_mark_search": "pending_interactive_registry_search_classes_9_and_41",
-    "wipo_global_brand_database_exact_and_similar_search": "pending_interactive_human_registry_search_classes_9_and_41",
-    "domain_veredasdatrama_com": "pending_authoritative_registration_check",
-    "domain_veredasdatrama_com_br": "pending_authoritative_registration_check",
-    "social_handles": "pending_authoritative_platform_checks"
+    "replacement_title_selected": false,
+    "inpi_brazil_exact_and_similar_mark_search": "blocked_until_replacement_title_selected",
+    "wipo_global_brand_database_exact_and_similar_search": "blocked_until_replacement_title_selected",
+    "domains": "blocked_until_replacement_title_selected",
+    "social_handles": "blocked_until_replacement_title_selected"
   },
   "identity_dependencies": {
     "android_application_id": "com.pmartins87.veredasdatrama",
+    "android_application_id_status": "legacy_technical_identifier_pending_final_name_decision",
     "canonical_repository": "pmartins87/Veredas",
+    "repository_name_status": "legacy_technical_identifier_not_product_name",
     "application_id_is_not_legal_name_clearance": true,
     "repository_name_is_not_legal_name_clearance": true
   },
   "completion_requirements": [
-    "complete exact and confusingly-similar human search in INPI classes 9 and 41 and review material adjacent goods/services if the final filing specification requires them",
-    "complete WIPO/global human cross-check and record material candidates if any",
+    "define the world premise, cultures, geography and naming languages before bulk renaming",
+    "select a memorable final title from semantically grounded candidates",
+    "replace rejected user-facing proper nouns with names justified by world context",
+    "complete exact and confusingly-similar human search in INPI classes 9 and 41 for the selected title",
+    "complete WIPO/global human cross-check for the selected title",
     "confirm desired domains/social handles or explicitly accept alternatives",
     "record final name decision and trademark filing strategy or explicit no-filing decision",
-    "verify store listing name can be created without material collision"
+    "verify store listing name can be created without material collision",
+    "decide whether the Android application ID must change before public release"
   ],
-  "result": "provisional_public_clearance_only"
+  "result": "no_active_candidate_name"
 }
