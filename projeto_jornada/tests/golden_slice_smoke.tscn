@@ -2,5 +2,5 @@
 
 [ext_resource path="res://tests/GoldenSliceSmoke.gd" type="Script" id="1"]
 
-[node name="GoldenSliceSmoke" type="Node"]
+[node name="GoldenSliceRuntimeSmoke" type="Node"]
 script = ExtResource("1")
