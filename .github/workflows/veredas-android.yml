@@ -171,8 +171,10 @@ jobs:
         include:
           - api-level: 29
             label: android10
+            ram_mb: 4096M
           - api-level: 34
             label: android14
+            ram_mb: 2048M
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -216,6 +218,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           profile: pixel_2
+          ram-size: ${{ matrix.ram_mb }}
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu software
           script: sh projeto_jornada/tools/android_emulator_certify.sh "$VEREDAS_ANDROID_PACKAGE_ID" '${{ steps.apk.outputs.path }}' '${{ matrix.api-level }}' && sh projeto_jornada/tools/android_performance_profile.sh "$VEREDAS_ANDROID_PACKAGE_ID" '${{ matrix.api-level }}' emulator 60
@@ -250,6 +253,8 @@ jobs:
             'performance_proxy=pass' \
             'performance_source=emulator' \
             'emulator_gpu=software' \
+            'emulator_ram=${{ matrix.ram_mb }}' \
+            'process_memory_hard_budget_mb=420' \
             > compatibility/${{ matrix.label }}.txt
 
       - name: Upload compatibility evidence
