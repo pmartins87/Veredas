@@ -39,6 +39,10 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def normalized_text(value: str) -> str:
+    return " ".join(value.split())
+
+
 def backend_key(component: dict[str, Any]) -> str:
     name = str(component.get("normalized_name", component.get("name", ""))).replace("_", "-").lower()
     version = str(component.get("version", ""))
@@ -78,10 +82,11 @@ def exact_text_license(key: str, archived_files: list[dict[str, str]]) -> str:
         raw = (ROOT / file_row["path"]).read_bytes()
         texts.append(raw.decode("utf-8", errors="replace"))
     joined = "\n".join(texts)
+    normalized = normalized_text(joined)
     for marker in markers:
-        if marker not in joined:
+        if normalized_text(marker) not in normalized:
             raise SystemExit(f"exact license marker missing for {key}: {marker!r}")
-    if key == "pypi:pyasn1-modules@0.4.2" and "Neither the name" in joined:
+    if key == "pypi:pyasn1-modules@0.4.2" and "Neither the name" in normalized:
         raise SystemExit("pyasn1-modules exact text unexpectedly contains BSD-3-Clause endorsement clause")
     return license_id
 
