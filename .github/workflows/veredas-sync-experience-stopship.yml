@@ -86,12 +86,28 @@ jobs:
 
           p.write_text(json.dumps(state, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
       - name: Verify canonical roadmap consistency
+        id: verify
         shell: bash
         run: |
-          set -euo pipefail
-          python projeto_jornada/tools/roadmap_state_consistency.py
-          git diff --check -- projeto_jornada/PROJECT_STATE.json
+          set +e
+          python projeto_jornada/tools/roadmap_state_consistency.py > state-consistency.txt 2>&1
+          code=$?
+          cat state-consistency.txt
+          git diff --check -- projeto_jornada/PROJECT_STATE.json >> state-consistency.txt 2>&1
+          diff_code=$?
+          if [ "$code" -ne 0 ] || [ "$diff_code" -ne 0 ]; then
+            exit 1
+          fi
+      - name: Upload consistency diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experience-stopship-consistency
+          path: state-consistency.txt
+          if-no-files-found: error
+          retention-days: 2
       - name: Commit corrected state
+        if: steps.verify.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
